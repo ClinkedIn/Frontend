@@ -3,6 +3,7 @@ import React from "react";
 import Home from "../src/pages/home/HomePage";
 import Login from "../src/pages/Login/LoginPage";
 import SignUp from "../src/pages/signup/SignUpPage";
+import TestPage from "./pages/Test/TestPage.jsx";
 import VerifyEmail from "../src/pages/signup/VerifyEmail";
 import UpdatePasswordForm from "./components/authentication/Reset/UpdatePasswordForm";
 import UpdateUserNameForm from "./components/authentication/Reset/UpdateUserNameForm";
@@ -10,9 +11,14 @@ import ForgotPasswordForm from "./components/authentication/Reset/ForgotPassword
 
 
 
+
 // Define your routes as an array of RouteObject (compatible with React Router v6)
 const routes: RouteObject[] = [
   //Add routes and their corresponding needed component page
+  {
+    path: "/test",
+    element: React.createElement(TestPage),
+  },
   {
     path: "/",
     element: React.createElement(Home),
