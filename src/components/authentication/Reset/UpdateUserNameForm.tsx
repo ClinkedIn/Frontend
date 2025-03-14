@@ -158,7 +158,7 @@ export default function UpdateUserNameForm() {
         <div className="text-right  border-t border-gray-400 p-3">
           <Button
             type="submit"
-            className="btn-class"
+            className="btn-class px-6 py-2"
             id="updateButton"
             onClick={() => {}}
           >
