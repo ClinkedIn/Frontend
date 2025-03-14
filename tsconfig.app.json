@@ -7,13 +7,17 @@
     "module": "ESNext",
     "skipLibCheck": true,
 
+    "jsx": "react-jsx", // Keep only one instance
+    "allowJs": true,
+    "checkJs": false,
+    "moduleResolution": "bundler", // Keep only one instance, use "bundler" for Vite
+    "resolveJsonModule": true,
+
     /* Bundler mode */
-    "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "isolatedModules": true,
     "moduleDetection": "force",
     "noEmit": true,
-    "jsx": "react-jsx",
 
     /* Linting */
     "strict": true,
