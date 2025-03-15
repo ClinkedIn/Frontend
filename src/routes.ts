@@ -4,10 +4,12 @@ import Home from "../src/pages/home/HomePage";
 import Login from "../src/pages/Login/LoginPage";
 import SignUp from "../src/pages/signup/SignUpPage";
 import TestPage from "./pages/Test/TestPage.jsx";
+import PasswordResetUsingMail from "../src/pages/PasswordResetUsingMail/PassWordResetUsingMail";
 import VerifyEmail from "../src/pages/signup/VerifyEmail";
 import UpdatePasswordForm from "./components/authentication/Reset/UpdatePasswordForm";
 import UpdateUserNameForm from "./components/authentication/Reset/UpdateUserNameForm";
 import ForgotPasswordForm from "./components/authentication/Reset/ForgotPasswordForm";
+import Notification from "./pages/notifications/Notifications";
 
 
 
@@ -18,6 +20,10 @@ const routes: RouteObject[] = [
   {
     path: "/test",
     element: React.createElement(TestPage),
+  },
+  {
+    path: "/password-reset",
+    element: React.createElement(PasswordResetUsingMail),
   },
   {
     path: "/",
@@ -47,7 +53,12 @@ const routes: RouteObject[] = [
     path: "/forgot-password",
     element: React.createElement(ForgotPasswordForm),
   },
+  {
+    path: "/notifications",
+    element: React.createElement(Notification),
+  },
 ];
+
 
 
 export default routes;
