@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Header from "../../components/UpperNavBar";
 import ProfileCard from "../../components/ProfileCard";
 import { useNavigate } from "react-router-dom";
+import NotificationCard from "../../components/Notification/NotificationCard"
 
 const Notification = () => {
   const navigate = useNavigate();
@@ -146,18 +147,16 @@ const Notification = () => {
             </div>
 
             {/* Notifications List */}
-            <div className="flex-1 bg-white p-4 shadow-sm rounded-lg border border-gray-300">
-              {filteredNotifications.length > 0 ? (
-                <ul>
-                  {filteredNotifications.map((notif) => (
-                    <li key={notif.id} className="text-gray-700 mb-2 border-b pb-2">
-                      {notif.text}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-gray-500 text-sm">📭 No notifications available.</p>
-              )}
+            <div className="flex-1 bg-white shadow-sm rounded-lg border-2 border-gray-300">
+            {filteredNotifications.length > 0 ? (
+                  <ul >
+                    {filteredNotifications.map((notif) => (
+                      <NotificationCard key={notif.id} notification={notif} />
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-gray-500 text-sm">📭 No notifications available.</p>
+                )}
             </div>
           </div>
 
