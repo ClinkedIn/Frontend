@@ -1,5 +1,8 @@
-import React, { useState, ChangeEvent, FocusEvent, FormEvent } from "react";
+import { useState, ChangeEvent, FocusEvent, FormEvent } from "react";
 import Button from "../../Button";
+
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 
 interface FormData {
   currentPassword: string;
@@ -42,9 +45,10 @@ export default function UpdatePasswordForm() {
       const newErrors = { ...prevErrors };
 
       if (name === "newPassword") {
-        newErrors.newPassword = value.length < 8 && value.length > 0
-          ? "Your password is too short. It should be at least 8 characters long"
-          : "";
+        newErrors.newPassword =
+          value.length < 8 && value.length > 0
+            ? "Your password is too short. It should be at least 8 characters long"
+            : "";
 
         if (formData.confirmPassword && value !== formData.confirmPassword) {
           newErrors.confirmPassword = "Passwords do not match";
@@ -54,11 +58,12 @@ export default function UpdatePasswordForm() {
       }
 
       if (name === "confirmPassword") {
-        newErrors.confirmPassword = value.length < 8 && value.length > 0
-          ? "Your password is too short. It should be at least 8 characters long"
-          : value !== formData.newPassword
-          ? "Passwords do not match"
-          : "";
+        newErrors.confirmPassword =
+          value.length < 8 && value.length > 0
+            ? "Your password is too short. It should be at least 8 characters long"
+            : value !== formData.newPassword
+            ? "Passwords do not match"
+            : "";
       }
 
       return newErrors;
@@ -74,7 +79,9 @@ export default function UpdatePasswordForm() {
 
     if (!isNewPasswordValid || !isConfirmPasswordValid || !doPasswordsMatch) {
       setErrors({
-        newPassword: isNewPasswordValid ? "" : "Your password is too short. It should be at least 8 characters long",
+        newPassword: isNewPasswordValid
+          ? ""
+          : "Your password is too short. It should be at least 8 characters long",
         confirmPassword: isConfirmPasswordValid
           ? doPasswordsMatch
             ? ""
@@ -88,23 +95,45 @@ export default function UpdatePasswordForm() {
   };
 
   return (
-    <div className="bg-slate-300 p-2 container mx-auto lg:w-1/2 rounded-3xl shadow-2xl ">
-      <div className="my-4">
-        <h1 className="text-3xl font-bold">Change Password</h1>
-        <p className="my-2">Create a new password that is at least 8 characters long.</p>
+    <div
+      className="container lg:w-4xl  mx-auto my-24  flex flex-col justify-between
+    shadow-2xl  rounded-lg  p-4"
+    >
+      <button className="flex items-center  my-4  cursor-pointer w-fit">
+        <FontAwesomeIcon icon={faArrowLeft} className="text-gray-700 me-2" />
+        Back
+      </button>
+      <div className="mt-4">
+        <h1 className="text-3xl ">Change Password</h1>
+        <p className="my-2">
+          Create a new password that is at least 8 characters long.
+        </p>
       </div>
       <form onSubmit={handleSubmit}>
-        {(["currentPassword", "newPassword", "confirmPassword"] as (keyof FormData)[]).map((field) => (
-          <div className="flex flex-col my-2" key={field}>
+        {(
+          [
+            "currentPassword",
+            "newPassword",
+            "confirmPassword",
+          ] as (keyof FormData)[]
+        ).map((field) => (
+          <div className="flex flex-col   my-8" key={field}>
             <label htmlFor={field}>
-              {field === "currentPassword" ? "Type your current password" : field === "newPassword" ? "Type your new password" : "Retype your new password"}
+              {field === "currentPassword"
+                ? "Type your current password"
+                : field === "newPassword"
+                ? "Type your new password"
+                : "Retype your new password"}
               <span className="text-red-700">*</span>
             </label>
             <div className="relative">
               <input
                 required
                 className="border-2 border-black rounded-md p-1 w-full"
-                placeholder={`Enter your ${field.replace("Password", " password")}`}
+                placeholder={`Enter your ${field.replace(
+                  "Password",
+                  " password"
+                )}`}
                 type="password"
                 name={field}
                 id={field}
@@ -116,23 +145,35 @@ export default function UpdatePasswordForm() {
                 type="button"
                 className="absolute right-2 top-1/2 transform -translate-y-1/2 text-blue-600"
                 onClick={() => {
-                  const input = document.getElementById(field) as HTMLInputElement;
-                  if (input) input.type = input.type === "password" ? "text" : "password";
+                  const input = document.getElementById(
+                    field
+                  ) as HTMLInputElement;
+                  if (input)
+                    input.type =
+                      input.type === "password" ? "text" : "password";
                 }}
               >
                 Show
               </button>
             </div>
-            {field in errors && errors[field as keyof Errors] && <p className="text-red-600 mt-1">{errors[field as keyof Errors]}</p>}
+            {field in errors && errors[field as keyof Errors] && (
+              <p className="text-red-600 mt-1">
+                {errors[field as keyof Errors]}
+              </p>
+            )}
           </div>
         ))}
 
         <div className="flex items-center my-3">
           <input type="checkbox" id="requireAllDevices" className="mr-2" />
-          <label htmlFor="requireAllDevices">Require all devices to sign in with new password</label>
+          <label htmlFor="requireAllDevices">
+            Require all devices to sign in with new password
+          </label>
         </div>
 
-        <Button type="submit" className="" id="" onClick={() => {}}>Save Password</Button>
+        <Button type="submit" className="" id="" onClick={() => {}}>
+          Save Password
+        </Button>
       </form>
     </div>
   );
