@@ -9,6 +9,7 @@ import VerifyEmail from "../src/pages/signup/VerifyEmail";
 import UpdatePasswordForm from "./components/authentication/Reset/UpdatePasswordForm";
 import UpdateUserNameForm from "./components/authentication/Reset/UpdateUserNameForm";
 import ForgotPasswordForm from "./components/authentication/Reset/ForgotPasswordForm";
+import Notification from "./pages/notifications/Notifications";
 
 
 
@@ -52,7 +53,12 @@ const routes: RouteObject[] = [
     path: "/forgot-password",
     element: React.createElement(ForgotPasswordForm),
   },
+  {
+    path: "/notifications",
+    element: React.createElement(Notification),
+  },
 ];
+
 
 
 export default routes;
