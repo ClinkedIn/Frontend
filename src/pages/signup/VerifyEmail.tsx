@@ -5,26 +5,26 @@ const VerifyEmail = () => {
   const [code, setCode] = useState("");
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen ">
-
+    <div className="container mx-auto flex flex-col items-center justify-center h-screen ">
       {/* Title */}
       <h2 className="text-2xl font-semibold text-center">Confirm your email</h2>
       <p className="text-gray-600 text-center mt-2">
         Type in the code we sent to <strong>youremail@example.com</strong>.{" "}
         <span className="text-blue-500 cursor-pointer">Edit email</span>
       </p>
-{/* Code Input */}
-<input
-  type="text"
-  value={code}
-  onChange={(e) => setCode(e.target.value)}
-  placeholder="------"
-  maxLength={6}
-  className="mt-4 text-center text-2xl tracking-widest border-2 border-gray-500 rounded-lg p-3 outline-none focus:ring-2 focus:ring-black leading-tight"
-/>
-   
-{/* Privacy Notice */}
-<div className="mt-4 p-4 text-sm text-gray-700 rounded-lg w-96 text-left bg-white border border-gray-300 shadow-sm flex items-start gap-3">
+
+      {/* Code Input */}
+      <input
+        type="text"
+        value={code}
+        onChange={(e) => setCode(e.target.value)}
+        placeholder="------"
+        maxLength={6}
+        className="mt-4 text-center text-2xl tracking-widest border-2 border-gray-500 rounded-lg p-3 outline-none focus:ring-2 focus:ring-black leading-tight"
+      />
+
+      {/* Privacy Notice */}
+      <div className="mt-4 p-4 text-sm text-gray-700 rounded-lg w-full md:max-w-sm text-left bg-white border border-gray-300 shadow-sm flex items-start gap-3">
   <div className="font-sans w-full">
     <div className="flex items-center gap-2">
       <IoShieldHalf className="text-gray-600 text-lg" />

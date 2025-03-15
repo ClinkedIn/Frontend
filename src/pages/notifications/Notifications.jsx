@@ -57,36 +57,36 @@ const Notification = () => {
     }
     return notif.type === selectedFilter;
   });
-
   return (
     <div className="bg-yellow-50 min-h-screen">
       <Header />
-      <div className="pt-20 flex justify-center p-6">
-        <div className="flex w-full max-w-6xl gap-6">
+      <div className="container mx-auto px-4 pt-20">
+        <div className="flex flex-col lg:flex-row justify-center gap-6 p-6">
+          
           {/* Left Sidebar */}
-          <div className="w-56 flex flex-col">
+          <div className="w-full lg:w-56 flex flex-col">
             <ProfileCard user={dummyUser} />
-            <div className="p-4 bg-white mt-2 w-56 shadow-sm rounded-xl border border-gray-300">
+            <div className="p-4 bg-white mt-2 w-full lg:w-56 shadow-sm rounded-xl border border-gray-300">
               <p className="text-sm font-medium text-gray-800">Manage your notifications</p>
               <a href="#" className="text-blue-600 text-sm font-medium hover:underline">
                 View settings
               </a>
             </div>
           </div>
-
+  
           {/* Main Content */}
-          <div className="flex-1">
+          <div className="flex-1 max-w-4xl">
             {/* Filter Section */}
-            <div className="bg-white p-4 shadow-sm rounded-lg border border-gray-300 mb-3 flex space-x-2">
+            <div className="bg-white p-4 shadow-sm rounded-lg border border-gray-300 mb-3 flex flex-wrap space-x-2">
               {["all", "job", "post", "mention"].map((filter) => (
                 <div key={filter} className="relative">
                   {filter === "post" ? (
                     <button
                       onClick={() => {
                         if (!isArrowVisible) {
-                          setIsArrowVisible(true); // Show arrow after first click
+                          setIsArrowVisible(true);
                         } else {
-                          setIsDropdownOpen(!isDropdownOpen); // Toggle dropdown on second click
+                          setIsDropdownOpen(!isDropdownOpen);
                         }
                         setSelectedFilter("post");
                       }}
@@ -108,11 +108,11 @@ const Notification = () => {
                       }`}
                     >
                       {filter === "all" ? "All" :
-                       filter === "job" ? "Jobs" :
-                       filter === "post" ? "My Posts" : "Mentions"}
+                        filter === "job" ? "Jobs" :
+                        filter === "post" ? "My Posts" : "Mentions"}
                     </button>
                   )}
-
+  
                   {/* Dropdown Menu for My Posts */}
                   {isDropdownOpen && filter === "post" && (
                     <div className="absolute left-0 mt-1 bg-white shadow-lg rounded-md border border-gray-200 w-40 z-10">
@@ -136,8 +136,8 @@ const Notification = () => {
                             }`}
                           />
                           {option === "all" ? "All" :
-                           option === "comments" ? "Comments" :
-                           option === "reactions" ? "Reactions" : "Reposts"}
+                            option === "comments" ? "Comments" :
+                            option === "reactions" ? "Reactions" : "Reposts"}
                         </button>
                       ))}
                     </div>
@@ -145,52 +145,53 @@ const Notification = () => {
                 </div>
               ))}
             </div>
-
+  
             {/* Notifications List */}
-            <div className="flex-1 bg-white shadow-sm rounded-lg border-2 border-gray-300">
-            {filteredNotifications.length > 0 ? (
-                  <ul >
-                    {filteredNotifications.map((notif) => (
-                      <NotificationCard key={notif.id} notification={notif} />
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-gray-500 text-sm">📭 No notifications available.</p>
-                )}
+            <div className="bg-white shadow-sm rounded-lg border border-gray-300">
+              {filteredNotifications.length > 0 ? (
+                <ul>
+                  {filteredNotifications.map((notif) => (
+                    <NotificationCard key={notif.id} notification={notif} />
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-500 text-sm p-4">📭 No notifications available.</p>
+              )}
             </div>
           </div>
-
-          {/* Right Sidebar (Ad Section) */}
-          <div>
-            <div className="w-72 shadow-sm rounded-lg border border-gray-300">
+  
+          {/*Ad Section */}
+          <div className="w-full lg:w-72">
+            <div className="shadow-sm rounded-lg border border-gray-300">
               <img
                 src="/ads.png"
                 alt="Ad Banner"
-                className="w-72 rounded-lg cursor-pointer"
+                className="w-full rounded-lg cursor-pointer"
                 onClick={() => navigate("/ads-page")}
               />
             </div>
-             {/* Footer Links */}
-      <div className="text-xs text-gray-500 space-y-2 text-center mt-6">
-        <div className="flex justify-center flex-wrap gap-x-4">
-          <a href="#" className="hover:underline hover:text-blue-600">About</a>
-          <a href="#" className="hover:underline hover:text-blue-600">Accessibility</a>
-          <a href="#" className="hover:underline hover:text-blue-600">Help Center</a>
-        </div>
-        <div className="flex justify-center flex-wrap gap-x-4">
-          <a href="#" className="hover:underline hover:text-blue-600">Privacy & Terms</a>
-          <a href="#" className="hover:underline hover:text-blue-600">Ad Choices</a>
-        </div>
-        <div className="flex justify-center flex-wrap gap-x-4">
-          <a href="#" className="hover:underline hover:text-blue-600">Advertising</a>
-          <a href="#" className="hover:underline hover:text-blue-600">Business Services</a>
-        </div>
-        <div className="flex justify-center flex-wrap gap-x-4">
-          <a href="#" className="hover:underline hover:text-blue-600">Get the LinkedIn app</a>
-          <a href="#" className="hover:underline hover:text-blue-600">More</a>
-        </div>
-        <p className="text-gray-600 mt-2">© 2025 LinkedIn Corporation</p>
-      </div>
+  
+            {/* Footer Links */}
+            <div className="text-xs text-gray-500 space-y-2 text-center mt-6">
+              <div className="flex justify-center flex-wrap gap-x-4">
+                <a href="#" className="hover:underline hover:text-blue-600">About</a>
+                <a href="#" className="hover:underline hover:text-blue-600">Accessibility</a>
+                <a href="#" className="hover:underline hover:text-blue-600">Help Center</a>
+              </div>
+              <div className="flex justify-center flex-wrap gap-x-4">
+                <a href="#" className="hover:underline hover:text-blue-600">Privacy & Terms</a>
+                <a href="#" className="hover:underline hover:text-blue-600">Ad Choices</a>
+              </div>
+              <div className="flex justify-center flex-wrap gap-x-4">
+                <a href="#" className="hover:underline hover:text-blue-600">Advertising</a>
+                <a href="#" className="hover:underline hover:text-blue-600">Business Services</a>
+              </div>
+              <div className="flex justify-center flex-wrap gap-x-4">
+                <a href="#" className="hover:underline hover:text-blue-600">Get the LinkedIn app</a>
+                <a href="#" className="hover:underline hover:text-blue-600">More</a>
+              </div>
+              <p className="text-gray-600 mt-2">© 2025 LinkedIn Corporation</p>
+            </div>
           </div>
         </div>
       </div>
