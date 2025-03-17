@@ -10,6 +10,7 @@ import UpdatePasswordForm from "./components/authentication/Reset/UpdatePassword
 import UpdateUserNameForm from "./components/authentication/Reset/UpdateUserNameForm";
 import ForgotPasswordForm from "./components/authentication/Reset/ForgotPasswordForm";
 import Notification from "./pages/notifications/Notifications";
+import Jobs from "./pages/jobs/Jobs";
 
 
 
@@ -56,6 +57,10 @@ const routes: RouteObject[] = [
   {
     path: "/notifications",
     element: React.createElement(Notification),
+  },
+  {
+    path: "/jobs",
+    element: React.createElement(Jobs),
   },
 ];
 
