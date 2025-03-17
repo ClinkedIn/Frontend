@@ -25,7 +25,7 @@ const NotificationCard = ({ notification }) => {
         <div className="relative w-10 h-10 bg-gray-200  flex items-center justify-center">
           <img src="/job-icon.png" alt="Job" className="w-full h-full rounded-md" />
         </div>
-        <p className="text-sm text-gray-800">{notification.text}</p>
+        <p className="text-sm text-gray-800">{notification.content}</p>
       </div>
 
       <div className="relative">
