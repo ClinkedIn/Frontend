@@ -2,6 +2,8 @@ import { useState, useRef, FormEvent } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
 import toast, { Toaster } from "react-hot-toast";
 import Button from "../../Button";
+import { auth, provider, signInWithPopup } from "../../../config/firebase";
+
 
 const SignUpForm = () => {
   const [name, setName] = useState<string>("");
@@ -21,6 +23,16 @@ const SignUpForm = () => {
 
     console.log({ name, email, username, password });
   };
+  const handleGoogleSignUp = async () => {
+    try {
+       const result = await signInWithPopup(auth, provider);
+       const idToken = await result.user.getIdToken();
+       console.log(result);
+       console.log(idToken);
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   return (
     <form className="flex flex-col gap-4" onSubmit={handleSignUp}>
@@ -64,10 +76,18 @@ const SignUpForm = () => {
           required
         />
       </div>
-      <ReCAPTCHA sitekey="6Le-D-8qAAAAAHinvtdVoVWtZg-bur5V3dDw2V3r" ref={recaptchaRef} />
-      <Toaster />
-
-      <Button type="submit" className="" id="" onClick={() => {}}>Sign Up</Button>
+      <div>
+        <ReCAPTCHA sitekey="6Le-D-8qAAAAAHinvtdVoVWtZg-bur5V3dDw2V3r" ref={recaptchaRef} />
+        <Toaster />
+      </div>
+      <Button type="submit" className="" id=""  onClick={() => {}}>Sign Up</Button>
+      <button onClick={handleGoogleSignUp} className="google-signup-button rounded-full p-3 m-2 flex items-center justify-center gap-2 border border-gray-400 rounded py-2 px-4 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+        <img
+          src="/Images/google.svg"
+          alt="Google Logo"
+          className="google-logo"
+        />Continue with Google
+      </button>
     </form>
   );
 };
