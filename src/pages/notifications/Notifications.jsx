@@ -16,9 +16,6 @@ const Notification = () => {
     profileImage: "https://picsum.photos/80",
   };
 
-
-
-
   const [notifications, setNotifications] = useState([]);
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [isArrowVisible, setIsArrowVisible] = useState(false);
@@ -64,9 +61,13 @@ const Notification = () => {
   // Filter Notifications
   const filteredNotifications = notifications.filter((notif) => {
     if (selectedFilter === "all") return true;
+  
     if (selectedFilter === "post") {
-      return selectedPostFilter === "all" || notif.subType === selectedPostFilter;
+      return selectedPostFilter === "all" 
+        ? notif.type === "post"  
+        : notif.subType === selectedPostFilter;
     }
+  
     return notif.type === selectedFilter;
   });
   return (
@@ -77,12 +78,14 @@ const Notification = () => {
           
           {/* Left Sidebar */}
           <div className="w-full lg:w-56 flex flex-col">
-            <ProfileCard user={dummyUser}  onClick={() => navigate("/ads-page")} />
+            <div  
+            className="cursor-pointer"
+            onClick={() => navigate("/profile")}><ProfileCard user={dummyUser}  /></div>
             <div className="p-4 bg-white mt-2 w-full lg:w-56 shadow-sm rounded-xl border border-gray-300">
               <p className="text-sm font-medium text-gray-800">Manage your notifications</p>
-              <a href="#" className="text-[#0a66c2] text-sm font-medium hover:underline">
-                View settings
-              </a>
+              <button  
+              onClick={()=>navigate("/profile")}
+              className="text-[#0a66c2] text-sm font-medium hover:underline" >  View settings</button>
             </div>
           </div>
   
@@ -155,14 +158,49 @@ const Notification = () => {
   
             {/* Notifications List */}
             <div className="bg-white shadow-sm rounded-lg border border-gray-300">
-              {filteredNotifications.length > 0 ? (
+            {filteredNotifications.length > 0 ? (
                 <ul>
                   {filteredNotifications.map((notif) => (
                     <NotificationCard key={notif.id} notification={notif} />
                   ))}
                 </ul>
+              ) : selectedFilter === "job" ? (
+                <div className="flex items-center flex-col">
+                  <img
+                  src="no new notif.png"
+                  alt="No New Notifications"
+                  className="w-72 h-72 object-cover rounded-md "
+                  />
+                  <p className="font-semibold text-2xl">No new job notifications</p>
+                  <p>When you receive new job updates, notifications will appear here.</p>
+                  <button className="m-2  mb-4  px-4 py-2 cursor-pointer text-[#0a66c2] border-2 border-[#0a66c2] rounded-3xl hover:bg-[#ebf4fd] hover:border-4" onClick={() => navigate("/jobs")}>Explore more jobs</button>
+                </div>
+              ) : selectedFilter === "post" ? (
+                <div className="flex items-center flex-col">
+                  <img
+                  src="no new notif.png"
+                  alt="No New Notifications"
+                  className="w-72 h-72 object-cover rounded-md "
+                  />
+                  <p className="font-semibold text-2xl">No new post activities</p>
+                  <p>View your previous post activity on your profile.</p>
+                  <button className="m-2 mb-4 px-4 py-2 cursor-pointer text-[#0a66c2] border-2 border-[#0a66c2] rounded-3xl hover:bg-[#ebf4fd] hover:border-4 " onClick={() => navigate("/profile")}>View previous activity</button>
+                </div>
+              ) : selectedFilter === "mention" ? (
+                <div className="flex items-center flex-col">
+                  <img
+                  src="no new notif.png"
+                  alt="No New Notifications"
+                  className="w-72 h-72 object-cover rounded-md "
+                  />
+                  <p className="font-semibold text-2xl">No new mentions</p>
+                  <p className="m-4 ">When someone tags you in a post or comment, that notification will appear here.</p>
+                </div>
               ) : (
-                <p className="text-gray-500 text-sm p-4">📭 No notifications available.</p>
+                <div className="text-center">
+                  <img src="no new notif.png" alt="No New Notifications" className="w-full h-full object-cover rounded-md" />
+                  <p>No New Notifications</p>
+                </div>
               )}
             </div>
           </div>
