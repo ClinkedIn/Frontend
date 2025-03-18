@@ -76,7 +76,7 @@ const SignUpForm = () => {
           required
         />
       </div>
-      <div>
+      <div className="flex justify-center w-full ">
         <ReCAPTCHA sitekey="6Le-D-8qAAAAAHinvtdVoVWtZg-bur5V3dDw2V3r" ref={recaptchaRef} />
         <Toaster />
       </div>
