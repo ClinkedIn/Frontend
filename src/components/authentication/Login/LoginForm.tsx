@@ -4,6 +4,7 @@ import { axiosInstance } from "../../../services/axios";
 import toast from "react-hot-toast";
 import { Loader } from "lucide-react";
 import { auth, provider, signInWithPopup } from "../../../../firebase";
+import GoogleLogin from "../../GoogleLoginButton";
 
 const LoginForm = () => {
 	const [username, setUsername] = useState("");
@@ -72,18 +73,10 @@ const LoginForm = () => {
 				className="input input-bordered w-full"
 				required
 			/>
-
 			<button type="submit" className="btn btn-primary w-full" disabled={loginMutation.isPending}>
 				{loginMutation.isPending ? <Loader className="size-5 animate-spin" /> : "Login"}
 			</button>
-			<button onClick={handleGoogleSignUp} className="google-signup-button w-full rounded-full p-3 m-2 flex items-center justify-center gap-2 border border-gray-400 rounded py-2 px-4 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-				<img
-				src="/Images/google.svg"
-				alt="Google Logo"
-				className="google-logo"
-				/>Continue with Google
-			</button>
-			
+		    <GoogleLogin type="submit" className="w-full" onClick={handleGoogleSignUp} />
 		</form>
 	);
 };

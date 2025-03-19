@@ -3,7 +3,7 @@ import ReCAPTCHA from "react-google-recaptcha";
 import toast, { Toaster } from "react-hot-toast";
 import Button from "../../Button";
 import { auth, provider, signInWithPopup } from "../../../../firebase";
-
+import GoogleLogin from "../../GoogleLoginButton";
 
 const SignUpForm = () => {
   const [name, setName] = useState<string>("");
@@ -81,13 +81,7 @@ const SignUpForm = () => {
         <Toaster />
       </div>
       <Button type="submit" className="" id=""  onClick={() => {}}>Sign Up</Button>
-      <button onClick={handleGoogleSignUp} className="google-signup-button rounded-full p-3 m-2 flex items-center justify-center gap-2 border border-gray-400 rounded py-2 px-4 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-        <img
-          src="/Images/google.svg"
-          alt="Google Logo"
-          className="google-logo"
-        />Continue with Google
-      </button>
+      <GoogleLogin type="submit" className="p-3 m-2" onClick={handleGoogleSignUp} />
     </form>
   );
 };
