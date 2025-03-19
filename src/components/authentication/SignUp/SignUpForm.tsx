@@ -2,7 +2,7 @@ import { useState, useRef, FormEvent } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
 import toast, { Toaster } from "react-hot-toast";
 import Button from "../../Button";
-import { auth, provider, signInWithPopup } from "../../../config/firebase";
+import { auth, provider, signInWithPopup } from "../../../../firebase";
 
 
 const SignUpForm = () => {
@@ -15,19 +15,19 @@ const SignUpForm = () => {
   const handleSignUp = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const token = recaptchaRef.current?.getValue();
-
+    console.log(token)
     if (!token) {
       toast.error("Please verify that you are not a robot");
       return;
     }
-
-    console.log({ name, email, username, password });
+    
+    //console.log({ name, email, username, password });
   };
   const handleGoogleSignUp = async () => {
     try {
        const result = await signInWithPopup(auth, provider);
        const idToken = await result.user.getIdToken();
-       console.log(result);
+       //console.log(result);
        console.log(idToken);
     } catch (error) {
       console.error(error);

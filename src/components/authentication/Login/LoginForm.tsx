@@ -3,7 +3,7 @@ import { useState } from "react";
 import { axiosInstance } from "../../../services/axios";
 import toast from "react-hot-toast";
 import { Loader } from "lucide-react";
-import { auth, provider, signInWithPopup } from "../../../config/firebase";
+import { auth, provider, signInWithPopup } from "../../../../firebase";
 
 const LoginForm = () => {
 	const [username, setUsername] = useState("");
