@@ -8,35 +8,37 @@ import FooterLinks from "../../components/FooterLinks";
 
 const Notification = () => {
   const navigate = useNavigate();
-  
-  const dummyUser = {
-    name: "Hamsa Saber",
-    location: "Cairo, Egypt",
-    university: "Cairo University",
-    profileImage: "https://picsum.photos/80",
-  };
-
   const [notifications, setNotifications] = useState([]);
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [isArrowVisible, setIsArrowVisible] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedPostFilter, setSelectedPostFilter] = useState("all");
+  const [user, setUser] = useState();
 
+  const fetchNotifications = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:5173/notifications"
+      );
+      setNotifications(response.data); // Set fetched notifications
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  };
+
+  const fetchUser= async ()=>{
+    try {
+      const response = await axios.get("http://localhost:5173/user");
+      setUser(response.data);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+    }
+  }
+  
   useEffect(() => {
-    const fetchNotifications = async () => {
-      try {
-        const response = await axios.get(
-          "http://localhost:5173/notifications"
-        );
-        setNotifications(response.data); // Set fetched notifications
-      } catch (error) {
-        console.error("Error fetching notifications:", error);
-      }
-    };
-
+    fetchUser();
     fetchNotifications();
   }, []);
-  console.log(notifications)
 
   // Reset My Posts label when a different main category is selected
   const handleMainFilterChange = (filter) => {
@@ -80,7 +82,7 @@ const Notification = () => {
           <div className="w-full lg:w-56 flex flex-col">
             <div  
             className="cursor-pointer"
-            onClick={() => navigate("/profile")}><ProfileCard user={dummyUser}  /></div>
+            onClick={() => navigate("/profile")}><ProfileCard user={user}  /></div>
             <div className="p-4 bg-white mt-2 w-full lg:w-56 shadow-sm rounded-xl border border-gray-300">
               <p className="text-sm font-medium text-gray-800">Manage your notifications</p>
               <button  
@@ -96,6 +98,7 @@ const Notification = () => {
               {["all", "job", "post", "mention"].map((filter) => (
                 <div key={filter} className="relative">
                   {filter === "post" ? (
+                    //My posts filter on
                     <button
                       onClick={() => {
                         if (!isArrowVisible) {

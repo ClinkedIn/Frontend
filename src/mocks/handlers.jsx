@@ -1,17 +1,14 @@
 import { http, HttpResponse } from "msw";
+let storedOTP = Math.floor(100000 + Math.random() * 900000);
 
-// const users = [
-//   {
-//     id: "c7b3d8e0-5e0b-4b0f-8b3a-3b9f4b3d3b3d",
-//     firstName: "John",
-//     lastName: "Maverick",
-//   },
-//   {
-//     id: "a1b2c3d4-e5f6-7g8h-9i0j-k1l2m3n4o5p6",
-//     firstName: "Jane",
-//     lastName: "Doe",
-//   },
-// ];
+const dummyUser = {
+    name: "Hamsa Saber",
+    email:"hamsa@gmail.com",
+    location: "Cairo, Egypt",
+    university: "Cairo University",
+    profileImage: "https://picsum.photos/80",
+  };
+
 
 const MOCK_NOTIFICATIONS = [
   {
@@ -101,8 +98,32 @@ const MOCK_NOTIFICATIONS = [
 
 export const handlers = [
 
+  //Mock API to get User
+  http.get("/user", async()=>{
+    console.log("[MSW] Intercepted GET /api/user");
+    return HttpResponse.json(dummyUser);
+  }),
+  //Mock API to get notifications
   http.get("/notifications", async () => {
     console.log("[MSW] Intercepted GET /api/notifications");
     return HttpResponse.json(MOCK_NOTIFICATIONS);
+  }),
+  
+
+  
+   // Mock API to request OTP
+   http.get("/request-otp", async () => {
+    storedOTP = Math.floor(100000 + Math.random() * 900000);
+    return HttpResponse.json({ success: true, otp: storedOTP });
+  }),
+
+  // Mock API to verify OTP
+  http.post("/verify-otp", async ({ request }) => {
+    const { otp } = await request.json();
+    if (otp == storedOTP) {
+      return HttpResponse.json({ success: true, message: "OTP verified successfully!" });
+    } else {
+      return HttpResponse.json({ success: false, message: "Invalid OTP" }, { status: 400 });
+    }
   }),
 ];
