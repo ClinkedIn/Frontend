@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Footer from "../../Footer/Footer"; 
+import Footer from "../../Footer/footer"; 
 
 const SignupNamePage = () => {
   const [firstName, setFirstName] = useState("");

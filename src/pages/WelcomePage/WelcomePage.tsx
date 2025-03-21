@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { auth, provider, signInWithPopup } from "../../../firebase";
 import toast from "react-hot-toast";
-import Footer from "../../components/Footer/Footer"; 
+import Footer from "../../components/Footer/footer"; 
 
 const WelcomePage = () => {
   const navigate = useNavigate();
@@ -145,7 +145,6 @@ const WelcomePage = () => {
         </div>
       </div>
 
-      {/* ✅ Footer fixed at the bottom of the page */}
       <div className="absolute bottom-0 w-full">
         <Footer />
       </div>

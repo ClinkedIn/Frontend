@@ -47,7 +47,7 @@ const SignupPage = () => {
       return;
     }
     toast.success("Signup successful!");
-    navigate("/signupname");
+    navigate("/signup-name");
   };
 
   return (
