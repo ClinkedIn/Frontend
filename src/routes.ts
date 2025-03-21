@@ -15,6 +15,7 @@ import Notification from "./pages/notifications/Notifications";
 import Jobs from "./pages/jobs/Jobs";
 import WelcomePage from "../src/pages/WelcomePage/WelcomePage";
 import ReportedPostsAdmin from './components/AdminPanel/ReportedPostsAdmin';
+import NotificationPost from "./components/Notification/NotificationPost.jsx";
 
 
 
@@ -33,6 +34,10 @@ const routes: RouteObject[] = [
   {
     path: "/home",
     element: React.createElement(Home),
+  },  
+  {
+      path: "/feed",
+      element: React.createElement(TestPage),
   },
   {
     path: "/login",
@@ -81,6 +86,10 @@ const routes: RouteObject[] = [
   {
     path: "/reported-posts",
     element: React.createElement(ReportedPostsAdmin),
+  },
+  {
+    path: "/notification-post",
+    element: React.createElement(NotificationPost),
   }
 ];
 
