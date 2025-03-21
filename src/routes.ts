@@ -30,8 +30,12 @@ const routes: RouteObject[] = [
     element: React.createElement(PasswordResetUsingMail),
   },
   {
-    path: "/",
-    element: React.createElement(Home),
+      path: "/",
+      element: React.createElement(TestPage),
+    },
+    {
+      path: "/feed",
+      element: React.createElement(TestPage),
   },
   {
     path: "/login",
