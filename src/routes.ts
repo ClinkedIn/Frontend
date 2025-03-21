@@ -11,6 +11,9 @@ import UpdateUserNameForm from "./components/authentication/Reset/UpdateUserName
 import ForgotPasswordForm from "./components/authentication/Reset/ForgotPasswordForm";
 import Notification from "./pages/notifications/Notifications";
 import Jobs from "./pages/jobs/Jobs";
+import ReportedPostsAdmin from './components/AdminPanel/ReportedPostsAdmin';
+
+
 
 
 
@@ -62,6 +65,10 @@ const routes: RouteObject[] = [
     path: "/jobs",
     element: React.createElement(Jobs),
   },
+  {
+    path: "/reported-posts",
+    element: React.createElement(ReportedPostsAdmin),
+  }
 ];
 
 
