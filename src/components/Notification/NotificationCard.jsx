@@ -3,15 +3,19 @@ import { BsThreeDots } from "react-icons/bs";
 import { MdDelete } from "react-icons/md";
 import { FaBell, FaThumbsDown } from "react-icons/fa";
 import axios from 'axios';
-
+import { useNavigate } from "react-router-dom";
 const NotificationCard = ({ notification,  handleNotificationClick}) => {
   const [showMenu, setShowMenu] = useState(false);
   const [isRead, setIsRead] = useState(notification.isRead || false);
   const [message, setMessage] = useState(null);
   const [removedNotification, setRemovedNotification] = useState(null);
+   const navigate = useNavigate();
 
-  const handleClick = () => {
+  const handleClick = (id) => {
     setIsRead(true);
+    console.log('handleClick')
+    handleNotificationClick(id)
+    navigate("/notification-post")
   }
 
   //Delete Notification
@@ -40,12 +44,10 @@ const NotificationCard = ({ notification,  handleNotificationClick}) => {
       setMessage("Failed to undo.");
     }
   };
-
+  
   return (
     <div
     id="Mark-Read"
-      onClick={handleClick
-      }
       className={`flex items-center justify-between p-3 cursor-pointer transition-all ${
         isRead ? "bg-white hover:bg-gray-300" : "bg-blue-100 hover:bg-blue-200"
       }`}
@@ -66,8 +68,8 @@ const NotificationCard = ({ notification,  handleNotificationClick}) => {
       ) : (
         <>
       <div 
-      id="Notification-Click"
-      onClick={() => handleNotificationClick(notification.id)}
+      id="Notification-Click"   
+      onClick={()=>handleClick(notification.id)}
       className="flex items-start space-x-3">
         {/* Blue dot is removed if notification is read */}
         {!isRead && <div className="w-2 h-2 bg-blue-600 rounded-full mt-2"></div>}
@@ -84,7 +86,6 @@ const NotificationCard = ({ notification,  handleNotificationClick}) => {
       </div>
 
       <div 
-      onClick={() => handleNotificationClick(notification.id)}
       className="relative">
         <button
         id="Notification-Menu"

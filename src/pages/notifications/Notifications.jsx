@@ -28,11 +28,9 @@ const Notification = () => {
  //Mark Notification as read
   const handleNotificationClick = async (id) => {
       try {
-        await axios.patch(`/notifications/${id.toString()}`, { isRead: true });
-        // Update the state with the updated notification
-        console.log(`Updated notification`)
+        await axios.patch(`http://localhost:5173/notifications/${id.toString()}`, { isRead: true });
+        console.log('Updated notification')
         setNotifications(notifications.map(notification => notification.id === id? {...notification, isRead: true } : notification));
-        console.log("patched");
       } catch (error) {
         console.error('Error updating notification:', error);
       }
@@ -185,7 +183,7 @@ const Notification = () => {
               {/*Displays the filtered notifications */}
             {filteredNotifications.length > 0 ? (
                 <ul 
-                onClick={()=>navigate("/notification-post")}
+               
                 id="Notification-Card">
                   {filteredNotifications.map((notif) => (
                     <NotificationCard key={notif.id} notification={notif} handleNotificationClick={()=>handleNotificationClick(notif.id)} />
