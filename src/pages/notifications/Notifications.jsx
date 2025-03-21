@@ -184,7 +184,9 @@ const Notification = () => {
             <div className="bg-white shadow-sm rounded-lg border border-gray-300">
               {/*Displays the filtered notifications */}
             {filteredNotifications.length > 0 ? (
-                <ul id="Notification-Card">
+                <ul 
+                onClick={()=>navigate("/notification-post")}
+                id="Notification-Card">
                   {filteredNotifications.map((notif) => (
                     <NotificationCard key={notif.id} notification={notif} handleNotificationClick={()=>handleNotificationClick(notif.id)} />
                   ))}

@@ -12,6 +12,7 @@ import ForgotPasswordForm from "./components/authentication/Reset/ForgotPassword
 import Notification from "./pages/notifications/Notifications";
 import Jobs from "./pages/jobs/Jobs";
 import ReportedPostsAdmin from './components/AdminPanel/ReportedPostsAdmin';
+import NotificationPost from "./components/Notification/NotificationPost.jsx";
 
 
 
@@ -68,6 +69,10 @@ const routes: RouteObject[] = [
   {
     path: "/reported-posts",
     element: React.createElement(ReportedPostsAdmin),
+  },
+  {
+    path: "/notification-post",
+    element: React.createElement(NotificationPost),
   }
 ];
 

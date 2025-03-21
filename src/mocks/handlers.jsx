@@ -109,6 +109,13 @@ export const handlers = [
     console.log("[MSW] Intercepted GET /api/notifications");
     return HttpResponse.json(MOCK_NOTIFICATIONS);
   }),
+  http.get("/notifications/unread-count", () => {
+    const unreadCount = MOCK_NOTIFICATIONS.filter(
+      (notification) => !notification.isRead
+    ).length;
+    
+    return HttpResponse.json({ count: unreadCount });
+  }),
   //Mock API to mark notification as read
   http.patch("/notifications/:id", async ({ request, params }) => {
     console.log(`[MSW] Intercepted PATCH /api/notifications/${params.id}`);
@@ -119,7 +126,8 @@ export const handlers = [
     const notificationIndex = MOCK_NOTIFICATIONS.findIndex((n) => n.id === id);
     if (notificationIndex !== -1) {
       MOCK_NOTIFICATIONS[notificationIndex].isRead = true;
-      return HttpResponse.json({ success: true, message: "Notification updated successfully" });
+      return HttpResponse.json({ success: true, message: "Notification updated successfully", 
+        updatedNotification: MOCK_NOTIFICATIONS[notificationIndex] });
     } else {
       return HttpResponse.json({ success: false, message: "Notification not found" }, { status: 404 });
     }
