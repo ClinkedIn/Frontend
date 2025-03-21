@@ -60,6 +60,7 @@ useEffect(() => {
 
   return (
     <div
+    id="Mark-Read"
       onClick={handleClick
       }
       className={`flex items-center justify-between p-3 cursor-pointer transition-all ${
@@ -72,6 +73,7 @@ useEffect(() => {
           {/*displays the action message (delete or show less) */}
           <p className="text-sm text-gray-800">{message}</p>
           <button
+          id="Undo"
             className="text-blue-600 text-sm font-medium hover:underline"
             onClick={handleUndo}
           >
@@ -81,6 +83,7 @@ useEffect(() => {
       ) : (
         <>
       <div 
+      id="Notification-Click"
       onClick={() => handleNotificationClick(notification.id, notification.isRead)}
       className="flex items-start space-x-3">
         {/* Blue dot is removed if notification is read */}
@@ -88,15 +91,21 @@ useEffect(() => {
 
         {/*displaying notification content */}
         <div className="relative w-10 h-10 bg-gray-200 flex items-center justify-center">
-          <img src={notification.profileImg} alt="image" className="w-10 h-10 rounded-md" />
+          <img 
+          id="Notification-Img"
+          src={notification.profileImg} alt="image" className="w-10 h-10 rounded-md" />
         </div>
-        <p className="text-sm text-gray-800">{notification.content}</p>
+        <p 
+        id="Notification-Content"
+        className="text-sm text-gray-800">{notification.content}</p>
       </div>
 
       <div 
       onClick={() => handleNotificationClick(notification.id, notification.isRead)}
       className="relative">
         <button
+        id="Notification-Menu"
+          
           className="p-2 rounded-full hover:bg-gray-200 transition"
           onClick={() => setShowMenu(!showMenu)}
         >
@@ -106,18 +115,22 @@ useEffect(() => {
         {showMenu && (
           <div className="absolute right-0 mt-2 w-72 bg-white shadow-md rounded-md p-2 z-10">
             {/*Change notification preferences*/}
-            <button className="flex items-center w-full p-2 hover:bg-gray-100 rounded-md">
+            <button 
+            id="Preferences-Button"
+            className="flex items-center w-full p-2 hover:bg-gray-100 rounded-md">
               <FaBell className="mr-2 text-gray-600" />
               Change notification preferences
             </button>
             {/*Delete button */}
             <button
-                  className="flex items-center w-full p-2 hover:bg-gray-100 rounded-md"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setMessage("Notification deleted.");
-                    handleDeleteNotification(notification.id);
-                    setShowMenu(false);
+              id="Delete-Button"
+                  
+              className="flex items-center w-full p-2 hover:bg-gray-100 rounded-md"
+              onClick={(e) => {
+              e.stopPropagation();
+              setMessage("Notification deleted.");
+              handleDeleteNotification(notification.id);
+              setShowMenu(false);
                   }}
                 >
                   <MdDelete className="mr-2 text-gray-600" />
@@ -125,6 +138,7 @@ useEffect(() => {
                 </button>
                 {/* Show less button */}
                 <button
+                id="Show-Less-Button"
                   className="flex items-center w-full p-2 hover:bg-gray-100 rounded-md"
                   onClick={(e) => {
                     e.stopPropagation();

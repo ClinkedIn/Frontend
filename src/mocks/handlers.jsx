@@ -156,8 +156,7 @@ export const handlers = [
     }
   }),
 
-
-   // Mock API to request OTP
+  // Mock API to request OTP
    http.get("/request-otp", async () => {
     storedOTP = Math.floor(100000 + Math.random() * 900000);
     return HttpResponse.json({ success: true, otp: storedOTP });

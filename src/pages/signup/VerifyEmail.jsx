@@ -14,12 +14,13 @@ const VerifyEmail = () => {
   const [timer, setTimer] = useState(0); 
   let countdown;
 
+  //RequestOTP API
   const requestOTP = async () => {
     if (!canRequestOTP) return;
     setMessage("Requesting OTP...");
     setCanRequestOTP(false);
     setTimer(30);
-  
+  //timer for sending otp requests
     countdown = setInterval(() => {
       setTimer((prev) => {
         if (prev === 1) {
@@ -29,7 +30,7 @@ const VerifyEmail = () => {
         return prev - 1;
       });
     }, 1000);
-  
+    
     try {
       const response = await axios.get("/request-otp");
       if (response.data.success) {
@@ -63,6 +64,7 @@ const VerifyEmail = () => {
   fetchUser();
 }, []);
 
+  //Send OTP to verify API
   const verifyOTP = async () => {
     setIsLoading(true);
     setMessage("Verifying OTP...");
@@ -85,24 +87,30 @@ const VerifyEmail = () => {
         Type in the code we sent to <strong>{isEditing ? "" : newEmail || "your email"}</strong>.
         {isEditing ? (
           <input
+          id="Edit-Email"
             type="email"
             value={newEmail}
             onChange={(e) => setNewEmail(e.target.value)}
             className="border border-gray-400 rounded px-2 py-1 ml-2"
           />
         ) : (
-          <button className="text-blue-500 cursor-pointer ml-2" onClick={() => setIsEditing(true)}>
+          <button 
+          id="Edit-Email-Button"
+          className="text-blue-500 cursor-pointer ml-2" onClick={() => setIsEditing(true)}>
             Edit email
           </button>
         )}
         {isEditing && (
-          <button className="ml-2 text-green-500" onClick={() => setIsEditing(false)}>
+          <button
+          id="Save-NewEmail-Button"
+          className="ml-2 text-green-500" onClick={() => setIsEditing(false)}>
             Save
           </button>
         )}
       </p>
 
       <input
+      id="Input-OTP"
         type="text"
         value={code}
         onChange={(e) => setCode(e.target.value)}
@@ -125,7 +133,9 @@ const VerifyEmail = () => {
         </div>
       </div>
 
-      <p className="text-center mt-4 text-gray-700">
+      <p 
+      id="Request-OTP-Again"
+      className="text-center mt-4 text-gray-700">
         Didn't receive the code?{" "}
         <span
           className={`cursor-pointer ${
@@ -138,6 +148,7 @@ const VerifyEmail = () => {
       </p>
 
       <button
+      id="Verify-Button"
         className={`mt-4 py-3 px-8 rounded-lg font-semibold ${
           isVerified ? "bg-green-600 text-white cursor-pointer" : "bg-blue-600 text-white cursor-pointer"
         } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
