@@ -21,6 +21,7 @@
     "axios": "^1.8.3",
     "clsx": "^2.1.1",
     "firebase": "^11.4.0",
+    "framer-motion": "^12.5.0",
     "lucide-react": "^0.479.0",
     "msw": "^2.7.3",
     "react": "^19.0.0",
