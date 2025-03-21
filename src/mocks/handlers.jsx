@@ -13,7 +13,7 @@ const dummyUser = {
 const MOCK_NOTIFICATIONS = [
   {
     id: "1",
-    type: "hiring",
+    type: "job",
     content: "<b>Amany Raafat</b> is hiring.",
     time: "4h",
     profileImg: "https://picsum.photos/80?random=1",
@@ -21,7 +21,8 @@ const MOCK_NOTIFICATIONS = [
   },
   {
     id: "2",
-    type: "analytics",
+    type: "post",
+    subType:"reactions",
     content: "Your posts got <b>15 impressions</b> last week. View your analytics.",
     time: "4h",
     profileImg: "https://picsum.photos/80?random=2",
@@ -29,7 +30,7 @@ const MOCK_NOTIFICATIONS = [
   },
   {
     id: "3",
-    type: "course",
+    type: "job",
     content: "New from <b>Free Online Courses with Certificates</b>",
     time: "11h",
     profileImg: "https://picsum.photos/80?random=3",
@@ -44,14 +45,14 @@ const MOCK_NOTIFICATIONS = [
     profileImg: "https://picsum.photos/80?random=4",
     isRead: false, 
   },
-  // {
-  //   id: "5",
-  //   type: "job",
-  //   content: "New job opportunities: <b>Software Engineer</b> at Microsoft.",
-  //   time: "8h",
-  //   profileImg: "https://picsum.photos/80?random=5",
-  //   isRead: false, 
-  // },
+  {
+    id: "5",
+    type: "job",
+    content: "New job opportunities: <b>Software Engineer</b> at Microsoft.",
+    time: "8h",
+    profileImg: "https://picsum.photos/80?random=5",
+    isRead: false, 
+  },
   {
     id: "6",
     type: "post",
@@ -80,20 +81,20 @@ const MOCK_NOTIFICATIONS = [
   },
   {
     id: "9",
-    type: "hiring",
+    type: "job",
     content: "<b>Ali Hassan</b> is looking for a <b>UX Designer</b>.",
     time: "3d",
     profileImg: "https://picsum.photos/80?random=9",
     isRead: false, 
   },
-  // {
-  //   id: "10",
-  //   type: "job",
-  //   content: "Exciting opportunity: <b>Data Scientist</b> at Google.",
-  //   time: "2d",
-  //   profileImg: "https://picsum.photos/80?random=10",
-  //   isRead: false, 
-  // },
+  {
+    id: "10",
+    type: "job",
+    content: "Exciting opportunity: <b>Data Scientist</b> at Google.",
+    time: "2d",
+    profileImg: "https://picsum.photos/80?random=10",
+    isRead: false, 
+  },
 ];
 
 export const handlers = [
@@ -108,9 +109,54 @@ export const handlers = [
     console.log("[MSW] Intercepted GET /api/notifications");
     return HttpResponse.json(MOCK_NOTIFICATIONS);
   }),
+  //Mock API to mark notification as read
+  http.patch("/notifications/:id", async ({ request, params }) => {
+    console.log(`[MSW] Intercepted PATCH /api/notifications/${params.id}`);
   
+    const { id } = params;
+    const { isRead } = await request.json();
+    // Find the notification in the mock data and update it
+    const notificationIndex = MOCK_NOTIFICATIONS.findIndex((n) => n.id === id);
+    if (notificationIndex !== -1) {
+      MOCK_NOTIFICATIONS[notificationIndex].isRead = true;
+      return HttpResponse.json({ success: true, message: "Notification updated successfully" });
+    } else {
+      return HttpResponse.json({ success: false, message: "Notification not found" }, { status: 404 });
+    }
+  }),
+  
+  //Mock Api to delete a notification
+  http.delete("/notifications/:id", async ({ params }) => {
+    console.log(`[MSW] Intercepted DELETE /notifications/${params.id}`);
+    const { id } = params;
 
-  
+    // Find the notification in the mock data and remove it
+    const notificationIndex = MOCK_NOTIFICATIONS.findIndex((n) => n.id === id);
+    if (notificationIndex !== -1) {
+      MOCK_NOTIFICATIONS.splice(notificationIndex, 1); // Remove the notification
+      return HttpResponse.json({ success: true, message: "Notification deleted successfully" });
+    } else {
+      return HttpResponse.json({ success: false, message: "Notification not found" }, { status: 404 });
+    }
+  }),
+ //Mock API to restore notification
+  http.post("/notifications/restore", async ({ request }) => {
+    console.log("[MSW] Intercepted POST /notifications/restore");
+    
+    const notification = await request.json();
+    
+    // Check if the notification already exists
+    const exists = MOCK_NOTIFICATIONS.some((n) => n.id === notification.id);
+    
+    if (!exists) {
+      MOCK_NOTIFICATIONS.push(notification); // Restore the notification
+      return HttpResponse.json({ success: true, message: "Notification restored" });
+    } else {
+      return HttpResponse.json({ success: false, message: "Notification already exists" }, { status: 400 });
+    }
+  }),
+
+
    // Mock API to request OTP
    http.get("/request-otp", async () => {
     storedOTP = Math.floor(100000 + Math.random() * 900000);
