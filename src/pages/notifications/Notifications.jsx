@@ -25,7 +25,18 @@ const Notification = () => {
       console.error("Error fetching notifications:", error);
     }
   };
-
+ //Mark Notification as read
+  const handleNotificationClick = async (id) => {
+      try {
+        await axios.patch(`/notifications/${id.toString()}`, { isRead: true });
+        // Update the state with the updated notification
+        console.log(`Updated notification`)
+        setNotifications(notifications.map(notification => notification.id === id? {...notification, isRead: true } : notification));
+        console.log("patched");
+      } catch (error) {
+        console.error('Error updating notification:', error);
+      }
+  };
   const fetchUser= async ()=>{
     try {
       const response = await axios.get("http://localhost:5173/user");
@@ -49,6 +60,7 @@ const Notification = () => {
     // Reset My Posts when switching categories
     if (filter !== "post") {
       setSelectedPostFilter("all");
+      console.log(notifications)
     }
   };
 
@@ -174,7 +186,7 @@ const Notification = () => {
             {filteredNotifications.length > 0 ? (
                 <ul id="Notification-Card">
                   {filteredNotifications.map((notif) => (
-                    <NotificationCard key={notif.id} notification={notif} />
+                    <NotificationCard key={notif.id} notification={notif} handleNotificationClick={()=>handleNotificationClick(notif.id)} />
                   ))}
                 </ul>
                 //Handles if Tab doesnt have any notifications

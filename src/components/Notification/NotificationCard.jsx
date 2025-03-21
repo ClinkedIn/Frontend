@@ -4,7 +4,7 @@ import { MdDelete } from "react-icons/md";
 import { FaBell, FaThumbsDown } from "react-icons/fa";
 import axios from 'axios';
 
-const NotificationCard = ({ notification}) => {
+const NotificationCard = ({ notification,  handleNotificationClick}) => {
   const [showMenu, setShowMenu] = useState(false);
   const [isRead, setIsRead] = useState(notification.isRead || false);
   const [message, setMessage] = useState(null);
@@ -13,7 +13,6 @@ const NotificationCard = ({ notification}) => {
   const handleClick = () => {
     setIsRead(true);
   }
-
 
   //Delete Notification
   const handleDeleteNotification = async (id) => {
@@ -41,22 +40,6 @@ const NotificationCard = ({ notification}) => {
       setMessage("Failed to undo.");
     }
   };
- //Mark Notification as read
-  const handleNotificationClick = async (id, isRead) => {
-    if (!isRead) {
-      try {
-        await axios.patch(`/notifications/${id}`, { isRead: true });
-        console.log("patched");
-      } catch (error) {
-        console.error('Error updating notification:', error);
-      }
-    }
-  };
-useEffect(() => {
-  handleNotificationClick(notification.id, notification.isRead);
-}, [notification.id, notification.isRead]);
-
-
 
   return (
     <div
@@ -84,7 +67,7 @@ useEffect(() => {
         <>
       <div 
       id="Notification-Click"
-      onClick={() => handleNotificationClick(notification.id, notification.isRead)}
+      onClick={() => handleNotificationClick(notification.id)}
       className="flex items-start space-x-3">
         {/* Blue dot is removed if notification is read */}
         {!isRead && <div className="w-2 h-2 bg-blue-600 rounded-full mt-2"></div>}
@@ -101,7 +84,7 @@ useEffect(() => {
       </div>
 
       <div 
-      onClick={() => handleNotificationClick(notification.id, notification.isRead)}
+      onClick={() => handleNotificationClick(notification.id)}
       className="relative">
         <button
         id="Notification-Menu"
