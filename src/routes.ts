@@ -1,8 +1,10 @@
 import { RouteObject } from "react-router-dom";
 import React from "react";
 import Home from "../src/pages/home/HomePage";
-import Login from "../src/pages/Login/LoginPage";
-import SignUp from "../src/pages/signup/SignUpPage";
+import Login from "./components/authentication/Login/LoginPage.js";
+import SignUp from "./components/authentication/SignUp/SignUpPage.js";
+import SignUpName from "./components/authentication/SignUp/SignUpName.js";
+import SignUpLocation from "./components/authentication/SignUp/SignUpLocation.js";
 import TestPage from "./pages/Test/TestPage.jsx";
 import PasswordResetUsingMail from "../src/pages/PasswordResetUsingMail/PassWordResetUsingMail";
 import VerifyEmail from "../src/pages/signup/VerifyEmail";
@@ -11,10 +13,9 @@ import UpdateUserNameForm from "./components/authentication/Reset/UpdateUserName
 import ForgotPasswordForm from "./components/authentication/Reset/ForgotPasswordForm";
 import Notification from "./pages/notifications/Notifications";
 import Jobs from "./pages/jobs/Jobs";
+import WelcomePage from "../src/pages/WelcomePage/WelcomePage";
 import ReportedPostsAdmin from './components/AdminPanel/ReportedPostsAdmin';
 import NotificationPost from "./components/Notification/NotificationPost.jsx";
-
-
 
 
 
@@ -31,10 +32,10 @@ const routes: RouteObject[] = [
     element: React.createElement(PasswordResetUsingMail),
   },
   {
-      path: "/",
-      element: React.createElement(TestPage),
-    },
-    {
+    path: "/home",
+    element: React.createElement(Home),
+  },  
+  {
       path: "/feed",
       element: React.createElement(TestPage),
   },
@@ -45,6 +46,14 @@ const routes: RouteObject[] = [
   {
     path: "/signup",
     element: React.createElement(SignUp),
+  },
+  {
+    path: "/signup-name",
+    element: React.createElement(SignUpName),
+  },  
+  {
+    path: "/signup-location",
+    element: React.createElement(SignUpLocation),
   },
   {
     path: "/verify-email",
@@ -69,6 +78,10 @@ const routes: RouteObject[] = [
   {
     path: "/jobs",
     element: React.createElement(Jobs),
+  },
+  {
+    path: "/",
+    element: React.createElement(WelcomePage),
   },
   {
     path: "/reported-posts",
