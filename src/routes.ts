@@ -11,6 +11,8 @@ import UpdateUserNameForm from "./components/authentication/Reset/UpdateUserName
 import ForgotPasswordForm from "./components/authentication/Reset/ForgotPasswordForm";
 import Notification from "./pages/notifications/Notifications";
 import Jobs from "./pages/jobs/Jobs";
+import CreateCompanyPage from "./pages/CompanyPages/CreateCompanyPage";
+import CompanyProfilePage from "./pages/CompanyPages/CompanyProfile.js";
 
 
 
@@ -62,6 +64,14 @@ const routes: RouteObject[] = [
     path: "/jobs",
     element: React.createElement(Jobs),
   },
+  {
+    path:"/company/setup/new",
+    element: React.createElement(CreateCompanyPage),
+  },
+  {
+    path:"/company/{companyId}",
+    element: React.createElement(CompanyProfilePage),
+  }
 ];
 
 
