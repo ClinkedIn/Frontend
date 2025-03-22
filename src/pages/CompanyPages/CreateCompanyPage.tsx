@@ -1,7 +1,11 @@
-import Button from "../../components/Button";
 import Header from "../../components/UpperNavBar"
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import {IoIosArrowRoundBack} from "react-icons/io";
+import { FaPlus,FaUpload } from "react-icons/fa6";
+import { toast,Toaster } from "react-hot-toast";
+
+
 
 const CreateCompanyPage = () => {
     const navigate = useNavigate();
@@ -11,13 +15,62 @@ const CreateCompanyPage = () => {
     const [organizationType, setOrganizationType] = useState("");
     const [organizationSize, setOrganizationSize] = useState("");
     const [website, setWebsite] = useState("");
-    const [chechbox, setCheckbox] = useState("");
+    const [checkbox, setCheckbox] = useState(false);
     const [logo, setLogo] = useState<File | null>(null);
     const [companyUrl, setCompanyUrl] = useState("");   
     const [logoPreview, setLogoPreview] = useState<string | null>(null);
-   
+    const [errors, setErrors] = useState({ organizationSize: "", organizationType: "" });
+
+    const handleSelectChange = (setter: React.Dispatch<React.SetStateAction<string>>, field: keyof typeof errors) => (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const value = e.target.value;
+        setter(value);
+        setErrors((prev) => ({
+            ...prev,
+            [field]: value.toLowerCase().includes("select") ? "Please choose a valid option." : ""
+        }));
+    };
+   const isValid = () => {
+        if(!companyName){
+            toast.error("Please enter the company name")
+            return false;
+        }
+        if(!companyUrl){
+            toast.error("Please enter the company URL")
+            return false;
+        }
+        const pattern = /^(https?:\/\/)?(www\.)?[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(:\d+)?(\/\S*)?(\?\S*)?$/;
+        if( !pattern.test(website)){
+            toast.error("Please enter a valid website URL starting with http://, https://, or www.")
+            return false;
+        }
+        if (organizationSize.toLowerCase().includes("select")) {
+            toast.error("Please choose a valid option.")
+            return false;
+        }
+        if (organizationType.toLowerCase().includes("select")) {
+            toast.error("Please choose a valid option.")
+            return false;
+       }
+
+
+        if(!industry){
+            toast.error("Please enter the industry")
+            return false;
+        }
+        if(!checkbox){
+            toast.error("Please verify that  the organization and you agree to the additional terms for Pages.")
+            return false;
+        }
+
+        return true;
+   }
     const createPage = () => {
-        console.log(logo);
+        if(isValid()){
+            console.log("Page Created")
+            console.log(logo)
+            navigate("/HomePage")
+        }
+
     }
 
 
@@ -26,14 +79,16 @@ const CreateCompanyPage = () => {
         <Header />
         <section className="w-full bg-white shadow-md rounded-lg p-6 px-4 pt-20 md:px-40">
                     <button 
-                        className="flex items-center text-blue-600 hover:text-gray-900 font-medium hover:bg-gray-100 p-2 rounded-lg"
+                        className="flex items-center text-[#0A66C2] hover:text-gray-900 font-medium hover:bg-gray-100 p-2 rounded-lg"
                         onClick={() => navigate("/HomePage")}
                     >
-                        <img src="/Images/right-icon.svg" alt="Back" width="24" height="24" className="mr-2" />
-                        Back
+                     <IoIosArrowRoundBack className="w-12 h-12 " />
+                       <h1 className="text-2xl font-semibold ">
+                       Back 
+                       </h1>
                     </button>
-                    <div className="mt-6 flex items-center space-x-4">
-                        <img src="/Images/right-icon.svg" alt="Icon" width="24" height="24" />
+                    <div className="mt-4 flex items-center space-x-4">
+                        <img src="/Images/building-icon.png" alt="Icon" width="50" height="50" />
                         <h1 className="text-xl font-semibold text-gray-800">
                             Let's get started with a few details about your company
                         </h1>
@@ -103,7 +158,7 @@ const CreateCompanyPage = () => {
                         <select
                             id="organizationSize"
                             value={organizationSize}
-                            onChange={(e) => setOrganizationSize(e.target.value)}
+                            onChange={handleSelectChange(setOrganizationSize, "organizationSize")}
                             className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
                             required
                         >
@@ -118,6 +173,7 @@ const CreateCompanyPage = () => {
                             <option>5001-10,000 employees</option>
                             <option>10,000+ employees</option>
                         </select>
+                        {errors.organizationSize && <p className="text-red-500 text-sm mt-1">{errors.organizationSize}</p>}
                     </div>
                     
                     <div>
@@ -125,7 +181,7 @@ const CreateCompanyPage = () => {
                         <select
                             id="organizationType"
                             value={organizationType}
-                            onChange={(e) => setOrganizationType(e.target.value)}
+                            onChange={handleSelectChange(setOrganizationType, "organizationType")}
                             className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
                             required
                         >
@@ -138,6 +194,7 @@ const CreateCompanyPage = () => {
                             <option>Privately held</option>
                             <option>Partnership</option>
                         </select>
+                        {errors.organizationType && <p className="text-red-500 text-sm mt-1">{errors.organizationType}</p>}
                     </div>
                     <div>
                         <label htmlFor="logo" className="block text-sm font-medium text-gray-700">
@@ -146,11 +203,13 @@ const CreateCompanyPage = () => {
                         <div className="flex items-center gap-4 mt-1">
                             <label
                                 htmlFor="logoUpload"
-                                className="cursor-pointer flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg shadow-md hover:bg-blue-700 transition duration-200"
+                                className="cursor-pointer flex items-center justify-center px-4 py-2 bg-[#0A66C2] text-white text-sm font-medium rounded-lg shadow-md hover:bg-blue-700 transition duration-200"
                             >
-                                <img src="/Images/upload-icon.svg" alt="Upload" className="w-5 h-5 mr-2" />
+                                <FaUpload className="w-5 h-5 mr-2" />
                                 Upload Logo
                             </label>
+                            <button className="cursor-pointer flex items-center justify-center px-4 py-2 bg-[#0A66C2] text-white text-sm font-medium rounded-lg shadow-md hover:bg-blue-700 transition duration-200" onClick={()=>{setLogoPreview("")}}>reset </button>
+
                             <input
                                 type="file"
                                 id="logoUpload"
@@ -164,9 +223,8 @@ const CreateCompanyPage = () => {
                                     }
                                 }}
                             />
-                            {logoPreview && (
-                                <img src={logoPreview} alt="Logo Preview" className="w-32 h-32  " />
-                            )}
+                                <img src={logoPreview || "/Images/photo-icon.svg"} alt="Logo Preview" className="w-32 h-32  " />
+    
                         </div>
                         <p className="text-sm text-gray-500 mt-2">
                             300 x 300px recommended. JPG, JPEG, and PNG supported.
@@ -189,12 +247,13 @@ const CreateCompanyPage = () => {
                         ></textarea>
                         <p className="text-sm text-gray-500">Use your tagline to briefly describe what your organization does. This can be changed later. {tagline.length}/{120} </p>
                     </div>
-                    <div>
-                        <input type="checkbox" value={chechbox} onChange={(e)=>{setCheckbox(e.target.value)}} id="checkbox" className="mt-5 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2" />
+                    <div className="flex  gap-2">
+                        <input type="checkbox" checked={checkbox} onChange={(e) => setCheckbox(e.target.checked)} id="checkbox" className=" size-12 rounded-md border-gray-300  focus:border-green-500 focus:ring-green-500 " />
                         <p>I verify that I am an authorized representative of this organization and have the right to act on its behalf in the creation and management of this page. The organization and I agree to the additional terms for Pages.</p>
                     </div>   
                 </form>
-                <Button className="mt-6 " onClick={()=>{createPage()}}>Create Page </Button>
+                <Toaster />
+                <button className="rounded-full  py-3 px-5 m-2 text-white cursor-pointer font-semibold bg-[#0A66C2] " onClick={()=>{createPage()}}>Create Page </button>
             </div>
             <aside className="md:px-4 md:w-[60%]  lg:w-[40%] h-fit rounded-lg lg:sticky lg:top-24">
                     <section className="mt-8 shadow-lg rounded-lg flex flex-col">
@@ -220,8 +279,8 @@ const CreateCompanyPage = () => {
                                     <p className="text-sm text-gray-600">
                                         {industry || "Industry"}
                                     </p>
-                                    <button className="mt-4 flex items-center justify-center gap-2 bg-[#0073b1] text-white font-semibold py-2 px-5 rounded-full shadow-md hover:bg-[#005582] transition duration-200">
-                                        <img src="/Images/plus-icon.svg" alt="Follow" className="w-5 h-5" />
+                                    <button disabled={true} className="mt-4 flex items-center justify-center gap-2 bg-[#0A66C2] text-white font-semibold py-2 px-5 rounded-full">
+                                        <FaPlus className="w-5 h-5" />
                                         Follow
                                     </button>
                                 </div>
