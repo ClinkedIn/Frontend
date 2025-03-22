@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Footer from "../../Footer/Footer";
+import Footer from "../../Footer/footer";
 
 const SignUpLocation = () => {
   const [location, setLocation] = useState("");
@@ -11,7 +11,7 @@ const SignUpLocation = () => {
     if (!location.trim()) {
       return;
     }
-    navigate("/nextStep"); // Change to the next step in signup
+    navigate("/signup-career");
   };
 
   return (

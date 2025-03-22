@@ -4,6 +4,7 @@ import { auth, provider, signInWithPopup } from "../../../firebase";
 import toast from "react-hot-toast";
 import Footer from "../../components/Footer/footer"; 
 
+
 const WelcomePage = () => {
   const navigate = useNavigate();
 
@@ -23,54 +24,59 @@ const WelcomePage = () => {
   return (
     <div className="relative min-h-screen flex flex-col">
       {/* Navbar */}
-      <nav className="bg-white py-3 px-11 md:px-24 flex items-center justify-between">
+      <nav className="bg-white py-3 px-4 md:px-12 flex flex-wrap items-center justify-between">
+        {/* Logo */}
         <Link to="/" className="flex items-center">
-          <img src="/public/images/login-logo.svg" alt="LinkedIn Logo" className="h-6" />
+            <img src="/public/images/login-logo.svg" alt="LinkedIn Logo" className="h-6" />
         </Link>
 
-        {/* Icons & Auth Section */}
-        <div className="flex items-center space-x-16 ml-auto">
-          <div className="hidden md:flex items-center space-x-10 text-gray-500">
+        {/* Icons & Buttons */}
+        <div className="flex items-center space-x-4 md:space-x-6 ml-auto flex-wrap">
+            {/* Icons */}
+            <div className="flex flex-wrap items-center space-x-4 md:space-x-6 text-gray-500">
             <Link to="/articles" className="text-xs hover:text-black flex flex-col items-center">
-              <img src="/public/Images/article.jpg" alt="Articles" className="h-5 w-5 mb-0 filter grayscale brightness-75" />
-              Articles
+                <img src="/public/Images/article.jpg" alt="Articles" className="h-5 w-5 mb-1" />
+                Articles
             </Link>
             <Link to="/people" className="text-xs hover:text-black flex flex-col items-center">
-              <img src="/public/Images/people-outline.png" alt="People" className="h-5 w-5 mb-0 filter grayscale brightness-75" />
-              People
+                <img src="/public/Images/people-outline.png" alt="People" className="h-5 w-5 mb-1" />
+                People
             </Link>
             <Link to="/learning" className="text-xs hover:text-black flex flex-col items-center">
-              <img src="/public/Images/learning-.png" alt="Learning" className="h-5 w-5 mb-0 filter grayscale brightness-75" />
-              Learning
+                <img src="/public/Images/learning-.png" alt="Learning" className="h-5 w-5 mb-1" />
+                Learning
             </Link>
             <Link to="/jobs" className="text-xs hover:text-black flex flex-col items-center">
-              <img src="/public/Images/job-icon.svg" alt="Jobs" className="h-5 w-5 mb-0 filter grayscale brightness-75" />
-              Jobs
+                <img src="/public/Images/job-icon.svg" alt="Jobs" className="h-5 w-5 mb-1 filter grayscale brightness-75" />
+                Jobs
             </Link>
             <Link to="/games" className="text-xs hover:text-black flex flex-col items-center">
-              <img src="/public/Images/games.png" alt="Games" className="h-5 w-5 mb-0 filter grayscale brightness-75" />
-              Games
+                <img src="/public/Images/games.png" alt="Games" className="h-5 w-5 mb-1" />
+                Games
             </Link>
             <Link to="/app" className="text-xs hover:text-black flex flex-col items-center">
-              <img src="/public/Images/app.png" alt="Get the app" className="h-5 w-5 mb-0 filter grayscale brightness-75" />
-              Get the app
+                <img src="/public/Images/app.png" alt="Get the app" className="h-5 w-5 mb-1" />
+                Get the app
             </Link>
-          </div>
+            </div>
 
-          {/* Join Now & Sign In */}
-          <div className="flex items-center space-x-4">
-            <Link to="/signup" className="text-gray-700 text-sm font-semibold hover:underline h-full flex items-center">
-              Join now
+            {/* Auth Buttons */}
+            <div className="flex items-center space-x-3 md:space-x-4">
+            <Link to="/signup" className="text-gray-700 text-sm font-semibold hover:underline">
+                Join now
             </Link>
             <Link
-              to="/login"
-              className="text-blue-600 text-sm font-semibold border border-blue-600 px-4 py-3 rounded-full hover:bg-blue-100"
+                to="/login"
+                className="text-blue-600 text-sm font-semibold border border-blue-600 px-4 py-2 rounded-full hover:bg-blue-100"
             >
-              Sign in
+                Sign in
             </Link>
-          </div>
+            </div>
         </div>
-      </nav>
+        </nav>
+
+
+
 
       {/* Main Content */}
       <div className="flex flex-1 items-center justify-center px-2 md:px-18">
@@ -132,7 +138,7 @@ const WelcomePage = () => {
           </p>
         </motion.div>
 
-        {/* Right Side: Hero Image */}
+        {/* Hero Image */}
         <div className="flex justify-end w-full">
           <motion.img
             src="/public/images/hero.svg"

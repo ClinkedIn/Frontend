@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import { Loader } from "lucide-react";
 import { motion } from "framer-motion";
 import Footer from "../../Footer/footer"; 
+import GoogleLogin from "../../GoogleLoginButton";
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
@@ -93,15 +94,7 @@ const LoginPage = () => {
       >
         <h2 className="text-3xl font-semibold text-gray-900 text-left mb-4">Sign in</h2>
 
-        <motion.button
-          onClick={handleGoogleSignUp}
-          className="flex items-center justify-center w-full py-2 border border-gray-500 rounded-full text-gray-700 hover:bg-gray-100"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <img src="/public/images/google_icon.png" alt="Google" className="h-5 w-5 mr-2" />
-          Continue with Google
-        </motion.button>
+          <GoogleLogin className="w-full" type="submit" onClick={handleGoogleSignUp} />
 
         <div className="relative flex items-center my-4">
           <div className="w-full border-t border-gray-300"></div>
@@ -151,7 +144,7 @@ const LoginPage = () => {
               </label>
             </div>
 
-            <Link to="#" className="text-sm text-blue-600 hover:underline">
+            <Link to="/forgot-password" className="text-sm text-blue-600 hover:underline">
               Forgot password?
             </Link>
           </div>
