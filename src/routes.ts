@@ -5,6 +5,7 @@ import Login from "./components/authentication/Login/LoginPage.js";
 import SignUp from "./components/authentication/SignUp/SignUpPage.js";
 import SignUpName from "./components/authentication/SignUp/SignUpName.js";
 import SignUpLocation from "./components/authentication/SignUp/SignUpLocation.js";
+import SignUpCareer from "./components/authentication/SignUp/SignUpCareer.js";
 import TestPage from "./pages/Test/TestPage.jsx";
 import PasswordResetUsingMail from "../src/pages/PasswordResetUsingMail/PassWordResetUsingMail";
 import VerifyEmail from "../src/pages/signup/VerifyEmail";
@@ -54,6 +55,10 @@ const routes: RouteObject[] = [
   {
     path: "/signup-location",
     element: React.createElement(SignUpLocation),
+  },
+  {
+    path: "/signup-career",
+    element: React.createElement(SignUpCareer),
   },
   {
     path: "/verify-email",

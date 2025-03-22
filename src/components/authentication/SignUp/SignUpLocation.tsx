@@ -11,7 +11,7 @@ const SignUpLocation = () => {
     if (!location.trim()) {
       return;
     }
-    navigate("/nextStep"); // Change to the next step in signup
+    navigate("/signup-career");
   };
 
   return (
