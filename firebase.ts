@@ -1,26 +1,57 @@
-// Import the functions you need from the SDKs you need
+// Import the necessary Firebase services
 import { initializeApp } from "firebase/app";
-//import { getAnalytics } from "firebase/analytics";
-import {getAuth,signInWithPopup,GoogleAuthProvider} from "firebase/auth";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { getMessaging, getToken, onMessage } from "firebase/messaging";
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+
+// Firebase configuration (same project)
 const firebaseConfig = {
-  apiKey: "AIzaSyA5j2m6iqXzQu7hOxeCHSdxKIGwLMmH7Gc",
-  authDomain: "lockedin-7908a.firebaseapp.com",
-  projectId: "lockedin-7908a",
-  storageBucket: "lockedin-7908a.firebasestorage.app",
-  messagingSenderId: "358685157127",
-  appId: "1:358685157127:web:c7200f0f929de131c007a2",
-  measurementId: "G-MYYPLVYZ3L"
+  apiKey: import.meta.env.VITE_FIREBASE_APIKEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTHDOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECTID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGEBUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGINGSENDERID,
+  appId:import.meta.env.VITE_FIREBASE_APPID ,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENTID
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-//const analytics = getAnalytics(app);
+
+// Authentication setup
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-export {auth,provider,signInWithPopup};
+// Push Notification setup (FCM)
+const messaging = getMessaging(app);
+
+// Function to request push notification permission
+const requestNotificationPermission = async (): Promise<string | null> => {
+  try {
+    const permission = await Notification.requestPermission();
+    if (permission === "granted") {
+      const token = await getToken(messaging, {
+        vapidKey: "YOUR_VAPID_PUBLIC_KEY",
+      });
+      console.log("FCM Token:", token);
+      return token;
+    } else {
+      console.log("Permission denied for notifications.");
+      return null;
+    }
+  } catch (error) {
+    console.error("Error requesting notification permission:", error);
+    return null;
+  }
+};
+
+// Handle foreground notifications
+onMessage(messaging, (payload) => {
+  console.log("Message received in foreground:", payload);
+  new Notification(payload.notification?.title || "Notification", {
+    body: payload.notification?.body,
+    icon: "/firebase-logo.png",
+  });
+});
+
+export { app, auth, provider, signInWithPopup, messaging, requestNotificationPermission };
