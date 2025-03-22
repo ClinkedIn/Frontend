@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import Footer from "../../Footer/footer";
+import Footer from "../../Footer/Footer";
 
 const SignupCareer = () => {
   const navigate = useNavigate();

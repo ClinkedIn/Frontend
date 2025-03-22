@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { auth, provider, signInWithPopup } from "../../../firebase";
 import toast from "react-hot-toast";
-import Footer from "../../components/Footer/footer"; 
+import Footer from "../../components/Footer/Footer"; 
 
 
 const WelcomePage = () => {

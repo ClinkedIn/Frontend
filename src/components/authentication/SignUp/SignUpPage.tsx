@@ -5,7 +5,7 @@ import { auth, provider, signInWithPopup } from "../../../../firebase";
 import toast, { Toaster } from "react-hot-toast";
 import ReCAPTCHA from "react-google-recaptcha";
 import GoogleLogin from "../../GoogleLoginButton";
-import Footer from "../../Footer/footer";
+import Footer from "../../Footer/Footer";
 
 const SignupPage = () => {
   const [email, setEmail] = useState("");

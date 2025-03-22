@@ -6,7 +6,7 @@ import { axiosInstance } from "../../../services/axios";
 import toast from "react-hot-toast";
 import { Loader } from "lucide-react";
 import { motion } from "framer-motion";
-import Footer from "../../Footer/footer"; 
+import Footer from "../../Footer/Footer"; 
 import GoogleLogin from "../../GoogleLoginButton";
 
 const LoginPage = () => {
