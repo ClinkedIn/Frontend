@@ -1,5 +1,6 @@
 import { http, HttpResponse } from "msw";
 let storedOTP = Math.floor(100000 + Math.random() * 900000);
+import axios from "axios";
 
 const dummyUser = {
     name: "Hamsa Saber",
@@ -109,30 +110,42 @@ export const handlers = [
     console.log("[MSW] Intercepted GET /api/notifications");
     return HttpResponse.json(MOCK_NOTIFICATIONS);
   }),
-  http.get("/notifications/unread-count", () => {
+
+  //Mock API to get unread notifications count
+  http.get("/notifications/unseenCount", () => {
     const unreadCount = MOCK_NOTIFICATIONS.filter(
       (notification) => !notification.isRead
     ).length;
     
     return HttpResponse.json({ count: unreadCount });
   }),
-  //Mock API to mark notification as read
-  http.patch("/notifications/:id", async ({ request, params }) => {
-    console.log(`[MSW] Intercepted PATCH /api/notifications/${params.id}`);
-  
+
+  //Mock API to handling reading notification
+  http.patch("/notifications/:id/read", async ({ request, params }) => {
+    console.log(`[MSW] Intercepted PATCH /notifications/${params.id}`);
     const { id } = params;
     const { isRead } = await request.json();
-    // Find the notification in the mock data and update it
-    const notificationIndex = MOCK_NOTIFICATIONS.findIndex((n) => n.id === id);
+
+    // Find the notification in the mock data
+    const notificationIndex = MOCK_NOTIFICATIONS.findIndex((n) => n.id.toString() === id);
     if (notificationIndex !== -1) {
-      MOCK_NOTIFICATIONS[notificationIndex].isRead = true;
-      return HttpResponse.json({ success: true, message: "Notification updated successfully", 
-        updatedNotification: MOCK_NOTIFICATIONS[notificationIndex] });
-    } else {
-      return HttpResponse.json({ success: false, message: "Notification not found" }, { status: 404 });
-    }
+      MOCK_NOTIFICATIONS[notificationIndex] = {
+        ...MOCK_NOTIFICATIONS[notificationIndex],
+        isRead
+      };
+      return HttpResponse.json({
+        status: 200,
+        success: true,
+        message: "Notification updated successfully",
+        updatedNotification: MOCK_NOTIFICATIONS[notificationIndex]
+      });
+    } 
+    
+    return HttpResponse.json(
+      { success: false, message: "Notification not found" },
+      { status: 404 }
+    );
   }),
-  
   //Mock Api to delete a notification
   http.delete("/notifications/:id", async ({ params }) => {
     console.log(`[MSW] Intercepted DELETE /notifications/${params.id}`);
@@ -179,4 +192,7 @@ export const handlers = [
       return HttpResponse.json({ success: false, message: "Invalid OTP" }, { status: 400 });
     }
   }),
+
+
+  
 ];

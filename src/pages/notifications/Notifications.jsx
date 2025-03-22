@@ -5,8 +5,12 @@ import { useNavigate } from "react-router-dom";
 import NotificationCard from "../../components/Notification/NotificationCard"
 import axios from "axios";
 import FooterLinks from "../../components/FooterLinks";
+// import { Toaster, toast } from "react-hot-toast";
+// import {requestPermission, onMessageListener} from "../../../firebase"
+import { patchRequest } from "../../services/axios";
 
 const Notification = () => {
+
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [selectedFilter, setSelectedFilter] = useState("all");
@@ -14,6 +18,25 @@ const Notification = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedPostFilter, setSelectedPostFilter] = useState("all");
   const [user, setUser] = useState();
+  const [pushNotif, setPushNotif] = useState({title:"",body:""})
+
+  // useEffect(()=>{
+  //   requestPermission()
+  //   const unsubscribe=onMessageListener.then(payload=>{
+  //     setPushNotif({
+  //       title: payload.notification.title,
+  //       body: payload.notification.body
+  //     })
+  //     toast.success(`${payload?.notification?.title}: ${payload?.notification?.body}`,
+  //       {duration:60000,
+  //         position:"top-right"
+  //       }
+  //     )
+  //   })
+  //   return()=>{
+  //     unsubscribe.catch(err=>console.log("failed: ",err))
+  //   }
+  // },[])
 
   const fetchNotifications = async () => {
     try {
@@ -25,16 +48,21 @@ const Notification = () => {
       console.error("Error fetching notifications:", error);
     }
   };
+
+  //DONE
  //Mark Notification as read
   const handleNotificationClick = async (id) => {
-      try {
-        await axios.patch(`http://localhost:5173/notifications/${id.toString()}`, { isRead: true });
-        console.log('Updated notification')
-        setNotifications(notifications.map(notification => notification.id === id? {...notification, isRead: true } : notification));
-      } catch (error) {
-        console.error('Error updating notification:', error);
-      }
-  };
+    const response = await patchRequest(`/notifications/${id.toString()}/read`, { isRead: true });
+
+    if (response?.status === 200) {
+        console.log('Updated notification');
+        setNotifications(notifications.map(notification =>
+            notification.id === id ? { ...notification, isRead: true } : notification
+        ));
+    } else {
+        console.error('Failed to update notification', response);
+    }
+};
   const fetchUser= async ()=>{
     try {
       const response = await axios.get("http://localhost:5173/user");
@@ -101,6 +129,7 @@ const Notification = () => {
               onClick={()=>navigate("/profile")}
               className="text-[#0a66c2] text-sm font-medium hover:underline" >  View settings</button>
             </div>
+            
           </div>
   
           {/* Main Content */}
