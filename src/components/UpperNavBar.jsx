@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"; // Add useEffect import
 import axios from "axios"; // Add axios import
 
-const Header = () => {
+const Header = ({notifications}) => {
   const [showUser, setShowUser] = useState(false)
   const [unreadCount, setUnreadCount] = useState(0); 
 
@@ -18,7 +18,7 @@ const Header = () => {
     };
 
     fetchUnreadCount();
-  }, []);
+  }, [notifications]);
   return (
     <header className="fixed top-0 left-0 w-full bg-white border-b border-gray-200 z-50">
       <div className="flex items-center justify-between max-w-6xl mx-auto px-4 py-2">
