@@ -84,7 +84,7 @@ const Notification = () => {
   });
   return (
     <div className="bg-[#f4f2ee] min-h-screen ">
-      <Header />
+      <Header notifications={notifications}/>
       <div className="container mx-auto px-4 pt-20 md:pl-[172px] md:pr-[172px]">
         <div className="flex flex-col lg:flex-row justify-center gap-6 p-2">
           
