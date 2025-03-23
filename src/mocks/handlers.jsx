@@ -99,7 +99,29 @@ const MOCK_NOTIFICATIONS = [
 ];
 
 export const handlers = [
+// Modify the existing POST handler
+http.post('/api/send-notification', async ({ request }) => {
+  const { title, body } = await request.json();
+  
+  // Create new notification object
+  const newNotification = {
+    id: Date.now().toString(),
+    type: "job",
+    content: `${title} - ${body}`,
+    time: "Just now",
+    profileImg: `https://picsum.photos/80?random=${Math.floor(Math.random() * 1000)}`,
+    isRead: false,
+    subType: "system"
+  };
 
+  // Add to beginning of mock array
+  MOCK_NOTIFICATIONS.unshift(newNotification);
+
+  return HttpResponse.json(
+    { success: true, message: 'Notification sent', notification: newNotification },
+    { status: 200, delay: 150 }
+  );
+}),
   //Mock API to get User
   http.get("/user", async()=>{
     console.log("[MSW] Intercepted GET /api/user");
