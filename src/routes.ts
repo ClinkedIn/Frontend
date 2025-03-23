@@ -11,13 +11,13 @@ import PasswordResetUsingMail from "../src/pages/PasswordResetUsingMail/PassWord
 import VerifyEmail from "../src/pages/signup/VerifyEmail";
 import UpdatePasswordForm from "./components/authentication/Reset/UpdatePasswordForm";
 import UpdateUserNameForm from "./components/authentication/Reset/UpdateUserNameForm";
-import ForgotPasswordForm from "./components/authentication/Reset/ForgotPasswordForm";
+import ForgotPasswordForm from "./components/authentication/Reset/ForgotPassword/ForgotPasswordForm";
 import Notification from "./pages/notifications/Notifications";
 import Jobs from "./pages/jobs/Jobs";
 import WelcomePage from "../src/pages/WelcomePage/WelcomePage";
 import ReportedPostsAdmin from './components/AdminPanel/ReportedPostsAdmin';
 import NotificationPost from "./components/Notification/NotificationPost.jsx";
-
+import ProfilePage from './pages/myProfile/ProfilePage';
 
 
 
@@ -95,6 +95,10 @@ const routes: RouteObject[] = [
   {
     path: "/notification-post",
     element: React.createElement(NotificationPost),
+  },
+    {
+    path: '/profile',
+    element: React.createElement(ProfilePage)
   }
 ];
 
