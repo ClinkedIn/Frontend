@@ -5,11 +5,34 @@ import { useNavigate } from "react-router-dom";
 import NotificationCard from "../../components/Notification/NotificationCard"
 import axios from "axios";
 import FooterLinks from "../../components/FooterLinks";
-// import { Toaster, toast } from "react-hot-toast";
-// import {requestPermission, onMessageListener} from "../../../firebase"
 import { patchRequest } from "../../services/axios";
+import { toast } from 'react-hot-toast';
+import { Toaster } from 'react-hot-toast';
+
 
 const Notification = () => {
+
+  const handleSendTestNotification = async () => {
+    try {
+      // Send to backend (mock)
+      const response = await axios.post('/api/send-notification', {
+      title: "Test Notification",
+        body: "This is a test notification!",
+      });
+      await fetchNotifications();
+  
+      // Show in-app toast
+      toast.success('New notification received!', {
+        
+        duration: 4000,
+      });
+  
+    } catch (error) {
+      toast.error('Failed to send notification');
+      console.error("Error sending notification:", error);
+    }
+  };
+
 
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
@@ -18,25 +41,7 @@ const Notification = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedPostFilter, setSelectedPostFilter] = useState("all");
   const [user, setUser] = useState();
-  const [pushNotif, setPushNotif] = useState({title:"",body:""})
 
-  // useEffect(()=>{
-  //   requestPermission()
-  //   const unsubscribe=onMessageListener.then(payload=>{
-  //     setPushNotif({
-  //       title: payload.notification.title,
-  //       body: payload.notification.body
-  //     })
-  //     toast.success(`${payload?.notification?.title}: ${payload?.notification?.body}`,
-  //       {duration:60000,
-  //         position:"top-right"
-  //       }
-  //     )
-  //   })
-  //   return()=>{
-  //     unsubscribe.catch(err=>console.log("failed: ",err))
-  //   }
-  // },[])
 
   const fetchNotifications = async () => {
     try {
@@ -49,7 +54,6 @@ const Notification = () => {
     }
   };
 
-  //DONE
  //Mark Notification as read
   const handleNotificationClick = async (id) => {
     const response = await patchRequest(`/notifications/${id.toString()}/read`, { isRead: true });
@@ -112,6 +116,10 @@ const Notification = () => {
   });
   return (
     <div className="bg-[#f4f2ee] min-h-screen ">
+
+
+<Toaster position="top-right"/>
+
       <Header notifications={notifications}/>
       <div className="container mx-auto px-4 pt-20 md:pl-[172px] md:pr-[172px]">
         <div className="flex flex-col lg:flex-row justify-center gap-6 p-2">
@@ -129,7 +137,15 @@ const Notification = () => {
               onClick={()=>navigate("/profile")}
               className="text-[#0a66c2] text-sm font-medium hover:underline" >  View settings</button>
             </div>
-            
+            <div className="w-full lg:w-72">
+  <button
+    onClick={handleSendTestNotification}
+    className=" mb-4 p-2 bg-[#004c33] text-white rounded-lg hover:bg-[#003825] transition-colors"
+  >
+    Send Test Notification
+  </button>
+
+</div>
           </div>
   
           {/* Main Content */}
