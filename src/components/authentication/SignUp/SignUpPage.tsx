@@ -81,7 +81,7 @@ const SignupPage = () => {
     try {
       await signInWithPopup(auth, provider);
       navigate("/signupname");
-    } catch (error) {
+    } catch{
       toast.error("Google signup failed.");
     }
   };
