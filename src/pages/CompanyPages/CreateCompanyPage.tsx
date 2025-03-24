@@ -16,8 +16,8 @@ const CreateCompanyPage = () => {
     const [organizationSize, setOrganizationSize] = useState("");
     const [website, setWebsite] = useState("");
     const [checkbox, setCheckbox] = useState(false);
-    const [logo, setLogo] = useState<File | null>(null);
-    const [companyUrl, setCompanyUrl] = useState("");   
+    //const [logo, setLogo] = useState<File | null>(null);
+    const [companyAddress, setCompanyAddress] = useState("");   
     const [logoPreview, setLogoPreview] = useState<string | null>(null);
     const [errors, setErrors] = useState({ organizationSize: "", organizationType: "" });
 
@@ -34,8 +34,8 @@ const CreateCompanyPage = () => {
             toast.error("Please enter the company name")
             return false;
         }
-        if(!companyUrl){
-            toast.error("Please enter the company URL")
+        if(!companyAddress){
+            toast.error("Please enter the company address")
             return false;
         }
         const pattern = /^(https?:\/\/)?(www\.)?[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(:\d+)?(\/\S*)?(\?\S*)?$/;
@@ -67,7 +67,7 @@ const CreateCompanyPage = () => {
     const createPage = () => {
         if(isValid()){
             console.log("Page Created")
-            console.log(logo)
+            //console.log(logo)
             navigate("/HomePage")
         }
 
@@ -114,16 +114,16 @@ const CreateCompanyPage = () => {
                     </div>
                     
                     <div>
-                        <label htmlFor="lockedInAddress" className="block text-sm font-medium text-gray-700">
-                            lockedin.com/company/*
+                        <label htmlFor="companyAddressAddress" className="block text-sm font-medium text-gray-700">
+                            Address*
                         </label>
                         <input
                             type="text"
-                            id="lockedInAddress"
-                            value={companyUrl}
-                            onChange={(e) => setCompanyUrl(e.target.value)}
+                            id="companyAddress"
+                            value={companyAddress}
+                            onChange={(e) => setCompanyAddress(e.target.value)}
                             className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
-                            placeholder="Add your unique Lockedin address"
+                            placeholder="Add your company address"
                             required
                         />
                     </div>
@@ -219,7 +219,7 @@ const CreateCompanyPage = () => {
                                     if (e.target.files?.[0]) {
                                         const file = e.target.files[0];
                                         setLogoPreview(URL.createObjectURL(file));
-                                        setLogo(file);
+                                       // setLogo(file);
                                     }
                                 }}
                             />

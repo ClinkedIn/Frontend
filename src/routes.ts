@@ -1,4 +1,4 @@
-import { RouteObject } from "react-router-dom";
+import { Navigate, RouteObject } from "react-router-dom";
 import React from "react";
 import Home from "../src/pages/home/HomePage";
 import Login from "../src/pages/Login/LoginPage";
@@ -12,8 +12,11 @@ import ForgotPasswordForm from "./components/authentication/Reset/ForgotPassword
 import Notification from "./pages/notifications/Notifications";
 import Jobs from "./pages/jobs/Jobs";
 import CreateCompanyPage from "./pages/CompanyPages/CreateCompanyPage";
-import CompanyProfilePage from "./pages/CompanyPages/CompanyProfile.js";
-
+import CompanyProfileMemberViewPage from "./pages/CompanyPages/CompanyProfileMemberView.js";
+import CompanyProfileAdminViewPage from "./pages/CompanyPages/CompanyProfileAdminView.js";
+import CompanyHomePage from "./components/CompanyPageSections/Home.tsx"
+import CompanyPostsPage from "./components/CompanyPageSections/Posts.tsx"
+import CompanyJobsPage from "./components/CompanyPageSections/Jobs.tsx"
 
 
 
@@ -69,9 +72,29 @@ const routes: RouteObject[] = [
     element: React.createElement(CreateCompanyPage),
   },
   {
-    path:"/company/{companyId}",
-    element: React.createElement(CompanyProfilePage),
-  }
+    path:"/company/:companyId/",
+    element: React.createElement(CompanyProfileMemberViewPage),
+    children: [
+      { index: true, element: React.createElement(Navigate, { to: "Home", replace: true }) }, // Default to Home
+      { path: "Home", element: React.createElement(CompanyHomePage) },
+      { path: "Posts", element: React.createElement(CompanyPostsPage) },
+      { path: "Jobs", element: React.createElement(CompanyJobsPage) },
+
+    ]
+  },
+  {
+    path:"/company/:companyId/admin/",
+    element: React.createElement(CompanyProfileAdminViewPage),
+    children: [
+      { index: true, element: React.createElement(Navigate, { to: "Feed", replace: true }) }, // Default to Home
+      { path: "Feed", element: React.createElement(CompanyHomePage) },
+      { path: "Analytics", element: React.createElement(CompanyPostsPage) },
+      { path: "Edit Page", element: React.createElement(CompanyJobsPage) },
+
+    ]
+
+  },
+
 ];
 
 
