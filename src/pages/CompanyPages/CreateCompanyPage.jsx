@@ -4,6 +4,7 @@ import { useState } from "react";
 import {IoIosArrowRoundBack} from "react-icons/io";
 import { FaPlus,FaUpload } from "react-icons/fa6";
 import { toast,Toaster } from "react-hot-toast";
+import axios from "axios";
 
 
 
@@ -19,11 +20,11 @@ const CreateCompanyPage = () => {
     const [checkbox, setCheckbox] = useState(false);
     //const [logo, setLogo] = useState<File | null>(null);
     const [companyAddress, setCompanyAddress] = useState("");   
-    const [logoPreview, setLogoPreview] = useState<string | null>(null);
+    const [logoPreview, setLogoPreview] = useState(null);
     const [errors, setErrors] = useState({ organizationSize: "", organizationType: "" });
     const [notifications, setNotifications] = useState([]);
 
-    const handleSelectChange = (setter: React.Dispatch<React.SetStateAction<string>>, field: keyof typeof errors) => (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const handleSelectChange = (setter, field) => (e) => {
         const value = e.target.value;
         setter(value);
         setErrors((prev) => ({
@@ -40,7 +41,7 @@ const CreateCompanyPage = () => {
             toast.error("Please enter the company address")
             return false;
         }
-        const pattern = /^(https?:\/\/)?(www\.)?[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(:\d+)?(\/\S*)?(\?\S*)?$/;
+        const pattern = /^(https?:\/\/|www\.)[a-zA-Z0-9.-]+\.(com|org)(:\d+)?(\/\S*)?(\?\S*)?$/;
         if( !pattern.test(website)){
             toast.error("Please enter a valid website URL starting with http://, https://, or www.")
             return false;
@@ -66,11 +67,22 @@ const CreateCompanyPage = () => {
 
         return true;
    }
-    const createPage = () => {
+    const createPage = async() => {
         if(isValid()){
             console.log("Page Created")
-            //console.log(logo)
-            navigate("/HomePage")
+            const company ={
+                userId: "1234",
+                name: companyName,
+                address:companyAddress,
+                website: website,
+                industry: industry,
+                organizationSize: organizationSize,
+                organizationType: organizationType,
+                logo: logoPreview,
+                tagLine: tagline
+            }
+            const response = await axios.post("http://localhost:5173/companies",company);
+            navigate(`/company/${response.data._id}`)
         }
 
     }
