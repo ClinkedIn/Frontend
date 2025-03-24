@@ -33,8 +33,13 @@ const LoginPage = () => {
       setTimeout(() => navigate("/home"), 1000);
     },
     onError: (err) => {
-      toast.error((err as any).response?.data?.message || "Invalid credentials");
+      const errorMessage = (err as { response?: { data?: { message?: string } } }).response?.data?.message || "Invalid credentials";
+      toast.error(errorMessage);
     },
+    //old code with error
+    /*onError: (err) => {
+      toast.error((err as unknown).response?.data?.message || "Invalid credentials");
+    },*/
   });
 
   const validateEmailOrPhone = (input: string) => {
@@ -51,7 +56,7 @@ const LoginPage = () => {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    let newErrors: { username?: string; password?: string } = {};
+    const newErrors: { username?: string; password?: string } = {};
 
     if (!username.trim()) {
       newErrors.username = "Email or phone number is required";
