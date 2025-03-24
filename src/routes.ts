@@ -105,7 +105,7 @@ const routes: RouteObject[] = [
     {
     path: '/profile',
     element: React.createElement(ProfilePage)
-  }
+  },
   {
     path:"/company/setup/new",
     element: React.createElement(CreateCompanyPage),
