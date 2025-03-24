@@ -7,6 +7,7 @@ import { toast,Toaster } from "react-hot-toast";
 
 
 
+
 const CreateCompanyPage = () => {
     const navigate = useNavigate();
     const [companyName, setCompanyName] = useState("");
@@ -20,6 +21,7 @@ const CreateCompanyPage = () => {
     const [companyAddress, setCompanyAddress] = useState("");   
     const [logoPreview, setLogoPreview] = useState<string | null>(null);
     const [errors, setErrors] = useState({ organizationSize: "", organizationType: "" });
+    const [notifications, setNotifications] = useState([]);
 
     const handleSelectChange = (setter: React.Dispatch<React.SetStateAction<string>>, field: keyof typeof errors) => (e: React.ChangeEvent<HTMLSelectElement>) => {
         const value = e.target.value;
@@ -73,10 +75,9 @@ const CreateCompanyPage = () => {
 
     }
 
-
     return (
         <div className="bg-[#f4f2ee] min-h-screen">
-        <Header />
+        <Header notifications={notifications} />
         <section className="w-full bg-white shadow-md rounded-lg p-6 px-4 pt-20 md:px-40">
                     <button 
                         className="flex items-center text-[#0A66C2] hover:text-gray-900 font-medium hover:bg-gray-100 p-2 rounded-lg"
@@ -109,7 +110,6 @@ const CreateCompanyPage = () => {
                             onChange={(e) => setCompanyName(e.target.value)}
                             className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
                             placeholder="Add your organization's name"
-                            required
                         />
                     </div>
                     
@@ -124,7 +124,6 @@ const CreateCompanyPage = () => {
                             onChange={(e) => setCompanyAddress(e.target.value)}
                             className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
                             placeholder="Add your company address"
-                            required
                         />
                     </div>
                     
@@ -149,7 +148,6 @@ const CreateCompanyPage = () => {
                             onChange={(e) => setIndustry(e.target.value)}
                             className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
                             placeholder="e.g., Information Services"
-                            required
                         />
                     </div>
                     
@@ -160,7 +158,6 @@ const CreateCompanyPage = () => {
                             value={organizationSize}
                             onChange={handleSelectChange(setOrganizationSize, "organizationSize")}
                             className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
-                            required
                         >
                             <option>Select size</option>
                             <option>0-1 employees</option>
@@ -183,7 +180,6 @@ const CreateCompanyPage = () => {
                             value={organizationType}
                             onChange={handleSelectChange(setOrganizationType, "organizationType")}
                             className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
-                            required
                         >
                             <option>Select type</option>
                             <option>Public company</option>
@@ -208,7 +204,6 @@ const CreateCompanyPage = () => {
                                 <FaUpload className="w-5 h-5 mr-2" />
                                 Upload Logo
                             </label>
-                            <button className="cursor-pointer flex items-center justify-center px-4 py-2 bg-[#0A66C2] text-white text-sm font-medium rounded-lg shadow-md hover:bg-blue-700 transition duration-200" onClick={()=>{setLogoPreview("")}}>reset </button>
 
                             <input
                                 type="file"
@@ -223,7 +218,9 @@ const CreateCompanyPage = () => {
                                     }
                                 }}
                             />
-                                <img src={logoPreview || "/Images/photo-icon.svg"} alt="Logo Preview" className="w-32 h-32  " />
+                            <button type="reset"className="cursor-pointer flex items-center justify-center px-4 py-2 bg-[#0A66C2] text-white text-sm font-medium rounded-lg shadow-md hover:bg-blue-700 " onClick={()=>{if(logoPreview) setLogoPreview(null)}}>reset </button>
+
+                            <img src={logoPreview || "/Images/CompanyLogo.png"} alt="Logo Preview" className="w-32 h-32  " />
     
                         </div>
                         <p className="text-sm text-gray-500 mt-2">
@@ -262,14 +259,14 @@ const CreateCompanyPage = () => {
                         </div>
                         <div className="bg-[#EAE6DF] w-full p-8 rounded-lg">
                             <div className="bg-white rounded-lg overflow-hidden shadow">
-                                <div className="p-6 flex ">
+                                <div className="px-6 pt-6  flex ">
                                     {logoPreview ? (
-                                        <img src={logoPreview} alt="Company Logo" className="w-20 h-20 rounded-lg" />
+                                        <img src={logoPreview} alt="Company Logo" className="w-24 h-24 rounded-lg" />
                                     ) : (
-                                        <img src="/Images/linkedin.png" alt="Default Logo" className="w-20 h-20" />
+                                        <img src="/Images/CompanyLogo.png" alt="Default Logo" className="w-24 h-24" />
                                     )}
                                 </div>
-                                <div className="p-6 ">
+                                <div className="px-6 py-3 ">
                                     <h1 className="text-xl font-bold text-gray-900">
                                         {companyName || "Company Name"}
                                     </h1>

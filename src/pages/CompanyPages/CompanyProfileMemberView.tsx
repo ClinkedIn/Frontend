@@ -1,12 +1,15 @@
 import { FaPlus } from "react-icons/fa6";
 import { Outlet, useNavigate,useParams } from "react-router-dom";
-import UpperNavBar from "../../components/UpperNavBar";
+import Header from "../../components/UpperNavBar";
 import { useState } from "react";
+import InlineTabs from "../../components/CompanyPageSections/InlineTabs"
 const CompanyProfileMemberViewPage = () => {
     const navigate = useNavigate();
     const {companyId, section = "Home"} = useParams();
     const [isFollowed, setIsFollowed] = useState(false);
     const [activeTab, setActiveTab] = useState(section);
+    const [notifications, setNotifications] = useState([]);
+    const Tabs =["Home", "Posts", "Jobs"];
 
     const handleTabClick = (tab: string) => {
         setActiveTab(tab);
@@ -24,10 +27,10 @@ const CompanyProfileMemberViewPage = () => {
 
     return (
         <div className="bg-[#f4f2ee] min-h-screen  items-center flex flex-col">
-            <UpperNavBar />
+            <Header  notifications={notifications} />
             <div className="lg:w-1/2 lg:h-3/4">
             <div className="bg-white  rounded-lg shadow-lg mt-16  ">
-                <img src="/Images/card-bg.svg" alt="profile" className="w-full h-30" />
+                <img src="/Images/card-bg.svg" alt="profile" className="w-full h-30 " />
                 <img src="/Images/building-icon.png" alt="profile" className="w-28 h-28 -mt-10 ml-5  " />
                 <div className="px-5 pt-5">
                     <h1 className="text-2xl">Company Name</h1>
@@ -40,7 +43,7 @@ const CompanyProfileMemberViewPage = () => {
                     <div className="flex gap-4">
                         {(isFollowed) ? (
                         
-                        <button className="mt-4 flex items-center justify-center gap-2 bg-[#EBF4FD] text-[#0A66C2]  border-2 font-semibold py-2 px-8 rounded-full hover:bg-blue-200 "  onClick={()=>{handleClickFollowingButton()}}>
+                        <button className="mt-4 flex items-center justify-center bg-[#EBF4FD] text-[#0A66C2]  border-2 font-semibold  px-8 rounded-full hover:bg-blue-200 "  onClick={()=>{handleClickFollowingButton()}}>
                             Following
                         </button>) : (
                             <button className="mt-4 flex items-center justify-center gap-2 bg-[#0A66C2] text-white font-semibold py-2 px-8 rounded-full hover:bg-[#004182]" onClick={()=>{handleClickFollowingButton()}}>
@@ -54,29 +57,7 @@ const CompanyProfileMemberViewPage = () => {
                     </div>
                 </div>
                 <hr className="border-gray-300 my-2" />
-                <div className="mb-4 px-2 border-b border-gray-200">
-                    <ul className="flex flex-wrap -mb-px text-sm font-medium text-center" role="tablist">
-                        {["Home", "Posts", "Jobs"].map((tab) => (
-                        <li key={tab} className="me-2" role="presentation">
-                            <button
-                            className={`inline-block p-4  rounded-t-lg ${
-                                activeTab === tab
-                                ? "text-green-600 border-b-2 border-green-600"
-                                : "hover:text-gray-600 hover:border-gray-300"
-                            }`}
-                            id={`${tab}-tab`}
-                            onClick={() => handleTabClick(tab)}
-                            type="button"
-                            role="tab"
-                            aria-controls={tab}
-                            aria-selected={activeTab === tab}
-                            >
-                            {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                            </button>
-                        </li>
-                        ))}
-                    </ul>
-                </div>
+                <InlineTabs activeTab={activeTab} Tabs={Tabs} handleTabClick={handleTabClick} />
             </div>
                 <div className="mt-4">
                     <Outlet />
