@@ -8,7 +8,7 @@ const companyInfo ={
   address: "Cairo Cairo",
   website: "www.microsoft.com",
   industry: "software",
-  organizationSize: "1-10",
+  organizationSize: "10000+",
   organizationType: "Public",
   logo: "https://purepng.com/public/uploads/large/purepng.com-microsoft-logo-iconlogobrand-logoiconslogos-251519939091wmudn.png",
   tagLine: "Every company has a mission. What's ours? To empower every person and every organization to achieve more. We believe technology can and should be a force for good and that meaningful innovation contributes to a brighter world in the future and today. Our culture doesn’t just encourage curiosity; it embraces it. Each day we make progress together by showing up as our authentic selves. We show up with a learn-it-all mentality. We show up cheering on others, knowing their success doesn't diminish our own. We show up every day open to learning our own biases, changing our behavior, and inviting in differences. Because impact matters.",
