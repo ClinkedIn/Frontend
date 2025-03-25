@@ -142,10 +142,47 @@ const CompanyProfileAdminViewPage = () => {
     },[]);
 
     return (
-        <div className="bg-[#f4f2ee] min-h-screen  items-center flex flex-col">
+        <div className="   justify-center bg-[#f4f2ee] min-h-screen  items-center flex flex-col">
+            
             <Header notifications={notifications} />
-            {companyInfo &&
-            <div className="lg:w-1/2 lg:h-3/4 md:w-3/4 max-[430px]:w-full ">
+            {showForm ? 
+                (<div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50 "
+                onClick={() => setShowForm(false)} 
+                >
+                <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl relative max-h-[90vh] overflow-y-auto  "
+                    onClick={(e) => e.stopPropagation()} 
+                >
+                    <CompanyForm 
+                        errors={errors}v 
+                        companyName={companyName} setCompanyName={setCompanyName}
+                        tagline={tagline} setTagline={setTagline}
+                        industry={industry} setIndustry={setIndustry}
+                        organizationType={organizationType} setOrganizationType={setOrganizationType}
+                        organizationSize={organizationSize} setOrganizationSize={setOrganizationSize}
+                        website={website} setWebsite={setWebsite}
+                        checkbox={checkbox} setCheckbox={setCheckbox}
+                        companyAddress={companyAddress} setCompanyAddress={setCompanyAddress}
+                        logoPreview={logoPreview} setLogoPreview={setLogoPreview}
+                    />
+                    <div className="flex justify-end gap-4 mt-4">
+                        <button 
+                            className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
+                            onClick={() => setShowForm(false)}
+                        >
+                            Cancel
+                        </button>
+                        <button 
+                            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                            onClick={handleUpdatePage}
+                        >
+                            Update
+                        </button>
+                    </div>
+                </div>
+            </div>)
+        :
+            (companyInfo && 
+            (<div className="lg:w-1/2 lg:h-3/4 md:w-3/4 max-[430px]:w-full ">
                 <div className="bg-white rounded-lg shadow-lg mt-16 relative"> 
                     <img src="/Images/card-bg.svg" alt="cover page" className="w-full h-30 rounded-t-lg" />
                         <button
@@ -167,42 +204,7 @@ const CompanyProfileAdminViewPage = () => {
                         </button>
                     </div>
 
-                    {showForm && 
-                            <div className="fixed inset-0 bg-gray-800  bg-blur-sm bg-opacity-50 flex justify-center py-10 z-50 overflow-y-auto"
-                            onClick={() => setShowForm(false)} 
-                            >
-                            <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl relative max-h-[90vh] overflow-y-auto"
-                                onClick={(e) => e.stopPropagation()} 
-                            >
-                                <CompanyForm 
-                                    errors={errors}
-                                    companyName={companyName} setCompanyName={setCompanyName}
-                                    tagline={tagline} setTagline={setTagline}
-                                    industry={industry} setIndustry={setIndustry}
-                                    organizationType={organizationType} setOrganizationType={setOrganizationType}
-                                    organizationSize={organizationSize} setOrganizationSize={setOrganizationSize}
-                                    website={website} setWebsite={setWebsite}
-                                    checkbox={checkbox} setCheckbox={setCheckbox}
-                                    companyAddress={companyAddress} setCompanyAddress={setCompanyAddress}
-                                    logoPreview={logoPreview} setLogoPreview={setLogoPreview}
-                                />
-                                <div className="flex justify-end gap-4 mt-4">
-                                    <button 
-                                        className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
-                                        onClick={() => setShowForm(false)}
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button 
-                                        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                                        onClick={handleUpdatePage}
-                                    >
-                                        Update
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    }
+                    
 
                     <div className="px-5 pt-5">
                         <h1 className="text-2xl">{companyInfo.name}</h1>
@@ -229,8 +231,9 @@ const CompanyProfileAdminViewPage = () => {
                 <div className="mt-4">
                    <Outlet context={{companyInfo}}/>
                 </div>
-            </div>
-         }
+            </div>)
+            )
+        }
         </div>
     )
 }
