@@ -17,3 +17,15 @@
 .toast-error {
   border-left: 4px solid #dc3545 !important;
 }
+
+
+body, html {
+  background-color: #f3f2ef; /* LinkedIn's background color */
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}

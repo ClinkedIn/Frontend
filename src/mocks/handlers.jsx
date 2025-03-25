@@ -31,94 +31,204 @@ const dummyUser = {
   profileImage: "https://picsum.photos/80",
 };
 
-const MOCK_NOTIFICATIONS = [
+const MOCK_POSTS = [
   {
-    id: "1",
-    type: "job",
-    content: "<b>Amany Raafat</b> is hiring.",
-    time: "4h",
-    profileImg: "https://picsum.photos/80?random=1",
-    isRead: false,
+    id: "post123",
+    author: {
+      id: "user456",
+      name: "Hamsa Saber",
+      headline: "Software Engineer at Tech Company",
+      profileImage: "https://picsum.photos/80?random=1",
+    },
+    content: {
+      text: "Excited to share that I've just completed a major project using React and Node.js! #webdevelopment #javascript #reactjs",
+      media: [
+        {
+          type: "image",
+          url: "https://picsum.photos/600/400?random=42",
+          alt: "Project screenshot"
+        }
+      ]
+    },
+    metrics: {
+      likes: 147,
+      comments: 23,
+      reposts: 12,
+      impressions: 1893
+    },
+    reactions: [
+      { type: "like", count: 89 },
+      { type: "celebrate", count: 32 },
+      { type: "support", count: 18 },
+      { type: "insightful", count: 8 }
+    ],
+    comments: [
+      {
+        id: "comment789",
+        authorId: "user789",
+        authorName: "Ahmed Khaled",
+        authorImage: "https://picsum.photos/80?random=7",
+        text: "Great work! The UI looks amazing.",
+        timestamp: "2025-03-22T14:30:00Z",
+        likes: 5
+      }
+    ],
+    timestamp: "2025-03-22T10:15:00Z",
+    isEdited: false,
+    visibility: "public",
+    hashtags: ["webdevelopment", "javascript", "reactjs"]
   },
   {
-    id: "2",
-    type: "post",
-    subType: "reactions",
-    content:
-      "Your posts got <b>15 impressions</b> last week. View your analytics.",
-    time: "4h",
-    profileImg: "https://picsum.photos/80?random=2",
-    isRead: false,
+    id: "post456",
+    author: {
+      id: "user789",
+      name: "Ahmed Khaled",
+      headline: "UX Designer at Creative Studio",
+      profileImage: "https://picsum.photos/80?random=2",
+    },
+    content: {
+      text: "Just published my latest UX case study on improving e-commerce checkout flows. Reduced cart abandonment by 23%! Check it out in the link below. #uxdesign #ecommerce #userresearch",
+      media: [
+        {
+          type: "image",
+          url: "https://picsum.photos/600/400?random=43",
+          alt: "UX design mockup"
+        }
+      ]
+    },
+    metrics: {
+      likes: 89,
+      comments: 12,
+      reposts: 7,
+      impressions: 1250
+    },
+    reactions: [
+      { type: "like", count: 42 },
+      { type: "celebrate", count: 27 },
+      { type: "insightful", count: 20 }
+    ],
+    comments: [
+      {
+        id: "comment456",
+        authorId: "user456",
+        authorName: "Hamsa Saber",
+        authorImage: "https://picsum.photos/80?random=1",
+        text: "Really impressive work! Would love to hear more about your research methodology.",
+        timestamp: "2025-03-21T15:45:00Z",
+        likes: 3
+      }
+    ],
+    timestamp: "2025-03-21T11:30:00Z",
+    isEdited: false,
+    visibility: "public",
+    hashtags: ["uxdesign", "ecommerce", "userresearch"]
   },
   {
-    id: "3",
-    type: "job",
-    content: "New from <b>Free Online Courses with Certificates</b>",
-    time: "11h",
-    profileImg: "https://picsum.photos/80?random=3",
-    isRead: false,
+    id: "post789",
+    author: {
+      id: "user101",
+      name: "Sara Ali",
+      headline: "Data Scientist at AI Solutions",
+      profileImage: "https://picsum.photos/80?random=3",
+    },
+    content: {
+      text: "I'm thrilled to announce that our research paper on predictive analytics in healthcare has been accepted for publication! A big thank you to my amazing team for their hard work and dedication. #datascience #machinelearning #healthcare",
+      media: [
+        {
+          type: "image",
+          url: "https://picsum.photos/600/400?random=44",
+          alt: "Data visualization"
+        }
+      ]
+    },
+    metrics: {
+      likes: 215,
+      comments: 32,
+      reposts: 45,
+      impressions: 3240
+    },
+    reactions: [
+      { type: "like", count: 105 },
+      { type: "celebrate", count: 85 },
+      { type: "support", count: 15 },
+      { type: "insightful", count: 10 }
+    ],
+    comments: [
+      {
+        id: "comment123",
+        authorId: "user456",
+        authorName: "Hamsa Saber",
+        authorImage: "https://picsum.photos/80?random=1",
+        text: "Congratulations! Looking forward to reading the paper.",
+        timestamp: "2025-03-20T09:15:00Z",
+        likes: 2
+      },
+      {
+        id: "comment124",
+        authorId: "user789",
+        authorName: "Ahmed Khaled",
+        authorImage: "https://picsum.photos/80?random=2",
+        text: "This is groundbreaking work. Would love to discuss potential applications.",
+        timestamp: "2025-03-20T10:30:00Z",
+        likes: 4
+      }
+    ],
+    timestamp: "2025-03-20T08:45:00Z",
+    isEdited: false,
+    visibility: "public",
+    hashtags: ["datascience", "machinelearning", "healthcare"]
   },
   {
-    id: "4",
-    type: "post",
-    subType: "comments",
-    content: "<b>John Maverick</b> commented on your post: 'Great insights!'",
-    time: "2h",
-    profileImg: "https://picsum.photos/80?random=4",
-    isRead: false,
-  },
-  {
-    id: "5",
-    type: "job",
-    content: "New job opportunities: <b>Software Engineer</b> at Microsoft.",
-    time: "8h",
-    profileImg: "https://picsum.photos/80?random=5",
-    isRead: false,
-  },
-  {
-    id: "6",
-    type: "post",
-    subType: "reactions",
-    content: "<b>Jane Doe</b> liked your post.",
-    time: "30m",
-    profileImg: "https://picsum.photos/80?random=6",
-    isRead: false,
-  },
-  {
-    id: "7",
-    type: "post",
-    subType: "reposts",
-    content: "<b>Ahmed Khaled</b> reposted your article: 'The Future of AI'.",
-    time: "5h",
-    profileImg: "https://picsum.photos/80?random=7",
-    isRead: false,
-  },
-  {
-    id: "8",
-    type: "mention",
-    content:
-      "<b>Sara Ali</b> mentioned you in a comment: '@yourusername check this out!'.",
-    time: "1h",
-    profileImg: "https://picsum.photos/80?random=8",
-    isRead: false,
-  },
-  {
-    id: "9",
-    type: "job",
-    content: "<b>Ali Hassan</b> is looking for a <b>UX Designer</b>.",
-    time: "3d",
-    profileImg: "https://picsum.photos/80?random=9",
-    isRead: false,
-  },
-  {
-    id: "10",
-    type: "job",
-    content: "Exciting opportunity: <b>Data Scientist</b> at Google.",
-    time: "2d",
-    profileImg: "https://picsum.photos/80?random=10",
-    isRead: false,
-  },
+    id: "post101",
+    author: {
+      id: "user202",
+      name: "Mohamed Ayman",
+      headline: "Frontend Developer | Open Source Contributor",
+      profileImage: "https://picsum.photos/80?random=4",
+    },
+    content: {
+      text: "I'm hosting a free workshop next week on 'Building Accessible Web Applications'. We'll cover WCAG guidelines, keyboard navigation, screen reader compatibility, and more. Everyone is welcome! Register with the link in comments. #accessibility #webdev #inclusivedesign",
+      media: []
+    },
+    metrics: {
+      likes: 78,
+      comments: 19,
+      reposts: 25,
+      impressions: 1560
+    },
+    reactions: [
+      { type: "like", count: 45 },
+      { type: "celebrate", count: 18 },
+      { type: "support", count: 10 },
+      { type: "love", count: 5 }
+    ],
+    comments: [
+      {
+        id: "comment321",
+        authorId: "user202",
+        authorName: "Mohamed Ayman",
+        authorImage: "https://picsum.photos/80?random=4",
+        text: "Here's the registration link: workshop.example.com/register",
+        timestamp: "2025-03-19T13:25:00Z",
+        likes: 7
+      },
+      {
+        id: "comment322",
+        authorId: "user101",
+        authorName: "Sara Ali",
+        authorImage: "https://picsum.photos/80?random=3",
+        text: "This is exactly what our industry needs more of. Thank you for organizing!",
+        timestamp: "2025-03-19T14:10:00Z",
+        likes: 3
+      }
+    ],
+    timestamp: "2025-03-19T13:20:00Z",
+    isEdited: true,
+    visibility: "public",
+    hashtags: ["accessibility", "webdev", "inclusivedesign"]
+  }
 ];
+
 
 const MOCK_USERS = [
   {
@@ -127,6 +237,9 @@ const MOCK_USERS = [
     password: "hashedPassword123", // This would be hashed in a real system
   },
 ];
+
+
+
 
 export const handlers = [
 // Modify the existing POST handler
@@ -364,6 +477,105 @@ http.post('/api/send-notification', async ({ request }) => {
       updatedAt: new Date().toISOString(),
     });
   }),
+
+
+
+
+
+
+  // Add these to your handlers array
+  //posts related handlers
+http.get("/api/posts", async () => {
+  console.log("[MSW] Intercepted GET /api/posts");
+  return HttpResponse.json(MOCK_POSTS);
+}),
+
+http.get("/api/posts/:id", async ({ params }) => {
+  console.log(`[MSW] Intercepted GET /api/posts/${params.id}`);
+  const { id } = params;
+  
+  // Find the post in mock data
+  const post = MOCK_POSTS.find(post => post.id === id);
+  
+  if (post) {
+    return HttpResponse.json(post);
+  } else {
+    return HttpResponse.json(
+      { success: false, message: "Post not found" },
+      { status: 404 }
+    );
+  }
+}),
+
+http.post("/api/posts", async ({ request }) => {
+  console.log("[MSW] Intercepted POST /api/posts");
+  const postData = await request.json();
+  
+  // Create new post with generated ID
+  const newPost = {
+    id: `post${Date.now()}`,
+    ...postData,
+    timestamp: new Date().toISOString(),
+    metrics: {
+      likes: 0,
+      comments: 0,
+      reposts: 0,
+      impressions: 0
+    },
+    reactions: [],
+    comments: [],
+    isEdited: false
+  };
+  
+  // Add to beginning of posts array
+  MOCK_POSTS.unshift(newPost);
+  
+  return HttpResponse.json(
+    { success: true, message: 'Post created', post: newPost },
+    { status: 201, delay: 300 }
+  );
+}),
+
+// For liking/reacting to posts
+http.post("/api/posts/:id/react", async ({ request, params }) => {
+        console.log(`[MSW] Intercepted POST /api/posts/${params.id}/react`);
+        const { id } = params;
+        const { reactionType } = await request.json();
+        
+        const postIndex = MOCK_POSTS.findIndex(post => post.id === id);
+        if (postIndex !== -1) {
+          // Find if this reaction type already exists
+        const reactionIndex = MOCK_POSTS[postIndex].reactions.findIndex(
+          r => r.type === reactionType
+        );
+        
+        if (reactionIndex !== -1) {
+          // Increment existing reaction
+          MOCK_POSTS[postIndex].reactions[reactionIndex].count += 1;
+        } else {
+          // Add new reaction type
+          MOCK_POSTS[postIndex].reactions.push({ type: reactionType, count: 1 });
+        }
+        
+        // Update total likes in metrics
+        MOCK_POSTS[postIndex].metrics.likes = MOCK_POSTS[postIndex].reactions.reduce(
+          (total, reaction) => total + reaction.count, 0
+        );
+        
+        return HttpResponse.json({
+          success: true,
+          message: "Reaction added",
+          post: MOCK_POSTS[postIndex]
+        });
+      }
+
+      return HttpResponse.json(
+        { success: false, message: "Post not found" },
+        { status: 404 }
+      );
+      }),
+
+
    http.get("/companies/:companyId", async  ({ request, params }) => {
           console.log(`[MSW] Intercepted GET /api/companies/${params.id}`);
           return HttpResponse.json(companyInfo);
