@@ -1,12 +1,29 @@
-import { RouteObject } from "react-router-dom";
+import { Navigate, RouteObject } from "react-router-dom";
 import React from "react";
 import Home from "../src/pages/home/HomePage";
-import Login from "../src/pages/Login/LoginPage";
-import SignUp from "../src/pages/signup/SignUpPage";
+import Login from "./components/authentication/Login/LoginPage.js";
+import SignUp from "./components/authentication/SignUp/SignUpPage.js";
+import SignUpName from "./components/authentication/SignUp/SignUpName.js";
+import SignUpLocation from "./components/authentication/SignUp/SignUpLocation.js";
+import SignUpCareer from "./components/authentication/SignUp/SignUpCareer.js";
+import TestPage from "./pages/Test/TestPage.jsx";
+import PasswordResetUsingMail from "../src/pages/PasswordResetUsingMail/PassWordResetUsingMail";
 import VerifyEmail from "../src/pages/signup/VerifyEmail";
 import UpdatePasswordForm from "./components/authentication/Reset/UpdatePasswordForm";
 import UpdateUserNameForm from "./components/authentication/Reset/UpdateUserNameForm";
-import ForgotPasswordForm from "./components/authentication/Reset/ForgotPasswordForm";
+import ForgotPasswordForm from "./components/authentication/Reset/ForgotPassword/ForgotPasswordForm";
+import Notification from "./pages/notifications/Notifications";
+import Jobs from "./pages/jobs/Jobs";
+import WelcomePage from "../src/pages/WelcomePage/WelcomePage";
+import ReportedPostsAdmin from './components/AdminPanel/ReportedPostsAdmin';
+import NotificationPost from "./components/Notification/NotificationPost.jsx";
+import ProfilePage from './pages/myProfile/ProfilePage';
+import CreateCompanyPage from "./pages/CompanyPages/CreateCompanyPage";
+import CompanyProfileMemberViewPage from "./pages/CompanyPages/CompanyProfileMemberView";
+import CompanyProfileAdminViewPage from "./pages/CompanyPages/CompanyProfileAdminView";
+import CompanyHomePage from "./components/CompanyPageSections/Home"
+import CompanyPostsPage from "./components/CompanyPageSections/Posts"
+import CompanyJobsPage from "./components/CompanyPageSections/Jobs"
 
 
 
@@ -14,8 +31,20 @@ import ForgotPasswordForm from "./components/authentication/Reset/ForgotPassword
 const routes: RouteObject[] = [
   //Add routes and their corresponding needed component page
   {
-    path: "/",
+    path: "/test",
+    element: React.createElement(TestPage),
+  },
+  {
+    path: "/password-reset",
+    element: React.createElement(PasswordResetUsingMail),
+  },
+  {
+    path: "/home",
     element: React.createElement(Home),
+  },  
+  {
+      path: "/feed",
+      element: React.createElement(TestPage),
   },
   {
     path: "/login",
@@ -24,6 +53,18 @@ const routes: RouteObject[] = [
   {
     path: "/signup",
     element: React.createElement(SignUp),
+  },
+  {
+    path: "/signup/name",
+    element: React.createElement(SignUpName),
+  },  
+  {
+    path: "/signup/name/location",
+    element: React.createElement(SignUpLocation),
+  },
+  {
+    path: "/signup/name/location/career",
+    element: React.createElement(SignUpCareer),
   },
   {
     path: "/verify-email",
@@ -41,7 +82,60 @@ const routes: RouteObject[] = [
     path: "/forgot-password",
     element: React.createElement(ForgotPasswordForm),
   },
+  {
+    path: "/notifications",
+    element: React.createElement(Notification),
+  },
+  {
+    path: "/jobs",
+    element: React.createElement(Jobs),
+  },
+  {
+    path: "/",
+    element: React.createElement(WelcomePage),
+  },
+  {
+    path: "/reported-posts",
+    element: React.createElement(ReportedPostsAdmin),
+  },
+  {
+    path: "/notification-post",
+    element: React.createElement(NotificationPost),
+  },
+    {
+    path: '/profile',
+    element: React.createElement(ProfilePage)
+  },
+  {
+    path:"/company/setup/new",
+    element: React.createElement(CreateCompanyPage),
+  },
+  {
+    path:"/company/:companyId/",
+    element: React.createElement(CompanyProfileMemberViewPage),
+    children: [
+      { index: true, element: React.createElement(Navigate, { to: "Home", replace: true }) }, // Default to Home
+      { path: "Home", element: React.createElement(CompanyHomePage) },
+      { path: "Posts", element: React.createElement(CompanyPostsPage) },
+      { path: "Jobs", element: React.createElement(CompanyJobsPage) },
+
+    ]
+  },
+  {
+    path:"/company/:companyId/admin/",
+    element: React.createElement(CompanyProfileAdminViewPage),
+    children: [
+      { index: true, element: React.createElement(Navigate, { to: "Feed", replace: true }) }, // Default to Home
+      { path: "Feed", element: React.createElement(CompanyHomePage) },
+      { path: "Analytics", element: React.createElement(CompanyPostsPage) },
+      { path: "Edit Page", element: React.createElement(CompanyJobsPage) },
+
+    ]
+
+  },
+
 ];
+
 
 
 export default routes;

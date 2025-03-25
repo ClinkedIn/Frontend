@@ -9,14 +9,20 @@ type ButtonProps = {
   type?: "button" | "submit" | "reset";
 };
 
-export default function Button({ className, children, id, onClick, type }: ButtonProps) {
+export default function Button({
+  className,
+  children,
+  id,
+  onClick,
+  type,
+}: ButtonProps) {
   return (
     <button
       type={type}
       id={id}
       onClick={onClick}
       className={clsx(
-        "rounded-full bg-blue-700 p-3 m-2 text-white cursor-pointer font-semibold",
+        "rounded-full bg-[#0073b1] p-3 m-2 text-white cursor-pointer font-semibold",
         className
       )}
     >

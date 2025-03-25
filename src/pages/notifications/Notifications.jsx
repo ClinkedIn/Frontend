@@ -1,0 +1,313 @@
+import React, { useState, useEffect } from "react";
+import Header from "../../components/UpperNavBar";
+import ProfileCard from "../../components/ProfileCard";
+import { useNavigate } from "react-router-dom";
+import NotificationCard from "../../components/Notification/NotificationCard"
+import axios from "axios";
+import FooterLinks from "../../components/FooterLinks";
+import { patchRequest } from "../../services/axios";
+import { toast } from 'react-hot-toast';
+import { Toaster } from 'react-hot-toast';
+
+
+const Notification = () => {
+
+  const handleSendTestNotification = async () => {
+    try {
+      // Send to backend (mock)
+      const response = await axios.post('/api/send-notification', {
+      title: "Test Notification",
+        body: "This is a test notification!",
+      });
+      await fetchNotifications();
+  
+      // Show in-app toast
+      toast.success('New notification received!', {
+        
+        duration: 4000,
+      });
+  
+    } catch (error) {
+      toast.error('Failed to send notification');
+      console.error("Error sending notification:", error);
+    }
+  };
+
+
+  const navigate = useNavigate();
+  const [notifications, setNotifications] = useState([]);
+  const [selectedFilter, setSelectedFilter] = useState("all");
+  const [isArrowVisible, setIsArrowVisible] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [selectedPostFilter, setSelectedPostFilter] = useState("all");
+  const [user, setUser] = useState();
+
+
+  const fetchNotifications = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:5173/notifications"
+      );
+      setNotifications(response.data); // Set fetched notifications
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  };
+
+ //Mark Notification as read
+  const handleNotificationClick = async (id) => {
+    const response = await patchRequest(`/notifications/${id.toString()}/read`, { isRead: true });
+
+    if (response?.status === 200) {
+        console.log('Updated notification');
+        setNotifications(notifications.map(notification =>
+            notification.id === id ? { ...notification, isRead: true } : notification
+        ));
+    } else {
+        console.error('Failed to update notification', response);
+    }
+};
+  const fetchUser= async ()=>{
+    try {
+      const response = await axios.get("http://localhost:5173/user");
+      setUser(response.data);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+    }
+  }
+  
+  useEffect(() => {
+    fetchUser();
+    fetchNotifications();
+  }, []);
+
+  // Reset My Posts label when a different main category is selected
+  const handleMainFilterChange = (filter) => {
+    setSelectedFilter(filter);
+    setIsArrowVisible(false);
+    setIsDropdownOpen(false);
+
+    // Reset My Posts when switching categories
+    if (filter !== "post") {
+      setSelectedPostFilter("all");
+      console.log(notifications)
+    }
+  };
+
+  // Mapping filter names for display
+  const postFilterLabels = {
+    all: "My Posts",
+    comments: "My Posts | Comments",
+    reactions: "My Posts | Reactions",
+    reposts: "My Posts | Reposts",
+  };
+
+  // Filter Notifications
+  const filteredNotifications = notifications.filter((notif) => {
+    if (selectedFilter === "all") return true;
+  
+    if (selectedFilter === "post") {
+      return selectedPostFilter === "all" 
+        ? notif.type === "post"  
+        : notif.subType === selectedPostFilter;
+    }
+  
+    return notif.type === selectedFilter;
+  });
+  return (
+    <div className="bg-[#f4f2ee] min-h-screen ">
+
+
+<Toaster position="top-right"/>
+
+      <Header notifications={notifications}/>
+      <div className="container mx-auto px-4 pt-20 md:pl-[172px] md:pr-[172px]">
+        <div className="flex flex-col lg:flex-row justify-center gap-6 p-2">
+          
+          {/* Left Sidebar */}
+          <div className="w-full lg:w-56 flex flex-col">
+            <div 
+            id="Profile-Card" 
+            className="cursor-pointer"
+            onClick={() => navigate("/profile")}><ProfileCard user={user}  /></div>
+            <div className="p-4 bg-white mt-2 w-full lg:w-56 shadow-sm rounded-xl border border-gray-300">
+              <p className="text-sm font-medium text-gray-800">Manage your notifications</p>
+              <button 
+              id="Notification-Settings" 
+              onClick={()=>navigate("/profile")}
+              className="text-[#0a66c2] text-sm font-medium hover:underline" >  View settings</button>
+            </div>
+            <div className="w-full lg:w-72">
+  <button
+    onClick={handleSendTestNotification}
+    className=" mb-4 p-2 bg-[#004c33] text-white rounded-lg hover:bg-[#003825] transition-colors"
+  >
+    Send Test Notification
+  </button>
+
+</div>
+          </div>
+  
+          {/* Main Content */}
+          <div className="flex-1 max-w-4xl">
+            {/* Filter Section */}
+            <div className="bg-white p-4 shadow-sm rounded-lg border border-gray-300 mb-3 flex flex-wrap space-x-2">
+              {["all", "job", "post", "mention"].map((filter) => (
+                <div 
+                id="Filter-Tabs"
+                key={filter} >
+                  {/*if user clicks post: post-notif are shown then clicked again: menu is shown */}
+                  {filter === "post" ? (
+                    <button
+                    id="Post-Tabs"
+                      onClick={() => {
+                        if (!isArrowVisible) {
+                          setIsArrowVisible(true);
+                        } else {
+                          setIsDropdownOpen(!isDropdownOpen);
+                        }
+                        setSelectedFilter("post");
+                      }}
+                      className={`px-4 py-1 rounded-full text-sm font-medium transition-all border flex items-center gap-1 ${
+                        selectedFilter === "post"
+                          ? "bg-[#004c33] text-white"
+                          : "border-gray-400 text-gray-600 hover:bg-gray-200"
+                      }`}
+                    >
+                      {postFilterLabels[selectedPostFilter]} {isArrowVisible && "▼"}
+                    </button>
+                  ) : (
+                    //Other Notification types filtering
+                    <button
+                    id="Other-Tabs"
+                      onClick={() => handleMainFilterChange(filter)}
+                      className={`px-4 py-1 rounded-full text-sm font-medium transition-all border ${
+                        selectedFilter === filter
+                          ? "bg-[#004c33] text-white"
+                          : "border-gray-400 text-gray-600 hover:bg-gray-200"
+                      }`}
+                    >
+                      {filter === "all" ? "All" :
+                        filter === "job" ? "Jobs" :
+                        filter === "post" ? "My Posts" : "Mentions"}
+                    </button>
+                  )}
+  
+                  {/* Dropdown Menu for My Posts */}
+                  {isDropdownOpen && filter === "post" && (
+                    <div className="absolute bg-white shadow-lg rounded-md border border-gray-200 w-40 z-10">
+                      <p className="px-3 py-2 text-sm font-semibold">Filter post activity</p>
+                      {["all", "comments", "reactions", "reposts"].map((option) => (
+                        <button
+                        id="Post-Types"
+                          key={option}
+                          onClick={() => {
+                            setSelectedPostFilter(option);
+                            setIsDropdownOpen(false);
+                          }}
+                          className={`w-full text-left px-4 py-2 text-sm flex items-center  ${
+                            //Changes My Posts filter to include the selected type
+                            selectedPostFilter === option
+                              ? " text-black  border-l-2 border-[#004c33]"
+                              : "text-gray-700 hover:bg-gray-100"
+                          }`}
+                        >
+                          {option === "all" ? "All" :
+                            option === "comments" ? "Comments" :
+                            option === "reactions" ? "Reactions" : "Reposts"}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+  
+            {/* Notifications List */}
+            <div className="bg-white shadow-sm rounded-lg border border-gray-300">
+              {/*Displays the filtered notifications */}
+            {filteredNotifications.length > 0 ? (
+                <ul 
+               
+                id="Notification-Card">
+                  {filteredNotifications.map((notif) => (
+                    <NotificationCard key={notif.id} notification={notif} handleNotificationClick={()=>handleNotificationClick(notif.id)} />
+                  ))}
+                </ul>
+                //Handles if Tab doesnt have any notifications
+              ) : 
+              //Jobs
+              selectedFilter === "job" ? (
+                <div className="flex items-center flex-col">
+                  <img id="No notif img"
+                  src="no new notif.png"
+                  alt="No New Notifications"
+                  className="w-72 h-72 object-cover rounded-md "
+                  />
+                  <p className="font-semibold text-2xl">No new job notifications</p>
+                  <p>When you receive new job updates, notifications will appear here.</p>
+                  <button 
+                  id="Explore-Jobs"
+                  className="m-2  mb-4  px-4 py-2 cursor-pointer text-[#0a66c2] border-2 border-[#0a66c2] rounded-3xl hover:bg-[#ebf4fd] hover:border-4" 
+                  onClick={() => navigate("/jobs")}>Explore more jobs</button>
+                </div>
+              ) : 
+              //Post
+              selectedFilter === "post" ? (
+                <div className="flex items-center flex-col">
+                  <img
+                  id="No notif img"
+                  src="no new notif.png"
+                  alt="No New Notifications"
+                  className="w-72 h-72 object-cover rounded-md "
+                  />
+                  <p className="font-semibold text-2xl">No new post activities</p>
+                  <p>View your previous post activity on your profile.</p>
+                  <button className="m-2 mb-4 px-4 py-2 cursor-pointer text-[#0a66c2] border-2 border-[#0a66c2] rounded-3xl hover:bg-[#ebf4fd] hover:border-4 "
+                  id="View-Activity"
+                  onClick={() => navigate("/profile")}>View previous activity</button>
+                </div>
+              ) : 
+              //Mention
+              selectedFilter === "mention" ? (
+                <div className="flex items-center flex-col">
+                  <img
+                  id="No notif img"
+                  src="no new notif.png"
+                  alt="No New Notifications"
+                  className="w-72 h-72 object-cover rounded-md "
+                  />
+                  <p className="font-semibold text-2xl">No new mentions</p>
+                  <p className="m-4 ">When someone tags you in a post or comment, that notification will appear here.</p>
+                </div>
+              ) : (
+                <div className="text-center">
+                  <img src="no new notif.png" alt="No New Notifications" className="w-full h-full object-cover rounded-md" />
+                  <p>No New Notifications</p>
+                </div>
+              )}
+            </div>
+          </div>
+  
+          {/*Ad Section */}
+          <div className="w-full lg:w-72">
+            <div className="shadow-sm rounded-lg border border-gray-300">
+              <img
+              id="Ad-img"
+                src="/ads.png"
+                alt="Ad Banner"
+                className="w-full rounded-lg cursor-pointer"
+                onClick={() => navigate("/ads-page")}
+              />
+            </div>
+  
+            {/* Footer Links */}
+              <FooterLinks/>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Notification;
