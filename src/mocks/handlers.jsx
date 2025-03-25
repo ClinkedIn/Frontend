@@ -2,6 +2,27 @@ import { http, HttpResponse } from "msw";
 let storedOTP = Math.floor(100000 + Math.random() * 900000);
 import axios from "axios";
 
+const companyInfo ={
+  userId: "12345",
+  name: "Microsoft",
+  address: "Cairo Cairo",
+  website: "www.microsoft.com",
+  industry: "software",
+  organizationSize: "10000+",
+  organizationType: "Public",
+  logo: "https://purepng.com/public/uploads/large/purepng.com-microsoft-logo-iconlogobrand-logoiconslogos-251519939091wmudn.png",
+  tagLine: "Every company has a mission. What's ours? To empower every person and every organization to achieve more. We believe technology can and should be a force for good and that meaningful innovation contributes to a brighter world in the future and today. Our culture doesn’t just encourage curiosity; it embraces it. Each day we make progress together by showing up as our authentic selves. We show up with a learn-it-all mentality. We show up cheering on others, knowing their success doesn't diminish our own. We show up every day open to learning our own biases, changing our behavior, and inviting in differences. Because impact matters.",
+  _id: "12345",
+  followers: [
+    "string"
+  ],
+  visitors: [
+    "string"
+  ],
+  createdAt: "2025-03-24T14:56:10.323Z",
+  updatedAt: "2025-03-24T14:56:10.323Z"
+};
+
 const dummyUser = {
   name: "Hamsa Saber",
   email: "hamsa@gmail.com",
@@ -652,46 +673,67 @@ http.post("/api/posts", async ({ request }) => {
 
 // For liking/reacting to posts
 http.post("/api/posts/:id/react", async ({ request, params }) => {
-  console.log(`[MSW] Intercepted POST /api/posts/${params.id}/react`);
-  const { id } = params;
-  const { reactionType } = await request.json();
-  
-  const postIndex = MOCK_POSTS.findIndex(post => post.id === id);
-  if (postIndex !== -1) {
-    // Find if this reaction type already exists
-    const reactionIndex = MOCK_POSTS[postIndex].reactions.findIndex(
-      r => r.type === reactionType
-    );
-    
-    if (reactionIndex !== -1) {
-      // Increment existing reaction
-      MOCK_POSTS[postIndex].reactions[reactionIndex].count += 1;
-    } else {
-      // Add new reaction type
-      MOCK_POSTS[postIndex].reactions.push({ type: reactionType, count: 1 });
-    }
-    
-    // Update total likes in metrics
-    MOCK_POSTS[postIndex].metrics.likes = MOCK_POSTS[postIndex].reactions.reduce(
-      (total, reaction) => total + reaction.count, 0
-    );
-    
-    return HttpResponse.json({
-      success: true,
-      message: "Reaction added",
-      post: MOCK_POSTS[postIndex]
-    });
-  }
-  
-  return HttpResponse.json(
-    { success: false, message: "Post not found" },
-    { status: 404 }
-  );
-})
+        console.log(`[MSW] Intercepted POST /api/posts/${params.id}/react`);
+        const { id } = params;
+        const { reactionType } = await request.json();
+        
+        const postIndex = MOCK_POSTS.findIndex(post => post.id === id);
+        if (postIndex !== -1) {
+          // Find if this reaction type already exists
+        const reactionIndex = MOCK_POSTS[postIndex].reactions.findIndex(
+          r => r.type === reactionType
+        );
+        
+        if (reactionIndex !== -1) {
+          // Increment existing reaction
+          MOCK_POSTS[postIndex].reactions[reactionIndex].count += 1;
+        } else {
+          // Add new reaction type
+          MOCK_POSTS[postIndex].reactions.push({ type: reactionType, count: 1 });
+        }
+        
+        // Update total likes in metrics
+        MOCK_POSTS[postIndex].metrics.likes = MOCK_POSTS[postIndex].reactions.reduce(
+          (total, reaction) => total + reaction.count, 0
+        );
+        
+        return HttpResponse.json({
+          success: true,
+          message: "Reaction added",
+          post: MOCK_POSTS[postIndex]
+        });
+      }
+
+      return HttpResponse.json(
+        { success: false, message: "Post not found" },
+        { status: 404 }
+      );
+      }),
+
+
+   http.get("/companies/:companyId", async  ({ request, params }) => {
+          console.log(`[MSW] Intercepted GET /api/companies/${params.companyId}`);
+          return HttpResponse.json(companyInfo);
+        }),
+    http.put("/companies/:companyId",async ({ request, params }) => {
+      console.log(`[MSW] Intercepted PUT /api/companies/${params.companyId}`);
+      const companyInfo = await request.json();
+      return HttpResponse.json({ companyInfo }, {
+        status: 201
+      });
+    }),
+    http.post("/companies/:companyId/follow",async ({ request, params }) => {
+      console.log(`[MSW] Intercepted POST /api/companies/${params.companyId}/follow`);
+      //const userId = await request.json() 
+      return HttpResponse.json({ companyInfo }, {
+        status: 200
+      });
+    }),
+    http.delete("/companies/:companyId/follow",async ({ request, params }) => {
+      console.log(`[MSW] Intercepted DELETE /api/companies/${params.companyId}/follow`);
+      //const userId = await request.json() 
+      return HttpResponse.json({ companyInfo }, {
+        status: 201
+      });
+    }),
 ];
-
-
-
-
-
-

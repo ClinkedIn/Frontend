@@ -19,11 +19,11 @@ import ReportedPostsAdmin from './components/AdminPanel/ReportedPostsAdmin';
 import NotificationPost from "./components/Notification/NotificationPost.jsx";
 import ProfilePage from './pages/myProfile/ProfilePage';
 import CreateCompanyPage from "./pages/CompanyPages/CreateCompanyPage";
-import CompanyProfileMemberViewPage from "./pages/CompanyPages/CompanyProfileMemberView.js";
-import CompanyProfileAdminViewPage from "./pages/CompanyPages/CompanyProfileAdminView.js";
-import CompanyHomePage from "./components/CompanyPageSections/Home.tsx"
-import CompanyPostsPage from "./components/CompanyPageSections/Posts.tsx"
-import CompanyJobsPage from "./components/CompanyPageSections/Jobs.tsx"
+import CompanyProfileMemberViewPage from "./pages/CompanyPages/CompanyProfileMemberView";
+import CompanyProfileAdminViewPage from "./pages/CompanyPages/CompanyProfileAdminView";
+import CompanyHomePage from "./components/CompanyPageSections/Home"
+import CompanyPostsPage from "./components/CompanyPageSections/Posts"
+import CompanyJobsPage from "./components/CompanyPageSections/Jobs"
 
 
 
