@@ -10,6 +10,57 @@ const dummyUser = {
   profileImage: "https://picsum.photos/80",
 };
 
+const MOCK_POSTS = [
+  {
+    id: "post123",
+    author: {
+      id: "user456",
+      name: "Hamsa Saber",
+      headline: "Software Engineer at Tech Company",
+      profileImage: "https://picsum.photos/80?random=1",
+    },
+    content: {
+      text: "Excited to share that I've just completed a major project using React and Node.js! #webdevelopment #javascript #reactjs",
+      media: [
+        {
+          type: "image",
+          url: "https://picsum.photos/600/400?random=42",
+          alt: "Project screenshot"
+        }
+      ]
+    },
+    metrics: {
+      likes: 147,
+      comments: 23,
+      reposts: 12,
+      impressions: 1893
+    },
+    reactions: [
+      { type: "like", count: 89 },
+      { type: "celebrate", count: 32 },
+      { type: "support", count: 18 },
+      { type: "insightful", count: 8 }
+    ],
+    comments: [
+      {
+        id: "comment789",
+        authorId: "user789",
+        authorName: "Ahmed Khaled",
+        authorImage: "https://picsum.photos/80?random=7",
+        text: "Great work! The UI looks amazing.",
+        timestamp: "2025-03-22T14:30:00Z",
+        likes: 5
+      }
+    ],
+    timestamp: "2025-03-22T10:15:00Z",
+    isEdited: false,
+    visibility: "public",
+    hashtags: ["webdevelopment", "javascript", "reactjs"]
+  }
+];
+
+
+
 const MOCK_NOTIFICATIONS = [
   {
     id: "1",
@@ -106,6 +157,9 @@ const MOCK_USERS = [
     password: "hashedPassword123", // This would be hashed in a real system
   },
 ];
+
+
+
 
 export const handlers = [
 // Modify the existing POST handler
@@ -343,4 +397,107 @@ http.post('/api/send-notification', async ({ request }) => {
       updatedAt: new Date().toISOString(),
     });
   }),
+
+
+
+
+
+
+  // Add these to your handlers array
+  //posts related handlers
+http.get("/api/posts", async () => {
+  console.log("[MSW] Intercepted GET /api/posts");
+  return HttpResponse.json(MOCK_POSTS);
+}),
+
+http.get("/api/posts/:id", async ({ params }) => {
+  console.log(`[MSW] Intercepted GET /api/posts/${params.id}`);
+  const { id } = params;
+  
+  // Find the post in mock data
+  const post = MOCK_POSTS.find(post => post.id === id);
+  
+  if (post) {
+    return HttpResponse.json(post);
+  } else {
+    return HttpResponse.json(
+      { success: false, message: "Post not found" },
+      { status: 404 }
+    );
+  }
+}),
+
+http.post("/api/posts", async ({ request }) => {
+  console.log("[MSW] Intercepted POST /api/posts");
+  const postData = await request.json();
+  
+  // Create new post with generated ID
+  const newPost = {
+    id: `post${Date.now()}`,
+    ...postData,
+    timestamp: new Date().toISOString(),
+    metrics: {
+      likes: 0,
+      comments: 0,
+      reposts: 0,
+      impressions: 0
+    },
+    reactions: [],
+    comments: [],
+    isEdited: false
+  };
+  
+  // Add to beginning of posts array
+  MOCK_POSTS.unshift(newPost);
+  
+  return HttpResponse.json(
+    { success: true, message: 'Post created', post: newPost },
+    { status: 201, delay: 300 }
+  );
+}),
+
+// For liking/reacting to posts
+http.post("/api/posts/:id/react", async ({ request, params }) => {
+  console.log(`[MSW] Intercepted POST /api/posts/${params.id}/react`);
+  const { id } = params;
+  const { reactionType } = await request.json();
+  
+  const postIndex = MOCK_POSTS.findIndex(post => post.id === id);
+  if (postIndex !== -1) {
+    // Find if this reaction type already exists
+    const reactionIndex = MOCK_POSTS[postIndex].reactions.findIndex(
+      r => r.type === reactionType
+    );
+    
+    if (reactionIndex !== -1) {
+      // Increment existing reaction
+      MOCK_POSTS[postIndex].reactions[reactionIndex].count += 1;
+    } else {
+      // Add new reaction type
+      MOCK_POSTS[postIndex].reactions.push({ type: reactionType, count: 1 });
+    }
+    
+    // Update total likes in metrics
+    MOCK_POSTS[postIndex].metrics.likes = MOCK_POSTS[postIndex].reactions.reduce(
+      (total, reaction) => total + reaction.count, 0
+    );
+    
+    return HttpResponse.json({
+      success: true,
+      message: "Reaction added",
+      post: MOCK_POSTS[postIndex]
+    });
+  }
+  
+  return HttpResponse.json(
+    { success: false, message: "Post not found" },
+    { status: 404 }
+  );
+})
 ];
+
+
+
+
+
+
