@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import {IoIosArrowRoundBack} from "react-icons/io";
 import { FaPlus,FaUpload } from "react-icons/fa6";
-import { toast,Toaster } from "react-hot-toast";
 import axios from "axios";
 
 
@@ -21,7 +20,7 @@ const CreateCompanyPage = () => {
     //const [logo, setLogo] = useState<File | null>(null);
     const [companyAddress, setCompanyAddress] = useState("");   
     const [logoPreview, setLogoPreview] = useState(null);
-    const [errors, setErrors] = useState({ organizationSize: "", organizationType: "" });
+    const [errors, setErrors] = useState({ });
     const [notifications, setNotifications] = useState([]);
 
     const handleSelectChange = (setter, field) => (e) => {
@@ -32,43 +31,58 @@ const CreateCompanyPage = () => {
             [field]: value.toLowerCase().includes("select") ? "Please choose a valid option." : ""
         }));
     };
-   const isValid = () => {
-        if(!companyName){
-            toast.error("Please enter the company name")
-            return false;
+    const isValid = () => {
+        let newErrors = {};
+
+        if (!companyName) {
+            newErrors.companyName = "Please enter the company name";
+        } else {
+            newErrors.companyName = "";
         }
-        if(!companyAddress){
-            toast.error("Please enter the company address")
-            return false;
+    
+        if (!companyAddress) {
+            newErrors.companyAddress = "Please enter the company address";
+        } else {
+            newErrors.companyAddress = "";
         }
+    
         const pattern = /^(https?:\/\/|www\.)[a-zA-Z0-9.-]+\.(com|org)(:\d+)?(\/\S*)?(\?\S*)?$/;
-        if( !pattern.test(website)){
-            toast.error("Please enter a valid website URL starting with http://, https://, or www.")
-            return false;
+        if (!website ||  !pattern.test(website)) {
+            newErrors.website = "Please enter a valid website URL.";
+        } else {
+            newErrors.website = "";
         }
+    
         if (organizationSize.toLowerCase().includes("select")) {
-            toast.error("Please choose a valid option.")
-            return false;
+            newErrors.organizationSize = "Please choose a valid option.";
+        } else {
+            newErrors.organizationSize = "";
         }
+    
         if (organizationType.toLowerCase().includes("select")) {
-            toast.error("Please choose a valid option.")
-            return false;
-       }
-
-
-        if(!industry){
-            toast.error("Please enter the industry")
-            return false;
+            newErrors.organizationType = "Please choose a valid option.";
+        } else {
+            newErrors.organizationType = "";
         }
-        if(!checkbox){
-            toast.error("Please verify that  the organization and you agree to the additional terms for Pages.")
-            return false;
+    
+        if (!industry) {
+            newErrors.industry = "Please enter the industry";
+        } else {
+            newErrors.industry = "";
         }
-
-        return true;
-   }
+    
+        if (!checkbox) {
+            newErrors.checkbox = "You must agree to the additional terms.";
+        } else {
+            newErrors.checkbox = "";
+        }
+        
+        setErrors(newErrors);
+        return Object.keys(newErrors).filter((key) => newErrors[key]).length === 0;
+    };
     const createPage = async() => {
         if(isValid()){
+            
             console.log("Page Created")
             const company ={
                 userId: "1234",
@@ -83,6 +97,7 @@ const CreateCompanyPage = () => {
             }
             const response = await axios.post("http://localhost:5173/companies",company);
             navigate(`/company/${response.data._id}`)
+            
         }
 
     }
@@ -100,11 +115,11 @@ const CreateCompanyPage = () => {
                        Back 
                        </h1>
                     </button>
-                    <div className="mt-4 flex items-center space-x-4">
+                    <div className="mt-4 flex items-center gap-4">
                         <img src="/Images/building-icon.png" alt="Icon" width="50" height="50" />
-                        <h1 className="text-xl font-semibold text-gray-800">
+                        <p className="text-xl font-semibold text-gray-800">
                             Let's get started with a few details about your company
-                        </h1>
+                        </p>
                     </div>
         </section>
         <div className=" w-full px-4 pt-20 md:px-0 flex flex-col lg:flex-row justify-center gap-4">
@@ -123,6 +138,7 @@ const CreateCompanyPage = () => {
                             className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
                             placeholder="Add your organization's name"
                         />
+                         {errors.companyName && <p className="text-red-500 text-sm mt-1">{errors.companyName}</p>}
                     </div>
                     
                     <div>
@@ -137,6 +153,7 @@ const CreateCompanyPage = () => {
                             className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
                             placeholder="Add your company address"
                         />
+                         {errors.companyAddress && <p className="text-red-500 text-sm mt-1">{errors.companyAddress}</p>}
                     </div>
                     
                     <div>
@@ -149,6 +166,7 @@ const CreateCompanyPage = () => {
                             className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
                             placeholder="Begin with http://, https://, or www."
                         />
+                         {errors.website && <p className="text-red-500 text-sm mt-1">{errors.website}</p>}
                     </div>
                     
                     <div>
@@ -161,6 +179,7 @@ const CreateCompanyPage = () => {
                             className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
                             placeholder="e.g., Information Services"
                         />
+                         {errors.industry && <p className="text-red-500 text-sm mt-1">{errors.industry}</p>}
                     </div>
                     
                     <div>
@@ -258,10 +277,10 @@ const CreateCompanyPage = () => {
                     </div>
                     <div className="flex  gap-2">
                         <input type="checkbox" checked={checkbox} onChange={(e) => setCheckbox(e.target.checked)} id="checkbox" className=" size-12 rounded-md border-gray-300  focus:border-green-500 focus:ring-green-500 " />
-                        <p>I verify that I am an authorized representative of this organization and have the right to act on its behalf in the creation and management of this page. The organization and I agree to the additional terms for Pages.</p>
-                    </div>   
+                        <p>I verify that I am an authorized representative of this organization and have the right to act on its behalf in the creation and management of this page. The organization and I agree to the additional terms for Pages.</p> 
+                    </div>  
+                    {errors.checkbox && <p className="text-red-500 text-sm ">{errors.checkbox}</p>} 
                 </form>
-                <Toaster />
                 <button className="rounded-full  py-3 px-5 m-2 text-white cursor-pointer font-semibold bg-[#0A66C2] " onClick={()=>{createPage()}}>Create Page </button>
             </div>
             <aside className="md:px-4 md:w-[60%]  lg:w-[40%] h-fit rounded-lg lg:sticky lg:top-24">
