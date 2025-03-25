@@ -146,7 +146,7 @@ const CompanyProfileAdminViewPage = () => {
             
             <Header notifications={notifications} />
             {showForm ? 
-                (<div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50 "
+                (<div className="fixed inset-0 flex items-center justify-center bg-black/50 bg-opacity-50 z-50 "
                 onClick={() => setShowForm(false)} 
                 >
                 <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl relative max-h-[90vh] overflow-y-auto  "
