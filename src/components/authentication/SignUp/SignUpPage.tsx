@@ -15,8 +15,8 @@ const SignupPage = () => {
   const [rememberMe, setRememberMe] = useState(true);
   const [passwordError, setPasswordError] = useState("");
   const recaptchaRef = useRef<ReCAPTCHA>(null);
+  const sitekey =import.meta.env.VITE_SITEKEY
   const navigate = useNavigate();
-
   // Validate Email Format
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -164,7 +164,7 @@ const SignupPage = () => {
 
             {/* ReCAPTCHA Integration */}
             <div className="flex justify-center w-full">
-              <ReCAPTCHA sitekey="6Le-D-8qAAAAAHinvtdVoVWtZg-bur5V3dDw2V3r" ref={recaptchaRef} />
+              <ReCAPTCHA sitekey={sitekey} ref={recaptchaRef} />
               <Toaster />
             </div>
 
