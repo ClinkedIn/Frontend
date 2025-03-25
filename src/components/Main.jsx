@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PostMenu from './PostMenu.jsx';
 import CreatePostModal from './PostCreation.jsx';
+import PostReactions from './PostReactions.jsx';
 
 const Main = () => {
   const [posts, setPosts] = useState([]);
@@ -8,6 +9,15 @@ const Main = () => {
   const [error, setError] = useState(null);
   const [postContent, setPostContent] = useState('');
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+  
+  // Available reaction types
+  const reactionTypes = [
+    { type: 'like', emoji: '👍', label: 'Like' },
+    { type: 'celebrate', emoji: '👏', label: 'Celebrate' },
+    { type: 'support', emoji: '❤️', label: 'Support' },
+    { type: 'insightful', emoji: '💡', label: 'Insightful' },
+    { type: 'funny', emoji: '😄', label: 'Funny' }
+  ];
   
   // Author information (normally would come from your auth system)
   const authorInfo = {
@@ -78,7 +88,7 @@ const Main = () => {
   };
   
   // Handle reacting to a post
-  const handleReact = async (postId) => {
+  const handleReact = async (postId, reactionType = 'like') => {
     try {
       const response = await fetch(`/api/posts/${postId}/react`, {
         method: 'POST',
@@ -86,7 +96,7 @@ const Main = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          reactionType: 'like', // Default reaction type
+          reactionType: reactionType,
         }),
       });
       
@@ -237,22 +247,40 @@ const Main = () => {
                 </div>
               </div>
             )}
+            
+            {/* Updated metrics section with reaction emojis */}
             <ul className="flex justify-between mx-4 p-2 border-b border-[#e9e5df] text-sm overflow-auto">
               <li className="flex items-center cursor-pointer hover:text-[#0a66c2] hover:underline">
-                <span>{post.metrics.likes}</span>
+                <div className="flex items-center">
+                  {post.reactions && post.reactions.length > 0 && (
+                    <div className="flex -space-x-1 mr-1">
+                      {post.reactions.slice(0, 3).map((reaction, index) => (
+                        <span key={index} className="inline-block w-4 h-4 text-xs">
+                          {reaction.type === 'like' && '👍'}
+                          {reaction.type === 'celebrate' && '👏'}
+                          {reaction.type === 'support' && '❤️'}
+                          {reaction.type === 'insightful' && '💡'}
+                          {reaction.type === 'funny' && '😄'}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  <span>{post.metrics.likes}</span>
+                </div>
               </li>
               <li className="flex items-center cursor-pointer hover:text-[#0a66c2] hover:underline">
                 <p>{post.metrics.comments} comments</p>
               </li>
             </ul>
+            
+            {/* Updated post action buttons with PostReactions component */}
             <div className="p-0 px-4 flex justify-between min-h-[40px] overflow-hidden">
-              <button 
-                onClick={() => handleReact(post.id)}
-                className="outline-none text-[rgba(0,0,0,0.6)] p-3 px-6 bg-transparent flex items-center cursor-pointer gap-1.25 rounded-md transition duration-200 hover:bg-[rgba(0,0,0,0.08)] font-semibold"
-              >
-                <img className="unLiked" src="/Images/like.svg" alt="like" />
-                <span>Like</span>
-              </button>
+              <PostReactions 
+                postId={post.id}
+                onReact={handleReact}
+                reactionTypes={reactionTypes}
+              />
+              
               <button className="outline-none text-[rgba(0,0,0,0.6)] p-3 px-6 bg-transparent flex items-center cursor-pointer gap-1.25 rounded-md transition duration-200 hover:bg-[rgba(0,0,0,0.08)] font-semibold">
                 <img src="/Images/comment.svg" alt="comment" />
                 <span>Comment</span>
