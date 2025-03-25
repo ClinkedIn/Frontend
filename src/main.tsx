@@ -7,6 +7,15 @@ import {
   QueryClient
 } from '@tanstack/react-query'
 import App from './App.tsx'
+import { worker } from './mocks/browser';
+
+async function enableMocking() {
+  if (import.meta.env.VITE_NODE_ENV === 'DEV') {
+    await worker.start({ onUnhandledRequest: 'bypass' });
+  }
+}
+
+await enableMocking();
 const queryClient = new QueryClient();
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

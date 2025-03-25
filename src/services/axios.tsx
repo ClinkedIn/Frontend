@@ -1,19 +1,19 @@
 import axios from 'axios'
 
 interface RequestResponse {
-    data: any;
+    data: unknown;
     status: number;
     statusText: string;
-    headers: any;
-    config: any;
-    request?: any;
+    headers: unknown;
+    config: unknown;
+    request?: unknown;
 }
 
 interface ErrorResponse {
     response: RequestResponse;
 }
 
-export const putRequest = async (url: string, body: any): Promise<RequestResponse | undefined> => {
+export const putRequest = async (url: string, body: unknown): Promise<RequestResponse | undefined> => {
     try {
         const response: RequestResponse = await axios.put(url, body, {
             headers: {
@@ -22,19 +22,19 @@ export const putRequest = async (url: string, body: any): Promise<RequestRespons
         });
         return response;
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         return (error as ErrorResponse).response;
     }
 }
 
 
 interface FormDataResponse {
-    data: any;
+    data: unknown;
     status: number;
     statusText: string;
-    headers: any;
-    config: any;
-    request?: any;
+    headers: unknown;
+    config: unknown;
+    request?: unknown;
 }
 
 export const putRequestFD = async (url: string, formData: FormData): Promise<FormDataResponse | undefined> => {
@@ -46,26 +46,26 @@ export const putRequestFD = async (url: string, formData: FormData): Promise<For
         });
         return response;
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         return (error as ErrorResponse).response;
     }
 }
 
 
 interface PostRequestResponse {
-    data: any;
+    data: unknown;
     status: number;
     statusText: string;
-    headers: any;
-    config: any;
-    request?: any;
+    headers: unknown;
+    config: unknown;
+    request?: unknown;
 }
 
 interface PostErrorResponse {
     response: PostRequestResponse;
 }
 
-export const postRequest = async (url: string, body: any): Promise<PostRequestResponse | undefined> => {
+export const postRequest = async (url: string, body: unknown): Promise<PostRequestResponse | undefined> => {
     try {
         const response: PostRequestResponse = await axios.post(url, body, {
             headers: {
@@ -74,18 +74,18 @@ export const postRequest = async (url: string, body: any): Promise<PostRequestRe
         });
         return response;
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         return (error as PostErrorResponse).response;
     }
 }
 
 interface PostImgResponse {
-    data: any;
+    data: unknown;
     status: number;
     statusText: string;
-    headers: any;
-    config: any;
-    request?: any;
+    headers: unknown;
+    config: unknown;
+    request?: unknown;
 }
 
 interface PostImgErrorResponse {
@@ -100,26 +100,26 @@ export const postRequestImg = async (url: string, formData: FormData): Promise<P
             },
         });
         return response;
-    } catch (error: any) {
+    } catch (error: unknown) {
         return (error as PostImgErrorResponse).response;
     }
 };
 
 
 interface PatchRequestResponse {
-    data: any;
+    data: unknown;
     status: number;
     statusText: string;
-    headers: any;
-    config: any;
-    request?: any;
+    headers: unknown;
+    config: unknown;
+    request?: unknown;
 }
 
 interface PatchErrorResponse {
     response: PatchRequestResponse;
 }
 
-export const patchRequest = async (url: string, body: any): Promise<PatchRequestResponse | undefined> => {
+export const patchRequest = async (url: string, body: unknown): Promise<PatchRequestResponse | undefined> => {
     try {
         const response: PatchRequestResponse = await axios.patch(url, body, {
             headers: {
@@ -128,17 +128,17 @@ export const patchRequest = async (url: string, body: any): Promise<PatchRequest
         });
         return response;
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         return (error as PatchErrorResponse).response;
     }
 }
 interface GetRequestResponse {
-    data: any;
+    data: unknown;
     status: number;
     statusText: string;
-    headers: any;
-    config: any;
-    request?: any;
+    headers: unknown;
+    config: unknown;
+    request?: unknown;
 }
 
 interface GetErrorResponse {
@@ -150,18 +150,18 @@ export const getRequest = async (url: string): Promise<GetRequestResponse | unde
         const response: GetRequestResponse = await axios.get(url);
         return response;
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         return (error as GetErrorResponse).response;
     }
 }
 
 interface DeleteRequestResponse {
-    data: any;
+    data: unknown;
     status: number;
     statusText: string;
-    headers: any;
-    config: any;
-    request?: any;
+    headers: unknown;
+    config: unknown;
+    request?: unknown;
 }
 
 interface DeleteErrorResponse {
@@ -172,7 +172,11 @@ export const deleteRequest = async (url: string): Promise<DeleteRequestResponse 
     try {
         const response: DeleteRequestResponse = await axios.delete(url);
         return response;
-    } catch (error: any) {
+    } catch (error: unknown) {
         return (error as DeleteErrorResponse).response;
     }
 }
+
+
+export const axiosInstance = axios.create({
+    baseURL: 'http://localhost:3000',});
