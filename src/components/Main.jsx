@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PostMenu from './PostMenu.jsx';
 
 const Main = () => {
   const [posts, setPosts] = useState([]);
@@ -95,6 +96,21 @@ const Main = () => {
       console.error('Error reacting to post:', err);
     }
   };
+  
+  // Handle PostMenu actions
+  const handleHidePost = (postId) => {
+    setPosts(posts.filter(post => post.id !== postId));
+  };
+
+  const handleSavePost = (postId) => {
+    console.log(`Post ${postId} saved`);
+    alert(`Post saved successfully!`);
+  };
+
+  const handleReportPost = (postId) => {
+    console.log(`Post ${postId} reported`);
+    alert(`Post reported. Thank you for helping keep LinkedIn safe.`);
+  };
 
   // Format date for display
   const formatDate = (dateString) => {
@@ -174,9 +190,14 @@ const Main = () => {
                 <span className="text-sm text-[rgba(0,0,0,0.6)] block">{formatDate(post.timestamp)}</span>
               </div>
             </a>
-            <button className="bg-transparent border-none cursor-pointer p-1.25 rounded-full hover:bg-[rgba(0,0,0,0.08)] transition duration-200">
-              <img src="/Images/ellipsis.svg" alt="ellipsis" className="w-full h-full" />
-            </button>
+            
+            {/* Using the PostMenu component instead of the simple button */}
+            <PostMenu
+              postId={post.id}
+              onHide={handleHidePost}
+              onSave={handleSavePost}
+              onReport={handleReportPost}
+            />
           </div>
           <div className="text-base text-start p-0 pl-4 pr-4 text-[rgba(0,0,0,0.9)] overflow-hidden">
             {post.content.text}
