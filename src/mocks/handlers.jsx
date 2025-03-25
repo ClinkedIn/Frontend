@@ -213,11 +213,9 @@ const MOCK_USERS = [
   {
     email: "mohamedayman@gmail.com",
     id: "123",
-    password: "hashedPassword123", // This would be hashed in a real system
+    password: "hashedPassword@123", // This would be hashed in a real system
   },
 ];
-
-
 
 
 export const handlers = [
@@ -356,6 +354,143 @@ http.post('/api/send-notification', async ({ request }) => {
       );
     }
   }),
+
+  // Mock API to register user
+  http.post("/api/user/", async ({ request }) => {
+    console.log("[MSW] Intercepted POST /api/user/");
+
+    const { email, password, recaptchaToken } = await request.json();
+    console.log("Received user data:", { email });
+
+    // Validate required fields
+    if (!email || !password || !recaptchaToken) {
+        return HttpResponse.json(
+            { error: "Missing required fields. Please provide email, password, and complete reCAPTCHA." },
+            { status: 400 }
+        );
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        return HttpResponse.json(
+            { error: "Invalid email format. Please enter a valid email address." },
+            { status: 400 }
+        );
+    }
+
+    // Validate password strength
+    const strongPasswordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!strongPasswordRegex.test(password)) {
+        return HttpResponse.json(
+            { error: "Weak password. Must be at least 8 characters, contain an uppercase letter, a number, and a special character." },
+            { status: 400 }
+        );
+    }
+
+    // // Mock reCAPTCHA verification
+    // if (recaptchaToken !== "mock-valid-recaptcha") {
+    //     return HttpResponse.json(
+    //         { error: "reCAPTCHA verification failed. Please try again." },
+    //         { status: 400 }
+    //     );
+    // }
+
+    // Check if user already exists
+    const existingUser = MOCK_USERS.find((user) => user.email === email);
+    if (existingUser) {
+        return HttpResponse.json(
+            { error: "User already exists." },
+            { status: 409 } // Conflict
+        );
+    }
+
+    // Create new user
+    const newUser = { id: MOCK_USERS.length + 1, email, password, confirmed: false };
+    MOCK_USERS.push(newUser);
+
+    // Mock email confirmation link
+    const confirmationLink = `https://example.com/confirm?email=${encodeURIComponent(email)}`;
+
+    console.log("Generated confirmation link:", confirmationLink);
+
+    // Mock authentication tokens
+    const authToken = `mock-auth-token-${newUser.id}`;
+    const refreshToken = `mock-refresh-token-${newUser.id}`;
+
+    return HttpResponse.json(
+        { message: "User created successfully. Check email for confirmation.", confirmationLink },
+        {
+            status: 201, // Created
+            headers: { 
+                "Set-Cookie": `authToken=${authToken}; HttpOnly, refreshToken=${refreshToken}; HttpOnly`
+            },
+        }
+    );
+  }),
+
+
+  // Mock API to login user
+  http.post("/api/user/login", async ({ request }) => {
+    console.log("[MSW] Intercepted POST /api/user/login");
+
+    const { email, password } = await request.json();
+    console.log("Received user data:", { email });
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        return HttpResponse.json(
+            { error: "Invalid email format. Please enter a valid email address." },
+            { status: 400 }
+        );
+    }
+
+    // Find user in the mock database
+    const existingUser = MOCK_USERS.find((user) => user.email === email);
+
+    if (!existingUser) {
+        return HttpResponse.json(
+            { error: "User not found. Please sign up first." },
+            { status: 404 }
+        );
+    }
+
+    // Check password match
+    if (existingUser.password !== password) {
+        return HttpResponse.json(
+            { error: "Invalid email or password." },
+            { status: 401 }
+        );
+    }
+
+    // Mock authentication tokens
+    const authToken = "mock-auth-token-" + existingUser.id;
+    const refreshToken = "mock-refresh-token-" + existingUser.id;
+
+    console.log("User logged in successfully:", { email });
+
+    return HttpResponse.json(
+        {
+            message: "Login successful.",
+            user: {
+                id: existingUser.id,
+                email: existingUser.email,
+                name: existingUser.name,
+                confirmed: existingUser.confirmed,
+            },
+            authToken,
+            refreshToken,
+        },
+        {
+            status: 200,
+            headers: { 
+                "Set-Cookie": `authToken=${authToken}; HttpOnly, refreshToken=${refreshToken}; HttpOnly`
+            },
+        }
+    );
+  }),
+
 
   http.post("/api/user/forgot-password", async ({ request }) => {
     console.log("[MSW] Intercepted POST /api/user/forgot-password");

@@ -1,12 +1,11 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { auth, provider, signInWithPopup } from "../../../../firebase";
-import { axiosInstance } from "../../../services/axios";
+import { axiosInstance } from "../../../services/axios"; 
 import toast from "react-hot-toast";
 import { Loader } from "lucide-react";
 import { motion } from "framer-motion";
-import Footer from "../../Footer/Footer"; 
+import Footer from "../../Footer/Footer";
 import GoogleLogin from "../../GoogleLoginButton";
 
 const LoginPage = () => {
@@ -18,40 +17,29 @@ const LoginPage = () => {
   const queryClient = useQueryClient();
 
   interface UserData {
-    username: string;
+    email: string;
     password: string;
   }
 
   const loginMutation = useMutation<void, unknown, UserData>({
     mutationFn: async (userData: UserData) => {
-      const response = await axiosInstance.post("/auth/login", userData);
+      const response = await axiosInstance.post("/api/user/login", userData);
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (data: any) => {
+      // Save tokens (if needed)
+      localStorage.setItem("authToken", data.authToken);
+      localStorage.setItem("refreshToken", data.refreshToken);
+
       queryClient.invalidateQueries({ queryKey: ["authUser"] });
       toast.success("Login successful!");
       setTimeout(() => navigate("/home"), 1000);
     },
     onError: (err) => {
-      const errorMessage = (err as { response?: { data?: { message?: string } } }).response?.data?.message || "Invalid credentials";
+      const errorMessage = (err as { response?: { data?: { error?: string } } }).response?.data?.error || "Invalid credentials";
       toast.error(errorMessage);
     },
-    //old code with error
-    /*onError: (err) => {
-      toast.error((err as unknown).response?.data?.message || "Invalid credentials");
-    },*/
   });
-
-  const validateEmailOrPhone = (input: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phoneRegex = /^[0-9]{10,15}$/;
-    return emailRegex.test(input) || phoneRegex.test(input);
-  };
-
-  const validatePasswordStrength = (password: string) => {
-    const strongPasswordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    return strongPasswordRegex.test(password);
-  };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -59,15 +47,11 @@ const LoginPage = () => {
     const newErrors: { username?: string; password?: string } = {};
 
     if (!username.trim()) {
-      newErrors.username = "Email or phone number is required";
-    } else if (!validateEmailOrPhone(username)) {
-      newErrors.username = "Enter a valid email or phone number";
+      newErrors.username = "Email is required";
     }
 
-    if (password.length < 8) {
-      newErrors.password = "Password must be at least 8 characters long";
-    } else if (!validatePasswordStrength(password)) {
-      newErrors.password = "Password must include an uppercase letter, a number, and a special character";
+    if (!password.trim()) {
+      newErrors.password = "Password is required";
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -76,30 +60,15 @@ const LoginPage = () => {
     }
 
     setErrors({});
-    loginMutation.mutate({ username, password });
-  };
-
-  const handleGoogleSignUp = async () => {
-    try {
-      const result = await signInWithPopup(auth, provider);
-      const idToken = await result.user.getIdToken();
-      console.log(idToken);
-      navigate("/home");
-    } catch (error) {
-      console.error(error);
-    }
+    loginMutation.mutate({ email: username, password });
   };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-white relative">
-      <img className="absolute top-6 left-13 h-6" src="/public/images/login-logo.svg" alt="LinkedIn" />
-
-      <motion.div
-        className="w-full max-w-sm p-6 bg-white rounded-lg shadow-lg"
-      >
+      <motion.div className="w-full max-w-sm p-6 bg-white rounded-lg shadow-lg">
         <h2 className="text-3xl font-semibold text-gray-900 text-left mb-4">Sign in</h2>
 
-          <GoogleLogin className="w-full" type="submit" onClick={handleGoogleSignUp} />
+        <GoogleLogin className="w-full" />
 
         <div className="relative flex items-center my-4">
           <div className="w-full border-t border-gray-300"></div>
@@ -111,7 +80,7 @@ const LoginPage = () => {
           <div>
             <input
               type="text"
-              placeholder="Email or phone"
+              placeholder="Email"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className={`w-full p-3 border rounded-md text-sm ${
@@ -139,19 +108,6 @@ const LoginPage = () => {
               {showPassword ? "Hide" : "Show"}
             </button>
             {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <input type="checkbox" id="keep-logged-in" className="mr-2" defaultChecked />
-              <label htmlFor="keep-logged-in" className="text-sm text-gray-700">
-                Keep me logged in
-              </label>
-            </div>
-
-            <Link to="/forgot-password" className="text-sm text-blue-600 hover:underline">
-              Forgot password?
-            </Link>
           </div>
 
           <motion.button
