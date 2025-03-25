@@ -182,8 +182,15 @@ const Main = () => {
             {post.content.text}
           </div>
           {post.content.media && post.content.media.length > 0 && (
-            <div className="w-full max-h-[500px] relative bg-[#f9fafb] mt-2 overflow-hidden">
-              <img src={post.content.media[0].url} alt={post.content.media[0].alt || "Post image"} className="max-h-[500px] max-w-full" />
+            <div className="w-full relative bg-[#f9fafb] mt-2">
+              <div className="aspect-[16/9] relative overflow-hidden">
+                <img 
+                  src={post.content.media[0].url} 
+                  alt={post.content.media[0].alt || "Post image"} 
+                  className="absolute inset-0 w-full h-full object-cover"
+                  loading="lazy"
+                />
+              </div>
             </div>
           )}
           <ul className="flex justify-between mx-4 p-2 border-b border-[#e9e5df] text-sm overflow-auto">
