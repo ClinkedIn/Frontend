@@ -7,7 +7,7 @@ import axios from "axios";
 const CompanyProfileMemberViewPage = () => {
     const navigate = useNavigate();
     const {companyId, section = "Home"} = useParams();
-    const [isFollowed, setIsFollowed] = useState(false);
+    const [isFollowing, setIsFollowing] = useState(false);
     const [activeTab, setActiveTab] = useState(section);
     const [notifications, setNotifications] = useState([]);
     const [companyInfo, setCompanyInfo] = useState();
@@ -18,12 +18,18 @@ const CompanyProfileMemberViewPage = () => {
         navigate(`/company/${companyId}/${tab}`);
       };
 
-    const handleClickFollowingButton = () => {
-        if(isFollowed) {
-        setIsFollowed(false);
+    const handleClickFollowingButton = async() => {
+        const userId ={user_Id :"12345"}
+        if(isFollowing) {
+            const response = await axios.delete(`http://localhost:5173/companies/${companyId}/follow`,userId);
+            console.log(response)
+            setIsFollowing(false);
+
         }
         else{
-        setIsFollowed(true);
+            const response = await axios.post(`http://localhost:5173/companies/${companyId}/follow`,userId);
+            console.log(response)
+            setIsFollowing(true);
         }
     }
     const fetchCompanyInfo=async()=>{
@@ -57,9 +63,9 @@ const CompanyProfileMemberViewPage = () => {
                         <p className="text-gray-500 text-sm">{companyInfo.organizationSize}  employees</p>
                         </div>
                         <div className="flex gap-4  max-[430px]:flex-col max-[430px]:gap-0 ">
-                            {(isFollowed) ? (
+                            {(isFollowing) ? (
                             
-                            <button className="mt-4 flex items-center justify-center bg-[#EBF4FD] text-[#0A66C2]  border-2 font-semibold  px-8 rounded-full hover:bg-blue-200 "  onClick={()=>{handleClickFollowingButton()}}>
+                            <button className="mt-4 py-1 flex items-center justify-center bg-[#EBF4FD] text-[#0A66C2]  border-2 font-semibold  px-8 rounded-full hover:bg-blue-200 "  onClick={()=>{handleClickFollowingButton()}}>
                                 Following
                             </button>) : (
                                 <button className="mt-4 flex items-center justify-center gap-2 bg-[#0A66C2] text-white font-semibold py-2 px-8 rounded-full hover:bg-[#004182]" onClick={()=>{handleClickFollowingButton()}}>

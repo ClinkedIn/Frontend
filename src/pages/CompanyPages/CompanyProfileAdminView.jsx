@@ -130,8 +130,8 @@ const CompanyProfileAdminViewPage = () => {
                 logo: logoPreview,
                 tagLine: tagline
             }
-            const response = await axios.post(`http://localhost:5173/companies/${companyId}`,company);
-            IoCompassOutline.log(response)
+            const response = await axios.put(`http://localhost:5173/companies/${companyId}`,company);
+            console.log(response)
             setShowForm(false)
 
         }
@@ -163,6 +163,7 @@ const CompanyProfileAdminViewPage = () => {
                         checkbox={checkbox} setCheckbox={setCheckbox}
                         companyAddress={companyAddress} setCompanyAddress={setCompanyAddress}
                         logoPreview={logoPreview} setLogoPreview={setLogoPreview}
+                        showTerms={false}
                     />
                     <div className="flex justify-end gap-4 mt-4">
                         <button 
@@ -180,8 +181,7 @@ const CompanyProfileAdminViewPage = () => {
                     </div>
                 </div>
             </div>)
-        :
-            (companyInfo && 
+            :(companyInfo && 
             (<div className="lg:w-1/2 lg:h-3/4 md:w-3/4 max-[430px]:w-full ">
                 <div className="bg-white rounded-lg shadow-lg mt-16 relative"> 
                     <img src="/Images/card-bg.svg" alt="cover page" className="w-full h-30 rounded-t-lg" />

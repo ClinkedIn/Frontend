@@ -577,13 +577,28 @@ http.post("/api/posts/:id/react", async ({ request, params }) => {
 
 
    http.get("/companies/:companyId", async  ({ request, params }) => {
-          console.log(`[MSW] Intercepted GET /api/companies/${params.id}`);
+          console.log(`[MSW] Intercepted GET /api/companies/${params.companyId}`);
           return HttpResponse.json(companyInfo);
         }),
-        http.post("/companies",async ({ request }) => {
-          const comapnyInfo =await request.json();
-          return HttpResponse.json(companyInfo,{
-            status:201
-          });
-        }),
+    http.put("/companies/:companyId",async ({ request, params }) => {
+      console.log(`[MSW] Intercepted PUT /api/companies/${params.companyId}`);
+      const companyInfo = await request.json();
+      return HttpResponse.json({ companyInfo }, {
+        status: 201
+      });
+    }),
+    http.post("/companies/:companyId/follow",async ({ request, params }) => {
+      console.log(`[MSW] Intercepted POST /api/companies/${params.companyId}/follow`);
+      //const userId = await request.json() 
+      return HttpResponse.json({ companyInfo }, {
+        status: 200
+      });
+    }),
+    http.delete("/companies/:companyId/follow",async ({ request, params }) => {
+      console.log(`[MSW] Intercepted DELETE /api/companies/${params.companyId}/follow`);
+      //const userId = await request.json() 
+      return HttpResponse.json({ companyInfo }, {
+        status: 201
+      });
+    }),
 ];

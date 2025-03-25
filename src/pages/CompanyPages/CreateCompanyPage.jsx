@@ -137,6 +137,7 @@ const CreateCompanyPage = () => {
                         checkbox={checkbox} setCheckbox={setCheckbox}
                         companyAddress={companyAddress} setCompanyAddress={setCompanyAddress}
                         logoPreview={logoPreview} setLogoPreview={setLogoPreview}
+                        showTerms={true}
                     />
                 <button className="rounded-full  py-3 px-5 m-2 text-white cursor-pointer font-semibold bg-[#0A66C2] " onClick={()=>{createPage()}}>Create Page </button>
             </div>
