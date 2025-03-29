@@ -580,10 +580,15 @@ http.post("/api/posts/:id/react", async ({ request, params }) => {
           console.log(`[MSW] Intercepted GET /api/companies/${params.companyId}`);
           return HttpResponse.json(companyInfo);
         }),
+        http.post("/companies", async  ({ request }) => {
+          return HttpResponse.json( companyInfo , {
+            status: 201
+          });
+        }),
     http.put("/companies/:companyId",async ({ request, params }) => {
       console.log(`[MSW] Intercepted PUT /api/companies/${params.companyId}`);
       const companyInfo = await request.json();
-      return HttpResponse.json({ companyInfo }, {
+      return HttpResponse.json( companyInfo , {
         status: 201
       });
     }),

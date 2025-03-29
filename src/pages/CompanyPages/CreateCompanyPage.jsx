@@ -97,6 +97,7 @@ const CreateCompanyPage = () => {
                 tagLine: tagline
             }
             const response = await axios.post("http://localhost:5173/companies",company);
+            console.log(response.data)
             navigate(`/company/${response.data._id}`)
             
         }
