@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Footer from "../../Footer/Footer"; 
+import Footer from "../../Footer/Footer";
+import { useSignup } from "../../../context/SignUpContext"; 
 
 const SignupNamePage = () => {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const { signupData, setSignupData } = useSignup(); 
+  const [firstName, setFirstName] = useState(signupData.firstName || "");
+  const [lastName, setLastName] = useState(signupData.lastName || "");
   const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -12,7 +14,16 @@ const SignupNamePage = () => {
     if (!firstName.trim() || !lastName.trim()) {
       return;
     }
-    navigate("/signup-location");
+
+    // Store name in context
+    setSignupData((prevData) => ({
+      ...prevData,
+      firstName,
+      lastName,
+    }));
+
+    // Navigate to the next step
+    navigate("location");
   };
 
   return (

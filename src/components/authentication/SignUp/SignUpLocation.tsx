@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../../Footer/Footer";
+import { useSignup } from "../../../context/SignUpContext"; 
 
 const SignUpLocation = () => {
-  const [location, setLocation] = useState("");
+  const { signupData, setSignupData } = useSignup();
+  const [location, setLocation] = useState(signupData.location || "");
   const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -11,7 +13,15 @@ const SignUpLocation = () => {
     if (!location.trim()) {
       return;
     }
-    navigate("/signup-career");
+
+    // Store location in context
+    setSignupData((prevData) => ({
+      ...prevData,
+      location,
+    }));
+
+    // Navigate to the next step
+    navigate("career");
   };
 
   return (

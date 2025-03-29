@@ -55,15 +55,15 @@ const routes: RouteObject[] = [
     element: React.createElement(SignUp),
   },
   {
-    path: "/signup-name",
+    path: "/signup/name",
     element: React.createElement(SignUpName),
   },  
   {
-    path: "/signup-location",
+    path: "/signup/name/location",
     element: React.createElement(SignUpLocation),
   },
   {
-    path: "/signup-career",
+    path: "/signup/name/location/career",
     element: React.createElement(SignUpCareer),
   },
   {
