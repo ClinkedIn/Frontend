@@ -1,12 +1,14 @@
-import { useRoutes } from 'react-router-dom';
-import routes from './routes';
+import { useRoutes } from "react-router-dom";
+import routes from "./routes";
+import { SignupProvider } from "./context/signupcontext";
 
 function App() {
   const routing = useRoutes(routes);
+
   return (
-    <div>
-      {routing}
-    </div>
+    <SignupProvider>
+      <div>{routing}</div>
+    </SignupProvider>
   );
 }
 

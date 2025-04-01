@@ -1,4 +1,4 @@
-import { RouteObject } from "react-router-dom";
+import { Navigate, RouteObject } from "react-router-dom";
 import React from "react";
 import Home from "../src/pages/home/HomePage";
 import Login from "./components/authentication/Login/LoginPage.js";
@@ -18,6 +18,12 @@ import WelcomePage from "../src/pages/WelcomePage/WelcomePage";
 import ReportedPostsAdmin from './components/AdminPanel/ReportedPostsAdmin';
 import NotificationPost from "./components/Notification/NotificationPost.jsx";
 import ProfilePage from './pages/myProfile/ProfilePage';
+import CreateCompanyPage from "./pages/CompanyPages/CreateCompanyPage";
+import CompanyProfileMemberViewPage from "./pages/CompanyPages/CompanyProfileMemberView";
+import CompanyProfileAdminViewPage from "./pages/CompanyPages/CompanyProfileAdminView";
+import CompanyHomePage from "./components/CompanyPageSections/Home"
+import CompanyPostsPage from "./components/CompanyPageSections/Posts"
+import CompanyJobsPage from "./components/CompanyPageSections/Jobs"
 
 
 
@@ -49,15 +55,15 @@ const routes: RouteObject[] = [
     element: React.createElement(SignUp),
   },
   {
-    path: "/signup-name",
+    path: "/signup/name",
     element: React.createElement(SignUpName),
   },  
   {
-    path: "/signup-location",
+    path: "/signup/name/location",
     element: React.createElement(SignUpLocation),
   },
   {
-    path: "/signup-career",
+    path: "/signup/name/location/career",
     element: React.createElement(SignUpCareer),
   },
   {
@@ -99,7 +105,35 @@ const routes: RouteObject[] = [
     {
     path: '/profile',
     element: React.createElement(ProfilePage)
-  }
+  },
+  {
+    path:"/company/setup/new",
+    element: React.createElement(CreateCompanyPage),
+  },
+  {
+    path:"/company/:companyId/",
+    element: React.createElement(CompanyProfileMemberViewPage),
+    children: [
+      { index: true, element: React.createElement(Navigate, { to: "Home", replace: true }) }, // Default to Home
+      { path: "Home", element: React.createElement(CompanyHomePage) },
+      { path: "Posts", element: React.createElement(CompanyPostsPage) },
+      { path: "Jobs", element: React.createElement(CompanyJobsPage) },
+
+    ]
+  },
+  {
+    path:"/company/:companyId/admin/",
+    element: React.createElement(CompanyProfileAdminViewPage),
+    children: [
+      { index: true, element: React.createElement(Navigate, { to: "Feed", replace: true }) }, // Default to Home
+      { path: "Feed", element: React.createElement(CompanyHomePage) },
+      { path: "Analytics", element: React.createElement(CompanyPostsPage) },
+      { path: "Edit Page", element: React.createElement(CompanyJobsPage) },
+
+    ]
+
+  },
+
 ];
 
 

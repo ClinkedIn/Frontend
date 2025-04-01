@@ -1,5 +1,5 @@
-import React from 'react';
-import RightSide from "../../components/RightSide";
+//import React from 'react';
+//import RightSide from "../../components/RightSide";
 
 const HomePage = () => {
   return (

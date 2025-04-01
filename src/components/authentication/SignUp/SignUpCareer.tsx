@@ -1,88 +1,48 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useSignup } from "../../../context/SignUpContext"; 
 import Footer from "../../Footer/Footer";
 
 const SignupCareer = () => {
   const navigate = useNavigate();
-  const [isStudent, setIsStudent] = useState(false); // Toggle between career and student form
-  const [careerData, setCareerData] = useState({
-    jobTitle: "",
-    employmentType: "",
-    company: "",
-  });
-
-  const [studentData, setStudentData] = useState({
-    school: "",
-    startYear: "",
-    endYear: "",
-    over16: true,
-    dobMonth: "",
-    dobDay: "",
-    dobYear: "",
-  });
+  const { signupData, setSignupData } = useSignup();
 
   // Validate forms
-  const isCareerValid = careerData.jobTitle.trim() && careerData.company.trim();
-  const isStudentValid =
-    studentData.school.trim() && studentData.startYear && studentData.endYear;
+  const isCareerValid = signupData.jobTitle?.trim() && signupData.company?.trim();
+  const isStudentValid = signupData.school?.trim() && signupData.startYear && signupData.endYear;
 
   // Handle input changes
-  const handleCareerChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setCareerData({ ...careerData, [e.target.name]: e.target.value });
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setSignupData({ ...signupData, [e.target.name]: e.target.value });
   };
 
-  const handleStudentChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-  
-    setStudentData((prev) => {
-      const updatedData = { ...prev, [name]: value };
-  
-      // Validate the date only if all fields are filled
-      if (updatedData.dobDay && updatedData.dobMonth && updatedData.dobYear) {
-        const day = parseInt(updatedData.dobDay, 10);
-        const month = parseInt(updatedData.dobMonth, 10);
-        const year = parseInt(updatedData.dobYear, 10);
-  
-        const isValid = isValidDate(day, month, year);
-        
-        if (!isValid) {
-          alert("Invalid date! Please enter a valid birth date.");
-          return prev; // Prevent invalid state update
-        }
-      }
-  
-      return updatedData;
-    });
-  };
-    
-  
   // Function to check if the entered date is valid
   const isValidDate = (day: number, month: number, year: number) => {
     if (!day || !month || !year) return false;
-  
     const date = new Date(year, month - 1, day);
-    
     return (
       date.getFullYear() === year &&
       date.getMonth() === month - 1 &&
       date.getDate() === day
     );
-  };  
+  };
 
   const isBirthDateValid = isValidDate(
-    parseInt(studentData.dobDay, 10),
-    parseInt(studentData.dobMonth, 10),
-    parseInt(studentData.dobYear, 10)
+    parseInt(signupData.dobDay || "0", 10),
+    parseInt(signupData.dobMonth || "0", 10),
+    parseInt(signupData.dobYear || "0", 10)
   );
-  
 
   const handleToggleStudent = () => {
-    setIsStudent(!isStudent);
+    setSignupData({ ...signupData, isStudent: !signupData.isStudent });
+  };
+
+  const handleToggleOver16 = () => {
+    setSignupData({ ...signupData, over16: !signupData.over16 });
   };
 
   const handleContinue = () => {
-    if (isStudent ? isStudentValid : isCareerValid) {
+    if (signupData.isStudent ? isStudentValid && (signupData.over16 || isBirthDateValid) : isCareerValid) {
       navigate("/verify-email");
     }
   };
@@ -101,15 +61,15 @@ const SignupCareer = () => {
 
       {/* Form Container */}
       <div className="w-full max-w-[90%] sm:max-w-md bg-white p-5 rounded-lg shadow-md">
-        {!isStudent ? (
-          // Career Form
+        {!signupData.isStudent ? (
           <>
+            {/* Career Form */}
             <label className="block text-sm text-gray-700 mb-1">Most recent job title *</label>
             <input
               type="text"
               name="jobTitle"
-              value={careerData.jobTitle}
-              onChange={handleCareerChange}
+              value={signupData.jobTitle || ""}
+              onChange={handleChange}
               placeholder="Enter job title"
               className="w-full p-2 py-1 border border-gray-500 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-200"
             />
@@ -117,8 +77,8 @@ const SignupCareer = () => {
             <label className="block text-sm text-gray-700 mt-4 mb-1">Employment type</label>
             <select
               name="employmentType"
-              value={careerData.employmentType}
-              onChange={handleCareerChange}
+              value={signupData.employmentType || ""}
+              onChange={handleChange}
               className="w-full p-2 py-1 border border-gray-500 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-200"
             >
               <option value="">Select one</option>
@@ -132,21 +92,21 @@ const SignupCareer = () => {
             <input
               type="text"
               name="company"
-              value={careerData.company}
-              onChange={handleCareerChange}
+              value={signupData.company || ""}
+              onChange={handleChange}
               placeholder="Enter company name"
               className="w-full p-2 py-1 border border-gray-500 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-200"
             />
           </>
         ) : (
-          // Student Form
           <>
+            {/* Student Form */}
             <label className="block text-sm text-gray-700 mb-1">School or College/University *</label>
             <input
               type="text"
               name="school"
-              value={studentData.school}
-              onChange={handleStudentChange}
+              value={signupData.school || ""}
+              onChange={handleChange}
               placeholder="Enter your school"
               className="w-full p-2 py-1 border border-gray-500 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-200"
             />
@@ -156,9 +116,9 @@ const SignupCareer = () => {
                 <label className="block text-sm text-gray-700 mb-1">Start year *</label>
                 <select
                   name="startYear"
-                  value={studentData.startYear}
-                  onChange={handleStudentChange}
-                  className="w-full p-2 py-1 border border-gray-500 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-200"
+                  value={signupData.startYear || ""}
+                  onChange={handleChange}
+                  className="w-full p-2 py-1 border border-gray-500 rounded-md"
                 >
                   <option value="">Select</option>
                   {Array.from({ length: 10 }, (_, i) => (
@@ -168,12 +128,12 @@ const SignupCareer = () => {
               </div>
 
               <div className="w-1/2">
-                <label className="block text-sm text-gray-700 mb-1">End year (or expected) *</label>
+                <label className="block text-sm text-gray-700 mb-1">End year *</label>
                 <select
                   name="endYear"
-                  value={studentData.endYear}
-                  onChange={handleStudentChange}
-                  className="w-full p-2 py-1 border border-gray-500 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-200"
+                  value={signupData.endYear || ""}
+                  onChange={handleChange}
+                  className="w-full p-2 py-1 border border-gray-500 rounded-md"
                 >
                   <option value="">Select</option>
                   {Array.from({ length: 10 }, (_, i) => (
@@ -183,114 +143,69 @@ const SignupCareer = () => {
               </div>
             </div>
 
-            {/* Age Toggle Button */}
+            {/* Over 16 Toggle */}
             <div className="border border-gray-400 py-3 rounded-md p-4 mt-4 flex justify-between items-center">
-            <span className="text-gray-700 text-sm mr-4">I'm over 16</span>
-            <div
-                onClick={() => setStudentData({ ...studentData, over16: !studentData.over16 })}
+              <span className="text-gray-700 text-sm mr-4">I'm over 16</span>
+              <div
+                onClick={handleToggleOver16}
                 className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer transition duration-300 ${
-                studentData.over16 ? "bg-green-500" : "bg-gray-300"
+                  signupData.over16 ? "bg-green-500" : "bg-gray-300"
                 }`}
-            >
+              >
                 <div
-                className={`w-5 h-5 bg-white rounded-full shadow-md transform transition duration-300 ${
-                    studentData.over16 ? "translate-x-6" : "translate-x-0"
-                }`}
+                  className={`w-5 h-5 bg-white rounded-full shadow-md transform transition duration-300 ${
+                    signupData.over16 ? "translate-x-6" : "translate-x-0"
+                  }`}
                 />
-            </div>
+              </div>
             </div>
 
-            
-            {/* Birthday Form (Only appears if toggle is OFF) */}
-            {!studentData.over16 && (
-            <div className="mt-4">
+            {/* Date of Birth */}
+            {!signupData.over16 && (
+              <div className="mt-4">
                 <label className="block text-sm text-gray-700 mb-1">Date of Birth *</label>
                 <div className="flex space-x-2">
-                {/* Day Dropdown */}
-                <select
-                    name="dobDay"
-                    value={studentData.dobDay}
-                    onChange={handleStudentChange}
-                    className="w-1/3 p-2 border rounded-md"
-                >
+                  {/* Day Dropdown */}
+                  <select name="dobDay" value={signupData.dobDay || ""} onChange={handleChange} className="w-1/3 p-2 border rounded-md">
                     <option value="">Day</option>
                     {Array.from({ length: 31 }, (_, i) => (
-                    <option key={i + 1} value={i + 1}>
-                        {i + 1}
-                    </option>
+                      <option key={i + 1} value={i + 1}>{i + 1}</option>
                     ))}
-                </select>
+                  </select>
 
-                {/* Month Dropdown */}
-                <select
-                    name="dobMonth"
-                    value={studentData.dobMonth}
-                    onChange={handleStudentChange}
-                    className="w-1/3 p-2 border rounded-md"
-                >
+                  {/* Month Dropdown */}
+                  <select name="dobMonth" value={signupData.dobMonth || ""} onChange={handleChange} className="w-1/3 p-2 border rounded-md">
                     <option value="">Month</option>
-                    {Array.from({ length: 12 }, (_, i) => (
-                    <option key={i + 1} value={i + 1}>
-                        {new Date(0, i).toLocaleString("default", { month: "long" })}
-                    </option>
+                    {["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].map((m, i) => (
+                      <option key={i + 1} value={i + 1}>{m}</option>
                     ))}
-                </select>
+                  </select>
 
-                {/* Year Dropdown */}
-                <select
-                    name="dobYear"
-                    value={studentData.dobYear}
-                    onChange={handleStudentChange}
-                    className="w-1/3 p-2 border rounded-md"
-                >
+                  {/* Year Dropdown */}
+                  <select name="dobYear" value={signupData.dobYear || ""} onChange={handleChange} className="w-1/3 p-2 border rounded-md">
                     <option value="">Year</option>
-                    {Array.from({ length: 100 }, (_, i) => {
-                    const year = new Date().getFullYear() - i;
-                    return (
-                        <option key={year} value={year}>
-                        {year}
-                        </option>
-                    );
-                    })}
-                </select>
+                    {Array.from({ length: 100 }, (_, i) => (
+                      <option key={i} value={2025 - i}>{2025 - i}</option>
+                    ))}
+                  </select>
                 </div>
-            </div>
+              </div>
             )}
-
           </>
         )}
 
         {/* Toggle Between Student and Career */}
-        <motion.button
-          className="w-full mt-4 text-gray-700 text-sm font-semibold hover:underline"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={handleToggleStudent}
-        >
-          {isStudent ? "I'm not a student" : "I'm a student"}
+        <motion.button className="w-full mt-4 text-gray-700 text-sm font-semibold hover:underline" onClick={handleToggleStudent}>
+          {signupData.isStudent ? "I'm not a student" : "I'm a student"}
         </motion.button>
 
         {/* Continue Button */}
-        <motion.button
-            className={`w-full mt-4 py-2 text-lg font-semibold rounded-full transition-all ${
-                (isStudent ? isStudentValid && (studentData.over16 || isBirthDateValid) : isCareerValid)
-                ? "bg-blue-600 text-white hover:bg-blue-700"
-                : "bg-gray-300 text-gray-500 cursor-not-allowed"
-            }`}
-            whileHover={(isStudent ? isStudentValid && (studentData.over16 || isBirthDateValid) : isCareerValid) ? { scale: 1.05 } : {}}
-            whileTap={(isStudent ? isStudentValid && (studentData.over16 || isBirthDateValid) : isCareerValid) ? { scale: 0.95 } : {}}
-            onClick={handleContinue}
-            disabled={!(isStudent ? isStudentValid && (studentData.over16 || isBirthDateValid) : isCareerValid)}
-            >
-            Continue
+        <motion.button className="w-full mt-4 py-2 text-lg font-semibold rounded-full bg-blue-600 text-white hover:bg-blue-700" onClick={handleContinue}>
+          Continue
         </motion.button>
-
       </div>
 
-      {/* Footer */}
-      <div className="mt-6 w-full">
-        <Footer />
-      </div>
+      <Footer />
     </div>
   );
 };

@@ -7,7 +7,7 @@ import { toast } from "react-hot-toast";
 
 const ForgotPasswordForm = () => {
   const [email, setEmail] = useState("");
-  let navigate = useNavigate();
+  const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState("");
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const phoneRegex =

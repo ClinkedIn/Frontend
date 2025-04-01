@@ -6,17 +6,17 @@ import toast, { Toaster } from "react-hot-toast";
 import ReCAPTCHA from "react-google-recaptcha";
 import GoogleLogin from "../../GoogleLoginButton";
 import Footer from "../../Footer/Footer";
+import { useSignup } from "../../../context/SignUpContext";
 
 const SignupPage = () => {
-  const [email, setEmail] = useState("");
+  const { signupData, setSignupData } = useSignup();
   const [emailError, setEmailError] = useState("");
-  const [password, setPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
-  const [passwordError, setPasswordError] = useState("");
   const recaptchaRef = useRef<ReCAPTCHA>(null);
+  const sitekey =import.meta.env.VITE_SITEKEY
   const navigate = useNavigate();
-
   // Validate Email Format
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -44,7 +44,7 @@ const SignupPage = () => {
   };
 
   // Handle Form Submission
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     // Check ReCAPTCHA
@@ -54,34 +54,50 @@ const SignupPage = () => {
       return;
     }
 
-    // Check Empty Fields
-    if (!email.trim() || !password.trim()) {
+    // Validate Inputs
+    if (!signupData.email.trim() || !signupData.password.trim()) {
       toast.error("Please fill in all fields.");
       return;
     }
-
-    // Validate Email
-    if (!validateEmail(email)) {
-      toast.error("Invalid email format.");
+    if (!validateEmail(signupData.email) || !validatePassword(signupData.password)) {
       return;
     }
 
-    // Validate Password
-    if (!validatePassword(password)) {
-      toast.error("Please enter a stronger password.");
-      return;
-    }
+    try {
+      // Send data to mock API
+      const response = await fetch("/api/user/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: signupData.email,
+          password: signupData.password,
+          recaptchaToken: recaptchaValue, // Include reCAPTCHA token
+        }),
+      });
 
-    toast.success("Signup successful!");
-    navigate("/signup-name");
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Signup failed.");
+      }
+
+      // Save confirmation link (for testing purposes)
+      setSignupData((prev) => ({ ...prev, confirmationLink: data.confirmationLink }));
+
+      toast.success("Signup successful! Check your email for confirmation.");
+      navigate("name"); // Move to the next step
+    } catch (error: any) {
+      toast.error(error.message);
+    }
   };
+  
 
   // Handle Google Sign Up
   const handleGoogleSignUp = async () => {
     try {
       await signInWithPopup(auth, provider);
-      navigate("/signupname");
-    } catch (error) {
+      navigate("/signup-name");
+    } catch {
       toast.error("Google signup failed.");
     }
   };
@@ -109,9 +125,9 @@ const SignupPage = () => {
               <input
                 id="email"
                 type="text"
-                value={email}
+                value={signupData.email}
                 onChange={(e) => {
-                  setEmail(e.target.value);
+                  setSignupData({ ...signupData, email: e.target.value });
                   validateEmail(e.target.value);
                 }}
                 className={`w-full p-3 py-1 border rounded-md text-sm ${
@@ -129,9 +145,9 @@ const SignupPage = () => {
               <input
                 id="password"
                 type={showPassword ? "text" : "password"}
-                value={password}
+                value={signupData.password}
                 onChange={(e) => {
-                  setPassword(e.target.value);
+                  setSignupData({ ...signupData, password: e.target.value });
                   validatePassword(e.target.value);
                 }}
                 className={`w-full p-3 py-1 border rounded-md text-sm ${
@@ -164,7 +180,7 @@ const SignupPage = () => {
 
             {/* ReCAPTCHA Integration */}
             <div className="flex justify-center w-full">
-              <ReCAPTCHA sitekey="6Le-D-8qAAAAAHinvtdVoVWtZg-bur5V3dDw2V3r" ref={recaptchaRef} />
+              <ReCAPTCHA sitekey={sitekey} ref={recaptchaRef} />
               <Toaster />
             </div>
 
