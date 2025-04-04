@@ -24,6 +24,7 @@ import CompanyProfileAdminViewPage from "./pages/CompanyPages/CompanyProfileAdmi
 import CompanyHomePage from "./components/CompanyPageSections/Home"
 import CompanyPostsPage from "./components/CompanyPageSections/Posts"
 import CompanyJobsPage from "./components/CompanyPageSections/Jobs"
+import MyJobs from "./pages/jobs/MyJobs.jsx";
 
 
 
@@ -89,6 +90,10 @@ const routes: RouteObject[] = [
   {
     path: "/jobs",
     element: React.createElement(Jobs),
+  },
+  {
+    path: "/myjobs",
+    element: React.createElement(MyJobs),
   },
   {
     path: "/",
