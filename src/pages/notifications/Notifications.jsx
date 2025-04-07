@@ -8,9 +8,33 @@ import FooterLinks from "../../components/FooterLinks";
 import { patchRequest } from "../../services/axios";
 import { toast } from 'react-hot-toast';
 import { Toaster } from 'react-hot-toast';
+// import { getMessaging, getToken } from 'firebase/messaging';
+// import { app } from '../../../firebase'; 
+
 
 
 const Notification = () => {
+
+  // async function requestFCMToken() {
+  //   try {
+  //     const messaging = getMessaging(app);
+  //     {
+  //       const fcmToken = await getToken(messaging, { 
+  //         vapidKey: 'BKQc38HyUXuvI_yz5hPvprjVjmWrcUjTP2H7J_cjGoyMMoBGNBbC0ucVGrzM67rICMclmUuOx-mdt7CXlpnhq9g' // From Firebase Console > Cloud Messaging
+  //       });
+  //       if (fcmToken) {
+  //         console.log('FCM Token:', fcmToken);
+          
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error('Error getting token:', error);
+  //   }
+  // }
+  // useEffect(() => {
+  //   requestFCMToken();
+  // }, []);
+
 
   const handleSendTestNotification = async () => {
     try {
@@ -48,6 +72,7 @@ const Notification = () => {
       const response = await axios.get(
         "http://localhost:5173/notifications"
       );
+      console.log(response)
       setNotifications(response.data); // Set fetched notifications
     } catch (error) {
       console.error("Error fetching notifications:", error);

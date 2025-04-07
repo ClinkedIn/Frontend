@@ -55,6 +55,7 @@ const VerifyEmail = () => {
       setNewEmail(response.data.email);
     } catch (error) {
       console.error("Error fetching user:", error);
+      
     }
   };
 
@@ -75,7 +76,7 @@ const VerifyEmail = () => {
         setMessage(response.data.message);
       }
     } catch (error) {
-      setMessage(error.response?.data?.message || "❌ Network error. Please try again.");
+      setMessage(error.response?.data?.message || "Network error. Please try again.");
     }
     setIsLoading(false);
   };
@@ -83,7 +84,7 @@ const VerifyEmail = () => {
   return (
     <div className="container mx-auto flex flex-col items-center justify-center h-screen">
       <h2 className="text-2xl font-semibold text-center">Confirm your email</h2>
-      <p className="text-gray-600 text-center mt-2">
+      <p className="text-gray-600 text-center mt-2" >
         Type in the code we sent to <strong>{isEditing ? "" : newEmail || "your email"}</strong>.
         {isEditing ? (
           <input
@@ -92,6 +93,7 @@ const VerifyEmail = () => {
             value={newEmail}
             onChange={(e) => setNewEmail(e.target.value)}
             className="border border-gray-400 rounded px-2 py-1 ml-2"
+            aria-label="Edit email" 
           />
         ) : (
           <button 
@@ -111,6 +113,7 @@ const VerifyEmail = () => {
 
       <input
       id="Input-OTP"
+      data-testid="otp-input"
         type="text"
         value={code}
         onChange={(e) => setCode(e.target.value)}
@@ -137,18 +140,23 @@ const VerifyEmail = () => {
       id="Request-OTP-Again"
       className="text-center mt-4 text-gray-700">
         Didn't receive the code?{" "}
-        <span
+        <button
+        type="button"
           className={`cursor-pointer ${
             canRequestOTP ? "text-blue-500" : "text-gray-400 cursor-not-allowed"
           }`}
           onClick={canRequestOTP ? requestOTP : null}
+          disabled={!canRequestOTP}
+          aria-label={canRequestOTP ? "Send again" : "Wait for cooldown"}
         >
           {canRequestOTP ? "Send again" : `Wait ${timer}s`}
-        </span>
+          
+        </button>
       </p>
 
       <button
       id="Verify-Button"
+      data-testid="verify-button"
         className={`mt-4 py-3 px-8 rounded-lg font-semibold ${
           isVerified ? "bg-green-600 text-white cursor-pointer" : "bg-blue-600 text-white cursor-pointer"
         } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
