@@ -1,13 +1,17 @@
 import { useState, useEffect } from "react"; 
 import axios from "axios"; 
 import { useNavigate } from "react-router-dom"; 
+import { MdLocationPin,MdSearch } from "react-icons/md";
+import Jobs from "../pages/jobs/Jobs";
 
-const Header = ({notifications}) => {
+const Header = ({notifications, onSearchChange}) => {
   const [showUser, setShowUser] = useState(false)
   const [unreadCount, setUnreadCount] = useState(0); 
+  const [searchQuery, setSearchQuery] = useState("");  
+  const [location, setLocation] = useState("");
   const navigate = useNavigate(); 
+  const [tab, setTab]=useState("home")
 
-  // Add useEffect to fetch unread count
   useEffect(() => {
     const fetchUnreadCount = async () => {
       try {
@@ -23,22 +27,73 @@ const Header = ({notifications}) => {
 
   // Handler to navigate to notifications page
   const handleNotificationsClick = () => {
+    setTab('notifications')
     navigate('/notifications');
   };
 
   // Handler to navigate to jobs page
   const handleJobsClick = () => {
+    setTab('jobs')
     navigate('/jobs');
+    console.log("jobs")
   };
+    // Handle search submission
+    const handleSearch = (e) => {
+      e.preventDefault();
+      if (searchQuery ) {
+        onSearchChange(searchQuery);
+        
+      }
+      else if (location){
+        onSearchChange(location);
+      }
 
+    };
+  
   return (
     <header className="fixed top-0 left-0 w-full bg-white border-b border-gray-200 z-50">
       <div className="flex items-center justify-between max-w-6xl mx-auto px-4 py-2">
-        {/* Logo */}
+        <div className="flex">
+          {/* Logo */}
         <a href="/feed">
           <img src="/Images/home-logo.svg" alt="Logo" className="w-8 h-8" />
         </a>
+        {/* Search Bar */}
+        {tab=="jobs" && 
+        <form onSubmit={handleSearch} className="flex rounded-lg">
+          <div className="flex items-center bg-[#edf3f8] rounded-sm ml-2 ">
+           <MdSearch 
+           color="#5f6163"
+           className="w-4 h-4 mr-2 ml-1"/>
+            <input
+              type="text"
+              placeholder="Title, skill or company"
+              className=" text-sm placeholder-[#5f6163] w-[832] "
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
 
+          <div className="flex items-center bg-[#edf3f8] rounded-sm ml-2">
+          <MdLocationPin 
+          color="#5f6163"
+          className="w-4 h-4 mr-2 ml-1"/>
+            <input
+              type="text"
+              placeholder="City, state, or zip code"
+              className="placeholder-[#5f6163] text-sm w-[832]"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+            />
+          </div>
+
+          <button type="submit" className="bg-blue-600 ml-1 text-white px-2 py-2 rounded-lg hover:bg-blue-700">
+            Search
+          </button>
+        </form>}
+        
+        </div>
+        
         {/* Navigation Icons */}
         <nav className="flex space-x-6">
           <button className="hover:bg-gray-200 p-2 rounded-lg">
@@ -47,7 +102,7 @@ const Header = ({notifications}) => {
           <button className="hover:bg-gray-200 p-2 rounded-lg">
             <img src="/Images/nav-network.svg" alt="Network" className="w-6 h-6" />
           </button>
-          {/* Jobs Icon - THIS IS THE ONE WE'RE UPDATING */}
+
           <button 
             className="hover:bg-gray-200 p-2 rounded-lg"
             onClick={handleJobsClick}
@@ -57,7 +112,6 @@ const Header = ({notifications}) => {
           <button className="hover:bg-gray-200 p-2 rounded-lg">
             <img src="/Images/nav-messaging.svg" alt="Messaging" className="w-6 h-6" />
           </button>
-          {/* Notifications Icon with Badge */}
           <button 
             className="hover:bg-gray-200 p-2 rounded-lg relative"
             onClick={handleNotificationsClick}
@@ -93,6 +147,7 @@ const Header = ({notifications}) => {
         </div>
       </div>
     </header>
+   
   );
 };
 

@@ -24,6 +24,7 @@ import CompanyProfileAdminViewPage from "./pages/CompanyPages/CompanyProfileAdmi
 import CompanyHomePage from "./components/CompanyPageSections/Home";
 import CompanyPostsPage from "./components/CompanyPageSections/Posts";
 import CompanyJobsPage from "./components/CompanyPageSections/Jobs";
+import MyJobs from "./pages/jobs/MyJobs.jsx";
 import JobListing from "./components/AdminPanel/JobListing";
 import Analytics from "./components/AdminPanel/Analytics";
 import AdminPanel from "./components/AdminPanel/AdminPanel";
@@ -90,6 +91,10 @@ const routes: RouteObject[] = [
   {
     path: "/jobs",
     element: React.createElement(Jobs),
+  },
+  {
+    path: "/myjobs",
+    element: React.createElement(MyJobs),
   },
   {
     path: "/",

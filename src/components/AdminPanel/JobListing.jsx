@@ -254,6 +254,68 @@ const JobListing = () => {
           </p>
         </header>
 
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="bg-white p-4 rounded-lg shadow">
+            <div className="flex items-center">
+              <div className="bg-green-100 p-3 rounded-full">
+                <CheckCircle className="h-6 w-6 text-green-600" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium text-gray-500">Active Jobs</p>
+                <p className="text-lg font-semibold text-gray-900">
+                  {jobs.filter((job) => job.status === "active").length}
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow">
+            <div className="flex items-center">
+              <div className="bg-yellow-100 p-3 rounded-full">
+                <AlarmClock className="h-6 w-6 text-yellow-600" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium text-gray-500">
+                  Pending Review
+                </p>
+                <p className="text-lg font-semibold text-gray-900">
+                  {jobs.filter((job) => job.status === "pending").length}
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow">
+            <div className="flex items-center">
+              <div className="bg-gray-100 p-3 rounded-full">
+                <Archive className="h-6 w-6 text-gray-600" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium text-gray-500">
+                  Inactive Jobs
+                </p>
+                <p className="text-lg font-semibold text-gray-900">
+                  {jobs.filter((job) => job.status === "inactive").length}
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow">
+            <div className="flex items-center">
+              <div className="bg-red-100 p-3 rounded-full">
+                <Flag className="h-6 w-6 text-red-600" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium text-gray-500">
+                  Flagged Jobs
+                </p>
+                <p className="text-lg font-semibold text-gray-900">
+                  {jobs.filter((job) => job.flagged).length}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Navigation Tabs */}
         <div className="mb-6 border-b border-gray-200">
           <nav className="flex space-x-8">
@@ -481,68 +543,6 @@ const JobListing = () => {
               )}
             </tbody>
           </table>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white p-4 rounded-lg shadow">
-            <div className="flex items-center">
-              <div className="bg-green-100 p-3 rounded-full">
-                <CheckCircle className="h-6 w-6 text-green-600" />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-500">Active Jobs</p>
-                <p className="text-lg font-semibold text-gray-900">
-                  {jobs.filter((job) => job.status === "active").length}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow">
-            <div className="flex items-center">
-              <div className="bg-yellow-100 p-3 rounded-full">
-                <AlarmClock className="h-6 w-6 text-yellow-600" />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-500">
-                  Pending Review
-                </p>
-                <p className="text-lg font-semibold text-gray-900">
-                  {jobs.filter((job) => job.status === "pending").length}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow">
-            <div className="flex items-center">
-              <div className="bg-gray-100 p-3 rounded-full">
-                <Archive className="h-6 w-6 text-gray-600" />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-500">
-                  Inactive Jobs
-                </p>
-                <p className="text-lg font-semibold text-gray-900">
-                  {jobs.filter((job) => job.status === "inactive").length}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow">
-            <div className="flex items-center">
-              <div className="bg-red-100 p-3 rounded-full">
-                <Flag className="h-6 w-6 text-red-600" />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-500">
-                  Flagged Jobs
-                </p>
-                <p className="text-lg font-semibold text-gray-900">
-                  {jobs.filter((job) => job.flagged).length}
-                </p>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
