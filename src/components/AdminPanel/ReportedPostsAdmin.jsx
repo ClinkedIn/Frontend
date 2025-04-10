@@ -11,7 +11,7 @@ import {
   Clock,
 } from "lucide-react";
 
-const LinkedInStyleAdminPanel = () => {
+const ReportedPosts = () => {
   // Sample data - replace with your actual API call
   const [reportedPosts, setReportedPosts] = useState([]);
   const [filteredPosts, setFilteredPosts] = useState([]);
@@ -259,9 +259,9 @@ const LinkedInStyleAdminPanel = () => {
   };
 
   return (
-    <div className="bg-[#f3f2ef] min-h-screen">
+    <div className="bg-gray-50  min-h-screen">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+      {/* <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex">
@@ -290,11 +290,11 @@ const LinkedInStyleAdminPanel = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Content */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="bg-white rounded-lg shadow">
+      <div className="max-w-6xl  mx-auto ">
+        <div className="bg-gray-50 ">
           <div className="px-6 py-5 border-b border-gray-200">
             <h1 className="text-xl font-medium text-gray-900">
               Reported Posts
@@ -558,4 +558,481 @@ const LinkedInStyleAdminPanel = () => {
   );
 };
 
-export default LinkedInStyleAdminPanel;
+export default ReportedPosts;
+
+// import React, { useState } from 'react';
+// import { AlarmClock, Archive, CheckCircle, Edit, EyeOff, Flag, MoreHorizontal, Search, Trash2 } from 'lucide-react';
+
+// const AdminPanel = () => {
+//   // Sample data for job listings
+//   const [jobs, setJobs] = useState([
+//     { id: 1, title: 'Senior Frontend Developer', company: 'TechCorp', location: 'San Francisco, CA', status: 'active', flagged: false, date: '2025-03-25', reason: '' },
+//     { id: 2, title: 'UX Designer', company: 'DesignHub', location: 'Remote', status: 'active', flagged: true, date: '2025-03-27', reason: 'Suspicious contact information' },
+//     { id: 3, title: 'Project Manager', company: 'ManageCo', location: 'New York, NY', status: 'pending', flagged: false, date: '2025-03-28', reason: '' },
+//     { id: 4, title: 'Data Scientist', company: 'DataInsights', location: 'Boston, MA', status: 'active', flagged: true, date: '2025-03-26', reason: 'Discriminatory language' },
+//     { id: 5, title: 'Marketing Specialist', company: 'BrandBoost', location: 'Chicago, IL', status: 'inactive', flagged: false, date: '2025-03-20', reason: '' },
+//   ]);
+
+//   const [activeTab, setActiveTab] = useState('all');
+//   const [searchTerm, setSearchTerm] = useState('');
+
+//   // Filter jobs based on active tab and search term
+//   const filteredJobs = jobs.filter(job => {
+//     const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+//                           job.company.toLowerCase().includes(searchTerm.toLowerCase());
+
+//     if (activeTab === 'all') return matchesSearch;
+//     if (activeTab === 'active') return job.status === 'active' && matchesSearch;
+//     if (activeTab === 'pending') return job.status === 'pending' && matchesSearch;
+//     if (activeTab === 'inactive') return job.status === 'inactive' && matchesSearch;
+//     if (activeTab === 'flagged') return job.flagged && matchesSearch;
+
+//     return matchesSearch;
+//   });
+
+//   // Handler functions
+//   const handleApprove = (id) => {
+//     setJobs(jobs.map(job =>
+//       job.id === id ? {...job, status: 'active', flagged: false} : job
+//     ));
+//   };
+
+//   const handleReject = (id) => {
+//     setJobs(jobs.map(job =>
+//       job.id === id ? {...job, status: 'inactive'} : job
+//     ));
+//   };
+
+//   const handleDelete = (id) => {
+//     setJobs(jobs.filter(job => job.id !== id));
+//   };
+
+//   const handleResolveFlag = (id) => {
+//     setJobs(jobs.map(job =>
+//       job.id === id ? {...job, flagged: false} : job
+//     ));
+//   };
+
+//   return (
+//     <div className="bg-gray-50 min-h-screen">
+//       <div className="max-w-7xl mx-auto p-4">
+//         <header className="mb-6">
+//           <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
+//           <p className="text-gray-600">Manage job postings and flagged listings</p>
+//         </header>
+
+//         {/* Navigation Tabs */}
+//         <div className="mb-6 border-b border-gray-200">
+//           <nav className="flex space-x-8">
+//             <button
+//               onClick={() => setActiveTab('all')}
+//               className={`py-4 px-1 font-medium text-sm ${activeTab === 'all' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+//             >
+//               All Listings
+//             </button>
+//             <button
+//               onClick={() => setActiveTab('active')}
+//               className={`py-4 px-1 font-medium text-sm ${activeTab === 'active' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+//             >
+//               Active
+//             </button>
+//             <button
+//               onClick={() => setActiveTab('pending')}
+//               className={`py-4 px-1 font-medium text-sm ${activeTab === 'pending' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+//             >
+//               Pending Review
+//             </button>
+//             <button
+//               onClick={() => setActiveTab('inactive')}
+//               className={`py-4 px-1 font-medium text-sm ${activeTab === 'inactive' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+//             >
+//               Inactive
+//             </button>
+//             <button
+//               onClick={() => setActiveTab('flagged')}
+//               className={`py-4 px-1 font-medium text-sm ${activeTab === 'flagged' ? 'border-b-2 border-red-500 text-red-600' : 'text-gray-500 hover:text-gray-700'}`}
+//             >
+//               Flagged <span className="ml-1 px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-600">{jobs.filter(job => job.flagged).length}</span>
+//             </button>
+//           </nav>
+//         </div>
+
+//         {/* Search and Controls */}
+//         <div className="mb-6 flex justify-between">
+//           <div className="relative w-64">
+//             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+//               <Search className="h-4 w-4 text-gray-400" />
+//             </div>
+//             <input
+//               type="text"
+//               className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+//               placeholder="Search jobs..."
+//               value={searchTerm}
+//               onChange={(e) => setSearchTerm(e.target.value)}
+//             />
+//           </div>
+//           <button className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+//             + Add New Job
+//           </button>
+//         </div>
+
+//         {/* Jobs Table */}
+//         <div className="bg-white shadow overflow-hidden border-b border-gray-200 rounded-lg mb-6">
+//           <table className="min-w-full divide-y divide-gray-200">
+//             <thead className="bg-gray-50">
+//               <tr>
+//                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Job Details</th>
+//                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+//                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date Posted</th>
+//                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+//               </tr>
+//             </thead>
+//             <tbody className="bg-white divide-y divide-gray-200">
+//               {filteredJobs.map((job) => (
+//                 <tr key={job.id} className={job.flagged ? 'bg-red-50' : ''}>
+//                   <td className="px-6 py-4 whitespace-nowrap">
+//                     <div className="flex items-start">
+//                       <div>
+//                         <div className="text-sm font-medium text-gray-900 flex items-center">
+//                           {job.title}
+//                           {job.flagged && (
+//                             <Flag className="h-4 w-4 ml-2 text-red-500" />
+//                           )}
+//                         </div>
+//                         <div className="text-sm text-gray-500">{job.company} • {job.location}</div>
+//                         {job.flagged && (
+//                           <div className="mt-1 text-xs text-red-600 bg-red-50 px-2 py-1 rounded">
+//                             Flagged: {job.reason}
+//                           </div>
+//                         )}
+//                       </div>
+//                     </div>
+//                   </td>
+//                   <td className="px-6 py-4 whitespace-nowrap">
+//                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+//                       ${job.status === 'active' ? 'bg-green-100 text-green-800' :
+//                         job.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+//                         'bg-gray-100 text-gray-800'}`}>
+//                       {job.status === 'active' ? 'Active' :
+//                        job.status === 'pending' ? 'Pending Review' :
+//                        'Inactive'}
+//                     </span>
+//                   </td>
+//                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+//                     <div className="flex items-center">
+//                       <AlarmClock className="h-4 w-4 mr-1 text-gray-400" />
+//                       {job.date}
+//                     </div>
+//                   </td>
+//                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+//                     <div className="flex space-x-3">
+//                       {job.status === 'pending' && (
+//                         <button
+//                           onClick={() => handleApprove(job.id)}
+//                           className="text-green-600 hover:text-green-900"
+//                           title="Approve"
+//                         >
+//                           <CheckCircle className="h-5 w-5" />
+//                         </button>
+//                       )}
+
+//                       {job.status === 'active' && (
+//                         <button
+//                           onClick={() => handleReject(job.id)}
+//                           className="text-gray-600 hover:text-gray-900"
+//                           title="Deactivate"
+//                         >
+//                           <EyeOff className="h-5 w-5" />
+//                         </button>
+//                       )}
+
+//                       {job.flagged && (
+//                         <button
+//                           onClick={() => handleResolveFlag(job.id)}
+//                           className="text-blue-600 hover:text-blue-900"
+//                           title="Resolve Flag"
+//                         >
+//                           <CheckCircle className="h-5 w-5" />
+//                         </button>
+//                       )}
+
+//                       <button
+//                         className="text-indigo-600 hover:text-indigo-900"
+//                         title="Edit"
+//                       >
+//                         <Edit className="h-5 w-5" />
+//                       </button>
+
+//                       <button
+//                         onClick={() => handleDelete(job.id)}
+//                         className="text-red-600 hover:text-red-900"
+//                         title="Delete"
+//                       >
+//                         <Trash2 className="h-5 w-5" />
+//                       </button>
+//                     </div>
+//                   </td>
+//                 </tr>
+//               ))}
+//             </tbody>
+//           </table>
+//         </div>
+
+//         {/* Stats Cards */}
+//         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+//           <div className="bg-white p-4 rounded-lg shadow">
+//             <div className="flex items-center">
+//               <div className="bg-green-100 p-3 rounded-full">
+//                 <CheckCircle className="h-6 w-6 text-green-600" />
+//               </div>
+//               <div className="ml-3">
+//                 <p className="text-sm font-medium text-gray-500">Active Jobs</p>
+//                 <p className="text-lg font-semibold text-gray-900">{jobs.filter(job => job.status === 'active').length}</p>
+//               </div>
+//             </div>
+//           </div>
+//           <div className="bg-white p-4 rounded-lg shadow">
+//             <div className="flex items-center">
+//               <div className="bg-yellow-100 p-3 rounded-full">
+//                 <AlarmClock className="h-6 w-6 text-yellow-600" />
+//               </div>
+//               <div className="ml-3">
+//                 <p className="text-sm font-medium text-gray-500">Pending Review</p>
+//                 <p className="text-lg font-semibold text-gray-900">{jobs.filter(job => job.status === 'pending').length}</p>
+//               </div>
+//             </div>
+//           </div>
+//           <div className="bg-white p-4 rounded-lg shadow">
+//             <div className="flex items-center">
+//               <div className="bg-gray-100 p-3 rounded-full">
+//                 <Archive className="h-6 w-6 text-gray-600" />
+//               </div>
+//               <div className="ml-3">
+//                 <p className="text-sm font-medium text-gray-500">Inactive Jobs</p>
+//                 <p className="text-lg font-semibold text-gray-900">{jobs.filter(job => job.status === 'inactive').length}</p>
+//               </div>
+//             </div>
+//           </div>
+//           <div className="bg-white p-4 rounded-lg shadow">
+//             <div className="flex items-center">
+//               <div className="bg-red-100 p-3 rounded-full">
+//                 <Flag className="h-6 w-6 text-red-600" />
+//               </div>
+//               <div className="ml-3">
+//                 <p className="text-sm font-medium text-gray-500">Flagged Jobs</p>
+//                 <p className="text-lg font-semibold text-gray-900">{jobs.filter(job => job.flagged).length}</p>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default AdminPanel;
+
+// import React, { useState } from 'react';
+// import { BarChart, LineChart, PieChart, Calendar, Users, Activity, TrendingUp, Database } from 'lucide-react';
+
+// const AdminAnalyticsDashboard = () => {
+//   const [activeTab, setActiveTab] = useState('overview');
+
+//   // Sample analytics data
+//   const overviewStats = [
+//     { title: 'Total Users', value: '24,532', change: '+12%', icon: <Users className="text-blue-500" /> },
+//     { title: 'Active Users', value: '18,201', change: '+8%', icon: <Activity className="text-green-500" /> },
+//     { title: 'New Signups', value: '1,204', change: '+23%', icon: <TrendingUp className="text-purple-500" /> },
+//     { title: 'Posts Created', value: '8,392', change: '+15%', icon: <Database className="text-amber-500" /> }
+//   ];
+
+//   const engagementData = [
+//     { name: 'Jan', posts: 4000, connections: 2400, messages: 2400 },
+//     { name: 'Feb', posts: 3000, connections: 1398, messages: 2210 },
+//     { name: 'Mar', posts: 2000, connections: 9800, messages: 2290 },
+//     { name: 'Apr', posts: 2780, connections: 3908, messages: 2000 },
+//     { name: 'May', posts: 1890, connections: 4800, messages: 2181 },
+//     { name: 'Jun', posts: 2390, connections: 3800, messages: 2500 }
+//   ];
+
+//   const tabs = [
+//     { id: 'overview', label: 'Overview', icon: <BarChart className="mr-2 h-4 w-4" /> },
+//     { id: 'users', label: 'User Analytics', icon: <Users className="mr-2 h-4 w-4" /> },
+//     { id: 'engagement', label: 'Engagement', icon: <Activity className="mr-2 h-4 w-4" /> },
+//     { id: 'content', label: 'Content', icon: <Database className="mr-2 h-4 w-4" /> },
+//     { id: 'reports', label: 'Reports', icon: <LineChart className="mr-2 h-4 w-4" /> }
+//   ];
+
+//   return (
+//     <div className="bg-gray-50 min-h-screen p-6">
+//       <header className="mb-8">
+//         <h1 className="text-3xl font-bold text-gray-900">Analytics Dashboard</h1>
+//         <p className="text-gray-500 mt-2">Monitor your platform's performance and user engagement</p>
+//       </header>
+
+//       {/* Tabs */}
+//       <div className="bg-white rounded-lg shadow mb-6">
+//         <div className="flex overflow-x-auto">
+//           {tabs.map((tab) => (
+//             <button
+//               key={tab.id}
+//               onClick={() => setActiveTab(tab.id)}
+//               className={`flex items-center px-4 py-3 font-medium border-b-2 whitespace-nowrap ${
+//                 activeTab === tab.id
+//                   ? 'border-blue-500 text-blue-600'
+//                   : 'border-transparent text-gray-500 hover:text-gray-700'
+//               }`}
+//             >
+//               {tab.icon}
+//               {tab.label}
+//             </button>
+//           ))}
+//         </div>
+//       </div>
+
+//       {/* Overview Stats */}
+//       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+//         {overviewStats.map((stat, index) => (
+//           <div key={index} className="bg-white rounded-lg shadow p-6">
+//             <div className="flex justify-between items-start">
+//               <div>
+//                 <p className="text-gray-500 text-sm">{stat.title}</p>
+//                 <p className="text-2xl font-bold mt-1">{stat.value}</p>
+//                 <div className="flex items-center mt-2">
+//                   <span className={`text-sm ${stat.change.startsWith('+') ? 'text-green-500' : 'text-red-500'}`}>
+//                     {stat.change}
+//                   </span>
+//                   <span className="text-gray-500 text-sm ml-1">vs last month</span>
+//                 </div>
+//               </div>
+//               <div className="p-3 bg-gray-50 rounded-lg">{stat.icon}</div>
+//             </div>
+//           </div>
+//         ))}
+//       </div>
+
+//       {/* Charts Section */}
+//       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+//         {/* User Acquisition Chart */}
+//         <div className="bg-white rounded-lg shadow p-6">
+//           <div className="flex justify-between items-center mb-4">
+//             <h2 className="text-lg font-semibold">User Acquisition</h2>
+//             <select className="bg-gray-50 border border-gray-200 rounded px-2 py-1 text-sm">
+//               <option>Last 7 days</option>
+//               <option>Last 30 days</option>
+//               <option>Last 90 days</option>
+//             </select>
+//           </div>
+//           <div className="h-64 flex items-center justify-center text-gray-400">
+//             {/* Placeholder for actual chart component */}
+//             <div className="text-center">
+//               <BarChart className="mx-auto h-12 w-12 opacity-50" />
+//               <p className="mt-2">User acquisition trend visualization</p>
+//             </div>
+//           </div>
+//         </div>
+
+//         {/* Engagement Chart */}
+//         <div className="bg-white rounded-lg shadow p-6">
+//           <div className="flex justify-between items-center mb-4">
+//             <h2 className="text-lg font-semibold">Engagement Metrics</h2>
+//             <select className="bg-gray-50 border border-gray-200 rounded px-2 py-1 text-sm">
+//               <option>Last 7 days</option>
+//               <option>Last 30 days</option>
+//               <option>Last 90 days</option>
+//             </select>
+//           </div>
+//           <div className="h-64 flex items-center justify-center text-gray-400">
+//             {/* Placeholder for actual chart component */}
+//             <div className="text-center">
+//               <LineChart className="mx-auto h-12 w-12 opacity-50" />
+//               <p className="mt-2">Engagement metrics visualization</p>
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* Additional Metrics */}
+//       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+//         {/* Active Users by Industry */}
+//         <div className="bg-white rounded-lg shadow p-6">
+//           <h2 className="text-lg font-semibold mb-4">Users by Industry</h2>
+//           <div className="h-64 flex items-center justify-center text-gray-400">
+//             <div className="text-center">
+//               <PieChart className="mx-auto h-12 w-12 opacity-50" />
+//               <p className="mt-2">Industry distribution chart</p>
+//             </div>
+//           </div>
+//         </div>
+
+//         {/* Activity Timeline */}
+//         <div className="bg-white rounded-lg shadow p-6">
+//           <h2 className="text-lg font-semibold mb-4">Activity Timeline</h2>
+//           <div className="h-64 overflow-auto">
+//             <div className="space-y-4">
+//               {[1, 2, 3, 4, 5].map((item) => (
+//                 <div key={item} className="flex">
+//                   <div className="mr-3 flex-shrink-0">
+//                     <div className="w-2 h-2 mt-1 rounded-full bg-blue-500"></div>
+//                     <div className="w-0.5 h-full ml-0.5 bg-gray-200"></div>
+//                   </div>
+//                   <div className="pb-4">
+//                     <p className="text-sm font-medium">New feature launched</p>
+//                     <p className="text-xs text-gray-500 mt-1">April 1, 2025 · 08:30 AM</p>
+//                     <p className="text-sm text-gray-600 mt-1">Profile enhancement feature was released to all users</p>
+//                   </div>
+//                 </div>
+//               ))}
+//             </div>
+//           </div>
+//         </div>
+
+//         {/* Real-time Metrics */}
+//         <div className="bg-white rounded-lg shadow p-6">
+//           <h2 className="text-lg font-semibold mb-4">Real-time Activity</h2>
+//           <div className="space-y-4">
+//             <div>
+//               <div className="flex justify-between items-center mb-1">
+//                 <span className="text-sm text-gray-600">Active Users Now</span>
+//                 <span className="text-sm font-medium">4,256</span>
+//               </div>
+//               <div className="w-full bg-gray-200 rounded-full h-2">
+//                 <div className="bg-blue-500 h-2 rounded-full" style={{ width: '70%' }}></div>
+//               </div>
+//             </div>
+//             <div>
+//               <div className="flex justify-between items-center mb-1">
+//                 <span className="text-sm text-gray-600">Messages/min</span>
+//                 <span className="text-sm font-medium">386</span>
+//               </div>
+//               <div className="w-full bg-gray-200 rounded-full h-2">
+//                 <div className="bg-green-500 h-2 rounded-full" style={{ width: '45%' }}></div>
+//               </div>
+//             </div>
+//             <div>
+//               <div className="flex justify-between items-center mb-1">
+//                 <span className="text-sm text-gray-600">Posts/min</span>
+//                 <span className="text-sm font-medium">124</span>
+//               </div>
+//               <div className="w-full bg-gray-200 rounded-full h-2">
+//                 <div className="bg-purple-500 h-2 rounded-full" style={{ width: '30%' }}></div>
+//               </div>
+//             </div>
+//             <div>
+//               <div className="flex justify-between items-center mb-1">
+//                 <span className="text-sm text-gray-600">New Connections/min</span>
+//                 <span className="text-sm font-medium">215</span>
+//               </div>
+//               <div className="w-full bg-gray-200 rounded-full h-2">
+//                 <div className="bg-amber-500 h-2 rounded-full" style={{ width: '50%' }}></div>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default AdminAnalyticsDashboard;
+
