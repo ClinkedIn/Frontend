@@ -34,8 +34,8 @@ export default function AdminPanel() {
               ></path>
             </svg>
           </button>
-          <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold">
-            A
+          <div className="w-20 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold">
+            Admin
           </div>
         </div>
       </nav>
@@ -43,7 +43,7 @@ export default function AdminPanel() {
       <div className="flex">
         {/* Collapsible Sidebar navigation */}
         <div
-          className={`bg-white shadow-md h-screen pt-6 transition-all duration-300 ease-in-out ${
+          className={`bg-white shadow-md h-screen sticky top-0  pt-6 transition-all duration-300 ease-in-out ${
             sidebarExpanded ? "w-64" : "w-16"
           }`}
           onMouseEnter={() => setSidebarExpanded(true)}
@@ -55,7 +55,7 @@ export default function AdminPanel() {
                 to=""
                 className={`flex items-center py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-700 ${
                   activePage === "dashboard"
-                    ? "bg-blue-50 text-blue-700 font-semibold"
+                    ? "bg-gray-100 border-b-4 border-b-blue-600  text-blue-700 font-semibold"
                     : ""
                 } ${sidebarExpanded ? "px-4" : "justify-center px-2"}`}
                 onClick={() => handleNavClick("dashboard")}
@@ -82,7 +82,7 @@ export default function AdminPanel() {
                 to="reported-posts"
                 className={`flex items-center py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-700 ${
                   activePage === "reported-posts"
-                    ? "bg-blue-50 text-blue-700 font-semibold"
+                    ? "bg-gray-100  border-b-4 border-b-blue-600  text-blue-700 font-semibold"
                     : ""
                 } ${sidebarExpanded ? "px-4" : "justify-center px-2"}`}
                 onClick={() => handleNavClick("reported-posts")}
@@ -109,7 +109,7 @@ export default function AdminPanel() {
                 to="job-listing"
                 className={`flex items-center py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-700 ${
                   activePage === "job-listing"
-                    ? "bg-blue-50 text-blue-700 font-semibold"
+                    ? "bg-gray-100  border-b-4 border-b-blue-600  text-blue-700 font-semibold"
                     : ""
                 } ${sidebarExpanded ? "px-4" : "justify-center px-2"}`}
                 onClick={() => handleNavClick("job-listing")}
@@ -136,7 +136,7 @@ export default function AdminPanel() {
                 to="analytics"
                 className={`flex items-center py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-700 ${
                   activePage === "analytics"
-                    ? "bg-blue-50 text-blue-700 font-semibold"
+                    ? "bg-gray-100  border-b-4 border-b-blue-600  text-blue-700 font-semibold"
                     : ""
                 } ${sidebarExpanded ? "px-4" : "justify-center px-2"}`}
                 onClick={() => handleNavClick("analytics")}
