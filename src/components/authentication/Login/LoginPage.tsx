@@ -65,6 +65,8 @@ const LoginPage = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-white relative">
+      <img className="absolute top-6 left-13 h-7" src="/public/images/login-logo.svg" alt="LinkedIn" />
+
       <motion.div className="w-full max-w-sm p-6 bg-white rounded-lg shadow-lg">
         <h2 className="text-3xl font-semibold text-gray-900 text-left mb-4">Sign in</h2>
 
