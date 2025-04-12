@@ -179,4 +179,6 @@ export const deleteRequest = async (url: string): Promise<DeleteRequestResponse 
 
 
 export const axiosInstance = axios.create({
-    baseURL: 'http://localhost:3000',});
+    baseURL: 'http://localhost:3000',
+    withCredentials: true,
+});

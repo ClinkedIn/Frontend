@@ -7,6 +7,7 @@ import ReCAPTCHA from "react-google-recaptcha";
 import GoogleLogin from "../../GoogleLoginButton";
 import Footer from "../../Footer/Footer";
 import { useSignup } from "../../../context/SignUpContext";
+import { useAuth } from "../../../context/AuthContext";
 
 const SignupPage = () => {
   const { signupData, setSignupData } = useSignup();
@@ -15,9 +16,9 @@ const SignupPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const recaptchaRef = useRef<ReCAPTCHA>(null);
-  const sitekey =import.meta.env.VITE_SITEKEY
+  const sitekey = import.meta.env.VITE_SITEKEY;
   const navigate = useNavigate();
-  // Validate Email Format
+
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
@@ -28,11 +29,9 @@ const SignupPage = () => {
     return true;
   };
 
-  // Validate Password Strength
   const validatePassword = (password: string) => {
     const strongPasswordRegex =
       /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-
     if (!strongPasswordRegex.test(password)) {
       setPasswordError(
         "Password must be at least 8 characters long, include an uppercase letter, a number, and a special character."
@@ -43,60 +42,80 @@ const SignupPage = () => {
     return true;
   };
 
-  // Handle Form Submission
+  const { setAuthToken } = useAuth(); // Get the setAuthToken function from context
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  e.preventDefault();
+  const recaptchaValue = recaptchaRef.current?.getValue();
+  if (!recaptchaValue) {
+    toast.error("Please complete the ReCAPTCHA.");
+    return;
+  }
 
-    // Check ReCAPTCHA
-    const recaptchaValue = recaptchaRef.current?.getValue();
-    if (!recaptchaValue) {
-      toast.error("Please complete the ReCAPTCHA.");
-      return;
-    }
+  if (
+    !signupData.firstName?.trim() ||
+    !signupData.lastName?.trim() ||
+    !signupData.email.trim() ||
+    !signupData.password.trim()
+  ) {
+    toast.error("Please fill in all fields.");
+    return;
+  }
 
-    // Validate Inputs
-    if (!signupData.email.trim() || !signupData.password.trim()) {
-      toast.error("Please fill in all fields.");
-      return;
-    }
-    if (!validateEmail(signupData.email) || !validatePassword(signupData.password)) {
-      return;
-    }
+  if (
+    !validateEmail(signupData.email) ||
+    !validatePassword(signupData.password)
+  ) {
+    return;
+  }
 
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+  try {
+    const response = await fetch(`${BASE_URL}/user/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        firstName: signupData.firstName,
+        lastName: signupData.lastName,
+        email: signupData.email,
+        password: signupData.password,
+        recaptchaResponseToken: recaptchaValue,
+      }),
+    });
+
+    let data = null;
+    let text = "";
     try {
-      // Send data to mock API
-      const response = await fetch("/api/user/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: signupData.email,
-          password: signupData.password,
-          recaptchaToken: recaptchaValue, // Include reCAPTCHA token
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Signup failed.");
-      }
-
-      // Save confirmation link (for testing purposes)
-      setSignupData((prev) => ({ ...prev, confirmationLink: data.confirmationLink }));
-
-      toast.success("Signup successful! Check your email for confirmation.");
-      navigate("name"); // Move to the next step
-    } catch (error: any) {
-      toast.error(error.message);
+      text = await response.text(); // get raw text
+      data = text ? JSON.parse(text) : null;
+    } catch (e) {
+      console.warn("Could not parse JSON. Raw text:", text);
     }
-  };
-  
 
-  // Handle Google Sign Up
+    if (!response.ok) {
+      console.error("Full response:", response);
+      console.error("Raw response text:", text);
+      throw new Error(data?.error || `Signup failed. Status: ${response.status}`);
+    }
+
+    // Store the authToken in the AuthContext if returned by the backend
+    if (data.authToken) {
+      setAuthToken(data.authToken); // Save the token
+    }
+
+    setSignupData((prev) => ({ ...prev, confirmationLink: data.confirmationLink }));
+    toast.success("Signup successful! Check your email for confirmation.");
+    navigate("location"); // Proceed to next step
+  } catch (error: any) {
+    toast.error(error.message);
+  }
+};
+
   const handleGoogleSignUp = async () => {
     try {
       await signInWithPopup(auth, provider);
-      navigate("/signup-name");
+      navigate("/feed");
     } catch {
       toast.error("Google signup failed.");
     }
@@ -117,7 +136,35 @@ const SignupPage = () => {
           animate={{ opacity: 1, y: 0 }}
         >
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Email Input */}
+            {/* First Name */}
+            <div className="flex flex-col">
+              <label htmlFor="first-name" className="text-sm font-semibold text-gray-700 mb-1">
+                First name
+              </label>
+              <input
+                id="first-name"
+                type="text"
+                value={signupData.firstName}
+                onChange={(e) => setSignupData({ ...signupData, firstName: e.target.value })}
+                className="w-full p-3 py-1 border rounded-md text-sm border-gray-600"
+              />
+            </div>
+
+            {/* Last Name */}
+            <div className="flex flex-col">
+              <label htmlFor="last-name" className="text-sm font-semibold text-gray-700 mb-1">
+                Last name
+              </label>
+              <input
+                id="last-name"
+                type="text"
+                value={signupData.lastName}
+                onChange={(e) => setSignupData({ ...signupData, lastName: e.target.value })}
+                className="w-full p-3 py-1 border rounded-md text-sm border-gray-600"
+              />
+            </div>
+
+            {/* Email */}
             <div className="flex flex-col">
               <label htmlFor="email" className="text-sm font-semibold text-gray-700 mb-1">
                 Email
@@ -137,7 +184,7 @@ const SignupPage = () => {
               {emailError && <p className="text-xs text-red-500 mt-1">{emailError}</p>}
             </div>
 
-            {/* Password Input */}
+            {/* Password */}
             <div className="relative flex flex-col">
               <label htmlFor="password" className="text-sm font-semibold text-gray-700 mb-1">
                 Password
@@ -164,7 +211,7 @@ const SignupPage = () => {
               {passwordError && <p className="text-xs text-red-500 mt-1">{passwordError}</p>}
             </div>
 
-            {/* Remember Me Checkbox */}
+            {/* Remember Me */}
             <div className="flex items-center">
               <input
                 type="checkbox"
@@ -178,13 +225,13 @@ const SignupPage = () => {
               </label>
             </div>
 
-            {/* ReCAPTCHA Integration */}
+            {/* ReCAPTCHA */}
             <div className="flex justify-center w-full">
               <ReCAPTCHA sitekey={sitekey} ref={recaptchaRef} />
               <Toaster />
             </div>
 
-            {/* Submit Button */}
+            {/* Submit */}
             <motion.button
               type="submit"
               className={`w-full py-3 text-white rounded-full text-sm font-semibold 
@@ -197,17 +244,17 @@ const SignupPage = () => {
             </motion.button>
           </form>
 
-          {/* OR Separator */}
+          {/* OR */}
           <div className="relative flex items-center my-4">
             <div className="w-full border-t border-gray-300"></div>
             <span className="px-3 text-sm text-gray-500 bg-white">or</span>
             <div className="w-full border-t border-gray-300"></div>
           </div>
 
-          {/* Google Signup Button */}
+          {/* Google */}
           <GoogleLogin className="w-full" type="button" onClick={handleGoogleSignUp} />
 
-          {/* Already a Member? */}
+          {/* Already signed up */}
           <p className="mt-4 text-center text-sm text-gray-600">
             Already on LinkedIn?{" "}
             <Link to="/login" className="text-blue-600 hover:underline">

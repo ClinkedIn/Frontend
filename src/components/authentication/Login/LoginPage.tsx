@@ -7,6 +7,7 @@ import { Loader } from "lucide-react";
 import { motion } from "framer-motion";
 import Footer from "../../Footer/Footer";
 import GoogleLogin from "../../GoogleLoginButton";
+import { useAuth } from "../../../context/AuthContext";
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
@@ -21,22 +22,32 @@ const LoginPage = () => {
     password: string;
   }
 
+  const { setAuthToken } = useAuth(); // Get the setAuthToken function from context
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
   const loginMutation = useMutation<void, unknown, UserData>({
     mutationFn: async (userData: UserData) => {
-      const response = await axiosInstance.post("/api/user/login", userData);
+      const response = await axiosInstance.post(`${BASE_URL}/user/login`, userData);
       return response.data;
     },
     onSuccess: (data: any) => {
-      // Save tokens (if needed)
-      localStorage.setItem("authToken", data.authToken);
-      localStorage.setItem("refreshToken", data.refreshToken);
+      // Save tokens in AuthContext and localStorage
+      if (data.authToken) {
+        setAuthToken(data.authToken); // Save the token in AuthContext
+        localStorage.setItem("authToken", data.authToken); // Persist in localStorage
+      }
+      if (data.refreshToken) {
+        localStorage.setItem("refreshToken", data.refreshToken); // Persist refreshToken
+      }
 
       queryClient.invalidateQueries({ queryKey: ["authUser"] });
       toast.success("Login successful!");
-      setTimeout(() => navigate("/home"), 1000);
+      setTimeout(() => navigate("/feed"), 1000);
     },
     onError: (err) => {
-      const errorMessage = (err as { response?: { data?: { error?: string } } }).response?.data?.error || "Invalid credentials";
+      const errorMessage =
+        (err as { response?: { data?: { error?: string } } }).response?.data?.error ||
+        "Invalid credentials";
       toast.error(errorMessage);
     },
   });
