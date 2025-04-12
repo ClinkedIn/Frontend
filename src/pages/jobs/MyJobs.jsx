@@ -9,40 +9,17 @@ const MyJobs=()=> {
     const [selectedTab, setSelectedTab] = useState("my-jobs");
     const [activeFilter, setActiveFilter] = useState("Saved");
     const [jobs, setJobs] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [authToken, setAuthToken] = useState(null);
-  
-  
-    // Original static jobs data
-    const staticJobs = [
-      {
-        id: 1,
-        title: "Software Engineer Internship",
-        company: "Advansys",
-        location: "Nasr City (On-site)",
-        appliedDate: "Applied 1d ago",
-        logo: "/advansys-logo.png",
-      },
-      {
-        id: 2,
-        title: "Full Stack Engineer - Intern",
-        company: "THNDR GROUP",
-        location: "Egypt (Remote)",
-        appliedDate: "Applied 3w ago",
-        logo: "/thndr-logo.png",
-      },
-    ];
-  let count = 1;
-  let myJobsCount = 3;
-
+    const [user, setUser]=useState()
 
   const testLogin = async () => {
     try {
         const response = await axios.post('http://localhost:3000/user/login', {
-          email: "Charlie.Kreiger@yahoo.com",
-          password: "password123"
-        },
+         email: "Colin.Miller@hotmail.com",
+        password: "password123"
+        },{
+          withCredentials:true
+        }
+        
        );
         
        console.log('login successful')
@@ -59,37 +36,67 @@ const MyJobs=()=> {
       }
     }
   };
-  useEffect(() => {
-      testLogin(); 
-  }, []);
-  useEffect(() => {
-    const fetchSavedJobs = async () => {
-      if (selectedTab === "my-jobs" && activeFilter === "Saved") {
-        try {
-          setLoading(true);
-          const response = await axios.get('http://localhost:3000/jobs/saved', {
-            // withCredentials: true // Send cookies with request
-          });
-          setJobs(response.data);
-          setError(null);
-        } catch (err) {
-          setError("Failed to fetch saved jobs");
-          setJobs(staticJobs);
-        } finally {
-          setLoading(false);
-        }
-      } else {
-        setJobs(staticJobs);
-        setLoading(false);
-      }
-    };
 
-    fetchSavedJobs();
-  }, [activeFilter, selectedTab]);
+  
+  const fetchUser = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/user/me", {
+    
+        withCredentials:true
+      });
+  
+      setUser(response.data);
+      console.log("User data:", response.data);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+    }
+  };
+    const fetchSavedJobs = async () => {
+      
+        try {
+          const response = await axios.get("http://localhost:3000/jobs/saved", {
+            withCredentials: true // Send cookies with request
+          });
+          setJobs(response.data.jobs);
+          console.log("jobs saved:",response.data.jobs)
+        } catch (err) {
+          console.log("error in save jobs")
+          setJobs(staticJobs);
+        }
+       
+    };
+     // Function to fetch jobs according to the current filter
+  const fetchMyApplications = async (status) => {
+    try {
+      const response = await axios.get(`http://localhost:3000/jobs/my-applications?status=${status.toLowerCase()}`, {
+        withCredentials: true,
+      });
+      setJobs(response.data.jobs);
+      console.log(`Fetched jobs for status: ${status}`, response.data);
+    } catch (error) {
+      console.error(`Error fetching jobs with status ${status}:`, error);
+      setJobs([]);
+    }
+  };
+
+    useEffect(() => {
+      const loginAndFetchData = async () => {
+        await testLogin(); // Ensure login is completed first
+        fetchUser()
+        if (selectedTab === "my-jobs" && activeFilter === "Saved") {
+          fetchSavedJobs();
+        } else if (selectedTab === "my-jobs") {
+          fetchMyApplications(activeFilter);
+        }
+      }
+      loginAndFetchData();
+    },  [selectedTab, activeFilter]);
+  
+
 
   // Determine filter options based on selected tab
   const filterOptions =
-    selectedTab === "posted-jobs" ? ["Drafts", "Posted"] : ["Saved", "In Progress", "Applied", "Archived"];
+    selectedTab === "posted-jobs" ? ["Drafts", "Posted"] : ["Saved", "Pending", "Viewed", "Accepted", "Rejected"];
 
   return (
     <div className="flex bg-[#F5F3EE] p-6 mt-14">
@@ -109,7 +116,6 @@ const MyJobs=()=> {
             onClick={() => setSelectedTab("posted-jobs")}
           >
             <span>Posted jobs</span>
-            <span className="text-gray-500">{count}</span>
           </li>
           <li
             className={`flex justify-between items-center p-2 cursor-pointer ${
@@ -118,7 +124,7 @@ const MyJobs=()=> {
             onClick={() => setSelectedTab("my-jobs")}
           >
             <span>My jobs</span>
-            <span className="text-gray-500">{myJobsCount}</span>
+
           </li>
         </ul>
       </div>
@@ -146,13 +152,9 @@ const MyJobs=()=> {
 
         {/* Job Listings */}
         <div className="space-y-4 pl-6 pr-6">
-          {loading ? (
-            <p>Loading jobs...</p>
-          ) : error ? (
-            <p>{error}</p>
-          ) : jobs && jobs.length > 0 ? (
+          {jobs && jobs.length > 0 ? (
             jobs.map((job, index) => (
-              <JobCard key={index} job={job} />
+              <JobCard key={index} job={job} state={activeFilter} />
             ))
           ) : (
             <p>No jobs available at the moment.</p>
