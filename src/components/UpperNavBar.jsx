@@ -61,7 +61,7 @@ const Header = ({notifications}) => {
 
   const handleMessagingClick = () => {
     setTab('messaging')
-    navigate('/messaging');
+    navigate('/messaging/');
   }
     
   
