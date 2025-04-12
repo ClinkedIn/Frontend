@@ -7,6 +7,17 @@ import JobCard from '../../components/jobs/JobCard';
 import Filter from "../../components/jobs/Filter";
 import ApplyJob from "../../components/jobs/ApplyJob";
 
+/**
+ * The JobBoardPage component displays a list of available jobs and allows users to view details,
+ * apply for jobs, and save jobs for later. It uses location state to display specific jobs based
+ * on search queries or location data passed through routing. It features a modal for applying to jobs
+ * and includes a filter component to refine job search results.
+ * 
+ * @component
+ * @example
+ * // Usage
+ * <JobBoardPage />
+ */
 const JobBoardPage = () => {
   const [jobs, setJobs] = useState([]);
   const [selectedJob, setSelectedJob] = useState(null);
@@ -15,9 +26,25 @@ const JobBoardPage = () => {
   const [applicants, setApplicants] = useState(0); 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  /**
+   * Opens the modal for applying to a job.
+   * 
+   * @function openModal
+   */
   const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
 
+  /**
+   * Closes the modal for applying to a job.
+   * 
+   * @function closeModal
+   */
+  const closeModal = () => setIsModalOpen(false);
+/**
+   * Saves the selected job by sending a POST request to the backend.
+   * 
+   * @async
+   * @function handleSave
+   */
   const handleSave = async () => {
     const jobId = selectedJob?._id || selectedJob?.id;
     if (!jobId) {
@@ -39,7 +66,14 @@ const JobBoardPage = () => {
         alert(`Failed to save job: ${error.response.data.message}`);
       }
     }
-  };
+  }; 
+  /**
+  * useEffect hook to load jobs, selected job, and current tab information
+  * from location state when the component mounts.
+  * 
+  * @hook
+  * @function useEffect
+  */
   useEffect(() => {
     if (location.state) {
       setJobs(location.state.jobs || []);

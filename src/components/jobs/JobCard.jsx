@@ -2,15 +2,29 @@ import React, {useState, useEffect} from "react";
 import { X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-
+/**
+ * The JobCard component displays the details of a job listing, including the company logo, job title,
+ * job location, and the time since the job was posted. It also includes a clickable job title that 
+ * navigates to a detailed job board page and a button to close the card.
+ * 
+ * @component
+ * @param {Object} props - The properties passed to the component.
+ * @param {Object} props.job - The job object to display.
+ * @param {Array} props.jobs - A list of jobs, used for passing job data to the job board page.
+ * @param {Object} props.state - The current state of the application, used when navigating to the job board page.
+ * 
+ * @example
+ * // Usage
+ * <JobCard job={jobData} jobs={jobsList} state={locationState} />
+ */
 const JobCard = ({ job, jobs, state}) => {
   const [selectedJob, setSelectedJob]=useState()
-
-  // Function to calculate weeks ago
-  const getWeeksAgo = (monthsAgo) => {
-    return Math.round(monthsAgo * 4.33);
-  };
-
+/**
+   * Handles the click event on the job title. It sets the selected job and navigates to the job board page.
+   * 
+   * @function handleJobClick
+   * @param {Object} job - The job object that was clicked.
+   */
   const handleJobClick = (job) => {
     setSelectedJob(job);
     navigate("/job-board", {
@@ -40,9 +54,6 @@ const JobCard = ({ job, jobs, state}) => {
         </p>
         <p className="text-gray-700 text-sm">
         {(job.company?.name ?? job.job?.company?.name ?? "Unknown Company")} · {job.jobLocation}
-        </p>
-        <p className="text-gray-500 text-xs">
-          {getWeeksAgo(job.createdAt)} weeks ago
         </p>
       </div>
 

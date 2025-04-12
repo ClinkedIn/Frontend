@@ -1,3 +1,20 @@
+/**
+ * Jobs Component
+ * 
+ * This component renders a job listing page with user profile information, 
+ * sidebar navigation for job preferences, and a list of job recommendations. 
+ * It also includes a modal for setting job preferences.
+ * 
+ * Features:
+ * - Authenticates a test user and fetches user data
+ * - Fetches a list of job postings from the server
+ * - Displays job postings using the JobCard component
+ * - Sidebar for preferences, my jobs, and posting a job
+ * - Modal for editing user job preferences and qualifications
+ * 
+ * @component
+ * @returns {JSX.Element} The rendered job listing page
+ */
 import React, { useEffect, useState } from 'react';
 import Header from '../../components/UpperNavBar';
 import ProfileCard from '../../components/ProfileCard';
@@ -8,14 +25,22 @@ import { IoMdClose } from 'react-icons/io';
 import JobCard from '../../components/jobs/JobCard';
 import { useLocation, useNavigate } from "react-router-dom";
 
-
+/**
+ * Jobs functional component
+ * @returns {JSX.Element}
+ */
 const Jobs = () => {
     const navigate = useNavigate();
     const [user, setUser] = useState();
     const [searchQuery, setSearchQuery] = useState("");
     const [showPreferences, setShowPreferences] = useState(false);
     const [jobs, setJobs]=useState()
-
+ /**
+   * Fetches job listings from the backend server
+   * @async
+   * @function
+   * @returns {Promise<Object[]>} Array of job objects
+   */
    const getJobs = async () => {
     try {
       const response = await axios.get("http://localhost:3000/jobs", {
@@ -32,11 +57,15 @@ const Jobs = () => {
       }
     }
   };
- 
+ /**
+   * Simulates user login using test credentials
+   * @async
+   * @function
+   */
    const testLogin = async () => {
     try {
       const response = await axios.post('http://localhost:3000/user/login', {
-        email: "Franz_Robel36@hotmail.com",
+        email: "Porter.Hodkiewicz@hotmail.com",
         password: "password123"
       },{
         withCredentials:true
@@ -58,7 +87,11 @@ const Jobs = () => {
       }
     }
   };
-
+ /**
+   * Fetches current user profile data
+   * @async
+   * @function
+   */
   const fetchUser = async () => {
     try {
       const response = await axios.get("http://localhost:3000/user/me", {
@@ -81,7 +114,11 @@ const Jobs = () => {
   
     loginAndFetchData();
   }, []);
-
+ /**
+   * Handles change in search query input
+   * @function
+   * @param {string} query - The search input string
+   */
   const handleSearchChange = (query) => {
     setSearchQuery(query);
   };

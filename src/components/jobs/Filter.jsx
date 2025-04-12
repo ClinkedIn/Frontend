@@ -1,6 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-
+/**
+ * The Filter component provides an interface for users to filter job search results based on company, 
+ * experience, and work type. It fetches company data from an API and allows users to select filters 
+ * that are used to query job listings.
+ * 
+ * @component
+ * @example
+ * // Usage
+ * <Filter />
+ */
 const Filter = () => {
   const [companies, setCompanies] = useState([]);
   const [experience, setExperience] = useState(0);
@@ -8,7 +17,14 @@ const Filter = () => {
   const [selectedCompany, setSelectedCompany] = useState("");
 
 
-  
+  /**
+   * Fetches company data from the API and sets the companies state.
+   * This function is called on component mount to populate the company selection list.
+   * 
+   * @async
+   * @function fetchCompanies
+   * @returns {Promise<void>}
+   */
   const fetchCompanies= async () => {
     try {
       const response = await axios.get("http://localhost:3000/companies'");
@@ -18,6 +34,14 @@ const Filter = () => {
       console.error("Error fetching user:", error);
     }
   };
+  /**
+   * Handles the job filter request. It builds a query string based on selected filter values 
+   * and fetches filtered job listings from the API.
+   * 
+   * @async
+   * @function handleFilter
+   * @returns {Promise<void>}
+   */
   const handleFilter = async () => {
     
       try {
@@ -33,7 +57,6 @@ const Filter = () => {
         
       } catch (error) {
         console.error("Search error:", error);
-        // Optionally show error to user
       }
     };
 
@@ -42,7 +65,7 @@ const Filter = () => {
   }, []);
   useEffect(() => {
     handleFilter();
-  }, [experience, workType, selectedCompany]); // Add dependencies here
+  }, [experience, workType, selectedCompany]); 
   console.log("companies: ", companies )
 
   return (

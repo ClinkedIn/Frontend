@@ -5,16 +5,31 @@ import Header from "../../components/UpperNavBar";
 import JobCard from '../../components/jobs/JobCard';
 
 
+/**
+ * * MyJobs component displays either the user's saved/applied jobs
+ * or the jobs they have posted, depending on the selected tab.
+ *
+ * @component
+ * @returns {JSX.Element} Rendered MyJobs component
+ */
 const MyJobs=()=> {
     const [selectedTab, setSelectedTab] = useState("my-jobs");
     const [activeFilter, setActiveFilter] = useState("Saved");
     const [jobs, setJobs] = useState([]);
     const [user, setUser]=useState()
 
+    /**
+   * Performs test login using hardcoded user credentials.
+   * Handles various login error cases (server, network, unknown).
+   *
+   * @async
+   * @function
+   * @returns {Promise<void>}
+   */
   const testLogin = async () => {
     try {
         const response = await axios.post('http://localhost:3000/user/login', {
-         email: "Colin.Miller@hotmail.com",
+         email: "Porter.Hodkiewicz@hotmail.com",
         password: "password123"
         },{
           withCredentials:true
@@ -37,7 +52,13 @@ const MyJobs=()=> {
     }
   };
 
-  
+  /**
+   * Fetches currently logged-in user data and updates state.
+   *
+   * @async
+   * @function
+   * @returns {Promise<void>}
+   */
   const fetchUser = async () => {
     try {
       const response = await axios.get("http://localhost:3000/user/me", {
@@ -51,6 +72,14 @@ const MyJobs=()=> {
       console.error("Error fetching user:", error);
     }
   };
+  /**
+   * Fetches jobs saved by the user.
+   * Updates job list state with the retrieved jobs.
+   *
+   * @async
+   * @function
+   * @returns {Promise<void>}
+   */
     const fetchSavedJobs = async () => {
       
         try {
@@ -65,10 +94,19 @@ const MyJobs=()=> {
         }
        
     };
+
+     /**
+   * Fetches jobs the user has applied to, filtered by status.
+   *
+   * @async
+   * @function
+   * @param {string} status - The application status to filter by (e.g., "Pending", "Accepted")
+   * @returns {Promise<void>}
+   */
      // Function to fetch jobs according to the current filter
   const fetchMyApplications = async (status) => {
     try {
-      const response = await axios.get(`http://localhost:3000/jobs/my-applications?status=${status}`, {
+      const response = await axios.get(`http://localhost:3000/jobs/my-applications?status=${status.toLowerCase()}`, {
         withCredentials: true,
       });
       setJobs(response.data.applications);
@@ -78,7 +116,9 @@ const MyJobs=()=> {
       setJobs([]);
     }
   };
-
+/**
+   * Effect to handle login, fetch user and job data when selectedTab or activeFilter changes.
+   */
     useEffect(() => {
       const loginAndFetchData = async () => {
         await testLogin(); // Ensure login is completed first
@@ -95,7 +135,10 @@ const MyJobs=()=> {
     },  [selectedTab, activeFilter]);
   
 
-
+ /**
+   * List of filters based on the selected tab.
+   * @type {string[]}
+   */
   // Determine filter options based on selected tab
   const filterOptions =
     selectedTab === "posted-jobs" ? ["Drafts", "Posted"] : ["Saved", "Pending", "Viewed", "Accepted", "Rejected"];

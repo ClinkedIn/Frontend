@@ -1,15 +1,67 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+
+
+/**
+ * Component for applying to a job with multiple steps, including contact information and screening questions.
+ * 
+ * @component
+ * @param {Object} props - Component properties
+ * @param {boolean} props.isOpen - Whether the modal is open or not
+ * @param {Function} props.onClose - Function to close the modal
+ * @param {Object} props.job - The job data that the user is applying to
+ * @param {string} props.jobId - The ID of the job being applied to
+ * @returns {JSX.Element|null} The ApplyJob component or null if the modal is not open
+ */
 const ApplyJob = ({ isOpen, onClose, job , jobId}) => {
+  /**
+   * Current step of the application process (1 for contact info, 3 for screening questions).
+   * @type {number}
+   */
   const [step, setStep] = useState(1); 
+
+  /**
+   * The user's email address.
+   * @type {string}
+   */
   const [email, setEmail] = useState('');
+
+  /**
+   * The user's phone country code.
+   * @type {string}
+   */
   const [countryCode, setCountryCode] = useState('+20'); 
+
+  /**
+   * The user's phone number.
+   * @type {string}
+   */
   const [phoneNumber, setPhoneNumber] = useState('');
+
+  /**
+   * The user data fetched after login.
+   * @type {Object}
+   */
   const [user, setUser] = useState();
+
+  /**
+   * The answers to screening questions.
+   * @type {Object}
+   */
   const [step3Answers, setStep3Answers] = useState({});
-  const [id, setId]=useState()
 
+  /**
+   * The job ID to apply for.
+   * @type {string}
+   */
+  const [id, setId] = useState();
 
+  /**
+   * Logs in the user for the application process.
+   * 
+   * @async
+   * @returns {Promise<void>} A promise indicating login completion
+   */
  console.log("job:", job)
  console.log("job id inside apply", jobId)
   const testLogin = async () => {
@@ -37,7 +89,12 @@ const ApplyJob = ({ isOpen, onClose, job , jobId}) => {
       }
     }
   };
-
+ /**
+   * Fetches the current user's data.
+   * 
+   * @async
+   * @returns {Promise<void>} A promise indicating fetch completion
+   */
   const fetchUser = async () => {
     try {
       const response = await axios.get("http://localhost:3000/user/me", {
@@ -59,6 +116,12 @@ const ApplyJob = ({ isOpen, onClose, job , jobId}) => {
   
     loginAndFetchData();
   }, []);
+    /**
+   * Handles the job application submission.
+   * 
+   * @async
+   * @returns {Promise<void>} A promise indicating application submission completion
+   */
   const handleApply = async () => {
     const id= jobId?? job._id??"" 
     console.log("id inside submit func:", id)
@@ -96,6 +159,12 @@ const ApplyJob = ({ isOpen, onClose, job , jobId}) => {
       }
     }
   };
+   /**
+   * Handles changes to the answers of the screening questions.
+   * 
+   * @param {number} index - The index of the question in the screening questions list
+   * @param {string} value - The value of the answer provided
+   */
   const handleStep3Change = (index, value) => {
     setStep3Answers((prev) => ({
       ...prev,

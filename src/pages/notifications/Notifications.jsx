@@ -13,6 +13,16 @@ import { Toaster } from 'react-hot-toast';
 
 
 
+/**
+ * The Notification component is responsible for displaying and managing user notifications.
+ * It supports filtering notifications by category, marking them as read, and sending test notifications.
+ * It fetches notifications and user data from an API and displays them accordingly.
+ * 
+ * @component
+ * @example
+ * // Usage
+ * <Notification />
+ */
 const Notification = () => {
 
   
@@ -45,7 +55,13 @@ const Notification = () => {
   // }, []);
 
 
-
+/**
+   * Sends a test login request to authenticate a user.
+   * This function simulates a login process by sending a POST request to the backend.
+   *
+   * @async
+   * @function testLogin
+   */
   const testLogin = async () => {
     try {
       const response = await axios.post('http://localhost:3000/user/login', {
@@ -71,7 +87,12 @@ const Notification = () => {
       }
     }
   };
-
+/**
+   * Sends a test notification to the backend and shows a toast notification in the app.
+   * 
+   * @async
+   * @function handleSendTestNotification
+   */
   const handleSendTestNotification = async () => {
     try {
       // Send to backend (mock)
@@ -92,7 +113,12 @@ const Notification = () => {
       console.error("Error sending notification:", error);
     }
   };
-
+ /**
+   * Fetches notifications from the backend and updates the state.
+   * 
+   * @async
+   * @function fetchNotifications
+   */
   const fetchNotifications = async () => {
     try {
       const response = await axios.get(
@@ -104,7 +130,13 @@ const Notification = () => {
       console.error("Error fetching notifications:", error);
     }
   };
-
+/**
+   * Marks a notification as read when clicked.
+   *
+   * @async
+   * @function handleNotificationClick
+   * @param {string} id - The ID of the notification to be marked as read.
+   */
  //Mark Notification as read
   const handleNotificationClick = async (id) => {
     const response = await patchRequest(`http://localhost:3000/notifications/${id}/read`);
@@ -118,6 +150,12 @@ const Notification = () => {
         console.error('Failed to update notification', response);
     }
 };
+/**
+ * Fetches the user data from the backend and updates the state.
+ * 
+ * @async
+ * @function fetchUser
+ */
   const fetchUser= async ()=>{
     try {
       const response = await axios.get("http://localhost:3000/user");
@@ -127,13 +165,26 @@ const Notification = () => {
     }
   }
   
+  /**
+   * useEffect hook for executing login, fetching user data, and notifications.
+   * It triggers login and fetch data operations on component mount.
+   * 
+   * @function
+   * @hook
+   */
   useEffect(() => {
     const loginAndFetchData = async () => {
       await testLogin(); // Ensure login is completed first
     fetchUser();
     fetchNotifications();}
   }, []);
-
+ /**
+   * Handles the change in the main notification filter.
+   * Resets post filter and closes dropdown when switching to a different category.
+   * 
+   * @function handleMainFilterChange
+   * @param {string} filter - The selected filter for notifications.
+   */
   // Reset My Posts label when a different main category is selected
   const handleMainFilterChange = (filter) => {
     setSelectedFilter(filter);
@@ -154,7 +205,12 @@ const Notification = () => {
     reactions: "My Posts | Reactions",
     reposts: "My Posts | Reposts",
   };
-
+/**
+   * Filters notifications based on the selected main filter and post filter.
+   * 
+   * @function filteredNotifications
+   * @returns {Array} - The filtered notifications based on user selection.
+   */
   // Filter Notifications
   const filteredNotifications = notifications.filter((notif) => {
     if (selectedFilter === "all") return true;
