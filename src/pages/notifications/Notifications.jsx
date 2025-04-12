@@ -65,8 +65,8 @@ const Notification = () => {
   const testLogin = async () => {
     try {
       const response = await axios.post('http://localhost:3000/user/login', {
-        email: "Charlie.Kreiger@yahoo.com",
-        password: "password123"
+        email: "Porter.Hodkiewicz@hotmail.com",
+        password: "Aa12345678"
       },{
         withCredentials:true
       }
@@ -87,7 +87,8 @@ const Notification = () => {
       }
     }
   };
-/**
+
+  /**
    * Sends a test notification to the backend and shows a toast notification in the app.
    * 
    * @async
@@ -122,9 +123,10 @@ const Notification = () => {
   const fetchNotifications = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:3000/notifications"
+        "http://localhost:3000/notifications",
+        {withCredentials:true}
       );
-      console.log(response)
+      console.log("notifications:",response.data)
       setNotifications(response.data); // Set fetched notifications
     } catch (error) {
       console.error("Error fetching notifications:", error);
@@ -139,12 +141,16 @@ const Notification = () => {
    */
  //Mark Notification as read
   const handleNotificationClick = async (id) => {
-    const response = await patchRequest(`http://localhost:3000/notifications/${id}/read`);
+    const response = await axios.patch(
+      `http://localhost:3000/notifications/mark-read/${id}`,
+      {},
+      { withCredentials: true }
+    );
 
     if (response?.status === 200) {
         console.log('Updated notification');
         setNotifications(notifications.map(notification =>
-            notification.id === id ? { ...notification, isRead: true } : notification
+            notification._id === id ? { ...notification, isRead: true } : notification
         ));
     } else {
         console.error('Failed to update notification', response);
@@ -156,14 +162,19 @@ const Notification = () => {
  * @async
  * @function fetchUser
  */
-  const fetchUser= async ()=>{
-    try {
-      const response = await axios.get("http://localhost:3000/user");
-      setUser(response.data);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-    }
-  }
+  const fetchUser = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/user/me", {
+      
+          withCredentials:true
+        });
+    
+        setUser(response.data);
+        console.log("User data:", response.data);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
+    };
   
   /**
    * useEffect hook for executing login, fetching user data, and notifications.
@@ -177,6 +188,7 @@ const Notification = () => {
       await testLogin(); // Ensure login is completed first
     fetchUser();
     fetchNotifications();}
+    loginAndFetchData()
   }, []);
  /**
    * Handles the change in the main notification filter.
@@ -340,7 +352,7 @@ const Notification = () => {
                
                 id="Notification-Card">
                   {filteredNotifications.map((notif) => (
-                    <NotificationCard key={notif.id} notification={notif} handleNotificationClick={()=>handleNotificationClick(notif.id)} />
+                    <NotificationCard key={notif._id} notification={notif} handleNotificationClick={()=>handleNotificationClick(notif._id)} />
                   ))}
                 </ul>
                 //Handles if Tab doesnt have any notifications
@@ -396,22 +408,6 @@ const Notification = () => {
                 </div>
               )}
             </div>
-          </div>
-  
-          {/*Ad Section */}
-          <div className="w-full lg:w-72">
-            <div className="shadow-sm rounded-lg border border-gray-300">
-              <img
-              id="Ad-img"
-                src="/ads.png"
-                alt="Ad Banner"
-                className="w-full rounded-lg cursor-pointer"
-                onClick={() => navigate("/ads-page")}
-              />
-            </div>
-  
-            {/* Footer Links */}
-              <FooterLinks/>
           </div>
         </div>
       </div>
