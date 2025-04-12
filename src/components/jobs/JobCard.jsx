@@ -1,11 +1,24 @@
-import React from "react";
+import React, {useState, useEffect} from "react";
 import { X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
-const JobCard = ({ job }) => {
+const JobCard = ({ job, jobs, state}) => {
+  const [selectedJob, setSelectedJob]=useState()
+
   // Function to calculate weeks ago
   const getWeeksAgo = (monthsAgo) => {
     return Math.round(monthsAgo * 4.33);
+  };
+
+  const handleJobClick = (job) => {
+    setSelectedJob(job);
+    navigate("/job-board", {
+      state: {
+        jobs,
+        selectedJob: job,
+      },
+    });
   };
 
   const navigate = useNavigate();
@@ -13,7 +26,7 @@ const JobCard = ({ job }) => {
     <div className="flex items-start justify-between bg-white p-4 border-b-2 border-gray-200">
       {/* Company Logo */}
       <img
-        src={job.companyLogo}
+        src={job.companyId?.logo?? job.company.logo}
         alt="Company Logo"
         className="w-12 h-12 object-contain"
       />
@@ -21,12 +34,12 @@ const JobCard = ({ job }) => {
       {/* Job Details */}
       <div className="flex-1 ml-3">
         <p 
-        onClick={() => navigate("/profile")}
+       onClick={() => handleJobClick(job)} className="cursor-pointer"
         className="text-blue-600 font-semibold hover:underline">
           {job.title}
         </p>
         <p className="text-gray-700 text-sm">
-          {job.company} · {job.jobLocation}
+        {job.company?.name ?? job.company} · {job.jobLocation}
         </p>
         <p className="text-gray-500 text-xs">
           {getWeeksAgo(job.createdAt)} weeks ago
@@ -36,7 +49,8 @@ const JobCard = ({ job }) => {
       {/* Close Button */}
       <button className="text-gray-500 hover:text-gray-800">
         <X size={18} />
-      </button>
+        </button>
+
     </div>
   );
 };
