@@ -6,19 +6,21 @@ import axios from "axios";
 import { FaClipboardList, FaBookmark, FaFileAlt, FaPen,FaArrowRight } from 'react-icons/fa';
 import { IoMdClose } from 'react-icons/io';
 import JobCard from '../../components/jobs/JobCard';
+import { useLocation, useNavigate } from "react-router-dom";
+
 
 const Jobs = () => {
-   const [user, setUser] = useState();
-   const [searchQuery, setSearchQuery] = useState("");
-   const [showPreferences, setShowPreferences] = useState(false);
-   const [jobs, setJobs]=useState()
-  
+    const navigate = useNavigate();
+    const [user, setUser] = useState();
+    const [searchQuery, setSearchQuery] = useState("");
+    const [showPreferences, setShowPreferences] = useState(false);
+    const [jobs, setJobs]=useState()
+
    const getJobs = async () => {
     try {
       const response = await axios.get("http://localhost:3000/jobs", {
       });
       setJobs(response.data)
-      console.log("Jobs Data:", response.data);
       return response.data;
     } catch (error) {
       if (error.response) {
@@ -30,14 +32,15 @@ const Jobs = () => {
       }
     }
   };
-  
-
+ 
    const testLogin = async () => {
     try {
       const response = await axios.post('http://localhost:3000/user/login', {
-        email: "Charlie.Kreiger@yahoo.com",
+        email: "Franz_Robel36@hotmail.com",
         password: "password123"
-      },
+      },{
+        withCredentials:true
+      }
       
     );
 
@@ -70,31 +73,34 @@ const Jobs = () => {
     }
   };
   useEffect(() => {
-
-      testLogin(); // Ensure login is completed first
-      fetchUser(); // Fetch user data after login
-      getJobs(); // Fetch jobs after user data is retrieved
-   
+    const loginAndFetchData = async () => {
+      await testLogin(); // Ensure login is completed first
+      fetchUser();
+      getJobs(); 
+    };
+  
+    loginAndFetchData();
   }, []);
 
   const handleSearchChange = (query) => {
     setSearchQuery(query);
   };
-
   return (
     <div className="container bg-[#f4f2ee] min-h-screen ">
-      <Header onSearchChange={handleSearchChange} />
+      <Header />
       <div className="container mx-auto px-4 pt-20 flex flex-col md:flex-row gap-6">
         {/* Left Sidebar */}
         <div className="w-full md:w-1/4 p-4">
-          {/* <ProfileCard user={user} /> */}
+           <ProfileCard user={user} /> 
           <div className="bg-white shadow-md rounded-lg pt-1 space-y-1 mt-2.5">
             <button 
               onClick={() => setShowPreferences(true)}
               className="flex items-center font-semibold text-[#3d3d3d] gap-3 w-full text-left py-3 px-6 hover:bg-gray-100">
               <FaClipboardList className="font-semibold text-[#3d3d3d]" /> Preferences
             </button>
-            <button className="flex items-center gap-3 font-semibold w-full text-left py-3 px-6 hover:bg-gray-100">
+            <button 
+            onClick={() => navigate("/myjobs")}
+            className="flex items-center gap-3 font-semibold w-full text-left py-3 px-6 hover:bg-gray-100">
               <FaBookmark className="font-semibold text-[#3d3d3d]" /> My jobs
             </button>
             <button className="flex items-center gap-3 w-full font-semibold text-left p-5 text-blue-600 hover:bg-gray-100 rounded-md">
@@ -110,7 +116,10 @@ const Jobs = () => {
           </h2>
           {jobs && jobs.length > 0 ? (
             jobs.map((job, index) => (
-              <JobCard key={index} job={job} />
+              <div ><JobCard key={index} 
+              job={job} jobs={jobs}
+              /></div>
+              
             ))
           ) : (
             <p>No jobs available at the moment.</p>
