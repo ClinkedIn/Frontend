@@ -33,7 +33,6 @@ const Header = ({notifications}) => {
   // Handler to navigate to jobs page
   const handleJobsClick = () => {
     navigate('/jobs');
-    console.log(tab)
   };
   const handleSearch = async (e) => {
     e.preventDefault();

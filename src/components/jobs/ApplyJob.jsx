@@ -7,6 +7,7 @@ const ApplyJob = ({ isOpen, onClose, job , jobId}) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [user, setUser] = useState();
   const [step3Answers, setStep3Answers] = useState({});
+  const [id, setId]=useState()
 
 
  console.log("job:", job)
@@ -59,6 +60,8 @@ const ApplyJob = ({ isOpen, onClose, job , jobId}) => {
     loginAndFetchData();
   }, []);
   const handleApply = async () => {
+    const id= jobId?? job._id??"" 
+    console.log("id inside submit func:", id)
     const contactEmail = email;
     const contactPhone = `${countryCode} ${phoneNumber}`;
   
@@ -77,7 +80,7 @@ const ApplyJob = ({ isOpen, onClose, job , jobId}) => {
   
     try {
       const response = await axios.post(
-        `http://localhost:3000/jobs/${jobId}/apply`,
+        `http://localhost:3000/jobs/${id}/apply`,
         applicationData,
         { withCredentials: true }
       );
@@ -85,8 +88,12 @@ const ApplyJob = ({ isOpen, onClose, job , jobId}) => {
       alert("Application submitted!");
       onClose();
     } catch (error) {
-      console.error("Error submitting application:", error);
-     
+      if (error.response) {
+        console.error("Error response data:", error.response.data);
+        alert (error.response.data.message)
+      } else {
+        console.error("Error submitting application:", error);
+      }
     }
   };
   const handleStep3Change = (index, value) => {
@@ -102,7 +109,7 @@ const ApplyJob = ({ isOpen, onClose, job , jobId}) => {
       <div className="relative w-full max-w-xl rounded-lg bg-white p-7 shadow-lg">
         {/* Header */}
         <div className="mb-4 flex items-start justify-between">
-          <h2 className="text-xl font-semibold text-gray-800">Apply to Orange Business</h2>
+          <h2 className="text-xl font-semibold text-gray-800">Apply to {job.companyId.name } Business</h2>
           <button
             onClick={onClose}
             className="-mt-1 pl-4 text-2xl font-light text-gray-400 hover:text-gray-600"
@@ -118,13 +125,14 @@ const ApplyJob = ({ isOpen, onClose, job , jobId}) => {
             <h3 className="mb-3 text-sm font-semibold text-gray-600">Contact Info</h3>
             <div className="mb-5 flex items-center">
               <img
-                src={user?.image||" "}
-                alt="User"
+                src={user?.user.profilePicture
+                  ||" "}
+                alt="User picture"
                 className="mr-4 h-12 w-12 rounded-full object-cover ring-1 ring-gray-200"
               />
               <div>
-                <p className="font-medium text-gray-800">{user?.name|| "john doe"}</p>
-                <p className="text-sm text-gray-500">{user?.location||"ivbsid"}</p>
+                <p className="font-medium text-gray-800">{user?.user.firstName|| "john doe"}</p>
+                <p className="text-sm text-gray-500">{user?.user.location||"unknown location"}</p>
               </div>
             </div>
              <div className="space-y-4">
