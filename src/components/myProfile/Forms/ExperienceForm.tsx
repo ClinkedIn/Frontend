@@ -1,73 +1,164 @@
 import React, { useState } from "react";
+import ConfirmationDialog from "../ConfirmationDialog";
 
+/**
+ * Props interface for the ExperienceForm component
+ */
 interface ExperienceFormProps {
   onClose: () => void;
-  onSave: (experience: {
-    title: string;
-    employmentType: string;
-    organization: string;
-    currentlyWorking: boolean;
-    startMonth: string;
-    startYear: string;
-    endMonth: string;
-    endYear: string;
-    location: string;
-    locationType: string;
-    description: string;
-    profileHeadline?: string;
-    jobSource?: string;
-  }) => void;
+  onSave: (experience: any) => void;
 }
 
+/**
+ * List of companies available for selection in the form
+ */
+const COMPANIES = [
+  "Google",
+  "Apple",
+  "Microsoft",
+  "Amazon",
+  "Meta",
+  "Netflix",
+  "IBM",
+  "Oracle",
+  "Intel",
+  "Cisco",
+  "Adobe",
+  "Salesforce",
+  "Twitter",
+  "LinkedIn",
+  "Shopify",
+  "Spotify",
+  "Tesla",
+  "Uber",
+  "Airbnb",
+  "Slack",
+  "PayPal",
+  "Square",
+  "Zoom",
+];
+
+/**
+ * Available job types for the form
+ */
+const JOB_TYPES = [
+  "Full-time",
+  "Part-time",
+  "Contract",
+  "Internship",
+  "Freelance",
+  "Temporary",
+  "Volunteer",
+  "Remote",
+  "Hybrid",
+  "On-site",
+];
+
+/**
+ * List of job titles available for selection
+ */
+const JOB_TITLES = [
+  "Software Engineer",
+  "Product Manager",
+  "Data Scientist",
+  "UX Designer",
+  "Frontend Developer",
+  "Backend Developer",
+  "Full Stack Developer",
+  "DevOps Engineer",
+  "QA Engineer",
+  "Project Manager",
+  "Content Writer",
+  "Marketing Specialist",
+  "Sales Representative",
+  "Customer Support",
+  "HR Manager",
+  "Financial Analyst",
+  "Business Analyst",
+  "Research Scientist",
+  "Systems Administrator",
+  "Network Engineer",
+];
+
+/**
+ * List of common skills for quick selection
+ */
+const COMMON_SKILLS = [
+  "Python",
+  "JavaScript",
+  "HTML",
+  "CSS",
+  "React",
+  "Node.js",
+  "SQL",
+  "Java",
+  "C++",
+  "AI",
+  "Machine Learning",
+  "Data Science",
+  "Project Management",
+  "Leadership",
+  "Communication",
+  "Problem Solving",
+  "Critical Thinking",
+  "Teamwork",
+];
+
+/**
+ * Experience Form component
+ * Allows users to add or edit professional experience entries
+ *
+ * @param {ExperienceFormProps} props - Component props
+ * @returns {React.FC} The Experience Form component
+ */
 const ExperienceForm: React.FC<ExperienceFormProps> = ({ onClose, onSave }) => {
-  const [title, setTitle] = useState("");
-  const [employmentType, setEmploymentType] = useState("");
-  const [organization, setOrganization] = useState("");
+  const [company, setCompany] = useState("");
+  const [customCompany, setCustomCompany] = useState("");
+  const [jobTitle, setJobTitle] = useState("");
+  const [jobType, setJobType] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [currentlyWorking, setCurrentlyWorking] = useState(false);
-  const [startMonth, setStartMonth] = useState("");
-  const [startYear, setStartYear] = useState("");
-  const [endMonth, setEndMonth] = useState("");
-  const [endYear, setEndYear] = useState("");
   const [location, setLocation] = useState("");
-  const [locationType, setLocationType] = useState("");
   const [description, setDescription] = useState("");
-
-  const [profileHeadline, setProfileHeadline] = useState("");
-  const [jobSource, setJobSource] = useState("");
-
+  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+  const [customSkill, setCustomSkill] = useState("");
+  const [media, setMedia] = useState("");
   const [errors, setErrors] = useState<{
-    title?: string;
-    organization?: string;
+    company?: string;
+    jobTitle?: string;
     startDate?: string;
-    endDate?: string;
   }>({});
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [experienceData, setExperienceData] = useState<any>(null);
+  const [showOtherCompany, setShowOtherCompany] = useState(false);
 
+  /**
+   * Validates the form fields before submission
+   * @returns {boolean} True if the form is valid, false otherwise
+   */
   const validateForm = () => {
     const newErrors: {
-      title?: string;
-      organization?: string;
+      company?: string;
+      jobTitle?: string;
       startDate?: string;
-      endDate?: string;
     } = {};
     let isValid = true;
 
-    if (!title.trim()) {
-      newErrors.title = "Title is required";
+    const actualCompany = showOtherCompany ? customCompany : company;
+
+    if (!actualCompany.trim()) {
+      newErrors.company = "Company name is required";
       isValid = false;
     }
 
-    if (!organization.trim()) {
-      newErrors.organization = "Company or organization is required";
+    if (!jobTitle.trim()) {
+      newErrors.jobTitle = "Job title is required";
       isValid = false;
     }
 
-    if (!startMonth || !startYear) {
+    if (!startDate) {
       newErrors.startDate = "Start date is required";
-      isValid = false;
-    }
-
-    if (!currentlyWorking && (!endMonth || !endYear)) {
-      newErrors.endDate = "End date is required";
       isValid = false;
     }
 
@@ -75,30 +166,138 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({ onClose, onSave }) => {
     return isValid;
   };
 
+  /**
+   * Formats a date string for the API
+   * @param {string} dateString - The date string to format
+   * @returns {string} Formatted date string in YYYY-MM-DD format
+   */
+  const formatDateForApi = (dateString: string) => {
+    if (!dateString) return "";
+
+    const parts = dateString.split("-");
+    if (parts.length < 2) return dateString;
+
+    const year = parts[0];
+    const month = parts[1].padStart(2, "0");
+    const day = "01";
+
+    return `${year}-${month}-${day}`;
+  };
+
+  /**
+   * Handles the save action for the form
+   */
   const handleSave = () => {
     if (validateForm()) {
-      onSave({
-        title,
-        employmentType,
-        organization,
+      const finalCompany = showOtherCompany ? customCompany : company;
+
+      const formattedStartDate = formatDateForApi(startDate);
+      const formattedEndDate = currentlyWorking
+        ? ""
+        : formatDateForApi(endDate);
+
+      const data = {
+        companyName: finalCompany,
+        jobTitle,
+        employmentType: jobType,
+        fromDate: formattedStartDate,
+        toDate: currentlyWorking ? undefined : formattedEndDate || undefined,
         currentlyWorking,
-        startMonth,
-        startYear,
-        endMonth,
-        endYear,
-        location,
-        locationType,
-        description,
-        profileHeadline,
-        jobSource,
-      });
-      onClose();
+        location: location || undefined,
+        locationType: jobType.includes("Remote")
+          ? "Remote"
+          : jobType.includes("Hybrid")
+          ? "Hybrid"
+          : jobType.includes("On-site")
+          ? "Onsite"
+          : undefined,
+        description: description || undefined,
+        skills: selectedSkills,
+        media: media || undefined,
+      };
+
+      setExperienceData(data);
+      setShowConfirmation(true);
+    }
+  };
+
+  /**
+   * Handles the confirmation action
+   */
+  const handleConfirm = () => {
+    onSave(experienceData);
+    onClose();
+  };
+
+  /**
+   * Handles the add more action in the confirmation dialog
+   */
+  const handleAddMore = () => {
+    onSave(experienceData);
+    resetForm();
+  };
+
+  /**
+   * Resets all form fields to their default values
+   */
+  const resetForm = () => {
+    setCompany("");
+    setCustomCompany("");
+    setJobTitle("");
+    setJobType("");
+    setStartDate("");
+    setEndDate("");
+    setCurrentlyWorking(false);
+    setLocation("");
+    setDescription("");
+    setSelectedSkills([]);
+    setCustomSkill("");
+    setMedia("");
+    setShowConfirmation(false);
+    setShowOtherCompany(false);
+  };
+
+  /**
+   * Handles company selection change
+   * @param {React.ChangeEvent<HTMLSelectElement>} e - Change event
+   */
+  const handleCompanyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    setCompany(value);
+    setShowOtherCompany(value === "other");
+  };
+
+  /**
+   * Adds a custom skill to the selected skills list
+   */
+  const addSkill = () => {
+    if (customSkill && !selectedSkills.includes(customSkill)) {
+      setSelectedSkills([...selectedSkills, customSkill]);
+      setCustomSkill("");
+    }
+  };
+
+  /**
+   * Removes a skill from the selected skills list
+   * @param {string} skill - The skill to remove
+   */
+  const removeSkill = (skill: string) => {
+    setSelectedSkills(selectedSkills.filter((s) => s !== skill));
+  };
+
+  /**
+   * Adds a predefined skill to the selected skills list
+   * @param {string} skill - The skill to add
+   */
+  const selectSkill = (skill: string) => {
+    if (!selectedSkills.includes(skill)) {
+      setSelectedSkills([...selectedSkills, skill]);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-[rgba(0,0,0,0.5)]  flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg w-full max-w-xl shadow-lg overflow-y-auto max-h-[98vh]">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg w-full max-w-xl shadow-lg overflow-y-auto max-h-[90vh]">
         <div className="flex justify-between items-center p-4 border-b">
           <h3 className="text-xl font-semibold">Add experience</h3>
           <button
@@ -127,194 +326,138 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({ onClose, onSave }) => {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Title<span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                placeholder="Ex: Retail Sales Manager"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className={`w-full px-3 py-2 border rounded-md ${
-                  errors.title ? "border-red-500" : ""
-                }`}
-                required
-              />
-              {errors.title && (
-                <p className="text-red-500 text-sm mt-1">{errors.title}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Employment type
+                Company<span className="text-red-500">*</span>
               </label>
               <select
-                value={employmentType}
-                onChange={(e) => setEmploymentType(e.target.value)}
-                className="w-full px-3 py-2 border rounded-md appearance-none"
+                value={company}
+                onChange={handleCompanyChange}
+                className={`w-full px-3 py-2 border rounded-md ${
+                  errors.company && !showOtherCompany ? "border-red-500" : ""
+                }`}
+                required
               >
-                <option value="">Please select</option>
-                <option value="Full-time">Full-time</option>
-                <option value="Part-time">Part-time</option>
-                <option value="Self-employed">Self-employed</option>
-                <option value="Freelance">Freelance</option>
-                <option value="Contract">Contract</option>
-                <option value="Internship">Internship</option>
-                <option value="Apprenticeship">Apprenticeship</option>
-                <option value="Seasonal">Seasonal</option>
+                <option value="">Select a company</option>
+                {COMPANIES.map((comp, index) => (
+                  <option key={index} value={comp}>
+                    {comp}
+                  </option>
+                ))}
+                <option value="other">Other (not listed)</option>
               </select>
+
+              {showOtherCompany && (
+                <input
+                  type="text"
+                  placeholder="Enter company name"
+                  value={customCompany}
+                  onChange={(e) => setCustomCompany(e.target.value)}
+                  className={`w-full px-3 py-2 border rounded-md mt-2 ${
+                    errors.company ? "border-red-500" : ""
+                  }`}
+                />
+              )}
+
+              {errors.company && (
+                <p className="text-red-500 text-sm mt-1">{errors.company}</p>
+              )}
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Company or organization<span className="text-red-500">*</span>
+                Job Title<span className="text-red-500">*</span>
               </label>
-              <input
-                type="text"
-                placeholder="Ex: Microsoft"
-                value={organization}
-                onChange={(e) => setOrganization(e.target.value)}
+              <select
+                value={jobTitle}
+                onChange={(e) => setJobTitle(e.target.value)}
                 className={`w-full px-3 py-2 border rounded-md ${
-                  errors.organization ? "border-red-500" : ""
+                  errors.jobTitle ? "border-red-500" : ""
                 }`}
-                required
-              />
-              {errors.organization && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.organization}
-                </p>
+              >
+                <option value="">Select a job title</option>
+                {JOB_TITLES.map((title, index) => (
+                  <option key={index} value={title}>
+                    {title}
+                  </option>
+                ))}
+              </select>
+              {errors.jobTitle && (
+                <p className="text-red-500 text-sm mt-1">{errors.jobTitle}</p>
               )}
             </div>
 
-            <div className="flex items-center mt-2">
-              <div className="flex items-center h-10">
-                <div className="bg-green-600 text-white rounded p-1 mr-2">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-                <label className="text-gray-700">
-                  I am currently working in this role
-                </label>
-              </div>
-              <input
-                type="checkbox"
-                checked={currentlyWorking}
-                onChange={() => setCurrentlyWorking(!currentlyWorking)}
-                className="h-4 w-4 ml-2 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-              />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Job Type
+              </label>
+              <select
+                value={jobType}
+                onChange={(e) => setJobType(e.target.value)}
+                className="w-full px-3 py-2 border rounded-md"
+              >
+                <option value="">Select job type</option>
+                {JOB_TYPES.map((type, index) => (
+                  <option key={index} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Start date<span className="text-red-500">*</span>
               </label>
-              <div className="grid grid-cols-2 gap-2">
-                <select
-                  value={startMonth}
-                  onChange={(e) => setStartMonth(e.target.value)}
-                  className={`border rounded-md px-3 py-2 appearance-none ${
-                    errors.startDate ? "border-red-500" : ""
-                  }`}
-                  required
-                >
-                  <option value="">Month</option>
-                  <option value="January">January</option>
-                  <option value="February">February</option>
-                  <option value="March">March</option>
-                  <option value="April">April</option>
-                  <option value="May">May</option>
-                  <option value="June">June</option>
-                  <option value="July">July</option>
-                  <option value="August">August</option>
-                  <option value="September">September</option>
-                  <option value="October">October</option>
-                  <option value="November">November</option>
-                  <option value="December">December</option>
-                </select>
-                <select
-                  value={startYear}
-                  onChange={(e) => setStartYear(e.target.value)}
-                  className={`border rounded-md px-3 py-2 appearance-none ${
-                    errors.startDate ? "border-red-500" : ""
-                  }`}
-                  required
-                >
-                  <option value="">Year</option>
-                  {Array.from(
-                    { length: 50 },
-                    (_, i) => new Date().getFullYear() - i
-                  ).map((year) => (
-                    <option key={year} value={year.toString()}>
-                      {year}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <input
+                type="text"
+                placeholder="YYYY-MM-DD (e.g., 2019-03-15)"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className={`w-full px-3 py-2 border rounded-md ${
+                  errors.startDate ? "border-red-500" : ""
+                }`}
+              />
               {errors.startDate && (
                 <p className="text-red-500 text-sm mt-1">{errors.startDate}</p>
               )}
+              <p className="text-xs text-gray-500 mt-1">
+                Format: YYYY-MM-DD (e.g., 2019-03-15)
+              </p>
             </div>
 
-            {!currentlyWorking && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  End date<span className="text-red-500">*</span>
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  <select
-                    value={endMonth}
-                    onChange={(e) => setEndMonth(e.target.value)}
-                    className={`border rounded-md px-3 py-2 appearance-none ${
-                      errors.endDate ? "border-red-500" : ""
-                    }`}
-                  >
-                    <option value="">Month</option>
-                    <option value="January">January</option>
-                    <option value="February">February</option>
-                    <option value="March">March</option>
-                    <option value="April">April</option>
-                    <option value="May">May</option>
-                    <option value="June">June</option>
-                    <option value="July">July</option>
-                    <option value="August">August</option>
-                    <option value="September">September</option>
-                    <option value="October">October</option>
-                    <option value="November">November</option>
-                    <option value="December">December</option>
-                  </select>
-                  <select
-                    value={endYear}
-                    onChange={(e) => setEndYear(e.target.value)}
-                    className={`border rounded-md px-3 py-2 appearance-none ${
-                      errors.endDate ? "border-red-500" : ""
-                    }`}
-                  >
-                    <option value="">Year</option>
-                    {Array.from(
-                      { length: 50 },
-                      (_, i) => new Date().getFullYear() - i
-                    ).map((year) => (
-                      <option key={year} value={year.toString()}>
-                        {year}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                {errors.endDate && (
-                  <p className="text-red-500 text-sm mt-1">{errors.endDate}</p>
-                )}
-              </div>
-            )}
+            <div className="flex items-center mb-2">
+              <input
+                type="checkbox"
+                id="currentlyWorking"
+                checked={currentlyWorking}
+                onChange={(e) => setCurrentlyWorking(e.target.checked)}
+                className="h-4 w-4 text-blue-600"
+              />
+              <label
+                htmlFor="currentlyWorking"
+                className="ml-2 text-sm text-gray-700"
+              >
+                I am currently working here
+              </label>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                End date {!currentlyWorking && "(or expected)"}
+              </label>
+              <input
+                type="text"
+                placeholder="YYYY-MM-DD (e.g., 2022-08-30)"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                disabled={currentlyWorking}
+                className={`w-full px-3 py-2 border rounded-md ${
+                  currentlyWorking ? "bg-gray-100" : ""
+                }`}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Format: YYYY-MM-DD (e.g., 2022-08-30)
+              </p>
+            </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -322,7 +465,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({ onClose, onSave }) => {
               </label>
               <input
                 type="text"
-                placeholder="Ex: London, United Kingdom"
+                placeholder="Ex: San Francisco, CA"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 className="w-full px-3 py-2 border rounded-md"
@@ -331,113 +474,113 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({ onClose, onSave }) => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Location type
+                Description
               </label>
-              <select
-                value={locationType}
-                onChange={(e) => setLocationType(e.target.value)}
-                className="w-full px-3 py-2 border rounded-md appearance-none"
-              >
-                <option value="">Please select</option>
-                <option value="On-site">On-site</option>
-                <option value="Hybrid">Hybrid</option>
-                <option value="Remote">Remote</option>
-              </select>
-              <p className="text-xs text-gray-500 mt-1">
-                Pick a location type (ex: remote)
-              </p>
+              <textarea
+                placeholder="You can write about responsibilities, achievements, etc."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="w-full px-3 py-2 border rounded-md h-32 resize-none"
+              ></textarea>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Description
+                Skills
               </label>
-              <textarea
-                placeholder="List your major duties and successes, highlighting specific projects"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="w-full px-3 py-2 border rounded-md h-32"
-              ></textarea>
-              <div className="flex justify-between items-center mt-2">
-                <div className="flex items-center">
-                  <div className="bg-yellow-100 rounded p-1 mr-2">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5 text-yellow-600"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
+              <div className="flex flex-wrap gap-2 mb-2">
+                {selectedSkills.map((skill, index) => (
+                  <div
+                    key={index}
+                    className="bg-blue-100 px-3 py-1 rounded-full flex items-center"
+                  >
+                    <span>{skill}</span>
+                    <button
+                      onClick={() => removeSkill(skill)}
+                      className="ml-2 text-blue-500 hover:text-blue-700"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M13 10V3L4 14h7v7l9-11h-7z"
-                      />
-                    </svg>
+                      &times;
+                    </button>
                   </div>
-                  <span className="text-blue-600 font-medium text-sm">
-                    Get AI suggestions
-                  </span>
-                  <span className="text-gray-500 text-sm ml-1">
-                    with Premium
-                  </span>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Add a skill"
+                  value={customSkill}
+                  onChange={(e) => setCustomSkill(e.target.value)}
+                  className="flex-grow px-3 py-2 border rounded-md"
+                  onKeyPress={(e) => e.key === "Enter" && addSkill()}
+                />
+                <button
+                  onClick={addSkill}
+                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                >
+                  Add
+                </button>
+              </div>
+              <div className="mt-2">
+                <p className="text-sm font-medium text-gray-700 mb-1">
+                  Common skills:
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {COMMON_SKILLS.map((skill, index) => (
+                    <button
+                      key={index}
+                      onClick={() => selectSkill(skill)}
+                      disabled={selectedSkills.includes(skill)}
+                      className={`px-3 py-1 rounded-full text-sm ${
+                        selectedSkills.includes(skill)
+                          ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                          : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                      }`}
+                    >
+                      {skill}
+                    </button>
+                  ))}
                 </div>
-                <span className="text-gray-500 text-sm">0/2,000</span>
               </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Profile headline
+                Media (Projects, Portfolio, etc.)
               </label>
               <input
                 type="text"
-                placeholder="Ex: Biomedical engineering student at Cairo university"
-                value={profileHeadline}
-                onChange={(e) => setProfileHeadline(e.target.value)}
+                placeholder="URL to your work (e.g., https://example.com/project.pdf)"
+                value={media}
+                onChange={(e) => setMedia(e.target.value)}
                 className="w-full px-3 py-2 border rounded-md"
               />
-              <p className="text-xs text-gray-500 mt-1">
-                Appears below your name at the top of the profile
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Where did you find this job?
-              </label>
-              <select
-                value={jobSource}
-                onChange={(e) => setJobSource(e.target.value)}
-                className="w-full px-3 py-2 border rounded-md appearance-none"
-              >
-                <option value="">Please select</option>
-                <option value="Company website">Company website</option>
-                <option value="LinkedIn">LinkedIn</option>
-                <option value="Job board">Job board</option>
-                <option value="Recruiter">Recruiter</option>
-                <option value="Personal connection">Personal connection</option>
-                <option value="University">University</option>
-                <option value="Other">Other</option>
-              </select>
-              <p className="text-xs text-gray-500 mt-1">
-                This information will be used to improve LinkedIn's job search
-                experience.
-              </p>
             </div>
           </div>
         </div>
 
         <div className="flex justify-end p-4 border-t bg-gray-50">
           <button
-            className="px-4 py-2 bg-blue-600 text-white rounded-full font-medium hover:bg-blue-700"
+            className="px-6 py-2 bg-blue-600 text-white rounded-full font-medium hover:bg-blue-700"
             onClick={handleSave}
           >
             Save
           </button>
         </div>
       </div>
+
+      {showConfirmation && (
+        <ConfirmationDialog
+          title="Experience Added"
+          message={`${jobTitle} at ${
+            showOtherCompany ? customCompany : company
+          } has been added to your profile.`}
+          confirmText="Done"
+          onConfirm={handleConfirm}
+          onCancel={() => setShowConfirmation(false)}
+          showAddMore={true}
+          onAddMore={handleAddMore}
+        />
+      )}
     </div>
   );
 };

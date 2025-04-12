@@ -2,11 +2,10 @@ import React, { useState } from "react";
 
 import Navbar from "../../components/Navbar/Navbar";
 import ProfileHeader from "../../components/myProfile/ProfileHeader";
-import ProfileSuggestions from "../../components/myProfile/ProfileSuggestions";
 import ExperienceSection from "../../components/myProfile/ExperienceSection";
 import EducationSection from "../../components/myProfile/EducationSection";
-import { SkillsSection } from "../../components/myProfile/SkillsSection";
-
+import SkillsSection from "../../components/myProfile/SkillsSection";
+import ResumeSection from "../../components/myProfile/ResumeSection";
 const LinkedInProfile: React.FC = () => {
   const [showExperienceForm, setShowExperienceForm] = useState(false);
 
@@ -21,9 +20,6 @@ const LinkedInProfile: React.FC = () => {
         <div className="flex flex-col lg:flex-row gap-6">
           <div className="w-full lg:w-3/4 relative">
             <div className="mt-4">
-              <ProfileSuggestions />
-            </div>
-            <div className="mt-4">
               <ExperienceSection
                 showExperienceForm={showExperienceForm}
                 setShowExperienceForm={setShowExperienceForm}
@@ -34,6 +30,9 @@ const LinkedInProfile: React.FC = () => {
             </div>
             <div className="mt-4">
               <SkillsSection />
+            </div>
+            <div className="mt-4">
+              <ResumeSection />
             </div>
           </div>
 

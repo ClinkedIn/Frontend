@@ -1,28 +1,35 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './styles/index.css'
-import { BrowserRouter } from 'react-router-dom'
-import {
-  QueryClientProvider,
-  QueryClient
-} from '@tanstack/react-query'
-import App from './App.tsx'
-import { worker } from './mocks/browser';
-
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import "./styles/index.css";
+import { BrowserRouter } from "react-router-dom";
+import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
+import App from "./App.tsx";
+import { worker } from "./mocks/browser";
+import { CookiesProvider } from "react-cookie";
 async function enableMocking() {
-  if (import.meta.env.VITE_NODE_ENV === 'DEV') {
-    await worker.start({ onUnhandledRequest: 'bypass' });
+  // Always enable in development, regardless of VITE_NODE_ENV
+  if (process.env.NODE_ENV === "development") {
+    return worker.start({
+      onUnhandledRequest: "bypass",
+      serviceWorker: {
+        url: "/mockServiceWorker.js",
+      },
+    });
   }
+  return Promise.resolve();
 }
 
-await enableMocking();
-const queryClient = new QueryClient();
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-        <BrowserRouter>
-          <QueryClientProvider client={queryClient}>
+enableMocking().then(() => {
+  const queryClient = new QueryClient();
+  createRoot(document.getElementById("root")!).render(
+    <StrictMode>
+      <BrowserRouter>
+        <QueryClientProvider client={queryClient}>
+          <CookiesProvider>
             <App />
-          </QueryClientProvider>
-        </BrowserRouter>
-  </StrictMode>,
-)
+          </CookiesProvider>
+        </QueryClientProvider>
+      </BrowserRouter>
+    </StrictMode>
+  );
+});

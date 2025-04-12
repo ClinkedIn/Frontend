@@ -24,7 +24,7 @@ import CompanyProfileAdminViewPage from "./pages/CompanyPages/CompanyProfileAdmi
 import CompanyHomePage from "./components/CompanyPageSections/Home"
 import CompanyPostsPage from "./components/CompanyPageSections/Posts"
 import CompanyJobsPage from "./components/CompanyPageSections/Jobs"
-
+import Settings from "./components/Settings/Settings.jsx";
 
 
 // Define your routes as an array of RouteObject (compatible with React Router v6)
@@ -132,6 +132,10 @@ const routes: RouteObject[] = [
 
     ]
 
+  },
+    {
+    path: "/settings",
+    element: React.createElement(Settings),
   },
 
 ];
