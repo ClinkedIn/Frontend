@@ -9,11 +9,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCamera } from "@fortawesome/free-solid-svg-icons";
 import CompanyForm from "../../components/CompanyPageSections/CompanyPageForm";
 import axios from "axios";
+import { putRequest } from "../../services/axios";
 
 
 const CompanyProfileAdminViewPage = () => {
     const navigate = useNavigate();
-    
+    const [user, setUser] = useState(null);
     const {companyId, section = "Feed"} = useParams();
     const [activeTab, setActiveTab] = useState(section);
     const [companyInfo, setCompanyInfo] = useState();
@@ -31,6 +32,49 @@ const CompanyProfileAdminViewPage = () => {
     const [errors, setErrors] = useState({ });
     const [notifications, setNotifications] = useState([]);
     const Tabs =["Feed","Activity","Analytics"];
+    const testLogin = async () => {
+        try {
+          const response = await axios.post('http://localhost:3000/user/login', {
+            email: "Porter.Hodkiewicz@hotmail.com",
+            password: "Aa12345678"
+          },{
+            withCredentials:true
+          }
+          
+        );
+    
+          console.log("Login Response:", response.data);
+        } catch (error) {
+          if (error.response) {
+      
+            console.error("Login Error - Server Response:", error.response.data);
+          } else if (error.request) {
+            // Request made but no response received
+            console.error("Login Error - No Response:", error.request);
+          } else {
+            // Something else happened
+            console.error("Login Error:", error.message);
+          }
+        }
+      };
+     /**
+       * Fetches current user profile data
+       * @async
+       * @function
+       */
+      const fetchUser = async () => {
+        try {
+          const response = await axios.get("http://localhost:3000/user/me", {
+        
+            withCredentials:true
+          });
+      
+          setUser(response.data);
+          console.log("User data:", response.data);
+        } catch (error) {
+          console.error("Error fetching user:", error);
+        }
+      };
 
     const isValid = () => {
         let newErrors = {};
@@ -72,11 +116,7 @@ const CompanyProfileAdminViewPage = () => {
             newErrors.industry = "";
         }
     
-        if (!checkbox) {
-            newErrors.checkbox = "You must agree to the additional terms.";
-        } else {
-            newErrors.checkbox = "";
-        }
+
         
         setErrors(newErrors);
         return Object.keys(newErrors).filter((key) => newErrors[key]).length === 0;
@@ -98,7 +138,7 @@ const CompanyProfileAdminViewPage = () => {
     const fetchCompanyInfo=async()=>{
         try {
             const response = await axios.get(
-                "http://localhost:5173/companies/12345"
+                `http://localhost:3000/companies/${companyId}`
             );
             setCompanyInfo(response.data); 
             setCompanyName(response.data.name)
@@ -114,13 +154,21 @@ const CompanyProfileAdminViewPage = () => {
             console.error("Error fetching company info:", error);
          }
     }
+    useEffect(() => {
+        const loginAndFetchData = async () => {
+          await testLogin(); // Ensure login is completed first
+          fetchUser(); 
+        };
+      
+        loginAndFetchData();
+      }, []);
     const handleUpdatePage =async()=>{
        
         if(isValid()){
             
             console.log("Page updated")
             const company ={
-                userId: "1234",
+                userId: user.user._id,
                 name: companyName,
                 address:companyAddress,
                 website: website,
@@ -130,7 +178,7 @@ const CompanyProfileAdminViewPage = () => {
                 logo: logoPreview,
                 tagLine: tagline
             }
-            const response = await axios.put(`http://localhost:5173/companies/${companyId}`,company);
+            const response = await putRequest(`http://localhost:3000/companies/${companyId}`,company);
             console.log(response)
             setShowForm(false)
 
