@@ -25,6 +25,7 @@ import CompanyHomePage from "./components/CompanyPageSections/Home"
 import CompanyPostsPage from "./components/CompanyPageSections/Posts"
 import CompanyJobsPage from "./components/CompanyPageSections/Jobs"
 import MyJobs from "./pages/jobs/MyJobs.jsx";
+import MessagingPage from "./pages/messaging/Messaging.jsx";
 
 
 
@@ -138,6 +139,10 @@ const routes: RouteObject[] = [
     ]
 
   },
+  {
+    path:"/messaging/:id",
+    element: React.createElement(MessagingPage),
+  }
 
 ];
 

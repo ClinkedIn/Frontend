@@ -37,6 +37,10 @@ const Header = ({notifications, onSearchChange}) => {
     navigate('/jobs');
     console.log("jobs")
   };
+  const handleMessagingClick = () => {
+    setTab('messaging')
+    navigate('/messaging');
+  }
     // Handle search submission
     const handleSearch = (e) => {
       e.preventDefault();
@@ -109,7 +113,9 @@ const Header = ({notifications, onSearchChange}) => {
           >
             <img src="/Images/nav-jobs.svg" alt="Jobs" className="w-6 h-6" />
           </button>
-          <button className="hover:bg-gray-200 p-2 rounded-lg">
+          <button className="hover:bg-gray-200 p-2 rounded-lg"
+            onClick={handleMessagingClick}
+          >
             <img src="/Images/nav-messaging.svg" alt="Messaging" className="w-6 h-6" />
           </button>
           <button 
