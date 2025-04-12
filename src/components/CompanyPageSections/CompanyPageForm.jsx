@@ -2,7 +2,7 @@
 import { FaPlus,FaUpload } from "react-icons/fa6";
 
 
-const CompanyForm = ({ errors,companyName, setCompanyName, tagline, setTagline, industry, setIndustry, organizationType, setOrganizationType, organizationSize, setOrganizationSize, website, setWebsite, checkbox, setCheckbox, companyAddress, setCompanyAddress, logoPreview, setLogoPreview,showTerms }) =>{
+const CompanyForm = ({ errors,companyName, setCompanyName, tagline, setTagline, industry, setIndustry, organizationType, setOrganizationType, organizationSize, setOrganizationSize, website, setWebsite, checkbox, setCheckbox, companyAddress, setCompanyAddress, logoPreview, setLogoPreview ,children}) =>{
 
 
     return(
@@ -157,12 +157,7 @@ const CompanyForm = ({ errors,companyName, setCompanyName, tagline, setTagline, 
                 ></textarea>
                 <p className="text-sm text-gray-500">Use your tagline to briefly describe what your organization does. This can be changed later. {tagline.length}/{120} </p>
             </div>
-            {showTerms &&
-            <div className="flex  gap-2">
-                <input type="checkbox" data-testid="checkbox" checked={checkbox} onChange={(e) => setCheckbox(e.target.checked)} id="checkbox" className=" size-12 rounded-md border-gray-300  focus:border-green-500 focus:ring-green-500 " />
-                <p >I verify that I am an authorized representative of this organization and have the right to act on its behalf in the creation and management of this page. The organization and I agree to the additional terms for Pages.</p> 
-            </div>}  
-            {errors.checkbox && <p className="text-red-500 text-sm ">{errors.checkbox}</p>} 
+            {children}
         </form>   
         </div>    
     )

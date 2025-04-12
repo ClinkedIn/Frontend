@@ -22,6 +22,9 @@ import CompanyHomePage from "./components/CompanyPageSections/Home";
 import CompanyPostsPage from "./components/CompanyPageSections/Posts";
 import CompanyJobsPage from "./components/CompanyPageSections/Jobs";
 import MyJobs from "./pages/jobs/MyJobs.jsx";
+import MessagingPage from "./pages/messaging/Messaging.jsx";
+
+
 import JobBoardPage from "./pages/jobs/JobBoardPage.jsx";
 import JobListing from "./components/AdminPanel/JobListing";
 import Analytics from "./components/AdminPanel/Analytics";
@@ -151,6 +154,11 @@ const routes: RouteObject[] = [
       { path: "Edit Page", element: React.createElement(CompanyJobsPage) },
     ],
   },
+  {
+    path:"/messaging/:id",
+    element: React.createElement(MessagingPage),
+  }
+
 ];
 
 export default routes;

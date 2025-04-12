@@ -153,7 +153,7 @@ const CompanyProfileAdminViewPage = () => {
                     onClick={(e) => e.stopPropagation()} 
                 >
                     <CompanyForm 
-                        errors={errors}v 
+                        errors={errors}
                         companyName={companyName} setCompanyName={setCompanyName}
                         tagline={tagline} setTagline={setTagline}
                         industry={industry} setIndustry={setIndustry}
@@ -163,7 +163,6 @@ const CompanyProfileAdminViewPage = () => {
                         checkbox={checkbox} setCheckbox={setCheckbox}
                         companyAddress={companyAddress} setCompanyAddress={setCompanyAddress}
                         logoPreview={logoPreview} setLogoPreview={setLogoPreview}
-                        showTerms={false}
                     />
                     <div className="flex justify-end gap-4 mt-4">
                         <button 
