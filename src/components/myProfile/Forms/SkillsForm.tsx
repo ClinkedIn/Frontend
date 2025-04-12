@@ -1,69 +1,91 @@
 import React, { useState } from "react";
+import ConfirmationDialog from "../ConfirmationDialog";
 
 interface SkillsFormProps {
-  onAdd: (skill: string, context: { education?: string }) => void;
-  onCancel: () => void;
-  educationOptions: string[];
+  onClose: () => void;
+  onSave: (skill: any) => void;
+  editSkill?: {
+    skillName: string;
+    educationIndexes: number[];
+    experienceIndexes: number[];
+  };
 }
 
-const SUGGESTED_SKILLS = [
-  { name: "Engineering" },
-  { name: "Marketing" },
-  { name: "Analytical Skills" },
-  { name: "Research Skills" },
-  { name: "Project Management" },
-  { name: "Strategy" },
-  { name: "Design" },
-  { name: "Management" },
-  { name: "Customer Service" },
-  { name: "Communication" },
+const COMMON_SKILLS = [
+  "HTML",
+  "CSS",
+  "JavaScript",
+  "React",
+  "Node.js",
+  "Python",
+  "Java",
+  "C++",
+  "SQL",
+  "MongoDB",
+  "GraphQL",
+  "TypeScript",
+  "Git",
+  "Docker",
+  "AWS",
+  "Azure",
+  "Leadership",
+  "Communication",
+  "Problem Solving",
+  "Project Management",
+  "Agile",
+  "Design Thinking",
+  "Data Analysis",
 ];
 
 const SkillsForm: React.FC<SkillsFormProps> = ({
-  onAdd,
-  onCancel,
-  educationOptions,
+  onClose,
+  onSave,
+  editSkill,
 }) => {
-  const [skill, setSkill] = useState<string>("");
-  const [selectedEducation, setSelectedEducation] = useState<string | null>(
-    null
+  const [skillName, setSkillName] = useState(editSkill?.skillName || "");
+  const [originalSkillName, setOriginalSkillName] = useState(
+    editSkill?.skillName || ""
   );
-  const [followSkill, setFollowSkill] = useState<boolean>(true);
-  const [errors, setErrors] = useState<{ skill?: string }>({});
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [showSuggestions, setShowSuggestions] = useState<boolean>(true);
+  const [isEditing, setIsEditing] = useState(!!editSkill);
+  const [errors, setErrors] = useState<{ skillName?: string }>({});
 
-  const handleSubmit = () => {
-    if (!skill.trim()) {
-      setErrors({ skill: "Skill is required" });
-      return;
+  const validateForm = () => {
+    const newErrors: { skillName?: string } = {};
+    let isValid = true;
+
+    if (!skillName.trim()) {
+      newErrors.skillName = "Skill name is required";
+      isValid = false;
     }
 
-    setIsSubmitting(true);
-
-    setTimeout(() => {
-      onAdd(skill, {
-        education: selectedEducation || undefined,
-      });
-      setIsSubmitting(false);
-    }, 500);
+    setErrors(newErrors);
+    return isValid;
   };
 
-  const handleSuggestionClick = (suggestion: string) => {
-    setSkill(suggestion);
-    setShowSuggestions(false);
-    setErrors({});
+  const handleSave = () => {
+    if (validateForm()) {
+      onSave({
+        skillName,
+        originalSkillName: isEditing ? originalSkillName : null,
+        isEditing,
+      });
+    }
+  };
+
+  const selectCommonSkill = (skill: string) => {
+    setSkillName(skill);
   };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white w-full max-w-3xl max-h-screen flex flex-col">
-        <div className="border-b flex justify-between items-center p-4">
-          <h2 className="text-xl font-semibold">Add skill</h2>
+      <div className="bg-white rounded-lg w-full max-w-xl shadow-lg overflow-y-auto max-h-[90vh]">
+        <div className="flex justify-between items-center p-4 border-b">
+          <h3 className="text-xl font-semibold">
+            {isEditing ? "Edit Skill" : "Add Skill"}
+          </h3>
           <button
-            onClick={onCancel}
+            onClick={onClose}
             className="text-gray-500 hover:text-gray-700"
-            aria-label="Close"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -82,113 +104,64 @@ const SkillsForm: React.FC<SkillsFormProps> = ({
           </button>
         </div>
 
-        <div className="flex-grow overflow-auto p-4">
-          <p className="text-sm text-gray-500 mb-4">* Indicates required</p>
+        <div className="p-4">
+          <p className="text-sm text-gray-600 mb-4">* Indicates required</p>
 
-          <div className="mb-6">
-            <label className="block mb-2 font-medium">Skill*</label>
-            <input
-              type="text"
-              value={skill}
-              onChange={(e) => {
-                setSkill(e.target.value);
-                if (e.target.value.trim()) {
-                  setErrors({ ...errors, skill: undefined });
-                }
-                setShowSuggestions(true);
-              }}
-              className={`w-full p-3 border ${
-                errors.skill ? "border-red-500" : "border-gray-300"
-              } rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500`}
-              placeholder="Example: Project Management"
-            />
-            {errors.skill && (
-              <p className="text-red-500 text-sm mt-1">{errors.skill}</p>
-            )}
-          </div>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Skill Name<span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                placeholder="Ex: JavaScript, Project Management, Photoshop"
+                value={skillName}
+                onChange={(e) => setSkillName(e.target.value)}
+                className={`w-full px-3 py-2 border rounded-md ${
+                  errors.skillName ? "border-red-500" : ""
+                }`}
+              />
+              {errors.skillName && (
+                <p className="text-red-500 text-sm mt-1">{errors.skillName}</p>
+              )}
+            </div>
 
-          {showSuggestions && (
-            <div className="mb-6">
-              <h3 className="text-base font-medium mb-3">
-                Suggested based on your profile
-              </h3>
+            <div>
+              <p className="text-sm font-medium text-gray-700 mb-2">
+                Common skills:
+              </p>
               <div className="flex flex-wrap gap-2">
-                {SUGGESTED_SKILLS.map((suggestionItem, index) => (
+                {COMMON_SKILLS.map((skill, index) => (
                   <button
                     key={index}
-                    className="border border-gray-300 rounded-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                    onClick={() => handleSuggestionClick(suggestionItem.name)}
+                    onClick={() => selectCommonSkill(skill)}
+                    className={`px-3 py-1 rounded-full text-sm ${
+                      skillName === skill
+                        ? "bg-blue-100 text-blue-600 border border-blue-300"
+                        : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                    }`}
                   >
-                    {suggestionItem.name}
+                    {skill}
                   </button>
                 ))}
               </div>
             </div>
-          )}
-
-          <div className="mb-6">
-            <h3 className="text-lg font-medium mb-2">
-              Show us where you used this skill
-            </h3>
-            <p className="text-gray-600 text-sm mb-4">
-              75% of hirers value skill context. Select at least one item to
-              show where you used this skill.
-            </p>
-
-            <h4 className="font-medium mb-2">Education</h4>
-            {educationOptions.map((education, index) => (
-              <div key={index} className="flex items-center mb-2">
-                <input
-                  type="checkbox"
-                  id={`edu-${index}`}
-                  checked={selectedEducation === education}
-                  onChange={() =>
-                    setSelectedEducation(
-                      selectedEducation === education ? null : education
-                    )
-                  }
-                  className="w-5 h-5 text-blue-600 bg-gray-100 rounded border-gray-300 mr-3"
-                />
-                <label htmlFor={`edu-${index}`} className="text-gray-700">
-                  {education}
-                </label>
-              </div>
-            ))}
-          </div>
-
-          <div className="mb-6">
-            <div className="flex items-center bg-green-50 p-3 rounded-md">
-              <input
-                type="checkbox"
-                id="follow-skill"
-                checked={followSkill}
-                onChange={() => setFollowSkill(!followSkill)}
-                className="w-5 h-5 text-[#0073b1]  bg-gray-100 rounded border-gray-300 mr-3"
-              />
-              <label htmlFor="follow-skill" className="text-gray-700">
-                Follow this skill to keep up with relevant content.
-              </label>
-            </div>
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="border-t p-4 flex justify-end">
-          {isSubmitting ? (
-            <button
-              disabled
-              className="px-6 py-2 bg-gray-300 text-gray-700 rounded-full"
-            >
-              Saving
-            </button>
-          ) : (
-            <button
-              onClick={handleSubmit}
-              className="px-6 py-2 bg-[#0073b1]  text-white rounded-full hover:bg-[#026aa7]"
-            >
-              Save
-            </button>
-          )}
+        <div className="flex justify-end p-4 border-t bg-gray-50">
+          <button
+            onClick={onClose}
+            className="mr-3 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            className="px-6 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700"
+          >
+            Save
+          </button>
         </div>
       </div>
     </div>

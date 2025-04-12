@@ -32,7 +32,7 @@ const ProfileHeaderMain: React.FC = () => {
     navigate("/update-username");
   };
   return (
-    <div className="bg-white rounded-lg shadow w-240 ml-[-150px]">
+    <div className="bg-white rounded-lg shadow w-240 m-auto ml-4">
       <div className="relative">
         <CoverPhoto
           currentImageUrl={coverImageUrl}
@@ -71,9 +71,7 @@ const ProfileHeaderMain: React.FC = () => {
                 </svg>
               </div>
             </div>
-            <p className="text-gray-700 mt-1 text-lg">
-              Biomedical engineering student at Cairo university
-            </p>
+
             <div className="flex items-center mt-2">
               <div className="flex items-center text-gray-600 bg-gray-100 rounded-md px-2 py-1"></div>
             </div>
@@ -94,18 +92,6 @@ const ProfileHeaderMain: React.FC = () => {
             >
               <path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
             </svg>
-          </button>
-        </div>
-
-        <div className="flex mt-6 gap-2">
-          <button className="bg-blue-600 text-white px-6 py-2 rounded-full font-medium hover:bg-blue-700">
-            Open to
-          </button>
-          <button className="border border-blue-600 text-blue-600 px-6 py-2 rounded-full font-medium hover:bg-blue-50">
-            Add profile section
-          </button>
-          <button className="border border-gray-300 text-gray-600 px-6 py-2 rounded-full font-medium hover:bg-gray-50">
-            Resources
           </button>
         </div>
       </div>

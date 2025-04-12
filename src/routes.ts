@@ -18,13 +18,12 @@ import ProfilePage from "./pages/myProfile/ProfilePage";
 import CreateCompanyPage from "./pages/CompanyPages/CreateCompanyPage";
 import CompanyProfileMemberViewPage from "./pages/CompanyPages/CompanyProfileMemberView";
 import CompanyProfileAdminViewPage from "./pages/CompanyPages/CompanyProfileAdminView";
-import CompanyHomePage from "./components/CompanyPageSections/Home";
-import CompanyPostsPage from "./components/CompanyPageSections/Posts";
-import CompanyJobsPage from "./components/CompanyPageSections/Jobs";
+import CompanyHomePage from "./components/CompanyPageSections/Home"
+import CompanyPostsPage from "./components/CompanyPageSections/Posts"
+import CompanyJobsPage from "./components/CompanyPageSections/Jobs"
+import Settings from "./components/Settings/Settings.jsx";
 import MyJobs from "./pages/jobs/MyJobs.jsx";
 import MessagingPage from "./pages/messaging/Messaging.jsx";
-
-
 import JobBoardPage from "./pages/jobs/JobBoardPage.jsx";
 import JobListing from "./components/AdminPanel/JobListing";
 import Analytics from "./components/AdminPanel/Analytics";
@@ -153,6 +152,10 @@ const routes: RouteObject[] = [
       { path: "Analytics", element: React.createElement(CompanyPostsPage) },
       { path: "Edit Page", element: React.createElement(CompanyJobsPage) },
     ],
+  },
+    {
+    path: "/settings",
+    element: React.createElement(Settings),
   },
   {
     path:"/messaging/:id",
