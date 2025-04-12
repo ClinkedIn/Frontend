@@ -2,6 +2,8 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
+import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 
 // Firebase configuration (same project)
@@ -21,7 +23,9 @@ export const messaging = getMessaging(app);
 
 // Authentication setup
 const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
 const provider = new GoogleAuthProvider();
 
 
-export {  getToken, onMessage ,app, auth, provider, signInWithPopup };
+export {  getToken, onMessage ,app, auth, provider,db,storage, signInWithPopup };

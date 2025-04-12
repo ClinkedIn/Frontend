@@ -8,10 +8,92 @@ import FooterLinks from "../../components/FooterLinks";
 import { patchRequest } from "../../services/axios";
 import { toast } from 'react-hot-toast';
 import { Toaster } from 'react-hot-toast';
+// import { getMessaging, getToken } from 'firebase/messaging';
+// import { app } from '../../../firebase'; 
 
 
+
+/**
+ * The Notification component is responsible for displaying and managing user notifications.
+ * It supports filtering notifications by category, marking them as read, and sending test notifications.
+ * It fetches notifications and user data from an API and displays them accordingly.
+ * 
+ * @component
+ * @example
+ * // Usage
+ * <Notification />
+ */
 const Notification = () => {
 
+  
+  const navigate = useNavigate();
+  const [notifications, setNotifications] = useState([]);
+  const [selectedFilter, setSelectedFilter] = useState("all");
+  const [isArrowVisible, setIsArrowVisible] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [selectedPostFilter, setSelectedPostFilter] = useState("all");
+  const [user, setUser] = useState();
+
+  // async function requestFCMToken() {
+  //   try {
+  //     const messaging = getMessaging(app);
+  //     {
+  //       const fcmToken = await getToken(messaging, { 
+  //         vapidKey: 'BKQc38HyUXuvI_yz5hPvprjVjmWrcUjTP2H7J_cjGoyMMoBGNBbC0ucVGrzM67rICMclmUuOx-mdt7CXlpnhq9g' // From Firebase Console > Cloud Messaging
+  //       });
+  //       if (fcmToken) {
+  //         console.log('FCM Token:', fcmToken);
+          
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error('Error getting token:', error);
+  //   }
+  // }
+  // useEffect(() => {
+  //   requestFCMToken();
+  // }, []);
+
+
+/**
+   * Sends a test login request to authenticate a user.
+   * This function simulates a login process by sending a POST request to the backend.
+   *
+   * @async
+   * @function testLogin
+   */
+  const testLogin = async () => {
+    try {
+      const response = await axios.post('http://localhost:3000/user/login', {
+        email: "Porter.Hodkiewicz@hotmail.com",
+        password: "Aa12345678"
+      },{
+        withCredentials:true
+      }
+      
+    );
+
+      console.log("Login Response:", response.data);
+    } catch (error) {
+      if (error.response) {
+  
+        console.error("Login Error - Server Response:", error.response.data);
+      } else if (error.request) {
+        // Request made but no response received
+        console.error("Login Error - No Response:", error.request);
+      } else {
+        // Something else happened
+        console.error("Login Error:", error.message);
+      }
+    }
+  };
+
+  /**
+   * Sends a test notification to the backend and shows a toast notification in the app.
+   * 
+   * @async
+   * @function handleSendTestNotification
+   */
   const handleSendTestNotification = async () => {
     try {
       // Send to backend (mock)
@@ -32,55 +114,89 @@ const Notification = () => {
       console.error("Error sending notification:", error);
     }
   };
-
-
-  const navigate = useNavigate();
-  const [notifications, setNotifications] = useState([]);
-  const [selectedFilter, setSelectedFilter] = useState("all");
-  const [isArrowVisible, setIsArrowVisible] = useState(false);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [selectedPostFilter, setSelectedPostFilter] = useState("all");
-  const [user, setUser] = useState();
-
-
+ /**
+   * Fetches notifications from the backend and updates the state.
+   * 
+   * @async
+   * @function fetchNotifications
+   */
   const fetchNotifications = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:5173/notifications"
+        "http://localhost:3000/notifications",
+        {withCredentials:true}
       );
+      console.log("notifications:",response.data)
       setNotifications(response.data); // Set fetched notifications
     } catch (error) {
       console.error("Error fetching notifications:", error);
     }
   };
-
+/**
+   * Marks a notification as read when clicked.
+   *
+   * @async
+   * @function handleNotificationClick
+   * @param {string} id - The ID of the notification to be marked as read.
+   */
  //Mark Notification as read
   const handleNotificationClick = async (id) => {
-    const response = await patchRequest(`/notifications/${id.toString()}/read`, { isRead: true });
+    const response = await axios.patch(
+      `http://localhost:3000/notifications/mark-read/${id}`,
+      {},
+      { withCredentials: true }
+    );
 
     if (response?.status === 200) {
         console.log('Updated notification');
         setNotifications(notifications.map(notification =>
-            notification.id === id ? { ...notification, isRead: true } : notification
+            notification._id === id ? { ...notification, isRead: true } : notification
         ));
     } else {
         console.error('Failed to update notification', response);
     }
 };
-  const fetchUser= async ()=>{
-    try {
-      const response = await axios.get("http://localhost:5173/user");
-      setUser(response.data);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-    }
-  }
+/**
+ * Fetches the user data from the backend and updates the state.
+ * 
+ * @async
+ * @function fetchUser
+ */
+  const fetchUser = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/user/me", {
+      
+          withCredentials:true
+        });
+    
+        setUser(response.data);
+        console.log("User data:", response.data);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
+    };
   
+  /**
+   * useEffect hook for executing login, fetching user data, and notifications.
+   * It triggers login and fetch data operations on component mount.
+   * 
+   * @function
+   * @hook
+   */
   useEffect(() => {
+    const loginAndFetchData = async () => {
+      await testLogin(); // Ensure login is completed first
     fetchUser();
-    fetchNotifications();
+    fetchNotifications();}
+    loginAndFetchData()
   }, []);
-
+ /**
+   * Handles the change in the main notification filter.
+   * Resets post filter and closes dropdown when switching to a different category.
+   * 
+   * @function handleMainFilterChange
+   * @param {string} filter - The selected filter for notifications.
+   */
   // Reset My Posts label when a different main category is selected
   const handleMainFilterChange = (filter) => {
     setSelectedFilter(filter);
@@ -101,7 +217,12 @@ const Notification = () => {
     reactions: "My Posts | Reactions",
     reposts: "My Posts | Reposts",
   };
-
+/**
+   * Filters notifications based on the selected main filter and post filter.
+   * 
+   * @function filteredNotifications
+   * @returns {Array} - The filtered notifications based on user selection.
+   */
   // Filter Notifications
   const filteredNotifications = notifications.filter((notif) => {
     if (selectedFilter === "all") return true;
@@ -138,14 +259,14 @@ const Notification = () => {
               className="text-[#0a66c2] text-sm font-medium hover:underline" >  View settings</button>
             </div>
             <div className="w-full lg:w-72">
-  <button
-    onClick={handleSendTestNotification}
-    className=" mb-4 p-2 bg-[#004c33] text-white rounded-lg hover:bg-[#003825] transition-colors"
-  >
-    Send Test Notification
-  </button>
+            <button
+              onClick={handleSendTestNotification}
+              className=" mb-4 p-2 bg-[#004c33] text-white rounded-lg hover:bg-[#003825] transition-colors"
+            >
+              Send Test Notification
+            </button>
 
-</div>
+          </div>
           </div>
   
           {/* Main Content */}
@@ -231,7 +352,7 @@ const Notification = () => {
                
                 id="Notification-Card">
                   {filteredNotifications.map((notif) => (
-                    <NotificationCard key={notif.id} notification={notif} handleNotificationClick={()=>handleNotificationClick(notif.id)} />
+                    <NotificationCard key={notif._id} notification={notif} handleNotificationClick={()=>handleNotificationClick(notif._id)} />
                   ))}
                 </ul>
                 //Handles if Tab doesnt have any notifications
@@ -287,22 +408,6 @@ const Notification = () => {
                 </div>
               )}
             </div>
-          </div>
-  
-          {/*Ad Section */}
-          <div className="w-full lg:w-72">
-            <div className="shadow-sm rounded-lg border border-gray-300">
-              <img
-              id="Ad-img"
-                src="/ads.png"
-                alt="Ad Banner"
-                className="w-full rounded-lg cursor-pointer"
-                onClick={() => navigate("/ads-page")}
-              />
-            </div>
-  
-            {/* Footer Links */}
-              <FooterLinks/>
           </div>
         </div>
       </div>
