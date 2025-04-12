@@ -1,17 +1,17 @@
 import { useState, useEffect } from "react"; 
 import axios from "axios"; 
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate, useLocation } from "react-router-dom"; 
 import { MdLocationPin,MdSearch } from "react-icons/md";
 import Jobs from "../pages/jobs/Jobs";
 
-const Header = ({notifications, onSearchChange}) => {
+const Header = ({notifications}) => {
   const [showUser, setShowUser] = useState(false)
   const [unreadCount, setUnreadCount] = useState(0); 
   const [searchQuery, setSearchQuery] = useState("");  
   const [location, setLocation] = useState("");
   const navigate = useNavigate(); 
-  const [tab, setTab]=useState("home")
-
+  const locations = useLocation();
+  const currentPath = locations.pathname.split('/')[1];
   useEffect(() => {
     const fetchUnreadCount = async () => {
       try {
@@ -27,29 +27,38 @@ const Header = ({notifications, onSearchChange}) => {
 
   // Handler to navigate to notifications page
   const handleNotificationsClick = () => {
-    setTab('notifications')
     navigate('/notifications');
   };
 
   // Handler to navigate to jobs page
   const handleJobsClick = () => {
-    setTab('jobs')
     navigate('/jobs');
-    console.log("jobs")
   };
-    // Handle search submission
-    const handleSearch = (e) => {
-      e.preventDefault();
-      if (searchQuery ) {
-        onSearchChange(searchQuery);
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    try {
+      const params = new URLSearchParams();
+      if (searchQuery) params.append('q',searchQuery);
+      if (location) params.append('location', location);
+      
+      const response = await axios.get(
+        `http://localhost:3000/search/jobs?${params}`, 
         
-      }
-      else if (location){
-        onSearchChange(location);
-      }
+      );
+      
+      navigate('/job-board', { 
+        state: { 
+          jobs: response.data,
+          searchQuery,
+          location,
+          currentPath
+        } 
+      });
+    } catch (error) {
+      console.error("Search error:", error);
+    }
+  };
 
-    };
-  
   return (
     <header className="fixed top-0 left-0 w-full bg-white border-b border-gray-200 z-50">
       <div className="flex items-center justify-between max-w-6xl mx-auto px-4 py-2">
@@ -59,7 +68,7 @@ const Header = ({notifications, onSearchChange}) => {
           <img src="/Images/home-logo.svg" alt="Logo" className="w-8 h-8" />
         </a>
         {/* Search Bar */}
-        {tab=="jobs" && 
+        {currentPath=="jobs" && 
         <form onSubmit={handleSearch} className="flex rounded-lg">
           <div className="flex items-center bg-[#edf3f8] rounded-sm ml-2 ">
            <MdSearch 
