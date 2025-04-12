@@ -15,6 +15,15 @@ import { Toaster } from 'react-hot-toast';
 
 const Notification = () => {
 
+  
+  const navigate = useNavigate();
+  const [notifications, setNotifications] = useState([]);
+  const [selectedFilter, setSelectedFilter] = useState("all");
+  const [isArrowVisible, setIsArrowVisible] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [selectedPostFilter, setSelectedPostFilter] = useState("all");
+  const [user, setUser] = useState();
+
   // async function requestFCMToken() {
   //   try {
   //     const messaging = getMessaging(app);
@@ -35,6 +44,33 @@ const Notification = () => {
   //   requestFCMToken();
   // }, []);
 
+
+
+  const testLogin = async () => {
+    try {
+      const response = await axios.post('http://localhost:3000/user/login', {
+        email: "Charlie.Kreiger@yahoo.com",
+        password: "password123"
+      },{
+        withCredentials:true
+      }
+      
+    );
+
+      console.log("Login Response:", response.data);
+    } catch (error) {
+      if (error.response) {
+  
+        console.error("Login Error - Server Response:", error.response.data);
+      } else if (error.request) {
+        // Request made but no response received
+        console.error("Login Error - No Response:", error.request);
+      } else {
+        // Something else happened
+        console.error("Login Error:", error.message);
+      }
+    }
+  };
 
   const handleSendTestNotification = async () => {
     try {
@@ -57,20 +93,10 @@ const Notification = () => {
     }
   };
 
-
-  const navigate = useNavigate();
-  const [notifications, setNotifications] = useState([]);
-  const [selectedFilter, setSelectedFilter] = useState("all");
-  const [isArrowVisible, setIsArrowVisible] = useState(false);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [selectedPostFilter, setSelectedPostFilter] = useState("all");
-  const [user, setUser] = useState();
-
-
   const fetchNotifications = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:5173/notifications"
+        "http://localhost:3000/notifications"
       );
       console.log(response)
       setNotifications(response.data); // Set fetched notifications
@@ -81,7 +107,7 @@ const Notification = () => {
 
  //Mark Notification as read
   const handleNotificationClick = async (id) => {
-    const response = await patchRequest(`/notifications/${id.toString()}/read`, { isRead: true });
+    const response = await patchRequest(`http://localhost:3000/notifications/${id}/read`);
 
     if (response?.status === 200) {
         console.log('Updated notification');
@@ -94,7 +120,7 @@ const Notification = () => {
 };
   const fetchUser= async ()=>{
     try {
-      const response = await axios.get("http://localhost:5173/user");
+      const response = await axios.get("http://localhost:3000/user");
       setUser(response.data);
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -102,8 +128,10 @@ const Notification = () => {
   }
   
   useEffect(() => {
+    const loginAndFetchData = async () => {
+      await testLogin(); // Ensure login is completed first
     fetchUser();
-    fetchNotifications();
+    fetchNotifications();}
   }, []);
 
   // Reset My Posts label when a different main category is selected
@@ -163,14 +191,14 @@ const Notification = () => {
               className="text-[#0a66c2] text-sm font-medium hover:underline" >  View settings</button>
             </div>
             <div className="w-full lg:w-72">
-  <button
-    onClick={handleSendTestNotification}
-    className=" mb-4 p-2 bg-[#004c33] text-white rounded-lg hover:bg-[#003825] transition-colors"
-  >
-    Send Test Notification
-  </button>
+            <button
+              onClick={handleSendTestNotification}
+              className=" mb-4 p-2 bg-[#004c33] text-white rounded-lg hover:bg-[#003825] transition-colors"
+            >
+              Send Test Notification
+            </button>
 
-</div>
+          </div>
           </div>
   
           {/* Main Content */}
