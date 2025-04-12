@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-const ApplyJob = ({ isOpen, onClose, job }) => {
+const ApplyJob = ({ isOpen, onClose, job , jobId}) => {
   const [step, setStep] = useState(1); 
   const [email, setEmail] = useState('');
   const [countryCode, setCountryCode] = useState('+20'); 
@@ -10,6 +10,7 @@ const ApplyJob = ({ isOpen, onClose, job }) => {
 
 
  console.log("job:", job)
+ console.log("job id inside apply", jobId)
   const testLogin = async () => {
     try {
       const response = await axios.post('http://localhost:3000/user/login', {
@@ -57,7 +58,6 @@ const ApplyJob = ({ isOpen, onClose, job }) => {
   
     loginAndFetchData();
   }, []);
-
   const handleApply = async () => {
     const contactEmail = email;
     const contactPhone = `${countryCode} ${phoneNumber}`;
@@ -73,20 +73,20 @@ const ApplyJob = ({ isOpen, onClose, job }) => {
         : []
     };
   
+    console.log("application data", applicationData);
+  
     try {
       const response = await axios.post(
-        `http://localhost:3000/jobs/${job.id}/apply`,
+        `http://localhost:3000/jobs/${jobId}/apply`,
         applicationData,
-        {
-          withCredentials: true,
-        }
+        { withCredentials: true }
       );
       console.log("Application Submitted:", response.data);
       alert("Application submitted!");
       onClose();
     } catch (error) {
       console.error("Error submitting application:", error);
-      alert("Something went wrong while submitting the application.");
+     
     }
   };
   const handleStep3Change = (index, value) => {
@@ -220,7 +220,7 @@ const ApplyJob = ({ isOpen, onClose, job }) => {
 
             <div className="mt-6 flex justify-between border-t border-gray-200 pt-4">
               <button
-                onClick={() => setStep(2)}
+                onClick={() => setStep(1)}
                 className="text-sm font-medium text-gray-600 hover:text-gray-800"
               >
                 Back

@@ -110,7 +110,7 @@ const JobBoardPage = () => {
              Easy Apply
             </button>
            
-             <ApplyJob isOpen={isModalOpen} onClose={closeModal} job={selectedJob}/>
+             <ApplyJob isOpen={isModalOpen} onClose={closeModal} job={selectedJob} jobId={selectedJob._id}/>
              <button
               onClick={handleSave}
               className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700"
