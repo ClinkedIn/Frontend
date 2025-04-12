@@ -15,8 +15,9 @@ const Header = ({notifications}) => {
   useEffect(() => {
     const fetchUnreadCount = async () => {
       try {
-        const response = await axios.get("/notifications/unseenCount");
-        setUnreadCount(response.data.count);
+        const response = await axios.get("http://localhost:3000/notifications/unread-count",{withCredentials:true});
+        console.log("unread count:", response)
+        setUnreadCount(response.data.unreadCount);
       } catch (error) {
         console.error("Error fetching unread count:", error);
       }
