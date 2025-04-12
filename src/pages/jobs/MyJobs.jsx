@@ -68,10 +68,10 @@ const MyJobs=()=> {
      // Function to fetch jobs according to the current filter
   const fetchMyApplications = async (status) => {
     try {
-      const response = await axios.get(`http://localhost:3000/jobs/my-applications?status=${status.toLowerCase()}`, {
+      const response = await axios.get(`http://localhost:3000/jobs/my-applications?status=${status}`, {
         withCredentials: true,
       });
-      setJobs(response.data.jobs);
+      setJobs(response.data.applications);
       console.log(`Fetched jobs for status: ${status}`, response.data);
     } catch (error) {
       console.error(`Error fetching jobs with status ${status}:`, error);
@@ -83,6 +83,8 @@ const MyJobs=()=> {
       const loginAndFetchData = async () => {
         await testLogin(); // Ensure login is completed first
         fetchUser()
+        
+    setJobs([]); // Clear jobs before fetching new ones
         if (selectedTab === "my-jobs" && activeFilter === "Saved") {
           fetchSavedJobs();
         } else if (selectedTab === "my-jobs") {
