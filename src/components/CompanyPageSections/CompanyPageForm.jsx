@@ -95,12 +95,12 @@ const CompanyForm = ({ errors,companyName, setCompanyName, tagline, setTagline, 
                     className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
                 >
                         <option value="">Select type</option>
-                        <option value="Public company">Public company</option>
+                        <option value="Public">Public company</option>
                         <option value="Self-employed">Self-employed</option>
-                        <option value="Government agency">Government agency</option>
-                        <option value="Non-profit">Non-profit</option>
+                        <option value="Government">Government agency</option>
+                        <option value="Nonprofit">Non-profit</option>
                         <option value="Sole proprietorship">Sole proprietorship</option>
-                        <option value="Privately held">Privately held</option>
+                        <option value="Private">Privately held</option>
                         <option value="Partnership">Partnership</option>
                 </select>
                 {errors.organizationType && <p className="text-red-500 text-sm mt-1">{errors.organizationType}</p>}

@@ -1,16 +1,18 @@
 import Header from "../../components/UpperNavBar"
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import {IoIosArrowRoundBack} from "react-icons/io";
 import { FaPlus,FaUpload } from "react-icons/fa6";
 import axios from "axios";
 import CompanyForm from "../../components/CompanyPageSections/CompanyPageForm";
+import { postRequest } from "../../services/axios";
 
 
 
 
 const CreateCompanyPage = () => {
     const navigate = useNavigate();
+    const [user, setUser] = useState();
     const [companyName, setCompanyName] = useState("");
     const [tagline, setTagline] = useState("");
     const [industry, setIndustry] = useState("");
@@ -32,6 +34,49 @@ const CreateCompanyPage = () => {
             [field]: value.toLowerCase().includes("select") ? "Please choose a valid option." : ""
         }));
     };*/
+    const testLogin = async () => {
+        try {
+          const response = await axios.post('http://localhost:3000/user/login', {
+            email: "Porter.Hodkiewicz@hotmail.com",
+            password: "Aa12345678"
+          },{
+            withCredentials:true
+          }
+          
+        );
+    
+          console.log("Login Response:", response.data);
+        } catch (error) {
+          if (error.response) {
+      
+            console.error("Login Error - Server Response:", error.response.data);
+          } else if (error.request) {
+            // Request made but no response received
+            console.error("Login Error - No Response:", error.request);
+          } else {
+            // Something else happened
+            console.error("Login Error:", error.message);
+          }
+        }
+      };
+     /**
+       * Fetches current user profile data
+       * @async
+       * @function
+       */
+      const fetchUser = async () => {
+        try {
+          const response = await axios.get("http://localhost:3000/user/me", {
+        
+            withCredentials:true
+          });
+      
+          setUser(response.data);
+          console.log("User data:", response.data);
+        } catch (error) {
+          console.error("Error fetching user:", error);
+        }
+      };
     const isValid = () => {
         let newErrors = {};
 
@@ -81,24 +126,35 @@ const CreateCompanyPage = () => {
         setErrors(newErrors);
         return Object.keys(newErrors).filter((key) => newErrors[key]).length === 0;
     };
+      useEffect(() => {
+        const loginAndFetchData = async () => {
+          await testLogin(); // Ensure login is completed first
+          fetchUser(); 
+        };
+      
+        loginAndFetchData();
+      }, []);
     const createPage = async() => {
         if(isValid()){
+           
             
             console.log("Page Created")
             const company ={
-                userId: "1234",
+                userId: user.user._id,
                 name: companyName,
                 address:companyAddress,
                 website: website,
                 industry: industry,
                 organizationSize: organizationSize,
                 organizationType: organizationType,
-                logo: logoPreview,
-                tagLine: tagline
+                logo: "",
+                tagLine: tagline,
+                
             }
-            const response = await axios.post("http://localhost:5173/companies",company);
+            //const response = await axios.post("http://localhost:3000/companies",company)
+            const response = await postRequest("http://localhost:3000/companies",company)
             console.log(response.data)
-            navigate(`/company/${response.data._id}`)
+            navigate(`/company/${response.data._id}/admin`)
             
         }
 
