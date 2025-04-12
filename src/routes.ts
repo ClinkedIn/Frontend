@@ -1,11 +1,8 @@
 import { Navigate, RouteObject } from "react-router-dom";
 import React from "react";
 import Home from "../src/pages/home/HomePage";
-import Login from "./components/authentication/Login/LoginPage.js";
-import SignUp from "./components/authentication/SignUp/SignUpPage.js";
-import SignUpName from "./components/authentication/SignUp/SignUpName.js";
-import SignUpLocation from "./components/authentication/SignUp/SignUpLocation.js";
-import SignUpCareer from "./components/authentication/SignUp/SignUpCareer.js";
+import Login from "./components/authentication/Login/LoginPage";
+import SignUp from "./components/authentication/SignUp/SignUpPage";
 import TestPage from "./pages/Test/TestPage.jsx";
 import PasswordResetUsingMail from "../src/pages/PasswordResetUsingMail/PassWordResetUsingMail";
 import VerifyEmail from "../src/pages/signup/VerifyEmail";
@@ -56,18 +53,6 @@ const routes: RouteObject[] = [
   {
     path: "/signup",
     element: React.createElement(SignUp),
-  },
-  {
-    path: "/signup/name",
-    element: React.createElement(SignUpName),
-  },
-  {
-    path: "/signup/name/location",
-    element: React.createElement(SignUpLocation),
-  },
-  {
-    path: "/signup/name/location/career",
-    element: React.createElement(SignUpCareer),
   },
   {
     path: "/verify-email",
