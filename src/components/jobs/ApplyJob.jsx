@@ -110,7 +110,7 @@ const ApplyJob = ({ isOpen, onClose, job , jobId}) => {
   };
   useEffect(() => {
     const loginAndFetchData = async () => {
-      await testLogin(); // Ensure login is completed first
+      // await testLogin(); // Ensure login is completed first
       await fetchUser();
     };
   
