@@ -248,6 +248,7 @@ const Main = () => {
     } catch (err) {
       console.error(`Error posting comment:`, err);
       
+      //error handling
       if (err.response) {
         console.error('Comment error response:', err.response.data);
         console.error('Status code:', err.response.status);
@@ -262,6 +263,8 @@ const Main = () => {
       throw err;
     }
   };
+
+
   
   // Handle reacting to a comment
   const handleReactToComment = async (postId, commentId, reactionType = 'like', isRemove = false) => {
