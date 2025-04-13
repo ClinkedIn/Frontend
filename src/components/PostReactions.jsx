@@ -1,10 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-const PostReactions = ({ postId, onReact, reactionTypes }) => {
+const PostReactions = ({ postId, onReact, reactionTypes, isLiked = false, currentReaction = 'like' }) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef(null);
   const menuRef = useRef(null);
   const timeoutRef = useRef(null);
+  
+  // Find the current reaction object based on type
+  const activeReaction = isLiked ? 
+    reactionTypes.find(r => r.type.toLowerCase() === currentReaction.toLowerCase()) || reactionTypes[0] : 
+    null;
   
   // Handle click outside
   useEffect(() => {
@@ -59,6 +64,58 @@ const PostReactions = ({ postId, onReact, reactionTypes }) => {
     setIsOpen(false);
   };
 
+  // Handle like button click - toggle like state
+  const handleLikeClick = () => {
+    // If already liked, call onReact with the isRemove flag set to true
+    // Otherwise, just like the post normally
+    onReact(postId, isLiked ? currentReaction : 'like', isLiked);
+  };
+
+  // Get the appropriate reaction icon
+  const getReactionIcon = () => {
+    if (!isLiked) {
+      return <img src="/Images/like.svg" alt="like" />;
+    }
+    
+    // Return the emoji for the current reaction type
+    switch (currentReaction.toLowerCase()) {
+      case 'like':
+        return <span className="text-xl mr-1">👍</span>;
+      case 'celebrate':
+        return <span className="text-xl mr-1">👏</span>;
+      case 'support':
+        return <span className="text-xl mr-1">❤️</span>;
+      case 'insightful':
+        return <span className="text-xl mr-1">💡</span>;
+      case 'funny':
+        return <span className="text-xl mr-1">😄</span>;
+      default:
+        return <span className="text-xl mr-1">{activeReaction?.emoji || '👍'}</span>;
+    }
+  };
+  
+  // Get the label for the current reaction
+  const getReactionLabel = () => {
+    if (!isLiked) {
+      return 'Like';
+    }
+    
+    switch (currentReaction.toLowerCase()) {
+      case 'like':
+        return 'Liked';
+      case 'celebrate':
+        return 'Celebrated';
+      case 'support':
+        return 'Supported';
+      case 'insightful':
+        return 'Insightful';
+      case 'funny':
+        return 'Funny';
+      default:
+        return activeReaction?.label || 'Liked';
+    }
+  };
+
   return (
     <div 
       ref={containerRef}
@@ -66,13 +123,15 @@ const PostReactions = ({ postId, onReact, reactionTypes }) => {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {/* Regular Like button */}
+      {/* Like button that changes style based on the reaction */}
       <button 
-        onClick={() => onReact(postId, 'like')}
-        className="outline-none text-[rgba(0,0,0,0.6)] p-3 px-6 bg-transparent flex items-center cursor-pointer gap-1.25 rounded-md transition duration-200 hover:bg-[rgba(0,0,0,0.08)] font-semibold"
+        onClick={handleLikeClick}
+        className={`outline-none p-3 px-6 bg-transparent flex items-center cursor-pointer gap-1.25 rounded-md transition duration-200 hover:bg-[rgba(0,0,0,0.08)] font-semibold ${
+          isLiked ? 'text-[#0a66c2]' : 'text-[rgba(0,0,0,0.6)]'
+        }`}
       >
-        <img className="unLiked" src="/Images/like.svg" alt="like" />
-        <span>Like</span>
+        {getReactionIcon()}
+        <span>{getReactionLabel()}</span>
       </button>
       
       {/* Reaction Popup with enhanced visibility */}
@@ -96,7 +155,8 @@ const PostReactions = ({ postId, onReact, reactionTypes }) => {
               key={reaction.type}
               onClick={(e) => {
                 e.stopPropagation();
-                onReact(postId, reaction.type);
+                // Always use false for isRemove when selecting a reaction from the menu
+                onReact(postId, reaction.type, false);
                 setIsOpen(false);
               }}
               className="p-2 mx-1 hover:scale-125 transition-transform duration-200 bg-gray-100 hover:bg-gray-200 rounded-full"
