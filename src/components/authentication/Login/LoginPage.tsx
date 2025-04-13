@@ -22,7 +22,6 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-
   interface UserData {
     email: string;
     password: string;
@@ -31,7 +30,7 @@ const LoginPage = () => {
   const { setAuthToken } = useAuth(); // Get the setAuthToken function from context
 
   // import API_BASE_URL from your .env file
-  const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const loginMutation = useMutation<void, unknown, UserData>({
     mutationFn: async (userData: UserData) => {
