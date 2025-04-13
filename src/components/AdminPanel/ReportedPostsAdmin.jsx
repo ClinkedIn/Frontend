@@ -596,7 +596,10 @@ const ReportedPosts = () => {
       setError(null);
 
       try {
-        const response = await fetch(`${BASE_URL}/admin/reports`);
+        const response = await fetch(`${BASE_URL}/admin/reports`, {
+          method: "GET",
+          credentials: "include",
+        });
 
         if (!response.ok) {
           throw new Error(`API request failed with status ${response.status}`);
