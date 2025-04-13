@@ -36,7 +36,7 @@ const LoginPage = () => {
   const loginMutation = useMutation<void, unknown, UserData>({
     mutationFn: async (userData: UserData) => {
       const response = await axios.post(
-        `http://localhost:3000/user/login`,
+        `${BASE_URL}/user/login`,
         userData,
         { withCredentials: true } // Include credentials in the request
       );
