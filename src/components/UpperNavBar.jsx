@@ -24,7 +24,7 @@ const Header = ({notifications}) => {
     };
 
     fetchUnreadCount();
-  }, [notifications]);
+  }, []);
 
   // Handler to navigate to notifications page
   const handleNotificationsClick = () => {
