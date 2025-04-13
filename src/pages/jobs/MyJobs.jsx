@@ -3,6 +3,7 @@ import axios from "axios";
 import { BsBookmarkFill } from "react-icons/bs";
 import Header from "../../components/UpperNavBar";
 import JobCard from '../../components/jobs/JobCard';
+import { BASE_URL } from "../../constants";
 
 
 /**
@@ -18,40 +19,6 @@ const MyJobs=()=> {
     const [jobs, setJobs] = useState([]);
     const [user, setUser]=useState()
 
-    /**
-   * Performs test login using hardcoded user credentials.
-   * Handles various login error cases (server, network, unknown).
-   *
-   * @async
-   * @function
-   * @returns {Promise<void>}
-   */
-  const testLogin = async () => {
-    try {
-        const response = await axios.post('http://localhost:3000/user/login', {
-         email: "Porter.Hodkiewicz@hotmail.com",
-        password: "password123"
-        },{
-          withCredentials:true
-        }
-        
-       );
-        
-       console.log('login successful')
-    } catch (error) {
-      if (error.response) {
-  
-        console.error("Login Error - Server Response:", error.response.data);
-      } else if (error.request) {
-        // Request made but no response received
-        console.error("Login Error - No Response:", error.request);
-      } else {
-        // Something else happened
-        console.error("Login Error:", error.message);
-      }
-    }
-  };
-
   /**
    * Fetches currently logged-in user data and updates state.
    *
@@ -61,7 +28,7 @@ const MyJobs=()=> {
    */
   const fetchUser = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/user/me", {
+      const response = await axios.get(`${BASE_URL}/user/me`, {
     
         withCredentials:true
       });
@@ -83,7 +50,7 @@ const MyJobs=()=> {
     const fetchSavedJobs = async () => {
       
         try {
-          const response = await axios.get("http://localhost:3000/jobs/saved", {
+          const response = await axios.get(`${BASE_URL}/jobs/saved`, {
             withCredentials: true // Send cookies with request
           });
           setJobs(response.data.jobs);
@@ -106,7 +73,7 @@ const MyJobs=()=> {
      // Function to fetch jobs according to the current filter
   const fetchMyApplications = async (status) => {
     try {
-      const response = await axios.get(`http://localhost:3000/jobs/my-applications?status=${status.toLowerCase()}`, {
+      const response = await axios.get(`${BASE_URL}/jobs/my-applications?status=${status.toLowerCase()}`, {
         withCredentials: true,
       });
       setJobs(response.data.applications);
@@ -120,7 +87,7 @@ const MyJobs=()=> {
    * Effect to handle login, fetch user and job data when selectedTab or activeFilter changes.
    */
     useEffect(() => {
-      const loginAndFetchData = async () => {
+      // const loginAndFetchData = async () => {
       //   await testLogin(); // Ensure login is completed first
         fetchUser()
         
@@ -130,8 +97,8 @@ const MyJobs=()=> {
         } else if (selectedTab === "my-jobs") {
           fetchMyApplications(activeFilter);
         }
-      }
-      loginAndFetchData();
+      // }
+      // loginAndFetchData();
     },  [selectedTab, activeFilter]);
   
 
