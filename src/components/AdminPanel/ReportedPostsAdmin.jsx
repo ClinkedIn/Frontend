@@ -609,32 +609,43 @@ const ReportedPosts = () => {
 
         if (result.status === "success" && Array.isArray(result.data)) {
           // Transform the API data to match our component's expected format
-          const transformedData = result.data.map((report) => ({
-            id: report._id,
-            postId: report.reportedId,
-            postContent: report.policy, // Using policy as content placeholder
+          const transformedData = result.data.map((dataitem) => ({
+            id: dataitem.report._id,
+            postId: dataitem.report.reportedId,
+            postContent: dataitem.report.policy, // Using policy as content placeholder
+            // postAuthor: {
+            //   id: dataitem.report.reportedId,
+            //   name: dataitem.reportedUser.firstName,
+            //     // dataitem.report.reportedType === "User"
+            //     //   ? `${dataitem.report.reportedType} Profile`
+            //     //   : `${dataitem.report.reportedType} Content`,
+            //   avatar: "/api/placeholder/40/40",
+            //   position: dataitem.report.reportedType,
+            // }
             postAuthor: {
-              id: report.reportedId,
-              name:
-                report.reportedType === "User"
-                  ? `${report.reportedType} Profile`
-                  : `${report.reportedType} Content`,
+              id: dataitem.report?.reportedId || "unknown",
+              // Add null check here
+              name: dataitem.reportedUser
+                ? `${dataitem.reportedUser.firstName || ""} ${
+                    dataitem.reportedUser.lastName || ""
+                  }`.trim() || "Unknown User"
+                : "Unknown User",
               avatar: "/api/placeholder/40/40",
-              position: report.reportedType,
+              position: dataitem.report?.reportedType || "Unknown",
             },
             reporter: {
-              id: report.userId._id,
-              name: `${report.userId.firstName} ${report.userId.lastName}`,
+              id: dataitem.report.userId._id,
+              name: `${dataitem.report.userId.firstName} ${dataitem.report.userId.lastName}`,
               avatar: "/api/placeholder/40/40",
             },
-            reason: report.policy,
+            reason: dataitem.report.policy,
             details:
-              report.dontWantToSee ||
-              report.moderationReason ||
+              dataitem.report.dontWantToSee ||
+              dataitem.report.moderationReason ||
               "No additional details provided",
-            reportedAt: report.createdAt,
-            status: mapStatusValue(report.status),
-            moderatedAt: report.moderatedAt,
+            reportedAt: dataitem.report.createdAt,
+            status: mapStatusValue(dataitem.report.status),
+            moderatedAt: dataitem.report.moderatedAt,
           }));
 
           setReportedPosts(transformedData);
@@ -671,56 +682,56 @@ const ReportedPosts = () => {
   };
 
   // Fallback to sample data if API fails
-  const useSampleData = () => {
-    const sampleData = [
-      {
-        id: "1",
-        postId: "post123",
-        postContent:
-          "This is an inappropriate post with offensive language that violates our community guidelines.",
-        postAuthor: {
-          id: "user456",
-          name: "John Doe",
-          avatar: "/api/placeholder/40/40",
-          position: "Software Engineer at Tech Co.",
-        },
-        reporter: {
-          id: "user789",
-          name: "Sarah Smith",
-          avatar: "/api/placeholder/40/40",
-        },
-        reason: "Hate speech",
-        details: "Contains offensive language targeting specific groups",
-        reportedAt: "2025-03-19T14:30:00Z",
-        status: "pending",
-      },
-      // Additional sample items...
-      {
-        id: "2",
-        postId: "post456",
-        postContent:
-          "Check out my new website at spamlink.com! Guaranteed income!!!",
-        postAuthor: {
-          id: "user111",
-          name: "Alex Johnson",
-          avatar: "/api/placeholder/40/40",
-          position: "Freelancer",
-        },
-        reporter: {
-          id: "user222",
-          name: "Michael Brown",
-          avatar: "/api/placeholder/40/40",
-        },
-        reason: "Spam",
-        details: "Promotional content with suspicious links",
-        reportedAt: "2025-03-18T10:15:00Z",
-        status: "reviewed",
-      },
-    ];
+  // const useSampleData = () => {
+  //   const sampleData = [
+  //     {
+  //       id: "1",
+  //       postId: "post123",
+  //       postContent:
+  //         "This is an inappropriate post with offensive language that violates our community guidelines.",
+  //       postAuthor: {
+  //         id: "user456",
+  //         name: "John Doe",
+  //         avatar: "/api/placeholder/40/40",
+  //         position: "Software Engineer at Tech Co.",
+  //       },
+  //       reporter: {
+  //         id: "user789",
+  //         name: "Sarah Smith",
+  //         avatar: "/api/placeholder/40/40",
+  //       },
+  //       reason: "Hate speech",
+  //       details: "Contains offensive language targeting specific groups",
+  //       reportedAt: "2025-03-19T14:30:00Z",
+  //       status: "pending",
+  //     },
+  //     // Additional sample items...
+  //     {
+  //       id: "2",
+  //       postId: "post456",
+  //       postContent:
+  //         "Check out my new website at spamlink.com! Guaranteed income!!!",
+  //       postAuthor: {
+  //         id: "user111",
+  //         name: "Alex Johnson",
+  //         avatar: "/api/placeholder/40/40",
+  //         position: "Freelancer",
+  //       },
+  //       reporter: {
+  //         id: "user222",
+  //         name: "Michael Brown",
+  //         avatar: "/api/placeholder/40/40",
+  //       },
+  //       reason: "Spam",
+  //       details: "Promotional content with suspicious links",
+  //       reportedAt: "2025-03-18T10:15:00Z",
+  //       status: "reviewed",
+  //     },
+  //   ];
 
-    setReportedPosts(sampleData);
-    setFilteredPosts(sampleData);
-  };
+  //   setReportedPosts(sampleData);
+  //   setFilteredPosts(sampleData);
+  // };
 
   // Apply filters and search
   useEffect(() => {
@@ -790,6 +801,7 @@ const ReportedPosts = () => {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({
           action: apiStatus,
           reason:
@@ -1115,7 +1127,8 @@ const ReportedPosts = () => {
                           >
                             Dismiss
                           </button>
-                          <div className="relative">
+
+                          {/* <div className="relative">
                             <button
                               onClick={() =>
                                 setActiveDropdown(
@@ -1154,7 +1167,7 @@ const ReportedPosts = () => {
                                 </a>
                               </div>
                             )}
-                          </div>
+                          </div> */}
                         </div>
                       </div>
                     </div>
