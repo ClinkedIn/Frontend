@@ -185,7 +185,7 @@ const Notification = () => {
    */
   useEffect(() => {
     const loginAndFetchData = async () => {
-      await testLogin(); // Ensure login is completed first
+      // await testLogin(); // Ensure login is completed first
     fetchUser();
     fetchNotifications();}
     loginAndFetchData()
