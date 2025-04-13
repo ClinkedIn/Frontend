@@ -572,6 +572,7 @@ import {
   AlertTriangle,
   Clock,
 } from "lucide-react";
+import { data } from "react-router-dom";
 
 // Base URL configuration - adjust as needed for your environment
 const BASE_URL = "http://localhost:3000";
@@ -629,14 +630,22 @@ const ReportedPosts = () => {
                 ? `${dataitem.reportedUser.firstName || ""} ${
                     dataitem.reportedUser.lastName || ""
                   }`.trim() || "Unknown User"
+                : dataitem.reportedPost
+                ? `${dataitem.reportedPost.userId.firstName || ""} ${
+                    dataitem.reportedPost.userId.lastName || ""
+                  }`.trim() || "Unknown User"
                 : "Unknown User",
-              avatar: "/api/placeholder/40/40",
+              avatar: dataitem.reportedPost
+                ? dataitem.reportedPost.userId.profilePicture
+                : dataitem.reportedUser
+                ? dataitem.reportedUser.profilePicture
+                : "/api/placeholder/40/40",
               position: dataitem.report?.reportedType || "Unknown",
             },
             reporter: {
               id: dataitem.report.userId._id,
               name: `${dataitem.report.userId.firstName} ${dataitem.report.userId.lastName}`,
-              avatar: "/api/placeholder/40/40",
+              avatar: dataitem.report.userId.profilePicture || "/api/placeholder/40/40",
             },
             reason: dataitem.report.policy,
             details:
