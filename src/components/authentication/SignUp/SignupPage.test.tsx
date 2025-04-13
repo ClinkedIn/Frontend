@@ -1,132 +1,246 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import SignupPage from "./SignUpPage";
-import { Toaster } from "react-hot-toast";
-import { MemoryRouter } from "react-router-dom";
-import { SignupProvider } from "../../../context/SignUpContext";
-import "@testing-library/jest-dom";
+import { useSignup } from "../../../context/SignUpContext";
+import { useAuth } from "../../../context/AuthContext";
+import { BrowserRouter } from "react-router-dom";
+import { vi } from "vitest";
 
-// Mocking necessary components and modules
-vi.mock("../../../../firebase", () => ({
-  auth: {},
-  provider: {},
-  signInWithPopup: vi.fn(),
+// Mock the context hooks
+vi.mock("../../../context/SignUpContext", () => ({
+  useSignup: vi.fn(),
 }));
 
-vi.mock("react-hot-toast", async () => {
-  const actual = await vi.importActual("react-hot-toast");
+vi.mock("../../../context/AuthContext", () => ({
+  useAuth: vi.fn(),
+}));
+
+// Mock Firebase functions
+vi.mock("../../../../firebase", () => {
+  const signInWithPopup = vi.fn();
+  return {
+    auth: {},
+    provider: {},
+    signInWithPopup,
+  };
+});
+
+import { signInWithPopup } from "../../../../firebase";
+
+vi.mock("react-hot-toast", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("react-hot-toast")>();
   return {
     ...actual,
     toast: {
       error: vi.fn(),
       success: vi.fn(),
-      // add others if needed
     },
-    Toaster: () => <div data-testid="toaster" />,
+    Toaster: ({ children }: { children?: React.ReactNode }) => (
+      <div data-testid="toaster">{children}</div>
+    ),
   };
 });
 
-// Track reCAPTCHA completion state
-let recaptchaCompleted = false;
+describe("SignupPage Component", () => {
+  const mockSetSignupData = vi.fn();
+  const mockSetAuthToken = vi.fn();
 
-vi.mock("react-google-recaptcha", () => ({
-  __esModule: true,
-  default: (props: any) => {
-    return (
-      <div
-        data-testid="recaptcha"
-        onClick={() => {
-          recaptchaCompleted = true;
-          props.onChange?.("dummy-token");
-        }}
-      />
+  beforeEach(() => {
+    // Reset mocks before each test
+    vi.clearAllMocks();
+
+    // Mock the useSignup hook
+    (useSignup as jest.Mock).mockReturnValue({
+      signupData: {
+        firstName: "",
+        lastName: "",
+        email: "",
+        password: "",
+      },
+      setSignupData: mockSetSignupData,
+    });
+
+    // Mock the useAuth hook
+    (useAuth as jest.Mock).mockReturnValue({
+      setAuthToken: mockSetAuthToken,
+    });
+  });
+
+  it("renders all form fields and buttons", () => {
+    render(
+      <BrowserRouter>
+        <SignupPage />
+      </BrowserRouter>
     );
-  },
-}));
 
-beforeEach(() => {
-  vi.clearAllMocks();
-  recaptchaCompleted = false;
-
-  global.matchMedia = vi.fn().mockImplementation((query) => ({
-    matches: false,
-    media: query,
-    addListener: vi.fn(),
-    removeListener: vi.fn(),
-  }));
-
-  vi.spyOn(console, "log").mockImplementation(() => {});
-});
-
-describe("SignupPage", () => {
-  const setup = () => {
-    return render(
-      <SignupProvider>
-        <MemoryRouter>
-          <SignupPage />
-          <Toaster />
-        </MemoryRouter>
-      </SignupProvider>
-    );
-  };
-
-  it("renders the signup form with all elements", () => {
-    setup();
+    // Check if all form fields are rendered
+    expect(screen.getByLabelText(/first name/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/last name/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /agree & join/i })).toBeInTheDocument();
-    expect(screen.getByTestId("recaptcha")).toBeInTheDocument();
+    expect(screen.getByText(/already on linkedin/i)).toBeInTheDocument();
   });
 
-  it("validates email format", async () => {
-    setup();
-    const user = userEvent.setup();
+  it("validates email input and shows error message for invalid email", async () => {
+    render(
+      <BrowserRouter>
+        <SignupPage />
+      </BrowserRouter>
+    );
+
     const emailInput = screen.getByLabelText(/email/i);
-    await user.type(emailInput, "invalidemail");
-    await user.tab();
-    expect(screen.getByText(/please enter a valid email address/i)).toBeInTheDocument();
+    fireEvent.change(emailInput, { target: { value: "invalid-email" } });
+
+    // Trigger validation by blurring the input
+    fireEvent.blur(emailInput);
+
+    // Check if error message is displayed
+    expect(await screen.findByText(/please enter a valid email address/i)).toBeInTheDocument();
   });
 
-  it("validates password strength", async () => {
-    setup();
-    const user = userEvent.setup();
+  it("validates password input and shows error message for weak password", async () => {
+    render(
+      <BrowserRouter>
+        <SignupPage />
+      </BrowserRouter>
+    );
+
     const passwordInput = screen.getByLabelText(/password/i);
-    await user.type(passwordInput, "weakpass");
-    await user.tab();
-    expect(screen.getByText(/password must be at least 8 characters long/i)).toBeInTheDocument();
+    fireEvent.change(passwordInput, { target: { value: "weak" } });
+
+    // Trigger validation by blurring the input
+    fireEvent.blur(passwordInput);
+
+    // Check if error message is displayed
+    expect(
+      await screen.findByText(
+        /password must be at least 8 characters long, include an uppercase letter, a number, and a special character/i
+      )
+    ).toBeInTheDocument();
   });
 
-//   it("displays error when reCAPTCHA is not completed", async () => {
-//     setup();
-//     const user = userEvent.setup();
-//     await user.click(screen.getByRole("button", { name: /agree & join/i }));
-//     expect(await screen.findByText(/please complete the reCAPTCHA/i)).toBeInTheDocument();
-//   });
+  it("disables the submit button when there are validation errors", async () => {
+    render(
+      <BrowserRouter>
+        <SignupPage />
+      </BrowserRouter>
+    );
 
-//   it("displays error when fields are empty after reCAPTCHA is completed", async () => {
-//     setup();
-//     const user = userEvent.setup();
-//     const recaptcha = screen.getByTestId("recaptcha");
-//     await user.click(recaptcha); 
-//     await user.click(screen.getByRole("button", { name: /agree & join/i }));
-//     expect(await screen.findByText(/please fill in all fields/i)).toBeInTheDocument();
-//   });
+    const emailInput = screen.getByLabelText(/email/i);
+    const passwordInput = screen.getByLabelText(/password/i);
+    const submitButton = screen.getByRole("button", { name: /agree & join/i });
 
-//   it("submits the form with valid data", async () => {
-//     setup();
-//     const user = userEvent.setup();
+    // Enter invalid email and weak password
+    fireEvent.change(emailInput, { target: { value: "invalid-email" } });
+    fireEvent.change(passwordInput, { target: { value: "weak" } });
 
-//     const emailInput = screen.getByLabelText(/email/i);
-//     const passwordInput = screen.getByLabelText(/password/i);
-//     const recaptcha = screen.getByTestId("recaptcha");
-//     const submitButton = screen.getByRole("button", { name: /agree & join/i });
+    // Trigger validation
+    fireEvent.blur(emailInput);
+    fireEvent.blur(passwordInput);
 
-//     await user.type(emailInput, "test@example.com");
-//     await user.type(passwordInput, "StrongPassword123");
-//     await user.click(recaptcha); // simulate reCAPTCHA success
-//     await user.click(submitButton);
+    // Check if the submit button is disabled
+    expect(submitButton).toBeDisabled();
+  });
 
-//     expect(console.log).toHaveBeenCalled();
-//   });
+  it("calls the API and displays success message on successful signup", async () => {
+    // Mock the fetch API response
+    global.fetch = vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            authToken: "mock-token",
+            confirmationLink: "http://example.com/confirm",
+          }),
+      })
+    ) as any;
+
+    render(
+      <BrowserRouter>
+        <SignupPage />
+      </BrowserRouter>
+    );
+
+    const firstNameInput = screen.getByLabelText(/first name/i);
+    const lastNameInput = screen.getByLabelText(/last name/i);
+    const emailInput = screen.getByLabelText(/email/i);
+    const passwordInput = screen.getByLabelText(/password/i);
+    const submitButton = screen.getByRole("button", { name: /agree & join/i });
+
+    // Fill out the form with valid data
+    fireEvent.change(firstNameInput, { target: { value: "John" } });
+    fireEvent.change(lastNameInput, { target: { value: "Doe" } });
+    fireEvent.change(emailInput, { target: { value: "john.doe@example.com" } });
+    fireEvent.change(passwordInput, { target: { value: "StrongPass1!" } });
+
+    // Submit the form
+    fireEvent.click(submitButton);
+
+    // Wait for the success message to appear
+    await waitFor(() => {
+      expect(screen.getByText(/signup successful!/i)).toBeInTheDocument();
+    });
+
+    // Check if the token was saved in context
+    expect(mockSetAuthToken).toHaveBeenCalledWith("mock-token");
+  });
+
+  it("displays an error message when the API call fails", async () => {
+    // Mock the fetch API response to simulate an error
+    global.fetch = vi.fn(() =>
+      Promise.resolve({
+        ok: false,
+        status: 400,
+        text: () => Promise.resolve("Invalid credentials"),
+      })
+    ) as any;
+
+    render(
+      <BrowserRouter>
+        <SignupPage />
+      </BrowserRouter>
+    );
+
+    const firstNameInput = screen.getByLabelText(/first name/i);
+    const lastNameInput = screen.getByLabelText(/last name/i);
+    const emailInput = screen.getByLabelText(/email/i);
+    const passwordInput = screen.getByLabelText(/password/i);
+    const submitButton = screen.getByRole("button", { name: /agree & join/i });
+
+    // Fill out the form with valid data
+    fireEvent.change(firstNameInput, { target: { value: "John" } });
+    fireEvent.change(lastNameInput, { target: { value: "Doe" } });
+    fireEvent.change(emailInput, { target: { value: "john.doe@example.com" } });
+    fireEvent.change(passwordInput, { target: { value: "StrongPass1!" } });
+
+    // Submit the form
+    fireEvent.click(submitButton);
+
+    // Wait for the error message to appear
+    await waitFor(() => {
+      expect(screen.getByText(/signup failed/i)).toBeInTheDocument();
+    });
+  });
+
+  it("handles Google sign-up failure and displays an error message", async () => {
+    // Mock the signInWithPopup function to throw an error
+    const mockSignInWithPopup = vi.fn().mockRejectedValue(new Error("Google signup failed"));
+    vi.mocked(signInWithPopup).mockImplementation(mockSignInWithPopup);
+
+    render(
+      <BrowserRouter>
+        <SignupPage />
+      </BrowserRouter>
+    );
+
+    const googleButton = screen.getByRole("button", { name: /sign up with google/i });
+
+    // Click the Google sign-up button
+    fireEvent.click(googleButton);
+
+    // Wait for the error message to appear
+    await waitFor(() => {
+      expect(screen.getByText(/google signup failed/i)).toBeInTheDocument();
+    });
+  });
 });
