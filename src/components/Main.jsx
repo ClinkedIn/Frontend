@@ -43,7 +43,7 @@ const Main = () => {
   // Define fetchUser and fetchNotifications functions
   const fetchUser = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/user/profile');
+      const response = await axios.get('http://localhost:3000/user/profile', { withCredentials: true });
       console.log("User data:", response.data);
     } catch (error) {
       console.error("Error fetching user data:", error);
@@ -52,40 +52,19 @@ const Main = () => {
 
   const fetchNotifications = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/notifications');
+      const response = await axios.get('http://localhost:3000/notifications', { withCredentials: true });
       console.log("Notifications:", response.data);
     } catch (error) {
       console.error("Error fetching notifications:", error);
     }
   };
 
-  // Test login function
-  const testLogin = async () => {
-    try {
-      const response = await axios.post('http://localhost:3000/user/login', {
-        email: "Porter.Hodkiewicz@hotmail.com",
-        password: "Aa12345678"
-      });
-
-      console.log("Login Response:", response.data);
-      return response.data;
-    } catch (error) {
-      if (error.response) {
-        console.error("Login Error - Server Response:", error.response.data);
-      } else if (error.request) {
-        console.error("Login Error - No Response:", error.request);
-      } else {
-        console.error("Login Error:", error.message);
-      }
-      throw error;
-    }
-  };
   
   // Fetch posts function
   const fetchPosts = async () => {
     try {
       console.log("Attempting to fetch posts...");
-      const response = await axios.get(API_ENDPOINT);
+      const response = await axios.get(API_ENDPOINT, { withCredentials: true });
       console.log("Response received:", response);
       
       // Handle the data based on structure
@@ -107,7 +86,8 @@ const Main = () => {
         if (post.userReaction) {
           initialReactions[postId] = post.userReaction.type;
         } else if (post.isLiked) {
-          initialReactions[postId] = 'like';
+          initialReactions[postId] = post.isLiked.type;
+          console.log(post.isLiked.type);
         }
       });
       setUserReactions(initialReactions);
@@ -268,6 +248,7 @@ const Main = () => {
     } catch (err) {
       console.error(`Error posting comment:`, err);
       
+      //error handling
       if (err.response) {
         console.error('Comment error response:', err.response.data);
         console.error('Status code:', err.response.status);
@@ -282,6 +263,8 @@ const Main = () => {
       throw err;
     }
   };
+
+
   
   // Handle reacting to a comment
   const handleReactToComment = async (postId, commentId, reactionType = 'like', isRemove = false) => {
@@ -316,8 +299,6 @@ const Main = () => {
   useEffect(() => {
     const initializeData = async () => {
       try {
-        // Login first
-        await testLogin();
         
         // Then fetch other data
         await Promise.all([
@@ -396,7 +377,7 @@ const Main = () => {
   const handleReact = async (postId, reactionType = 'like', isRemove = false) => {
     try {
       const postIdToUse = postId.toString();
-      const endpoint = `${API_ENDPOINT}/${postIdToUse}/${reactionType.toLowerCase()}`;
+      const endpoint = `${API_ENDPOINT}/${postIdToUse}/Like`;
       console.log(`${isRemove ? 'Removing' : 'Sending'} ${reactionType} reaction to: ${endpoint}`);
       
       let response;
@@ -415,7 +396,9 @@ const Main = () => {
         
       } else {
         // Add the reaction using POST method
-        response = await axios.post(endpoint);
+        response = await axios.post(endpoint, {
+          impressionType: reactionType.toLowerCase()
+        });
         console.log(`Reaction added response:`, response.data);
         
         // Update user reactions state to track the reaction type
@@ -437,19 +420,27 @@ const Main = () => {
           setPosts(
             posts.map((post) => {
               if (post.id === postId || post.postId === postId) {
+                // Simple if-check for metrics update
+                let likeDelta = 0;
+                if (!isRemove && !post.isLiked) {
+                  likeDelta = 1; // Add a like if not already liked
+                } else if (isRemove && post.isLiked) {
+                  likeDelta = -1; // Remove a like if already liked
+                }
+                
                 return { 
                   ...post, 
                   isLiked: !isRemove,
                   userReaction: isRemove ? null : { type: reactionType },
-                  // Update counts if they exist
+                  // Use the delta only if needed
                   metrics: post.metrics ? {
                     ...post.metrics,
-                    likes: post.metrics.likes + (isRemove ? -1 : 1)
+                    likes: post.metrics.likes + likeDelta
                   } : undefined,
                   impressionCounts: post.impressionCounts ? {
                     ...post.impressionCounts,
-                    total: post.impressionCounts.total + (isRemove ? -1 : 1),
-                    [reactionType.toLowerCase()]: (post.impressionCounts[reactionType.toLowerCase()] || 0) + (isRemove ? -1 : 1)
+                    total: post.impressionCounts.total + likeDelta,
+                    [reactionType.toLowerCase()]: (post.impressionCounts[reactionType.toLowerCase()] || 0) + likeDelta
                   } : undefined
                 };
               }
