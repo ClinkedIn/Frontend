@@ -113,9 +113,13 @@ const Header = ({notifications}) => {
         
         {/* Navigation Icons */}
         <nav className="flex space-x-6">
-          <button className="hover:bg-gray-200 p-2 rounded-lg">
+          <button className="hover:bg-gray-200 p-2 rounded-lg"
+            onClick={() => navigate('/feed')}>
             <img src="/Images/nav-home.svg" alt="Home" className="w-6 h-6" />
           </button>
+
+
+
           <button className="hover:bg-gray-200 p-2 rounded-lg">
             <img src="/Images/nav-network.svg" alt="Network" className="w-6 h-6" />
           </button>
