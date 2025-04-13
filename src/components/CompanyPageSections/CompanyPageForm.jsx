@@ -73,8 +73,7 @@ const CompanyForm = ({ errors,companyName, setCompanyName, tagline, setTagline, 
                     className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
                 >
                         <option value="">Select size</option>
-                        <option value="0-1">0-1 employees</option>
-                        <option value="2-10">2-10 employees</option>
+                        <option value="1-10">1-10 employees</option>
                         <option value="11-50">11-50 employees</option>
                         <option value="51-200">51-200 employees</option>
                         <option value="201-500">201-500 employees</option>

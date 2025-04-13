@@ -161,11 +161,10 @@ const CompanyProfileAdminViewPage = () => {
     
             const response = await putRequest(`${BASE_URL}/companies/${companyId}`, company);
             
-            if (response.status === 200) {
+            
                 setCompanyInfo(response.data); 
                 setShowForm(false);
                 
-            }
         } catch (error) {
             console.error('Error updating company:', error);
             toast.error("Error updating company" );
@@ -202,6 +201,7 @@ const CompanyProfileAdminViewPage = () => {
                         companyAddress={companyAddress} setCompanyAddress={setCompanyAddress}
                         logoPreview={logoPreview} setLogoPreview={setLogoPreview}
                     />
+                     <Toaster position="top-center" />
                     <div className="flex justify-end gap-4 mt-4">
                         <button 
                             className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
