@@ -4,6 +4,7 @@ import Header from "../../components/UpperNavBar";
 import { useEffect, useState } from "react";
 import InlineTabs from "../../components/CompanyPageSections/InlineTabs"
 import axios from "axios";
+import { BASE_URL } from "../../constants";
 const CompanyProfileMemberViewPage = () => {
     const navigate = useNavigate();
     const {companyId, section = "Home"} = useParams();
@@ -21,13 +22,13 @@ const CompanyProfileMemberViewPage = () => {
     const handleClickFollowingButton = async() => {
         const userId ={user_Id :"12345"}
         if(isFollowing) {
-            const response = await axios.delete(`http://localhost:5173/companies/${companyId}/follow`,userId);
+            const response = await axios.delete(`${BASE_URL}/companies/${companyId}/follow`,userId);
             console.log(response)
             setIsFollowing(false);
 
         }
         else{
-            const response = await axios.post(`http://localhost:5173/companies/${companyId}/follow`,userId);
+            const response = await axios.post(`${BASE_URL}/companies/${companyId}/follow`,userId);
             console.log(response)
             setIsFollowing(true);
         }
@@ -35,7 +36,7 @@ const CompanyProfileMemberViewPage = () => {
     const fetchCompanyInfo=async()=>{
         try {
             const response = await axios.get(
-                "http://localhost:5173/companies/12345"
+                `${BASE_URL}/companies/12345`
             );
             setCompanyInfo(response.data); 
         } catch (error) {
@@ -43,7 +44,8 @@ const CompanyProfileMemberViewPage = () => {
          }
     }
     useEffect(()=>{
-        if(!companyInfo) fetchCompanyInfo();
+        if(!companyInfo)
+             fetchCompanyInfo();
     },[]);
 
     return (

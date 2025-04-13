@@ -9,8 +9,9 @@ import {
   ExternalLink,
   X,
 } from "lucide-react";
+import { BASE_URL } from "../../constants";
 
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = BASE_URL;
 const API_ROUTES = {
   login: `${API_BASE_URL}/user/login`,
   resume: `${API_BASE_URL}/user/resume`,

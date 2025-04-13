@@ -6,6 +6,7 @@ import { FaPlus,FaUpload } from "react-icons/fa6";
 import axios from "axios";
 import CompanyForm from "../../components/CompanyPageSections/CompanyPageForm";
 import { postRequest } from "../../services/axios";
+import { BASE_URL } from "../../constants";
 
 
 
@@ -34,31 +35,7 @@ const CreateCompanyPage = () => {
             [field]: value.toLowerCase().includes("select") ? "Please choose a valid option." : ""
         }));
     };*/
-    const testLogin = async () => {
-        try {
-          const response = await axios.post('http://localhost:3000/user/login', {
-            email: "Porter.Hodkiewicz@hotmail.com",
-            password: "Aa12345678"
-          },{
-            withCredentials:true
-          }
-          
-        );
     
-          console.log("Login Response:", response.data);
-        } catch (error) {
-          if (error.response) {
-      
-            console.error("Login Error - Server Response:", error.response.data);
-          } else if (error.request) {
-            // Request made but no response received
-            console.error("Login Error - No Response:", error.request);
-          } else {
-            // Something else happened
-            console.error("Login Error:", error.message);
-          }
-        }
-      };
      /**
        * Fetches current user profile data
        * @async
@@ -66,7 +43,7 @@ const CreateCompanyPage = () => {
        */
       const fetchUser = async () => {
         try {
-          const response = await axios.get("http://localhost:3000/user/me", {
+          const response = await axios.get(`${BASE_URL}/user/me`, {
         
             withCredentials:true
           });
@@ -128,7 +105,7 @@ const CreateCompanyPage = () => {
     };
       useEffect(() => {
         const loginAndFetchData = async () => {
-          await testLogin(); // Ensure login is completed first
+          //await testLogin(); // Ensure login is completed first
           fetchUser(); 
         };
       
@@ -152,7 +129,7 @@ const CreateCompanyPage = () => {
                 
             }
             //const response = await axios.post("http://localhost:3000/companies",company)
-            const response = await postRequest("http://localhost:3000/companies",company)
+            const response = await postRequest(`${BASE_URL}/companies`,company)
             console.log(response.data)
             navigate(`/company/${response.data._id}/admin`)
             

@@ -11,8 +11,9 @@ import {
   Trash2,
 } from "lucide-react";
 import axios from "axios";
+import { BASE_URL } from "../../constants";
 
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = BASE_URL;
 
 const JobListing = () => {
   const [jobs, setJobs] = useState([]);

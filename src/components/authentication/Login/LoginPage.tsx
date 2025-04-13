@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { axiosInstance } from "../../../services/axios";
+//import { axiosInstance } from "../../../services/axios";
 
 import toast from "react-hot-toast";
 import { Loader } from "lucide-react";
@@ -10,6 +10,7 @@ import Footer from "../../Footer/Footer";
 import GoogleLogin from "../../GoogleLoginButton";
 import { useAuth } from "../../../context/AuthContext";
 import axios from "axios";
+import { BASE_URL } from "../../../constants";
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
@@ -31,7 +32,7 @@ const LoginPage = () => {
   const { setAuthToken } = useAuth(); // Get the setAuthToken function from context
 
   // import API_BASE_URL from your .env file
-  const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+  //const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
   const loginMutation = useMutation<void, unknown, UserData>({
     mutationFn: async (userData: UserData) => {
