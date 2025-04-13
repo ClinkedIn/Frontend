@@ -2,6 +2,8 @@ import React, {useState, useEffect} from "react";
 import { X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { BASE_URL } from "../../constants";
+
 /**
  * The JobCard component displays the details of a job listing, including the company logo, job title,
  * job location, and the time since the job was posted. It also includes a clickable job title that 
