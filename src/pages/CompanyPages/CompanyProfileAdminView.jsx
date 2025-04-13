@@ -12,12 +12,14 @@ import axios from "axios";
 import { putRequest } from "../../services/axios";
 import { BASE_URL } from "../../constants";
 import { set } from "date-fns";
+import {toast,Toaster} from "react-hot-toast";
 
 
 const CompanyProfileAdminViewPage = () => {
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
     const {companyId, section = "Feed"} = useParams();
+    const [isUpdating, setIsUpdating] = useState(false);
     const [activeTab, setActiveTab] = useState(section);
     const [companyInfo, setCompanyInfo] = useState();
     const [showForm, setShowForm] = useState(false);
@@ -140,33 +142,42 @@ const CompanyProfileAdminViewPage = () => {
       
         loginAndFetchData();
       }, []);
-    const handleUpdatePage =async()=>{
-       
-        if(isValid()){
-            
-            console.log("Page updated")
-            const company ={
-                userId: user.user._id,
+      const handleUpdatePage = async () => {
+        if (!isValid()) return;
+        
+        setIsUpdating(true);
+        try {
+            const company = {
+                userId: user?.user?._id,
                 name: companyName,
-                address:companyAddress,
+                address: companyAddress,
                 website: website,
                 industry: industry,
                 organizationSize: organizationSize,
                 organizationType: organizationType,
                 logo: logoPreview,
                 tagLine: tagline
+            };
+    
+            const response = await putRequest(`${BASE_URL}/companies/${companyId}`, company);
+            
+            if (response.status === 200) {
+                setCompanyInfo(response.data); 
+                setShowForm(false);
+                
             }
-            const response = await putRequest(`${BASE_URL}/companies/${companyId}`,company);
-            setCompanyInfo(company);
-            console.log(response)
-            setShowForm(false)
-
+        } catch (error) {
+            console.error('Error updating company:', error);
+            toast.error("Error updating company" );
+            
+            
+        } finally {
+            setIsUpdating(false);
         }
-
     }
     useEffect(()=>{
         if(!companyInfo) fetchCompanyInfo();
-    },[companyInfo]);
+    },[]);
 
     return (
         <div className="   justify-center bg-[#f4f2ee] min-h-screen  items-center flex flex-col">
@@ -201,8 +212,9 @@ const CompanyProfileAdminViewPage = () => {
                         <button 
                             className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
                             onClick={handleUpdatePage}
+                            disabled={isUpdating}
                         >
-                            Update
+                            {isUpdating ? 'Updating...' : 'Update'}
                         </button>
                     </div>
                 </div>
