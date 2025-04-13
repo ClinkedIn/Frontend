@@ -5,7 +5,6 @@ import { BrowserRouter } from "react-router-dom";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import App from "./App.tsx";
 import { worker } from "./mocks/browser";
-import { CookiesProvider } from "react-cookie";
 async function enableMocking() {
   // Always enable in development, regardless of VITE_NODE_ENV
   if (process.env.NODE_ENV === "development") {
@@ -25,9 +24,7 @@ enableMocking().then(() => {
     <StrictMode>
       <BrowserRouter>
         <QueryClientProvider client={queryClient}>
-          <CookiesProvider>
-            <App />
-          </CookiesProvider>
+          <App />
         </QueryClientProvider>
       </BrowserRouter>
     </StrictMode>

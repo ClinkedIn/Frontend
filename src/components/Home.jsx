@@ -2,9 +2,26 @@ import Leftside from "./Leftside";
 import Main from "./Main";
 import Rightside from "./Rightside";
 import Header from "./UpperNavBar";
+import { useEffect } from "react";
+import axios from "axios";
 
 const Home = () => {
   document.title = "Feed | LinkedIn";
+  useEffect(() => {
+    const fetchUserEducation = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:3000/user/education",
+          { withCredentials: true }
+        );
+        console.log(response.data);
+      } catch (error) {
+        console.error("Error fetching user education:", error);
+      }
+    };
+    fetchUserEducation();
+  }, []);
+
   return (
     <div className="w-screen bg-[#f5f5f5]">
       {/* Navbar at the top */}

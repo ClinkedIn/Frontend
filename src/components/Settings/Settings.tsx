@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 // Define types for our component props
@@ -6,17 +6,29 @@ interface SettingsPageProps {
   userEmail: string;
 }
 
-// Privacy options enum
+// Privacy options enum mapped to API values
 enum PrivacyOption {
-  PUBLIC = "Public",
-  PRIVATE = "Private",
-  CONNECTIONS_ONLY = "Connections Only",
+  PUBLIC = "public",
+  PRIVATE = "private",
+  CONNECTIONS_ONLY = "connections-only",
 }
+
+// Display names for privacy options
+const privacyOptionDisplayNames = {
+  [PrivacyOption.PUBLIC]: "Public",
+  [PrivacyOption.PRIVATE]: "Private",
+  [PrivacyOption.CONNECTIONS_ONLY]: "Connections Only",
+};
 
 // Define types for API responses
 interface UpdateEmailResponse {
   token: string;
   message: string;
+}
+
+interface UpdatePrivacyResponse {
+  message: string;
+  profilePrivacySettings: string;
 }
 
 interface ErrorResponse {
@@ -36,10 +48,17 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ userEmail }) => {
     PrivacyOption.PUBLIC
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUpdatingPrivacy, setIsUpdatingPrivacy] = useState(false);
   const [feedbackMessage, setFeedbackMessage] = useState<{
     type: "success" | "error";
     message: string;
   } | null>(null);
+
+  // Fetch current privacy settings on component mount
+  useEffect(() => {
+    // This would be where you'd fetch the current settings from your API
+    // For now, we'll just use the default state
+  }, []);
 
   const handleEmailUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,6 +107,42 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ userEmail }) => {
     }
   };
 
+  const handlePrivacyChange = async (value: PrivacyOption) => {
+    try {
+      setIsUpdatingPrivacy(true);
+      setFeedbackMessage(null);
+
+      const response = await api.patch<UpdatePrivacyResponse>(
+        "/user/privacy-settings",
+        {
+          profilePrivacySettings: value,
+        }
+      );
+
+      setSelectedPrivacy(value);
+      setFeedbackMessage({
+        type: "success",
+        message: response.data.message,
+      });
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        const errorData = error.response.data as ErrorResponse;
+        setFeedbackMessage({
+          type: "error",
+          message: errorData.message || "An error occurred",
+        });
+      } else {
+        setFeedbackMessage({
+          type: "error",
+          message: "Failed to update privacy settings. Please try again.",
+        });
+      }
+      // Reset to previous value if update fails
+    } finally {
+      setIsUpdatingPrivacy(false);
+    }
+  };
+
   const clearFeedback = () => {
     setFeedbackMessage(null);
   };
@@ -106,18 +161,12 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ userEmail }) => {
           </svg>
         </div>
         <div className="flex-grow"></div>
-        <div className="w-8 h-8 rounded-full bg-gray-300 overflow-hidden">
-          <img src="/api/placeholder/32/32" alt="profile" />
-        </div>
       </header>
 
       <div className="flex flex-1">
         <div className="w-64 border-r border-gray-200 bg-gray-50">
           <div className="p-6">
             <div className="flex items-center mb-6">
-              <div className="w-10 h-10 rounded-full bg-gray-300 overflow-hidden">
-                <img src="/api/placeholder/40/40" alt="profile" />
-              </div>
               <h1 className="ml-3 text-2xl font-bold">Settings</h1>
             </div>
 
@@ -143,9 +192,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ userEmail }) => {
           </div>
         </div>
 
-        {/* Main content area */}
         <div className="flex-1 p-8 bg-gray-50">
-          {/* Feedback message */}
           {feedbackMessage && (
             <div
               className={`max-w-2xl mx-auto mb-4 p-4 rounded flex items-center justify-between ${
@@ -239,7 +286,6 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ userEmail }) => {
                 </div>
               </div>
 
-              {/* Privacy settings section - kept as requested */}
               <div className="py-6">
                 <div className="flex justify-between items-start">
                   <div>
@@ -252,30 +298,56 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ userEmail }) => {
                   </div>
                   <div className="relative">
                     <select
-                      className="appearance-none bg-white border border-gray-300 rounded-md px-4 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className={`appearance-none bg-white border border-gray-300 rounded-md px-4 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                        isUpdatingPrivacy ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
                       value={selectedPrivacy}
                       onChange={(e) =>
-                        setSelectedPrivacy(e.target.value as PrivacyOption)
+                        handlePrivacyChange(e.target.value as PrivacyOption)
                       }
+                      disabled={isUpdatingPrivacy}
                     >
                       {Object.values(PrivacyOption).map((option) => (
                         <option key={option} value={option}>
-                          {option}
+                          {privacyOptionDisplayNames[option]}
                         </option>
                       ))}
                     </select>
                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                      <svg
-                        className="w-4 h-4"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                          clipRule="evenodd"
-                        ></path>
-                      </svg>
+                      {isUpdatingPrivacy ? (
+                        <svg
+                          className="animate-spin h-4 w-4 text-blue-600"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                      ) : (
+                        <svg
+                          className="w-4 h-4"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                            clipRule="evenodd"
+                          ></path>
+                        </svg>
+                      )}
                     </div>
                   </div>
                 </div>
