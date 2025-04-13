@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import PostMenu from './PostMenu.jsx';
 import CreatePostModal from './PostCreation.jsx';
 import PostReactions from './PostReactions.jsx';
+import CommentSection from './CommentSection.jsx';
+
+// Set axios defaults to include credentials with all requests
+axios.defaults.withCredentials = true;
 
 const Main = () => {
   const [posts, setPosts] = useState([]);
@@ -9,6 +14,14 @@ const Main = () => {
   const [error, setError] = useState(null);
   const [postContent, setPostContent] = useState('');
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+  const [userReactions, setUserReactions] = useState({});
+  const [expandedComments, setExpandedComments] = useState({});
+  const [comments, setComments] = useState({});
+  const [loadingComments, setLoadingComments] = useState({});
+  
+  // Use exact API endpoint as specified
+  const API_ENDPOINT = 'http://localhost:3000/posts';
+  const COMMENTS_ENDPOINT = 'http://localhost:3000/comments';
   
   // Available reaction types
   const reactionTypes = [
@@ -26,108 +39,462 @@ const Main = () => {
     headline: "Software Engineer at Tech Company",
     profileImage: "https://picsum.photos/80?random=1",
   };
+
+  // Define fetchUser and fetchNotifications functions
+  const fetchUser = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/user/profile');
+      console.log("User data:", response.data);
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  };
+
+  const fetchNotifications = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/notifications');
+      console.log("Notifications:", response.data);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  };
+
+  // Test login function
+  const testLogin = async () => {
+    try {
+      const response = await axios.post('http://localhost:3000/user/login', {
+        email: "Porter.Hodkiewicz@hotmail.com",
+        password: "Aa12345678"
+      });
+
+      console.log("Login Response:", response.data);
+      return response.data;
+    } catch (error) {
+      if (error.response) {
+        console.error("Login Error - Server Response:", error.response.data);
+      } else if (error.request) {
+        console.error("Login Error - No Response:", error.request);
+      } else {
+        console.error("Login Error:", error.message);
+      }
+      throw error;
+    }
+  };
   
-  // Fetch posts when component mounts
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        console.log("Attempting to fetch posts...");
-        const response = await fetch('/api/posts');
-        console.log("Response received:", response);
-        if (!response.ok) {
-          throw new Error('Failed to fetch posts');
+  // Fetch posts function
+  const fetchPosts = async () => {
+    try {
+      console.log("Attempting to fetch posts...");
+      const response = await axios.get(API_ENDPOINT);
+      console.log("Response received:", response);
+      
+      // Handle the data based on structure
+      let postsData = response.data;
+      
+      // Check if response has posts property (from the JSON example you provided)
+      if (response.data && response.data.posts) {
+        postsData = response.data.posts;
+        console.log("Pagination info:", response.data.pagination);
+      }
+      
+      console.log("Posts data:", postsData);
+      setPosts(postsData);
+      
+      // Initialize user reactions from posts data
+      const initialReactions = {};
+      postsData.forEach(post => {
+        const postId = post.id || post.postId;
+        if (post.userReaction) {
+          initialReactions[postId] = post.userReaction.type;
+        } else if (post.isLiked) {
+          initialReactions[postId] = 'like';
         }
-        const data = await response.json();
-        console.log("Data received:", data);
-        setPosts(data);
-      } catch (err) {
-        console.error('Error fetching posts:', err);
-        setError('Failed to load posts. Please try again later.');
-      } finally {
+      });
+      setUserReactions(initialReactions);
+      
+    } catch (err) {
+      console.error('Error fetching posts:', err);
+      setError('Failed to load posts. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // Fetch comments for a specific post
+  const fetchComments = async (postId) => {
+    try {
+      setLoadingComments(prev => ({ ...prev, [postId]: true }));
+      
+      const endpoint = `${COMMENTS_ENDPOINT}/${postId}/post`;
+      console.log(`Fetching comments for post ${postId} from ${endpoint}`);
+      
+      const response = await axios.get(endpoint);
+      console.log(`Comments response for post ${postId}:`, response.data);
+      
+      if (response.data && response.data.comments) {
+        setComments(prev => ({
+          ...prev,
+          [postId]: response.data.comments
+        }));
+      }
+    } catch (err) {
+      console.error(`Error fetching comments for post ${postId}:`, err);
+      
+      if (err.response) {
+        console.error('Comments error response:', err.response.data);
+        console.error('Status code:', err.response.status);
+      }
+    } finally {
+      setLoadingComments(prev => ({ ...prev, [postId]: false }));
+    }
+  };
+  
+  // Toggle comments display for a post
+  const toggleComments = async (postId) => {
+    const isExpanded = expandedComments[postId];
+    
+    setExpandedComments(prev => ({
+      ...prev,
+      [postId]: !isExpanded
+    }));
+    
+    // If expanding comments and we don't have them yet, fetch them
+    if (!isExpanded && !comments[postId]) {
+      await fetchComments(postId);
+    }
+  };
+  
+  // Add a new comment to a post with all API parameters
+  const handleAddComment = async (postId, commentText, attachment = null, taggedUsers = [], parentComment = null, attachmentUrl = null) => {
+    try {
+      const endpoint = `${COMMENTS_ENDPOINT}/${postId}/post`;
+      console.log(`Posting comment to ${endpoint}:`, commentText);
+      
+      // Use FormData to support file uploads
+      const formData = new FormData();
+      
+      // Required parameters
+      formData.append('postId', postId);
+      formData.append('commentContent', commentText);
+      
+      // Add attachment file if provided (using 'file' as the field name per API spec)
+      if (attachment) {
+        formData.append('file', attachment);
+      }
+      
+      // Add attachment URL if provided
+      if (attachmentUrl) {
+        formData.append('commentAttachment', attachmentUrl);
+      }
+      
+      // Add tagged users if any
+      if (taggedUsers && taggedUsers.length > 0) {
+        formData.append('taggedUsers', JSON.stringify(taggedUsers));
+      }
+      
+      // Add parent comment ID for replies
+      if (parentComment) {
+        formData.append('parentComment', parentComment);
+      }
+      
+      // Log what we're sending
+      console.log("Sending comment:");
+      console.log("- Post ID:", postId);
+      console.log("- Content:", commentText);
+      console.log("- File attachment:", attachment ? "Yes" : "No");
+      console.log("- URL attachment:", attachmentUrl);
+      console.log("- Tagged users:", taggedUsers.length > 0 ? taggedUsers : "None");
+      console.log("- Parent comment:", parentComment || "None (top-level comment)");
+      
+      const response = await axios.post(endpoint, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      
+      console.log(`Comment posted successfully:`, response.data);
+      
+      // If we receive the comment in the response, add it to our comment list
+      if (response.data && response.data.comment) {
+        setComments(prev => {
+          const existingComments = prev[postId] || [];
+          
+          // If it's a reply and we're showing replies, handle accordingly
+          if (parentComment) {
+            // Find parent comment and increment its reply count
+            return {
+              ...prev,
+              [postId]: existingComments.map(comment => 
+                comment._id === parentComment 
+                  ? {
+                      ...comment, 
+                      replyCount: (comment.replyCount || 0) + 1,
+                      // If we're tracking replies in-memory, could add to replies array too
+                      replies: [...(comment.replies || []), response.data.comment]
+                    }
+                  : comment
+              )
+            };
+          }
+          
+          // For top-level comments, add to the beginning of the array
+          return {
+            ...prev,
+            [postId]: [response.data.comment, ...existingComments]
+          };
+        });
+      } else {
+        // If API doesn't return the comment object, just refresh comments
+        await fetchComments(postId);
+      }
+      
+      // Update comment count in posts
+      setPosts(posts.map(post => {
+        if ((post.id === postId || post.postId === postId)) {
+          return {
+            ...post,
+            commentCount: (post.commentCount || 0) + 1,
+            metrics: post.metrics ? {
+              ...post.metrics,
+              comments: (post.metrics.comments || 0) + 1
+            } : undefined
+          };
+        }
+        return post;
+      }));
+      
+      return response.data;
+      
+    } catch (err) {
+      console.error(`Error posting comment:`, err);
+      
+      if (err.response) {
+        console.error('Comment error response:', err.response.data);
+        console.error('Status code:', err.response.status);
+        alert(`Failed to post comment: ${err.response.data.message || 'Server error'}`);
+      } else if (err.request) {
+        console.error('No response received:', err.request);
+        alert('Failed to post comment: No response from server');
+      } else {
+        console.error('Error setting up request:', err.message);
+        alert(`Failed to post comment: ${err.message}`);
+      }
+      throw err;
+    }
+  };
+  
+  // Handle reacting to a comment
+  const handleReactToComment = async (postId, commentId, reactionType = 'like', isRemove = false) => {
+    try {
+      const endpoint = `${COMMENTS_ENDPOINT}/${commentId}/${reactionType.toLowerCase()}`;
+      console.log(`${isRemove ? 'Removing' : 'Sending'} ${reactionType} reaction to comment ${commentId}`);
+      
+      let response;
+      
+      if (isRemove) {
+        response = await axios.delete(endpoint);
+      } else {
+        response = await axios.post(endpoint);
+      }
+      
+      console.log(`Comment reaction response:`, response.data);
+      
+      // Refresh comments for this post to get updated reaction counts
+      fetchComments(postId);
+      
+    } catch (err) {
+      console.error(`Error reacting to comment:`, err);
+      
+      if (err.response) {
+        console.error('Comment reaction error:', err.response.data);
+        console.error('Status code:', err.response.status);
+      }
+    }
+  };
+  
+  // Fetch data when component mounts
+  useEffect(() => {
+    const initializeData = async () => {
+      try {
+        // Login first
+        await testLogin();
+        
+        // Then fetch other data
+        await Promise.all([
+          fetchUser(),
+          fetchNotifications(),
+          fetchPosts()
+        ]);
+      } catch (error) {
+        console.error("Error during initialization:", error);
+        setError('Authentication failed. Please try again later.');
         setLoading(false);
       }
     };
     
-    fetchPosts();
+    initializeData();
   }, []);
   
   // Handle creating a new post
   const handleCreatePost = async (postData) => {
     try {
-      const response = await fetch('/api/posts', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          author: authorInfo,
-          content: {
-            text: postData.text,
-            media: postData.media.length > 0 
-              ? [{ 
-                  type: "image", 
-                  url: URL.createObjectURL(postData.media[0]),
-                  alt: "User uploaded image" 
-                }] 
-              : []
-          },
-          visibility: "public"
-        }),
-      });
+      console.log("Creating post with data:", postData);
       
-      if (!response.ok) {
-        throw new Error('Failed to create post');
+      // Create FormData for proper multipart/form-data encoding
+      const formData = new FormData();
+      
+      // Add description (required)
+      formData.append('description', postData.text);
+      
+      // Add attachments if any
+      if (postData.files && postData.files.length > 0) {
+        for (let i = 0; i < postData.files.length; i++) {
+          formData.append('files', postData.files[i]);
+        }
       }
       
-      const data = await response.json();
-      setPosts([data.post, ...posts]);
+      // Add privacy settings
+      formData.append('whoCanSee', 'anyone');
+      formData.append('whoCanComment', 'anyone');
+      
+      // Log form data for debugging
+      console.log("Sending post with description:", postData.text);
+      console.log("Number of files:", postData.files ? postData.files.length : 0);
+      
+      const response = await axios.post(API_ENDPOINT, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      
+      console.log("Post creation successful:", response.data);
+      
+      // Check response structure
+      const newPost = response.data.post || response.data;
+      setPosts([newPost, ...posts]);
+      
     } catch (err) {
       console.error('Error creating post:', err);
-      alert('Failed to create post. Please try again.');
+      
+      if (err.response) {
+        // The request was made but server responded with error
+        console.error('Server response:', err.response.data);
+        console.error('Status code:', err.response.status);
+        alert(`Failed to create post: ${err.response.data.message || 'Server error'}`);
+      } else if (err.request) {
+        // Request was made but no response received
+        console.error('No response received:', err.request);
+        alert('Failed to create post: No response from server');
+      } else {
+        // Error setting up request
+        alert(`Failed to create post: ${err.message}`);
+      }
     }
   };
   
-  // Handle reacting to a post
-  const handleReact = async (postId, reactionType = 'like') => {
+  // Handle reacting to a post - Updated to handle both liking and unliking with reaction types
+  const handleReact = async (postId, reactionType = 'like', isRemove = false) => {
     try {
-      const response = await fetch(`/api/posts/${postId}/react`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          reactionType: reactionType,
-        }),
-      });
+      const postIdToUse = postId.toString();
+      const endpoint = `${API_ENDPOINT}/${postIdToUse}/${reactionType.toLowerCase()}`;
+      console.log(`${isRemove ? 'Removing' : 'Sending'} ${reactionType} reaction to: ${endpoint}`);
       
-      if (!response.ok) {
-        throw new Error('Failed to react to post');
+      let response;
+      
+      if (isRemove) {
+        // Remove the reaction using DELETE method
+        response = await axios.delete(endpoint);
+        console.log(`Reaction removed response:`, response.data);
+        
+        // Update user reactions state to remove the reaction
+        setUserReactions(prev => {
+          const updated = { ...prev };
+          delete updated[postIdToUse];
+          return updated;
+        });
+        
+      } else {
+        // Add the reaction using POST method
+        response = await axios.post(endpoint);
+        console.log(`Reaction added response:`, response.data);
+        
+        // Update user reactions state to track the reaction type
+        setUserReactions(prev => ({
+          ...prev,
+          [postIdToUse]: reactionType
+        }));
       }
       
-      const data = await response.json();
-      
-      // Update the specific post in the posts array
-      setPosts(
-        posts.map((post) => (post.id === postId ? data.post : post))
-      );
+      // Update the post in the UI
+      if (response.data) {
+        // If the API returns the updated post
+        if (response.data.post) {
+          setPosts(
+            posts.map((post) => (post.id === postId || post.postId === postId) ? response.data.post : post)
+          );
+        } else {
+          // If API just returns success but not the updated post, update locally
+          setPosts(
+            posts.map((post) => {
+              if (post.id === postId || post.postId === postId) {
+                return { 
+                  ...post, 
+                  isLiked: !isRemove,
+                  userReaction: isRemove ? null : { type: reactionType },
+                  // Update counts if they exist
+                  metrics: post.metrics ? {
+                    ...post.metrics,
+                    likes: post.metrics.likes + (isRemove ? -1 : 1)
+                  } : undefined,
+                  impressionCounts: post.impressionCounts ? {
+                    ...post.impressionCounts,
+                    total: post.impressionCounts.total + (isRemove ? -1 : 1),
+                    [reactionType.toLowerCase()]: (post.impressionCounts[reactionType.toLowerCase()] || 0) + (isRemove ? -1 : 1)
+                  } : undefined
+                };
+              }
+              return post;
+            })
+          );
+        }
+      }
     } catch (err) {
-      console.error('Error reacting to post:', err);
+      console.error(`Error ${isRemove ? 'removing' : 'adding'} ${reactionType} reaction:`, err);
+      
+      if (err.response) {
+        console.error('Reaction error response:', err.response.data);
+        console.error('Status code:', err.response.status);
+      }
     }
   };
   
   // Handle PostMenu actions
   const handleHidePost = (postId) => {
-    setPosts(posts.filter(post => post.id !== postId));
+    setPosts(posts.filter(post => post.id !== postId && post.postId !== postId));
   };
 
-  const handleSavePost = (postId) => {
-    console.log(`Post ${postId} saved`);
-    alert(`Post saved successfully!`);
+  const handleSavePost = async (postId) => {
+    try {
+      await axios.post(`${API_ENDPOINT}/${postId}/save`);
+      console.log(`Post ${postId} saved`);
+      alert(`Post saved successfully!`);
+    } catch (error) {
+      console.error('Error saving post:', error);
+      alert('Failed to save post. Please try again.');
+    }
   };
 
-  const handleReportPost = (postId) => {
-    console.log(`Post ${postId} reported`);
-    alert(`Post reported. Thank you for helping keep LinkedIn safe.`);
+  const handleReportPost = async (postId) => {
+    try {
+      await axios.post(`${API_ENDPOINT}/${postId}/report`, {
+        reason: 'inappropriate'
+      });
+      console.log(`Post ${postId} reported`);
+      alert(`Post reported. Thank you for helping keep LinkedIn safe.`);
+    } catch (error) {
+      console.error('Error reporting post:', error);
+      alert('Failed to report post. Please try again.');
+    }
   };
 
   // Format date for display
@@ -214,33 +581,59 @@ const Main = () => {
 
         {/* Post List */}
         {posts.map((post) => (
-          <article key={post.id} className="overflow-visible p-0 mb-2 bg-white rounded-md border-none shadow-[0_0_0_1px_rgba(0,0,0,0.15),0_0_0_rgba(0,0,0,0.20)]">
+          <article key={post.id || post.postId} className="overflow-visible p-0 mb-2 bg-white rounded-md border-none shadow-[0_0_0_1px_rgba(0,0,0,0.15),0_0_0_rgba(0,0,0,0.20)]">
             <div className="p-3 pr-10 pb-0 flex justify-between items-start relative">
               <a href="/feed" className="overflow-hidden flex">
-                <img src={post.author.profileImage} alt="user" className="w-12 h-12 rounded-full mr-2.5" />
+                <img 
+                  src={post.author?.profileImage || post.profilePicture} 
+                  alt="user" 
+                  className="w-12 h-12 rounded-full mr-2.5" 
+                />
                 <div className="text-start">
-                  <h6 className="text-base text-black font-semibold">{post.author.name}</h6>
-                  <span className="text-sm text-[rgba(0,0,0,0.6)] block">{post.author.headline}</span>
-                  <span className="text-sm text-[rgba(0,0,0,0.6)] block">{formatDate(post.timestamp)}</span>
+                  <h6 className="text-base text-black font-semibold">
+                    {post.author?.name || `${post.firstName} ${post.lastName}`}
+                  </h6>
+                  <span className="text-sm text-[rgba(0,0,0,0.6)] block">
+                    {post.author?.headline || post.headline}
+                  </span>
+                  <span className="text-sm text-[rgba(0,0,0,0.6)] block">
+                    {formatDate(post.timestamp || post.createdAt)}
+                  </span>
                 </div>
               </a>
               
               <PostMenu
-                postId={post.id}
+                postId={post.id || post.postId}
                 onHide={handleHidePost}
                 onSave={handleSavePost}
                 onReport={handleReportPost}
+                isSaved={post.isSaved}
               />
             </div>
             <div className="text-base text-start p-0 pl-4 pr-4 text-[rgba(0,0,0,0.9)] overflow-hidden">
-              {post.content.text}
+              {post.content?.text || post.postDescription}
             </div>
-            {post.content.media && post.content.media.length > 0 && (
+            
+            {/* Handle different media formats */}
+            {(post.content?.files && post.content.files.length > 0) && (
               <div className="w-full relative bg-[#f9fafb] mt-2">
                 <div className="aspect-[16/9] relative overflow-hidden">
                   <img 
-                    src={post.content.media[0].url} 
-                    alt={post.content.media[0].alt || "Post image"} 
+                    src={post.content.files[0].url} 
+                    alt={post.content.files[0].alt || "Post image"} 
+                    className="absolute inset-0 w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                </div>
+              </div>
+            )}
+            
+            {(post.attachments && post.attachments.length > 0) && (
+              <div className="w-full relative bg-[#f9fafb] mt-2">
+                <div className="aspect-[16/9] relative overflow-hidden">
+                  <img 
+                    src={post.attachments[0]} 
+                    alt="Post attachment" 
                     className="absolute inset-0 w-full h-full object-cover"
                     loading="lazy"
                   />
@@ -252,6 +645,7 @@ const Main = () => {
             <ul className="flex justify-between mx-4 p-2 border-b border-[#e9e5df] text-sm overflow-auto">
               <li className="flex items-center cursor-pointer hover:text-[#0a66c2] hover:underline">
                 <div className="flex items-center">
+                  {/* Handle different reaction formats */}
                   {post.reactions && post.reactions.length > 0 && (
                     <div className="flex -space-x-1 mr-1">
                       {post.reactions.slice(0, 3).map((reaction, index) => (
@@ -265,23 +659,56 @@ const Main = () => {
                       ))}
                     </div>
                   )}
-                  <span>{post.metrics.likes}</span>
+                  
+                  {/* Handle impression counts format */}
+                  {post.impressionCounts && (
+                    <div className="flex -space-x-1 mr-1">
+                      {post.impressionCounts.like > 0 && <span className="inline-block w-4 h-4 text-xs">👍</span>}
+                      {post.impressionCounts.celebrate > 0 && <span className="inline-block w-4 h-4 text-xs">👏</span>}
+                      {post.impressionCounts.support > 0 && <span className="inline-block w-4 h-4 text-xs">❤️</span>}
+                      {post.impressionCounts.insightful > 0 && <span className="inline-block w-4 h-4 text-xs">💡</span>}
+                      {post.impressionCounts.funny > 0 && <span className="inline-block w-4 h-4 text-xs">😄</span>}
+                    </div>
+                  )}
+                  
+                  {/* Display count based on available data */}
+                  <span>
+                    {post.metrics?.likes || post.impressionCounts?.total || 0}
+                  </span>
                 </div>
               </li>
-              <li className="flex items-center cursor-pointer hover:text-[#0a66c2] hover:underline">
-                <p>{post.metrics.comments} comments</p>
+              <li 
+                className="flex items-center cursor-pointer hover:text-[#0a66c2] hover:underline"
+                onClick={() => toggleComments(post.id || post.postId)}
+              >
+                <p>{post.metrics?.comments || post.commentCount || 0} comments</p>
               </li>
+              
+              {/* Show reposts if available */}
+              {(post.repostCount > 0) && (
+                <li className="flex items-center cursor-pointer hover:text-[#0a66c2] hover:underline">
+                  <p>{post.repostCount} reposts</p>
+                </li>
+              )}
             </ul>
             
             {/* Updated post action buttons with PostReactions component */}
             <div className="p-0 px-4 flex justify-between min-h-[40px] overflow-hidden">
               <PostReactions 
-                postId={post.id}
+                postId={post.id || post.postId}
                 onReact={handleReact}
                 reactionTypes={reactionTypes}
+                isLiked={post.isLiked ? true : false}
+                currentReaction={
+                  userReactions[post.id || post.postId] || 
+                  (post.userReaction ? post.userReaction.type : 'like')
+                }
               />
               
-              <button className="outline-none text-[rgba(0,0,0,0.6)] p-3 px-6 bg-transparent flex items-center cursor-pointer gap-1.25 rounded-md transition duration-200 hover:bg-[rgba(0,0,0,0.08)] font-semibold">
+              <button 
+                onClick={() => toggleComments(post.id || post.postId)}
+                className="outline-none text-[rgba(0,0,0,0.6)] p-3 px-6 bg-transparent flex items-center cursor-pointer gap-1.25 rounded-md transition duration-200 hover:bg-[rgba(0,0,0,0.08)] font-semibold"
+              >
                 <img src="/Images/comment.svg" alt="comment" />
                 <span>Comment</span>
               </button>
@@ -294,6 +721,27 @@ const Main = () => {
                 <span>Send</span>
               </button>
             </div>
+            
+            {/* Comment Section - Only show when expanded */}
+            {expandedComments[post.id || post.postId] && (
+              <div className="border-t border-[#e9e5df] p-4">
+                {loadingComments[post.id || post.postId] ? (
+                  <div className="text-center py-4">Loading comments...</div>
+                ) : (
+                  <CommentSection 
+                    postId={post.id || post.postId}
+                    comments={comments[post.id || post.postId] || []}
+                    authorInfo={authorInfo}
+                    onAddComment={handleAddComment}
+                    onReactToComment={(commentId, reactionType, isRemove) => 
+                      handleReactToComment(post.id || post.postId, commentId, reactionType, isRemove)
+                    }
+                    reactionTypes={reactionTypes}
+                    formatDate={formatDate}
+                  />
+                )}
+              </div>
+            )}
           </article>
         ))}
       </div>
