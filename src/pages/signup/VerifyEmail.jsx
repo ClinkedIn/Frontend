@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { IoShieldHalf } from "react-icons/io5";
+import { BASE_URL } from "../../constants";
 
 const VerifyEmail = () => {
   const [code, setCode] = useState("");
@@ -50,7 +51,7 @@ const VerifyEmail = () => {
 
   const fetchUser = async () => {
     try {
-      const response = await axios.get("http://localhost:5173/user");
+      const response = await axios.get(`${BASE_URL}/user`);
       setUser(response.data);
       setNewEmail(response.data.email);
     } catch (error) {

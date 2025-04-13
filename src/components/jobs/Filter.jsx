@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { BASE_URL } from "../../constants";
+
 /**
  * The Filter component provides an interface for users to filter job search results based on company, 
  * experience, and work type. It fetches company data from an API and allows users to select filters 
@@ -27,7 +29,7 @@ const Filter = () => {
    */
   const fetchCompanies= async () => {
     try {
-      const response = await axios.get("http://localhost:3000/companies'");
+      const response = await axios.get(`${BASE_URL}/companies`);
   
       setCompanies(response.data);
     } catch (error) {
@@ -51,7 +53,7 @@ const Filter = () => {
         if(selectedCompany) params.append('companyId', selectedCompany)
         
         const response = await axios.get(
-          `http://localhost:3000/search/jobs?${params}`, 
+          `${BASE_URL}/search/jobs?${params}`, 
         );
         console.log("jobs filter", response.data)
         

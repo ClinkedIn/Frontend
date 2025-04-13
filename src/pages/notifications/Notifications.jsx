@@ -8,6 +8,8 @@ import FooterLinks from "../../components/FooterLinks";
 import { patchRequest } from "../../services/axios";
 import { toast } from 'react-hot-toast';
 import { Toaster } from 'react-hot-toast';
+import { BASE_URL } from "../../constants";
+
 // import { getMessaging, getToken } from 'firebase/messaging';
 // import { app } from '../../../firebase'; 
 
@@ -55,39 +57,6 @@ const Notification = () => {
   // }, []);
 
 
-/**
-   * Sends a test login request to authenticate a user.
-   * This function simulates a login process by sending a POST request to the backend.
-   *
-   * @async
-   * @function testLogin
-   */
-  const testLogin = async () => {
-    try {
-      const response = await axios.post('http://localhost:3000/user/login', {
-        email: "Porter.Hodkiewicz@hotmail.com",
-        password: "Aa12345678"
-      },{
-        withCredentials:true
-      }
-      
-    );
-
-      console.log("Login Response:", response.data);
-    } catch (error) {
-      if (error.response) {
-  
-        console.error("Login Error - Server Response:", error.response.data);
-      } else if (error.request) {
-        // Request made but no response received
-        console.error("Login Error - No Response:", error.request);
-      } else {
-        // Something else happened
-        console.error("Login Error:", error.message);
-      }
-    }
-  };
-
   /**
    * Sends a test notification to the backend and shows a toast notification in the app.
    * 
@@ -123,7 +92,7 @@ const Notification = () => {
   const fetchNotifications = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:3000/notifications",
+        `${BASE_URL}/notifications`,
         {withCredentials:true}
       );
       console.log("notifications:",response.data)
@@ -142,7 +111,7 @@ const Notification = () => {
  //Mark Notification as read
   const handleNotificationClick = async (id) => {
     const response = await axios.patch(
-      `http://localhost:3000/notifications/mark-read/${id}`,
+      `${BASE_URL}/notifications/mark-read/${id}`,
       {},
       { withCredentials: true }
     );
@@ -164,7 +133,7 @@ const Notification = () => {
  */
   const fetchUser = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/user/me", {
+        const response = await axios.get(`${BASE_URL}/user/me`, {
       
           withCredentials:true
         });
@@ -184,11 +153,12 @@ const Notification = () => {
    * @hook
    */
   useEffect(() => {
-    const loginAndFetchData = async () => {
-      await testLogin(); // Ensure login is completed first
+    // const loginAndFetchData = async () => {
+      // await testLogin(); // Ensure login is completed first
     fetchUser();
-    fetchNotifications();}
-    loginAndFetchData()
+    fetchNotifications();
+  // }
+  //   loginAndFetchData()
   }, []);
  /**
    * Handles the change in the main notification filter.

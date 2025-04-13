@@ -5,6 +5,8 @@ import { FaBell, FaThumbsDown } from "react-icons/fa";
 import { MdMarkChatUnread } from "react-icons/md";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { BASE_URL } from "../../constants";
+
 
 const NotificationCard = ({ notification, handleNotificationClick }) => {
   const [showMenu, setShowMenu] = useState(false);
@@ -27,7 +29,7 @@ const NotificationCard = ({ notification, handleNotificationClick }) => {
   // Delete Notification
   const handleDeleteNotification = async (id) => {
     try {
-      await axios.delete(`http://localhost:3000/notifications/${id}`,{withCredentials:true});
+      await axios.delete(`${BASE_URL}/notifications/${id}`,{withCredentials:true});
       setRemovedNotification(notification);
       console.log("Notification deleted");
     } catch (error) {
@@ -42,7 +44,7 @@ const NotificationCard = ({ notification, handleNotificationClick }) => {
 
     try {
       // Restore the notification in the backend
-      await axios.patch(`http://localhost:3000/notifications/restore-notification/${removedNotification._id}`,{},{
+      await axios.patch(`${BASE_URL}/notifications/restore-notification/${removedNotification._id}`,{},{
       
         withCredentials:true
       });
@@ -59,7 +61,7 @@ const NotificationCard = ({ notification, handleNotificationClick }) => {
   const handleMuteDuration = async (duration) => {
     try {
      const response= await axios.patch(
-        `http://localhost:3000/notifications/pause-notifications`,
+        `${BASE_URL}/notifications/pause-notifications`,
         { duration },
         { withCredentials: true }
       );
@@ -77,7 +79,7 @@ const NotificationCard = ({ notification, handleNotificationClick }) => {
     e.stopPropagation();
     try {
       const response=await axios.patch(
-        `http://localhost:3000/notifications/resume-notifications`,
+        `${BASE_URL}/notifications/resume-notifications`,
         {},
         { withCredentials: true }
       );
@@ -216,7 +218,7 @@ console.log("unmute response:", response)
                     if (isRead) {
                       try {
                         await axios.patch(
-                          `http://localhost:3000/notifications/mark-unread/${notification._id}`,
+                          `${BASE_URL}/notifications/mark-unread/${notification._id}`,
                           {},
                           { withCredentials: true }
                         );

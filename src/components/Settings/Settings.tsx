@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { BASE_URL } from "../../constants";
 
 // Define types for our component props
 interface SettingsPageProps {
@@ -24,7 +25,7 @@ interface ErrorResponse {
 }
 
 const api = axios.create({
-  baseURL: "http://localhost:3000",
+  baseURL: BASE_URL,
   withCredentials: true, // If you need to send cookies
 });
 

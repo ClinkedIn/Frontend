@@ -3,7 +3,7 @@ import axios from "axios";
 import SkillsForm from "./Forms/SkillsForm";
 import ConfirmationDialog from "./ConfirmationDialog";
 import { Loader, Plus, Pencil, Trash2, X } from "lucide-react";
-
+import { BASE_URL } from "../../constants";
 interface Skill {
   skillName: string;
   education: number[];
@@ -16,7 +16,7 @@ interface SkillsSectionProps {
 }
 
 // API configuration
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = BASE_URL;
 const API_ROUTES = {
   login: `${API_BASE_URL}/user/login`,
   skills: `${API_BASE_URL}/user/skills`,

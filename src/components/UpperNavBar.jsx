@@ -3,6 +3,8 @@ import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom"; 
 import { MdLocationPin,MdSearch } from "react-icons/md";
 import Jobs from "../pages/jobs/Jobs";
+import { BASE_URL } from "../constants";
+
 
 const Header = ({notifications}) => {
   const [showUser, setShowUser] = useState(false)
@@ -15,7 +17,7 @@ const Header = ({notifications}) => {
   useEffect(() => {
     const fetchUnreadCount = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/notifications/unread-count",{withCredentials:true});
+        const response = await axios.get(`${BASE_URL}/notifications/unread-count`,{withCredentials:true});
         console.log("unread count:", response)
         setUnreadCount(response.data.unreadCount);
       } catch (error) {
@@ -24,7 +26,7 @@ const Header = ({notifications}) => {
     };
 
     fetchUnreadCount();
-  }, [notifications]);
+  }, []);
 
   // Handler to navigate to notifications page
   const handleNotificationsClick = () => {
@@ -43,7 +45,7 @@ const Header = ({notifications}) => {
       if (location) params.append('location', location);
       
       const response = await axios.get(
-        `http://localhost:3000/search/jobs?${params}`, 
+        `${BASE_URL}/search/jobs?${params}`, 
         
       );
       

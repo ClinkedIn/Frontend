@@ -21,15 +21,15 @@ export const useAuth = () => {
 };
 
 // Provider component to wrap the app
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   // Initialize authToken and userRole from localStorage
   const [authToken, setToken] = useState<string | null>(() => {
     return localStorage.getItem("authToken") || null;
   });
 
   const [userRole, setUserRole] = useState<string | null>(null);
-
-
 
   // Update localStorage whenever the token changes
   useEffect(() => {
