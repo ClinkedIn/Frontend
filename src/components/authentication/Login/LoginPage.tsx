@@ -23,7 +23,6 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-
   interface UserData {
     email: string;
     password: string;
