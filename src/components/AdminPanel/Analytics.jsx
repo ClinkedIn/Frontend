@@ -293,6 +293,30 @@ import { Activity, Users, UserPlus, FileText, Briefcase, MessageSquare,
 
 export default function AdminDashboard() {
   // Sample data - in a real application, this would come from your API
+  /**
+   * useState hook to manage analytics data for the Admin Panel.
+   * 
+   * @typedef {Object} AnalyticsData
+   * @property {number} totalUsers - Total number of users on the platform.
+   * @property {number} activeUsers - Number of currently active users.
+   * @property {number} newSignups - Number of new signups.
+   * @property {number} postsCreated - Total number of posts created.
+   * @property {number} activeCompanies - Number of active companies.
+   * @property {number} avgJobsPerCompany - Average number of jobs per company.
+   * @property {number} activeUsersNow - Number of users currently active now.
+   * @property {number} messagesPerMin - Number of messages sent per minute.
+   * @property {number} newConnectionsPerMin - Number of new connections made per minute.
+   * @property {Array<Object>} subscriptionPlans - Array of subscription plans with user counts.
+   * @property {string} subscriptionPlans[].name - Name of the subscription plan.
+   * @property {number} subscriptionPlans[].users - Number of users subscribed to the plan.
+   * @property {Array<Object>} activityTrend - Array of activity trends by day.
+   * @property {string} activityTrend[].name - Name of the day (e.g., 'Mon', 'Tue').
+   * @property {number} activityTrend[].users - Number of users active on the day.
+   * @property {number} activityTrend[].posts - Number of posts created on the day.
+   * @property {number} activityTrend[].messages - Number of messages sent on the day.
+   * 
+   * @type {[AnalyticsData, React.Dispatch<React.SetStateAction<AnalyticsData>>]}
+   */
   const [analyticsData, setAnalyticsData] = useState({
     totalUsers: 35428,
     activeUsers: 12853,
@@ -322,6 +346,14 @@ export default function AdminDashboard() {
 
   // For demo purposes - simulate real-time updates
   useEffect(() => {
+    /**
+     * Sets up an interval that updates the analytics data every 5 seconds.
+     * The updates include random adjustments to the number of active users,
+     * messages per minute, and new connections per minute.
+     *
+     * @function
+     * @returns {number} The ID of the interval, which can be used to clear it later.
+     */
     const interval = setInterval(() => {
       setAnalyticsData(prevData => ({
         ...prevData,

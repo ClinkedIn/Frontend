@@ -2,8 +2,21 @@ import React from 'react';
 import { format } from 'date-fns'; 
 
 const MessageItem = ({ message, isOwnMessage, senderInfo, showReadReceipt }) => {
-  const defaultAvatar = 'https://via.placeholder.com/40/808080/FFFFFF?text=?';
+  const defaultAvatar = '/Images/user.svg';
 
+  /**
+   * Renders media content based on the type of media provided in the `message` object.
+   * 
+   * @returns {JSX.Element|null} A JSX element representing the media content or a link to the media,
+   *                             or null if no media URL is provided.
+   * 
+   * The function handles the following media types:
+   * - Images: Renders an <img> element for media types starting with "image/".
+   * - Videos: Renders a <video> element for media types starting with "video/".
+   * - Other files: Renders an <a> element linking to the media file.
+   * 
+   * The rendered elements include appropriate styling and accessibility attributes.
+   */
   const renderMedia = () => {
     if (!message.mediaUrl) return null;
 
@@ -52,7 +65,7 @@ const MessageItem = ({ message, isOwnMessage, senderInfo, showReadReceipt }) => 
           </p>
         </div>
          {isOwnMessage && showReadReceipt && (
-           <p className="text-xs text-gray-500 mt-1">Read</p>
+           <p className="text-xs text-gray-500 mt-1">Seen</p>
          )}
           {isOwnMessage && !showReadReceipt && (
            <p className="text-xs text-gray-500 mt-1">Sent</p>

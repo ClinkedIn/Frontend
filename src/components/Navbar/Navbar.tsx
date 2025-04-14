@@ -6,6 +6,18 @@ import { Home, Users, Bell, User, LogOut } from "lucide-react";
 const Navbar = () => {
   const queryClient = useQueryClient();
 
+  /**
+   * Fetches the authenticated user's data using a React Query `useQuery` hook.
+   *
+   * @constant
+   * @type {object}
+   * @property {object} data - The authenticated user's data.
+   * @property {string[]} queryKey - The unique key for the query, used for caching and refetching.
+   * @property {Function} queryFn - The function to fetch the authenticated user's data from the server.
+   * @property {number} retry - The number of retry attempts for the query in case of failure (set to 0).
+   *
+   * @returns {object} The result of the query, including the authenticated user's data.
+   */
   const { data: authUser } = useQuery({
     queryKey: ["authUser"],
     queryFn: async () => (await axiosInstance.get("/me")).data,
@@ -14,18 +26,65 @@ const Navbar = () => {
   
   const isLoggedIn = Boolean(authUser);
 
+  /**
+   * Fetches notifications data using a React Query `useQuery` hook.
+   *
+   * @constant
+   * @type {object}
+   * @property {Array|undefined} data - The fetched notifications data. It will be `undefined` if the query is disabled or still loading.
+   * @returns {object} - The result of the query, including the `data` property containing the notifications.
+   *
+   * @remarks
+   * - The query is enabled only when the user is logged in (`isLoggedIn` is true).
+   * - The `queryFn` makes an HTTP GET request to the `/notifications` endpoint using `axiosInstance`.
+   * - The `queryKey` is set to `["notifications"]` to uniquely identify this query.
+   */
   const { data: notifications } = useQuery({
     queryKey: ["notifications"],
     queryFn: async () => (await axiosInstance.get("/notifications")).data,
     enabled: isLoggedIn,
   });
 
+  /**
+   * Fetches the list of connection requests for the logged-in user.
+   *
+   * @constant
+   * @type {object}
+   * @property {Array} data - The list of connection requests fetched from the server.
+   * @returns {object} The result of the query containing the connection requests data.
+   *
+   * @remarks
+   * This query is enabled only when the user is logged in (`isLoggedIn` is true).
+   * It uses the `useQuery` hook from React Query to fetch data from the endpoint
+   * `/connections/requests` using the `axiosInstance`.
+   *
+   * @see {@link https://tanstack.com/query/v4/docs/react/reference/useQuery | React Query useQuery Documentation}
+   */
   const { data: connectionRequests } = useQuery({
     queryKey: ["connectionRequests"],
     queryFn: async () => (await axiosInstance.get("/connections/requests")).data,
     enabled: isLoggedIn,
   });
 
+  /**
+   * Custom hook that provides a mutation function for logging out a user.
+   * 
+   * This hook uses `useMutation` from React Query to handle the logout process.
+   * It sends a POST request to the `/auth/logout` endpoint using `axiosInstance`.
+   * On successful logout, it invalidates the `authUser` query in the query client
+   * to ensure the authentication state is updated across the application.
+   * 
+   * @returns {Object} An object containing the `mutate` function renamed as `logout`.
+   * 
+   * @example
+   * ```tsx
+   * const { mutate: logout } = useLogout();
+   * 
+   * const handleLogout = () => {
+   *   logout();
+   * };
+   * ```
+   */
   const { mutate: logout } = useMutation({
     mutationFn: async () => await axiosInstance.post("/auth/logout"),
     onSuccess: () => {
@@ -33,7 +92,26 @@ const Navbar = () => {
     },
   });
 
+  /**
+   * Calculates the count of unread notifications.
+   *
+   * Filters the `notifications` array to find notifications that have not been read
+   * and returns the count of such notifications. If `notifications` is undefined or null,
+   * the count defaults to 0.
+   *
+   * @constant
+   * @type {number}
+   * @default 0
+   */
   const unreadNotificationCount = notifications?.filter((notification: { read: boolean }) => !notification.read).length || 0;
+  
+  /**
+   * Represents the count of unread connection requests.
+   * If `connectionRequests` is undefined or null, the count defaults to 0.
+   *
+   * @constant
+   * @type {number}
+   */
   const unreadConnectionRequestsCount = connectionRequests?.length || 0;
 
   return (

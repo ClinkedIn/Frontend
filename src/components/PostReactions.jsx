@@ -1,5 +1,44 @@
 import React, { useState, useEffect, useRef } from 'react';
 
+/**
+ * A React component that renders a post reactions button with a popup menu for selecting reactions.
+ * The component supports multiple reaction types and handles toggling between "like" and other reactions.
+ *
+ * @component
+ * @param {Object} props - The props for the component.
+ * @param {string} props.postId - The ID of the post to which the reactions belong.
+ * @param {Function} props.onReact - Callback function to handle reaction changes. 
+ * It receives three arguments: `postId`, `reactionType`, and `isRemove`.
+ * @param {Array} props.reactionTypes - An array of reaction objects, where each object contains:
+ *   - `type` (string): The type of the reaction (e.g., "like", "celebrate").
+ *   - `emoji` (string): The emoji representing the reaction.
+ *   - `label` (string): The label for the reaction.
+ * @param {boolean} [props.isLiked=false] - Indicates whether the post is currently liked by the user.
+ * @param {string} [props.currentReaction='like'] - The type of the current reaction (default is "like").
+ *
+ * @returns {JSX.Element} The rendered PostReactions component.
+ *
+ * @example
+ * const reactionTypes = [
+ *   { type: 'like', emoji: '👍', label: 'Like' },
+ *   { type: 'celebrate', emoji: '👏', label: 'Celebrate' },
+ *   { type: 'support', emoji: '❤️', label: 'Support' },
+ *   { type: 'insightful', emoji: '💡', label: 'Insightful' },
+ *   { type: 'funny', emoji: '😄', label: 'Funny' },
+ * ];
+ *
+ * const handleReact = (postId, reactionType, isRemove) => {
+ *   console.log(`Post ID: ${postId}, Reaction: ${reactionType}, Remove: ${isRemove}`);
+ * };
+ *
+ * <PostReactions
+ *   postId="12345"
+ *   onReact={handleReact}
+ *   reactionTypes={reactionTypes}
+ *   isLiked={true}
+ *   currentReaction="celebrate"
+ * />
+ */
 const PostReactions = ({ postId, onReact, reactionTypes, isLiked = false, currentReaction = 'like' }) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef(null);
@@ -35,6 +74,10 @@ const PostReactions = ({ postId, onReact, reactionTypes, isLiked = false, curren
   }, []);
 
   // Handle mouse enter/leave with delay
+  /**
+   * Handles the mouse enter event by clearing any existing timeout and setting the state to open.
+   * Ensures that the reaction menu or tooltip remains visible when the mouse hovers over the element.
+   */
   const handleMouseEnter = () => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
@@ -43,6 +86,13 @@ const PostReactions = ({ postId, onReact, reactionTypes, isLiked = false, curren
     setIsOpen(true);
   };
 
+  /**
+   * Handles the mouse leave event by setting a delay before closing a menu.
+   * Ensures the menu remains open if the mouse is hovering over it.
+   *
+   * @function
+   * @returns {void}
+   */
   const handleMouseLeave = () => {
     // Add a delay before closing to allow moving to the menu
     timeoutRef.current = setTimeout(() => {
@@ -53,6 +103,11 @@ const PostReactions = ({ postId, onReact, reactionTypes, isLiked = false, curren
   };
 
   // Handle menu hover
+  /**
+   * Handles the mouse enter event on a menu element.
+   * Clears any existing timeout to prevent unintended behavior.
+   * Ensures the timeout reference is reset to null.
+   */
   const handleMenuMouseEnter = () => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
@@ -60,11 +115,26 @@ const PostReactions = ({ postId, onReact, reactionTypes, isLiked = false, curren
     }
   };
 
+  /**
+   * Handles the mouse leave event for a menu component.
+   * Closes the menu by setting the `isOpen` state to `false`.
+   *
+   * @function
+   * @returns {void}
+   */
   const handleMenuMouseLeave = () => {
     setIsOpen(false);
   };
 
   // Handle like button click - toggle like state
+  /**
+   * Handles the click event for liking a post.
+   * If the post is already liked, it triggers the `onReact` callback with the `isRemove` flag set to true,
+   * indicating the removal of the like. Otherwise, it likes the post normally.
+   *
+   * @function handleLikeClick
+   * @returns {void}
+   */
   const handleLikeClick = () => {
     // If already liked, call onReact with the isRemove flag set to true
     // Otherwise, just like the post normally
@@ -72,6 +142,23 @@ const PostReactions = ({ postId, onReact, reactionTypes, isLiked = false, curren
   };
 
   // Get the appropriate reaction icon
+  /**
+   * Returns the appropriate reaction icon based on the current reaction state.
+   *
+   * @function getReactionIcon
+   * @returns {JSX.Element} The JSX element representing the reaction icon.
+   *
+   * @description
+   * - If the user has not liked the post (`isLiked` is false), it returns a default "like" image.
+   * - If the user has reacted, it returns an emoji corresponding to the `currentReaction` type.
+   * - Supported reaction types include:
+   *   - "like" (👍)
+   *   - "celebrate" (👏)
+   *   - "support" (❤️)
+   *   - "insightful" (💡)
+   *   - "funny" (😄)
+   * - If the reaction type is unrecognized, it defaults to the emoji from `activeReaction` or a thumbs-up (👍).
+   */
   const getReactionIcon = () => {
     if (!isLiked) {
       return <img src="/Images/like.svg" alt="like" />;
@@ -95,6 +182,15 @@ const PostReactions = ({ postId, onReact, reactionTypes, isLiked = false, curren
   };
   
   // Get the label for the current reaction
+  /**
+   * Determines the label to display for the current reaction based on the reaction state.
+   *
+   * @function
+   * @returns {string} The label corresponding to the current reaction. 
+   *                   Returns 'Like' if the post is not liked, or a specific label 
+   *                   based on the current reaction type. Defaults to 'Liked' if no 
+   *                   matching reaction type is found.
+   */
   const getReactionLabel = () => {
     if (!isLiked) {
       return 'Like';

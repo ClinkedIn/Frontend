@@ -2,24 +2,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { auth, provider, signInWithPopup } from "../../../firebase";
 import toast from "react-hot-toast";
-import Footer from "../../components/Footer/Footer"; 
-
+import Footer from "../../components/Footer/Footer";
 
 const WelcomePage = () => {
   const navigate = useNavigate();
-
-  const handleGoogleSignIn = async () => {
-    try {
-      const result = await signInWithPopup(auth, provider);
-      const idToken = await result.user.getIdToken();
-      console.log("Google Auth Token:", idToken);
-      toast.success("Signed in with Google!");
-      navigate("/home");
-    } catch (error) {
-      console.error("Google Sign-in Error:", error);
-      toast.error("Google sign-in failed. Try again.");
-    }
-  };
 
   return (
     <div className="relative min-h-screen flex flex-col">
@@ -27,59 +13,61 @@ const WelcomePage = () => {
       <nav className="bg-white py-3 px-4 md:px-12 flex flex-wrap items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center">
-            <img src="/public/images/login-logo.svg" alt="LinkedIn Logo" className="h-6" />
+          <img src="/public/images/login-logo.svg" alt="LinkedIn Logo" className="h-6" />
         </Link>
 
         {/* Icons & Buttons */}
         <div className="flex items-center space-x-4 md:space-x-6 ml-auto flex-wrap">
-            {/* Icons */}
-            <div className="flex flex-wrap items-center space-x-4 md:space-x-6 text-gray-500">
+          {/* Navigation Links */}
+          <div className="flex flex-wrap items-center space-x-4 md:space-x-6 text-gray-500">
             <Link to="/articles" className="text-xs hover:text-black flex flex-col items-center">
-                <img src="/public/Images/article.jpg" alt="Articles" className="h-5 w-5 mb-1" />
-                Articles
+              <img src="/public/Images/article.jpg" alt="Articles" className="h-5 w-5 mb-1" />
+              Articles
             </Link>
             <Link to="/people" className="text-xs hover:text-black flex flex-col items-center">
-                <img src="/public/Images/people-outline.png" alt="People" className="h-5 w-5 mb-1" />
-                People
+              <img src="/public/Images/people-outline.png" alt="People" className="h-5 w-5 mb-1" />
+              People
             </Link>
             <Link to="/learning" className="text-xs hover:text-black flex flex-col items-center">
-                <img src="/public/Images/learning-.png" alt="Learning" className="h-5 w-5 mb-1" />
-                Learning
+              <img src="/public/Images/learning-.png" alt="Learning" className="h-5 w-5 mb-1" />
+              Learning
             </Link>
             <Link to="/jobs" className="text-xs hover:text-black flex flex-col items-center">
-                <img src="/public/Images/job-icon.svg" alt="Jobs" className="h-5 w-5 mb-1 filter grayscale brightness-75" />
-                Jobs
+              <img
+                src="/public/Images/job-icon.svg"
+                alt="Jobs"
+                className="h-5 w-5 mb-1 filter grayscale brightness-75"
+              />
+              Jobs
             </Link>
             <Link to="/games" className="text-xs hover:text-black flex flex-col items-center">
-                <img src="/public/Images/games.png" alt="Games" className="h-5 w-5 mb-1" />
-                Games
+              <img src="/public/Images/games.png" alt="Games" className="h-5 w-5 mb-1" />
+              Games
             </Link>
             <Link to="/app" className="text-xs hover:text-black flex flex-col items-center">
-                <img src="/public/Images/app.png" alt="Get the app" className="h-5 w-5 mb-1" />
-                Get the app
+              <img src="/public/Images/app.png" alt="Get the app" className="h-5 w-5 mb-1" />
+              Get the app
             </Link>
-            </div>
+          </div>
 
-            {/* Auth Buttons */}
-            <div className="flex items-center space-x-3 md:space-x-4">
+          {/* Auth Buttons */}
+          <div className="flex items-center space-x-3 md:space-x-4">
             <Link to="/signup" className="text-gray-700 text-sm font-semibold hover:underline">
-                Join now
+              Join now
             </Link>
             <Link
-                to="/login"
-                className="text-blue-600 text-sm font-semibold border border-blue-600 px-4 py-2 rounded-full hover:bg-blue-100"
+              to="/login"
+              className="text-blue-600 text-sm font-semibold border border-blue-600 px-4 py-2 rounded-full hover:bg-blue-100"
             >
-                Sign in
+              Sign in
             </Link>
-            </div>
+          </div>
         </div>
-        </nav>
-
-
-
+      </nav>
 
       {/* Main Content */}
       <div className="flex flex-1 items-center justify-center px-2 md:px-18">
+        {/* Left Section */}
         <motion.div
           className="w-full max-w-2xl p-5 bg-white rounded-lg text-left"
           initial={{ x: -30, opacity: 0 }}
@@ -92,7 +80,18 @@ const WelcomePage = () => {
 
           {/* Google Sign-in Button */}
           <motion.button
-            onClick={handleGoogleSignIn}
+            onClick={async () => {
+              try {
+                const result = await signInWithPopup(auth, provider);
+                const idToken = await result.user.getIdToken();
+                console.log("Google Auth Token:", idToken);
+                toast.success("Signed in with Google!");
+                navigate("/home");
+              } catch (error) {
+                console.error("Google Sign-in Error:", error);
+                toast.error("Google sign-in failed. Try again.");
+              }
+            }}
             className="w-[90%] max-w-[400px] flex items-center justify-center py-2 text-lg border border-blue-600 bg-blue-600 text-white rounded-full hover:bg-blue-700 mb-5"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -138,7 +137,7 @@ const WelcomePage = () => {
           </p>
         </motion.div>
 
-        {/* Hero Image */}
+        {/* Right Section */}
         <div className="flex justify-end w-full">
           <motion.img
             src="/public/images/hero.svg"
@@ -151,6 +150,7 @@ const WelcomePage = () => {
         </div>
       </div>
 
+      {/* Footer */}
       <div className="absolute bottom-0 w-full">
         <Footer />
       </div>
