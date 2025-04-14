@@ -1,0 +1,269 @@
+{
+  "status": "success",
+  "data": {
+    "userStats": {
+      "totalUsers": 114,
+      "activeUsers": 61,
+      "premiumUsers": 54,
+      "usersByIndustry": [
+        {
+          "_id": null,
+          "count": 114
+        }
+      ],
+      "averageConnections": 7,
+      "usersByProfilePrivacy": [
+        {
+          "_id": "public",
+          "count": 46
+        },
+        {
+          "_id": "private",
+          "count": 32
+        },
+        {
+          "_id": "connectionsOnly",
+          "count": 36
+        }
+      ],
+      "usersByConnectionRequestPrivacy": [
+        {
+          "_id": "connectionsOnly",
+          "count": 49
+        },
+        {
+          "_id": "everyone",
+          "count": 65
+        }
+      ],
+      "usersByDefaultMode": [
+        {
+          "_id": "light",
+          "count": 56
+        },
+        {
+          "_id": "dark",
+          "count": 58
+        }
+      ],
+      "employmentTypeCounts": [
+        {
+          "_id": "Part Time",
+          "count": 20
+        },
+        {
+          "_id": "Seasonal",
+          "count": 27
+        },
+        {
+          "_id": "Apprenticeship",
+          "count": 18
+        },
+        {
+          "_id": "Self Employed",
+          "count": 22
+        },
+        {
+          "_id": "Full Time",
+          "count": 22
+        },
+        {
+          "_id": "Freelance",
+          "count": 26
+        },
+        {
+          "_id": "Contract",
+          "count": 18
+        },
+        {
+          "_id": "Internship",
+          "count": 22
+        }
+      ]
+    },
+    "postStats": {
+      "totalPosts": 113,
+      "activePosts": 113,
+      "totalImpressions": 85,
+      "averageEngagement": {
+        "impressions": 1,
+        "comments": 0,
+        "reposts": 1
+      }
+    },
+    "jobStats": {
+      "totalJobs": 102,
+      "activeJobs": 101,
+      "jobsByType": [
+        {
+          "_id": "Part Time",
+          "count": 11
+        },
+        {
+          "_id": "Other",
+          "count": 19
+        },
+        {
+          "_id": "Contract",
+          "count": 12
+        },
+        {
+          "_id": "Volunteer",
+          "count": 18
+        },
+        {
+          "_id": "Internship",
+          "count": 18
+        },
+        {
+          "_id": "Full Time",
+          "count": 10
+        },
+        {
+          "_id": "Temporary",
+          "count": 14
+        }
+      ],
+      "jobsByWorkplaceType": [
+        {
+          "_id": "Onsite",
+          "count": 36
+        },
+        {
+          "_id": "Remote",
+          "count": 32
+        },
+        {
+          "_id": "Hybrid",
+          "count": 34
+        }
+      ],
+      "averageApplications": 8
+    },
+    "companyStats": {
+      "totalCompanies": 104,
+      "activeCompanies": 97,
+      "companiesBySize": [
+        {
+          "_id": "11-50",
+          "count": 14
+        },
+        {
+          "_id": "1001-5000",
+          "count": 12
+        },
+        {
+          "_id": "51-200",
+          "count": 11
+        },
+        {
+          "_id": "201-500",
+          "count": 17
+        },
+        {
+          "_id": "5000+",
+          "count": 15
+        },
+        {
+          "_id": "1-10",
+          "count": 14
+        },
+        {
+          "_id": "501-1000",
+          "count": 21
+        }
+      ],
+      "companiesByIndustry": [
+        {
+          "_id": "Automotive",
+          "count": 3
+        },
+        {
+          "_id": "Retail",
+          "count": 3
+        },
+        {
+          "_id": "Media & Entertainment",
+          "count": 4
+        },
+        {
+          "_id": "Technology",
+          "count": 6
+        },
+        {
+          "_id": "Consumer Goods",
+          "count": 4
+        },
+        {
+          "_id": "Biotechnology",
+          "count": 3
+        },
+        {
+          "_id": "Telecommunications",
+          "count": 3
+        },
+        {
+          "_id": "Hospitality",
+          "count": 5
+        },
+        {
+          "_id": "Healthcare",
+          "count": 2
+        },
+        {
+          "_id": "Energy",
+          "count": 4
+        },
+        {
+          "_id": "Transportation",
+          "count": 5
+        },
+        {
+          "_id": "Puolic",
+          "count": 1
+        },
+        {
+          "_id": "Real Estate",
+          "count": 7
+        },
+        {
+          "_id": "Manufacturing",
+          "count": 7
+        },
+        {
+          "_id": "Education",
+          "count": 7
+        },
+        {
+          "_id": "Software",
+          "count": 3
+        },
+        {
+          "_id": "Construction",
+          "count": 8
+        },
+        {
+          "_id": "Professional Services",
+          "count": 5
+        },
+        {
+          "_id": "Agriculture",
+          "count": 10
+        },
+        {
+          "_id": "Defense",
+          "count": 4
+        },
+        {
+          "_id": "Aerospace",
+          "count": 6
+        },
+        {
+          "_id": "Finance",
+          "count": 4
+        }
+      ],
+      "averageFollowers": 15
+    }
+  }
+}
