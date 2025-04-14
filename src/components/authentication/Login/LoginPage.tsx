@@ -63,13 +63,15 @@ const LoginPage = () => {
     },
     onError: (err) => {
       // Extract error details from the response
-      const errorResponse = err as { response?: { status?: number; data?: { error?: string } } };
+      const errorResponse = err as {
+        response?: { status?: number; data?: { error?: string } };
+      };
       const statusCode = errorResponse.response?.status;
       const errorMessageFromServer = errorResponse.response?.data?.error;
-    
+
       // Define the error message based on the status code or default fallback
       let errorMessage: string;
-    
+
       if (statusCode === 404) {
         errorMessage = "User not found. Please check your email or password.";
       } else if (errorMessageFromServer) {
@@ -77,7 +79,7 @@ const LoginPage = () => {
       } else {
         errorMessage = "Invalid credentials"; // Default fallback message
       }
-    
+
       // Display the error message using toast
       toast.error(errorMessage);
     },

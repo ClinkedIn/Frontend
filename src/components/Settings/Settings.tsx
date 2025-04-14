@@ -1,23 +1,37 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { BASE_URL } from "../../constants";
+import { useNavigate } from "react-router-dom";
 
-// Define types for our component props
-interface SettingsPageProps {
-  userEmail: string;
-}
-
-// Privacy options enum
 enum PrivacyOption {
-  PUBLIC = "Public",
-  PRIVATE = "Private",
-  CONNECTIONS_ONLY = "Connections Only",
+  PUBLIC = "public",
+  PRIVATE = "private",
+  CONNECTIONS_ONLY = "connectionsOnly",
 }
 
-// Define types for API responses
+const privacyOptionDisplayNames = {
+  [PrivacyOption.PUBLIC]: "Public",
+  [PrivacyOption.PRIVATE]: "Private",
+  [PrivacyOption.CONNECTIONS_ONLY]: "Connections Only",
+};
+
 interface UpdateEmailResponse {
   token: string;
   message: string;
+}
+
+interface UpdatePrivacyResponse {
+  message: string;
+  profilePrivacySettings: string;
+}
+
+interface UserProfile {
+  profilePrivacySettings: string;
+  email?: string;
+}
+
+interface GetMeResponse {
+  message: string;
+  user: UserProfile;
 }
 
 interface ErrorResponse {
@@ -25,22 +39,68 @@ interface ErrorResponse {
 }
 
 const api = axios.create({
-  baseURL: BASE_URL,
-  withCredentials: true, // If you need to send cookies
+  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:3000",
+  withCredentials: true,
 });
 
-const SettingsPage: React.FC<SettingsPageProps> = ({ userEmail }) => {
+const SettingsPage: React.FC = () => {
   const [isUpdateEmailVisible, setIsUpdateEmailVisible] = useState(false);
   const [newEmail, setNewEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [currentEmail, setCurrentEmail] = useState("");
   const [selectedPrivacy, setSelectedPrivacy] = useState<PrivacyOption>(
     PrivacyOption.PUBLIC
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUpdatingPrivacy, setIsUpdatingPrivacy] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isDeactivateDialogOpen, setIsDeactivateDialogOpen] = useState(false);
+  const [isDeactivating, setIsDeactivating] = useState(false);
   const [feedbackMessage, setFeedbackMessage] = useState<{
     type: "success" | "error";
     message: string;
   } | null>(null);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        setIsLoading(true);
+        const response = await api.get<GetMeResponse>("/user/me");
+        const { profilePrivacySettings, email } = response.data.user;
+
+        if (email) {
+          setCurrentEmail(email);
+        }
+
+        if (
+          Object.values(PrivacyOption).includes(
+            profilePrivacySettings as PrivacyOption
+          )
+        ) {
+          setSelectedPrivacy(profilePrivacySettings as PrivacyOption);
+        }
+      } catch (error) {
+        if (axios.isAxiosError(error) && error.response) {
+          const errorData = error.response.data as ErrorResponse;
+          setFeedbackMessage({
+            type: "error",
+            message: errorData.message || "Failed to load profile settings",
+          });
+        } else {
+          setFeedbackMessage({
+            type: "error",
+            message: "Failed to load profile settings. Please try again.",
+          });
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
 
   const handleEmailUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,9 +149,86 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ userEmail }) => {
     }
   };
 
+  const handlePrivacyChange = async (value: PrivacyOption) => {
+    try {
+      setIsUpdatingPrivacy(true);
+      setFeedbackMessage(null);
+
+      const response = await api.patch<UpdatePrivacyResponse>(
+        "/user/privacy-settings",
+        {
+          profilePrivacySettings: value,
+        }
+      );
+
+      setSelectedPrivacy(value);
+      setFeedbackMessage({
+        type: "success",
+        message:
+          response.data.message || "Privacy settings updated successfully",
+      });
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        const errorData = error.response.data as ErrorResponse;
+        setFeedbackMessage({
+          type: "error",
+          message: errorData.message || "An error occurred",
+        });
+      } else {
+        setFeedbackMessage({
+          type: "error",
+          message: "Failed to update privacy settings. Please try again.",
+        });
+      }
+    } finally {
+      setIsUpdatingPrivacy(false);
+    }
+  };
+
+  const handleDeactivateAccount = async () => {
+    try {
+      setIsDeactivating(true);
+      setFeedbackMessage(null);
+
+      await api.delete("/user");
+
+      setFeedbackMessage({
+        type: "success",
+        message: "Your account has been successfully deleted.",
+      });
+
+      setIsDeactivateDialogOpen(false);
+
+      navigate("/login");
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        const errorData = error.response.data as ErrorResponse;
+        setFeedbackMessage({
+          type: "error",
+          message: errorData.message || "An error occurred",
+        });
+      } else {
+        setFeedbackMessage({
+          type: "error",
+          message: "Failed to deactivate account. Please try again.",
+        });
+      }
+    } finally {
+      setIsDeactivating(false);
+    }
+  };
+
   const clearFeedback = () => {
     setFeedbackMessage(null);
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
@@ -107,18 +244,12 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ userEmail }) => {
           </svg>
         </div>
         <div className="flex-grow"></div>
-        <div className="w-8 h-8 rounded-full bg-gray-300 overflow-hidden">
-          <img src="/api/placeholder/32/32" alt="profile" />
-        </div>
       </header>
 
       <div className="flex flex-1">
         <div className="w-64 border-r border-gray-200 bg-gray-50">
           <div className="p-6">
             <div className="flex items-center mb-6">
-              <div className="w-10 h-10 rounded-full bg-gray-300 overflow-hidden">
-                <img src="/api/placeholder/40/40" alt="profile" />
-              </div>
               <h1 className="ml-3 text-2xl font-bold">Settings</h1>
             </div>
 
@@ -144,9 +275,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ userEmail }) => {
           </div>
         </div>
 
-        {/* Main content area */}
         <div className="flex-1 p-8 bg-gray-50">
-          {/* Feedback message */}
           {feedbackMessage && (
             <div
               className={`max-w-2xl mx-auto mb-4 p-4 rounded flex items-center justify-between ${
@@ -209,11 +338,15 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ userEmail }) => {
             <div className="max-w-2xl mx-auto bg-white rounded p-6">
               <h2 className="text-xl font-medium mb-6">Account access</h2>
 
-              {/* Email update section - without showing current email */}
               <div className="border-b border-gray-200 py-4">
                 <div className="flex justify-between items-center">
                   <div>
                     <h3 className="font-medium">Email addresses</h3>
+                    {currentEmail && (
+                      <p className="text-gray-600 text-sm mt-1">
+                        <span className="font-medium">{currentEmail}</span>
+                      </p>
+                    )}
                     <p className="text-gray-600 text-sm mt-1">
                       Update your email address
                     </p>
@@ -240,7 +373,6 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ userEmail }) => {
                 </div>
               </div>
 
-              {/* Privacy settings section - kept as requested */}
               <div className="py-6">
                 <div className="flex justify-between items-start">
                   <div>
@@ -253,32 +385,76 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ userEmail }) => {
                   </div>
                   <div className="relative">
                     <select
-                      className="appearance-none bg-white border border-gray-300 rounded-md px-4 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className={`appearance-none bg-white border border-gray-300 rounded-md px-4 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                        isUpdatingPrivacy ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
                       value={selectedPrivacy}
                       onChange={(e) =>
-                        setSelectedPrivacy(e.target.value as PrivacyOption)
+                        handlePrivacyChange(e.target.value as PrivacyOption)
                       }
+                      disabled={isUpdatingPrivacy}
                     >
                       {Object.values(PrivacyOption).map((option) => (
                         <option key={option} value={option}>
-                          {option}
+                          {privacyOptionDisplayNames[option]}
                         </option>
                       ))}
                     </select>
                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                      <svg
-                        className="w-4 h-4"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                          clipRule="evenodd"
-                        ></path>
-                      </svg>
+                      {isUpdatingPrivacy ? (
+                        <svg
+                          className="animate-spin h-4 w-4 text-blue-600"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                      ) : (
+                        <svg
+                          className="w-4 h-4"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                            clipRule="evenodd"
+                          ></path>
+                        </svg>
+                      )}
                     </div>
                   </div>
+                </div>
+              </div>
+
+              <div className="py-6">
+                <div>
+                  <h3 className="font-medium text-red-600">
+                    Deactivate your account
+                  </h3>
+                  <p className="text-gray-600 text-sm mt-1 mb-4">
+                    This will mark your account as inactive. Your profile will
+                    no longer be visible to others.
+                  </p>
+                  <button
+                    onClick={() => setIsDeactivateDialogOpen(true)}
+                    className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+                  >
+                    Deactivate account
+                  </button>
                 </div>
               </div>
             </div>
@@ -377,7 +553,6 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ userEmail }) => {
         </div>
       </div>
 
-      {/* Footer */}
       {isUpdateEmailVisible && (
         <footer className="bg-white py-4 border-t border-gray-200">
           <div className="max-w-6xl mx-auto flex flex-wrap justify-center text-sm text-gray-600">
@@ -415,11 +590,46 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ userEmail }) => {
           </div>
         </footer>
       )}
+
+      {isDeactivateDialogOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <div className="mb-4">
+              <h3 className="text-lg font-medium text-red-600">
+                Deactivate Account
+              </h3>
+              <p className="text-gray-600 mt-2">
+                Are you sure you want to deactivate your account? This action
+                will:
+              </p>
+              <ul className="mt-3 ml-5 text-gray-600 list-disc">
+                <li>Hide your profile from other users</li>
+                <li>Remove you from search results</li>
+                <li>Maintain your data for potential future reactivation</li>
+              </ul>
+            </div>
+            <div className="flex items-center justify-end space-x-3 mt-6">
+              <button
+                onClick={() => setIsDeactivateDialogOpen(false)}
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeactivateAccount}
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:bg-red-300"
+                disabled={isDeactivating}
+              >
+                {isDeactivating ? "Deactivating..." : "Yes, deactivate"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-// Usage example
-export default function App() {
-  return <SettingsPage userEmail="mohamed.ebrahim021@eng-st.cu.edu.eg" />;
+export default function Settings() {
+  return <SettingsPage />;
 }

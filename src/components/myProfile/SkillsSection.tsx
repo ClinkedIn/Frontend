@@ -3,7 +3,7 @@ import axios from "axios";
 import SkillsForm from "./Forms/SkillsForm";
 import ConfirmationDialog from "./ConfirmationDialog";
 import { Loader, Plus, Pencil, Trash2, X } from "lucide-react";
-import { BASE_URL } from "../../constants";
+
 interface Skill {
   skillName: string;
   education: number[];
@@ -16,9 +16,8 @@ interface SkillsSectionProps {
 }
 
 // API configuration
-const API_BASE_URL = BASE_URL;
+const API_BASE_URL = "http://localhost:3000";
 const API_ROUTES = {
-  login: `${API_BASE_URL}/user/login`,
   skills: `${API_BASE_URL}/user/skills`,
 };
 
@@ -30,7 +29,6 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({
   const [skills, setSkills] = useState<Skill[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // UI state
   const [showForm, setShowFormInternal] = useState(false);
@@ -54,54 +52,12 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({
     }
   };
 
-  // Login function
-  const login = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      const credentials = {
-        email: "john.doe@example.com",
-        password: "Password123!",
-      };
-
-      const response = await axios.post(API_ROUTES.login, credentials, {
-        withCredentials: true,
-      });
-
-      if (response.data) {
-        axios.defaults.withCredentials = true;
-
-        if (response.data.token) {
-          axios.defaults.headers.common[
-            "Authorization"
-          ] = `Bearer ${response.data.token}`;
-        }
-
-        setIsAuthenticated(true);
-        await fetchSkills();
-      } else {
-        throw new Error("Invalid response from server");
-      }
-    } catch (error: any) {
-      console.error("Login error:", error);
-      setIsAuthenticated(false);
-      setError(
-        error.response?.data?.message ||
-          "Login failed. Please check your credentials."
-      );
-      setIsLoading(false);
-    }
-  };
-
   const fetchSkills = async () => {
     try {
       setIsLoading(true);
       setError(null);
 
-      const response = await axios.get(API_ROUTES.skills, {
-        withCredentials: true,
-      });
+      const response = await axios.get(API_ROUTES.skills);
 
       if (response.data && response.data.skills) {
         setSkills(response.data.skills);
@@ -111,16 +67,7 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({
       setIsLoading(false);
     } catch (error: any) {
       console.error("Error fetching skills data:", error);
-
-      if (error.response && error.response.status === 401) {
-        setIsAuthenticated(false);
-        setError("Your session has expired. Please login again.");
-      } else {
-        setError(
-          error.response?.data?.message || "Failed to load skills data."
-        );
-      }
-
+      setError(error.response?.data?.message || "Failed to load skills data.");
       setIsLoading(false);
     }
   };
@@ -141,20 +88,15 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({
             newSkillName: skillData.skillName,
             educationIndexes: skillData.educationIndexes,
             experienceIndexes: skillData.experienceIndexes,
-          },
-          { withCredentials: true }
+          }
         );
       } else {
         // Add new skill
-        await axios.post(
-          API_ROUTES.skills,
-          {
-            skillName: skillData.skillName,
-            educationIndexes: skillData.educationIndexes || [],
-            experienceIndexes: skillData.experienceIndexes || [],
-          },
-          { withCredentials: true }
-        );
+        await axios.post(API_ROUTES.skills, {
+          skillName: skillData.skillName,
+          educationIndexes: skillData.educationIndexes || [],
+          experienceIndexes: skillData.experienceIndexes || [],
+        });
       }
 
       await fetchSkills();
@@ -163,14 +105,7 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({
       setIsProcessing(false);
     } catch (error: any) {
       console.error("Error saving skill:", error);
-
-      if (error.response && error.response.status === 401) {
-        setIsAuthenticated(false);
-        setError("Your session has expired. Please login again.");
-      } else {
-        setError(error.response?.data?.message || "Failed to save skill.");
-      }
-
+      setError(error.response?.data?.message || "Failed to save skill.");
       setIsProcessing(false);
     }
   };
@@ -182,9 +117,7 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({
     try {
       setIsProcessing(true);
 
-      await axios.delete(`${API_ROUTES.skills}/${pendingDeleteSkill}`, {
-        withCredentials: true,
-      });
+      await axios.delete(`${API_ROUTES.skills}/${pendingDeleteSkill}`);
 
       await fetchSkills();
       setShowDeleteConfirmation(false);
@@ -193,20 +126,13 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({
       setIsProcessing(false);
     } catch (error: any) {
       console.error("Error deleting skill:", error);
-
-      if (error.response && error.response.status === 401) {
-        setIsAuthenticated(false);
-        setError("Your session has expired. Please login again.");
-      } else {
-        setError(error.response?.data?.message || "Failed to delete skill.");
-      }
-
+      setError(error.response?.data?.message || "Failed to delete skill.");
       setIsProcessing(false);
     }
   };
 
   useEffect(() => {
-    login();
+    fetchSkills();
   }, []);
 
   // Component rendering helpers
@@ -229,7 +155,7 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({
     <div className="text-red-500 p-4 rounded-lg bg-red-50 flex flex-col items-center">
       <p className="mb-3 text-center">{error}</p>
       <button
-        onClick={login}
+        onClick={fetchSkills}
         className="mt-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
       >
         Try Again
