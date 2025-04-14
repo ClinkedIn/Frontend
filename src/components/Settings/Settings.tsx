@@ -42,6 +42,30 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ userEmail }) => {
     message: string;
   } | null>(null);
 
+  /**
+   * Handles the email update process when the form is submitted.
+   *
+   * @param {React.FormEvent} e - The form submission event.
+   * @returns {Promise<void>} - A promise that resolves when the email update process is complete.
+   *
+   * @description
+   * This function validates the input fields for the new email and password. If either field is empty,
+   * it sets an error feedback message and exits early. Otherwise, it sends a PATCH request to the
+   * `/user/update-email` endpoint with the new email and password. If the request is successful,
+   * it clears the input fields and sets a success feedback message. If an error occurs, it sets an
+   * appropriate error feedback message based on the type of error.
+   *
+   * @throws {Error} - Throws an error if the email update process fails unexpectedly.
+   *
+   * @example
+   * ```tsx
+   * <form onSubmit={handleEmailUpdate}>
+   *   <input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} />
+   *   <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+   *   <button type="submit">Update Email</button>
+   * </form>
+   * ```
+   */
   const handleEmailUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newEmail || !password) {
@@ -89,6 +113,10 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ userEmail }) => {
     }
   };
 
+  /**
+   * Clears the current feedback message by setting it to null.
+   * This function is typically used to reset or remove any displayed feedback.
+   */
   const clearFeedback = () => {
     setFeedbackMessage(null);
   };

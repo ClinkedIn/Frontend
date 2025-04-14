@@ -1,9 +1,25 @@
 import React, { useState, useEffect, useRef } from 'react';
 
+/**
+ * PostMenu component renders a dropdown menu with options to hide, save, or report a post.
+ * The menu toggles visibility when the ellipsis button is clicked and closes when clicking outside.
+ *
+ * @component
+ * @param {Object} props - Component props.
+ * @param {string} props.postId - The unique identifier of the post.
+ * @param {Function} props.onHide - Callback function triggered when the "Hide this post" option is selected.
+ * @param {Function} props.onSave - Callback function triggered when the "Save this post" option is selected.
+ * @param {Function} props.onReport - Callback function triggered when the "Report this post" option is selected.
+ * @returns {JSX.Element} The rendered PostMenu component.
+ */
 const PostMenu = ({ postId, onHide, onSave, onReport }) => {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef(null);
   
+  /**
+   * Toggles the state of the menu between open and closed.
+   * Updates the `isOpen` state by inverting its current value.
+   */
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };

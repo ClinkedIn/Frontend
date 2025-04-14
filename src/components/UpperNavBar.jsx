@@ -6,6 +6,36 @@ import Jobs from "../pages/jobs/Jobs";
 import { BASE_URL } from "../constants";
 
 
+/**
+ * Header component representing the upper navigation bar of the application.
+ * 
+ * @component
+ * @param {Object} props - Component props.
+ * @param {Array} props.notifications - Array of notification objects.
+ * 
+ * @returns {JSX.Element} The rendered Header component.
+ * 
+ * @description
+ * The Header component includes:
+ * - A logo that navigates to the feed page.
+ * - A search bar for job searches (visible only on the "jobs" page).
+ * - Navigation icons for Home, Network, Jobs, Messaging, and Notifications.
+ * - User and Work dropdown icons.
+ * 
+ * @example
+ * <Header notifications={notifications} />
+ * 
+ * @functionality
+ * - Fetches the unread notification count on mount.
+ * - Handles navigation to various pages (e.g., notifications, jobs, messaging).
+ * - Allows users to perform job searches with title and location filters.
+ * - Displays the unread notification count badge.
+ * 
+ * @dependencies
+ * - React hooks: useState, useEffect.
+ * - React Router hooks: useNavigate, useLocation.
+ * - Axios for API requests.
+ */
 const Header = ({notifications}) => {
   const [showUser, setShowUser] = useState(false)
   const [unreadCount, setUnreadCount] = useState(0); 
@@ -14,6 +44,7 @@ const Header = ({notifications}) => {
   const navigate = useNavigate(); 
   const locations = useLocation();
   const currentPath = locations.pathname.split('/')[1];
+  
   useEffect(() => {
     const fetchUnreadCount = async () => {
       try {
@@ -29,14 +60,34 @@ const Header = ({notifications}) => {
   }, []);
 
   // Handler to navigate to notifications page
+  /**
+   * Navigates the user to the notifications page.
+   * This function is triggered when the notifications button is clicked.
+   */
   const handleNotificationsClick = () => {
     navigate('/notifications');
   };
 
   // Handler to navigate to jobs page
+  /**
+   * Navigates the user to the '/jobs' route.
+   * This function is typically used as an event handler for navigation actions.
+   */
   const handleJobsClick = () => {
     navigate('/jobs');
   };
+  
+  /**
+   * Handles the search functionality by sending a GET request to the server
+   * with the provided search query and location parameters. Navigates to the
+   * job board page with the search results and relevant state data.
+   *
+   * @async
+   * @function handleSearch
+   * @param {Object} e - The event object from the form submission.
+   * @returns {Promise<void>} - A promise that resolves when the search is complete.
+   * @throws {Error} - Logs an error to the console if the search request fails.
+   */
   const handleSearch = async (e) => {
     e.preventDefault();
     try {
@@ -62,6 +113,13 @@ const Header = ({notifications}) => {
     }
   };
 
+  /**
+   * Navigates the user to the messaging page with a specific ID.
+   * 
+   * @function handleMessagingClick
+   * @description This function is triggered when the messaging button is clicked. 
+   * It redirects the user to the `/messaging/123` route using the `navigate` function.
+   */
   const handleMessagingClick = () => {
     navigate('/messaging/123');
   }

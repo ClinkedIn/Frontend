@@ -7,6 +7,31 @@ import { FiUserMinus } from "react-icons/fi";
 import { db } from '../../../firebase';
 
 
+/**
+ * ChatWindow component for displaying a chat interface between two users.
+ *
+ * @component
+ * @param {Object} props - The component props.
+ * @param {string} props.conversationId - The unique identifier for the conversation.
+ * @param {Object} props.currentUser - The current user's information.
+ * @param {string} props.currentUser.uid - The unique identifier of the current user.
+ * @param {Object} props.otherUser - The other user's information.
+ * @param {string} props.otherUser.userId - The unique identifier of the other user.
+ * @param {Function} props.onBack - Callback function to navigate back to the conversations list.
+ *
+ * @description
+ * This component provides a chat interface for messaging between two users. It includes features such as:
+ * - Real-time message fetching and updates.
+ * - Typing indicators.
+ * - Block/unblock functionality.
+ * - Scroll-to-bottom behavior for new messages.
+ * - Display of conversation metadata and user information.
+ *
+ * The component handles both new and existing conversations, including cases where the Firestore document
+ * for the conversation does not yet exist.
+ *
+ * @returns {JSX.Element} The rendered ChatWindow component.
+ */
 const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
   
   const [messages, setMessages] = useState([]);
@@ -35,42 +60,28 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
 
     setLoadingMetadata(true);
     const convDocRef = doc(db, 'conversations', conversationId);
-    const unsubscribeConv = onSnapshot(convDocRef, (docSnap) => {
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        setConversationData(data); // Set data if document exists
-
-        // Update block status
-        setIsBlockedByYou(data.blockedBy?.[currentUser.uid] || false);
-        setIsBlockedByOther(otherUserId ? (data.blockedBy?.[otherUserId] || false) : false);
-
-        // Update typing status 
-        setIsTyping(otherUserId ? (data.typing?.[otherUserId] || false) : false);
-
-        // Mark conversation as read (only if data exists)
-        if (data.unreadCounts?.[currentUser.uid] > 0) {
-           updateDoc(convDocRef, {
-               [`unreadCounts.${currentUser.uid}`]: 0
-           }).catch(err => console.error("Error marking conversation as read:", err));
-        }
-      } else {
-        
-        console.log("Conversation document not found (might be new):", conversationId);
-        setConversationData(null); // Ensure data is null
-        // Reset states that depend on data
-        setIsBlockedByYou(false);
-        setIsBlockedByOther(false);
-        setIsTyping(false);
-      }
-       setLoadingMetadata(false); // Metadata loading finished 
-    }, (error) => {
-       console.error("Error fetching conversation details:", error);
-       setLoadingMetadata(false);
-       setConversationData(null); // Clear data on error
-    });
-
-    return () => unsubscribeConv();
-    
+    /**
+     * Subscribes to real-time updates for a conversation document and updates the component state accordingly.
+     * 
+     * @constant
+     * @function unsubscribeConv
+     * @param {Object} convDocRef - A Firestore document reference for the conversation.
+     * @param {Function} onSnapshot - A Firestore function that listens for real-time updates to the document.
+     * @param {Object} docSnap - A snapshot of the conversation document.
+     * 
+     * @description
+     * This function listens for changes to a conversation document in Firestore. It updates the component's state
+     * based on the document's data, including block status, typing status, and unread message counts. If the document
+     * does not exist, it resets the relevant states. Errors during the snapshot subscription are logged, and the
+     * metadata loading state is updated accordingly.
+     * 
+     * @callback
+     * @param {Object} docSnap - The snapshot of the conversation document.
+     * @returns {void}
+     * 
+     * @error
+     * Logs any errors encountered while fetching the conversation details or updating the document.
+     */
   }, [conversationId, currentUser?.uid, otherUserId]); 
 
 
@@ -87,6 +98,19 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
     const messagesColRef = collection(convDocRef, 'messages');
     const q = query(messagesColRef, orderBy('timestamp', 'asc'));
 
+    /**
+     * Subscribes to a Firestore query to fetch and listen for real-time updates to messages.
+     * Updates the local state with the fetched messages and marks messages as read for the current user.
+     *
+     * @param {Query} q - The Firestore query object to fetch messages.
+     * @param {Function} setMessages - A state setter function to update the list of messages.
+     * @param {Function} setLoadingMessages - A state setter function to update the loading state.
+     * @param {Object} currentUser - The current user's information.
+     * @param {string} currentUser.uid - The unique identifier of the current user.
+     * @param {CollectionReference} messagesColRef - The Firestore collection reference for messages.
+     *
+     * @returns {Function} A function to unsubscribe from the Firestore query listener.
+     */
     const unsubscribeMessages = onSnapshot(q, (querySnapshot) => {
       const msgs = [];
       querySnapshot.forEach((messageDoc) => {
@@ -126,6 +150,19 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
   }, [messages, loadingMessages, loadingMetadata]);
 
   //Handle Typing Indicator Updates 
+  /**
+   * Updates the typing status of the current user in the specified conversation.
+   *
+   * @function
+   * @async
+   * @param {boolean} typing - Indicates whether the user is currently typing (true) or not (false).
+   * @returns {Promise<void>} Resolves when the typing status is successfully updated, or logs a warning if an error occurs.
+   * @throws {Error} Logs a warning if the document does not exist or the update fails.
+   * 
+   * @example
+   * updateTypingStatus(true); // Sets the typing status to true (user is typing).
+   * updateTypingStatus(false); // Sets the typing status to false (user stopped typing).
+   */
   const updateTypingStatus = useCallback(async (typing) => {
     if (!conversationId || !currentUser?.uid) return;
     const convDocRef = doc(db, 'conversations', conversationId);
@@ -143,6 +180,21 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
 
 
   // Block/Unblock User 
+  /**
+   * Toggles the block status of the other user in the current conversation.
+   * Updates the conversation document in the database to reflect the new block status.
+   * 
+   * @async
+   * @function handleBlockUser
+   * @returns {Promise<void>} Resolves when the block status is successfully updated.
+   * @throws Will log an error if the document update fails (e.g., if the document does not exist).
+   * 
+   * @description
+   * - If the conversation ID, current user ID, or other user ID is missing, the function exits early.
+   * - Retrieves the conversation document reference from the database.
+   * - Toggles the block status for the current user in the conversation document.
+   * - Updates the local state to reflect the new block status.
+   */
   const handleBlockUser = async () => {
     if (!conversationId || !currentUser?.uid || !otherUserId) return;
     const convDocRef = doc(db, 'conversations', conversationId);
