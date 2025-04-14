@@ -1474,6 +1474,30 @@ import {
 
 export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
+  /**
+   * useState hook to manage analytics data for the Admin Panel.
+   * 
+   * @typedef {Object} AnalyticsData
+   * @property {number} totalUsers - Total number of users on the platform.
+   * @property {number} activeUsers - Number of currently active users.
+   * @property {number} newSignups - Number of new signups.
+   * @property {number} postsCreated - Total number of posts created.
+   * @property {number} activeCompanies - Number of active companies.
+   * @property {number} avgJobsPerCompany - Average number of jobs per company.
+   * @property {number} activeUsersNow - Number of users currently active now.
+   * @property {number} messagesPerMin - Number of messages sent per minute.
+   * @property {number} newConnectionsPerMin - Number of new connections made per minute.
+   * @property {Array<Object>} subscriptionPlans - Array of subscription plans with user counts.
+   * @property {string} subscriptionPlans[].name - Name of the subscription plan.
+   * @property {number} subscriptionPlans[].users - Number of users subscribed to the plan.
+   * @property {Array<Object>} activityTrend - Array of activity trends by day.
+   * @property {string} activityTrend[].name - Name of the day (e.g., 'Mon', 'Tue').
+   * @property {number} activityTrend[].users - Number of users active on the day.
+   * @property {number} activityTrend[].posts - Number of posts created on the day.
+   * @property {number} activityTrend[].messages - Number of messages sent on the day.
+   * 
+   * @type {[AnalyticsData, React.Dispatch<React.SetStateAction<AnalyticsData>>]}
+   */
   const [analyticsData, setAnalyticsData] = useState(null);
   const [error, setError] = useState(null);
 

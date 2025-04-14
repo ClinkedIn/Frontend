@@ -23,6 +23,8 @@ const MessagingPage = () => {
         photoURL: 'https://picsum.photos/80' 
     });
 
+   
+
     const [otherUser, setOtherUser] = useState(null);
     const [selectedConversationId, setSelectedConversationId] = useState(null);
     const [showChatOnMobile, setShowChatOnMobile] = useState(false); // For mobile ui
@@ -31,6 +33,29 @@ const MessagingPage = () => {
     const [conversations, setConversations] = useState([]);
     const [loadingConversations, setLoadingConversations] = useState(true);
     const [errorConversations, setErrorConversations] = useState(null);
+    /*
+     const [currentUser, setUser] = useState();
+    const fetchUser = async () => {
+        try {
+          const response = await axios.get(`${BASE_URL}/user/me`, {
+        
+            withCredentials:true
+          });
+      
+          setUser(response.data);
+          console.log("User data:", response.data);
+        } catch (error) {
+          console.error("Error fetching user:", error);
+        }
+      };
+      useEffect(() => {
+        const loginAndFetchData = async () => {
+          //await testLogin(); // Ensure login is completed first
+          fetchUser(); 
+        };
+      
+        loginAndFetchData();
+      }, []);*/
 
     useEffect(() => {
        

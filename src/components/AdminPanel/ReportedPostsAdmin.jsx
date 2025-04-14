@@ -573,9 +573,10 @@ import {
   Clock,
 } from "lucide-react";
 import { data } from "react-router-dom";
+import { BASE_URL } from "../../constants";
 
 // Base URL configuration - adjust as needed for your environment
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+//const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
 const ReportedPosts = () => {
   const [reportedPosts, setReportedPosts] = useState([]);

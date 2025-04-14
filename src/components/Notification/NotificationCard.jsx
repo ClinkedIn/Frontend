@@ -17,6 +17,15 @@ const NotificationCard = ({ notification, handleNotificationClick }) => {
   const [showDurationMenu, setShowDurationMenu] = useState(false);
   const navigate = useNavigate();
 
+  /**
+   * Handles the click event for a notification card.
+   * Marks the notification as read if there is no associated message,
+   * logs the click event, and triggers the notification click handler.
+   *
+   * @async
+   * @function handleClick
+   * @returns {Promise<void>} Resolves when the notification click handling is complete.
+   */
   const handleClick = async () => {
     if (!message) {
       setIsRead(true);
@@ -27,6 +36,18 @@ const NotificationCard = ({ notification, handleNotificationClick }) => {
   };
 
   // Delete Notification
+  /**
+   * Deletes a notification by its ID.
+   *
+   * Sends a DELETE request to the server to remove the specified notification.
+   * If successful, updates the state with the removed notification and logs a success message.
+   * If an error occurs, logs the error and sets an error message in the state.
+   *
+   * @async
+   * @function handleDeleteNotification
+   * @param {string} id - The ID of the notification to be deleted.
+   * @returns {Promise<void>} A promise that resolves when the notification is deleted.
+   */
   const handleDeleteNotification = async (id) => {
     try {
       await axios.delete(`${BASE_URL}/notifications/${id}`,{withCredentials:true});
@@ -39,6 +60,16 @@ const NotificationCard = ({ notification, handleNotificationClick }) => {
   };
 
   // Undo delete
+  /**
+   * Handles the undo action for a removed notification.
+   * 
+   * This function prevents the default click event propagation, attempts to restore
+   * the removed notification on the backend, and updates the UI accordingly. If the
+   * restoration fails, an error message is displayed.
+   * 
+   * @param {Object} e - The event object from the click event.
+   * @throws Will log an error to the console and set a failure message if the undo action fails.
+   */
   const handleUndo = async (e) => {
     e.stopPropagation(); // Prevent triggering handleClick
 
@@ -58,6 +89,19 @@ const NotificationCard = ({ notification, handleNotificationClick }) => {
     }
   };
 
+  /**
+   * Handles muting notifications for a specified duration.
+   *
+   * This function sends a PATCH request to the server to pause notifications
+   * for the given duration. Upon success, it updates the local state to reflect
+   * the muted status and hides the duration and menu UI elements.
+   *
+   * @async
+   * @function handleMuteDuration
+   * @param {number} duration - The duration (in minutes or other units) for which notifications should be muted.
+   * @returns {Promise<void>} Resolves when the operation is complete.
+   * @throws {Error} Logs an error to the console if the request fails.
+   */
   const handleMuteDuration = async (duration) => {
     try {
      const response= await axios.patch(
@@ -75,6 +119,15 @@ const NotificationCard = ({ notification, handleNotificationClick }) => {
     }
   };
 
+  /**
+   * Handles the unmute action for notifications.
+   * Sends a PATCH request to resume notifications and updates the UI state accordingly.
+   *
+   * @param {Object} e - The event object.
+   * @param {Function} e.stopPropagation - Stops the event from propagating to parent elements.
+   * @returns {Promise<void>} - A promise that resolves when the unmute action is completed.
+   * @throws {Error} - Logs an error to the console if the request fails.
+   */
   const handleUnmute = async (e) => {
     e.stopPropagation();
     try {

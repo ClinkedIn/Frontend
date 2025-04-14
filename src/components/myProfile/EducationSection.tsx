@@ -36,12 +36,17 @@ interface EducationSectionProps {
   setShowEducationForm?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 const API_ROUTES = {
-  login: `${API_BASE_URL}/user/login`,
   education: `${API_BASE_URL}/user/education`,
 };
-
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 const getMonthNumber = (monthName: string): string => {
   const months = [
     "January",
@@ -71,7 +76,6 @@ const EducationSection: React.FC<EducationSectionProps> = ({
   const [educations, setEducations] = useState<Education[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // UI state
   const [showForm, setShowFormInternal] = useState(false);
@@ -149,72 +153,21 @@ const EducationSection: React.FC<EducationSectionProps> = ({
     return [];
   };
 
-  // Login function
-  const login = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      const credentials = {
-        email: "john.doe@example.com",
-        password: "Password123!",
-      };
-
-      const response = await axios.post(API_ROUTES.login, credentials, {
-        withCredentials: true,
-      });
-
-      if (response.data) {
-        axios.defaults.withCredentials = true;
-
-        if (response.data.token) {
-          axios.defaults.headers.common[
-            "Authorization"
-          ] = `Bearer ${response.data.token}`;
-        }
-
-        setIsAuthenticated(true);
-        console.log("Authenticated ");
-        await fetchEducation();
-      } else {
-        throw new Error("Invalid response from server");
-      }
-    } catch (error: any) {
-      console.error("Login error:", error);
-      setIsAuthenticated(false);
-      setError(
-        error.response?.data?.message ||
-          "Login failed. Please check your credentials."
-      );
-      setIsLoading(false);
-    }
-  };
-
   // Fetch education data
   const fetchEducation = async () => {
     try {
       setIsLoading(true);
       setError(null);
 
-      const response = await axios.get(API_ROUTES.education, {
-        withCredentials: true,
-      });
-
+      const response = await api.get(API_ROUTES.education);
       const educationData = parseEducationData(response.data);
       setEducations(educationData);
       setIsLoading(false);
     } catch (error: any) {
       console.error("Error fetching education data:", error);
-
-      if (error.response && error.response.status === 401) {
-        setIsAuthenticated(false);
-        setError("Your session has expired. Please login again.");
-      } else {
-        setError(
-          error.response?.data?.message || "Failed to load education data."
-        );
-      }
-
+      setError(
+        error.response?.data?.message || "Failed to load education data."
+      );
       setIsLoading(false);
     }
   };
@@ -228,15 +181,9 @@ const EducationSection: React.FC<EducationSectionProps> = ({
       const apiData = convertFormToApiFormat(formData);
 
       if (formData.index !== undefined) {
-        await axios.patch(
-          `${API_ROUTES.education}/${formData.index}`,
-          apiData,
-          { withCredentials: true }
-        );
+        await api.patch(`${API_ROUTES.education}/${formData.index}`, apiData);
       } else {
-        await axios.post(API_ROUTES.education, apiData, {
-          withCredentials: true,
-        });
+        await api.post(API_ROUTES.education, apiData);
       }
 
       await fetchEducation();
@@ -246,16 +193,9 @@ const EducationSection: React.FC<EducationSectionProps> = ({
       setIsProcessing(false);
     } catch (error: any) {
       console.error("Error saving education:", error);
-
-      if (error.response && error.response.status === 401) {
-        setIsAuthenticated(false);
-        setError("Your session has expired. Please login again.");
-      } else {
-        setError(
-          error.response?.data?.message || "Failed to save education data."
-        );
-      }
-
+      setError(
+        error.response?.data?.message || "Failed to save education data."
+      );
       setIsProcessing(false);
     }
   };
@@ -269,8 +209,7 @@ const EducationSection: React.FC<EducationSectionProps> = ({
 
     try {
       const response = await axios.delete(
-        `${API_ROUTES.education}/${pendingDeleteIndex}`,
-        { withCredentials: true }
+        `${API_ROUTES.education}/${pendingDeleteIndex}`
       );
 
       const updatedEducations = parseEducationData(response.data);
@@ -282,22 +221,13 @@ const EducationSection: React.FC<EducationSectionProps> = ({
       setIsProcessing(false);
     } catch (error: any) {
       console.error("Error deleting education:", error);
-
-      if (error.response && error.response.status === 401) {
-        setIsAuthenticated(false);
-        setError("Your session has expired. Please login again.");
-      } else {
-        setError(
-          error.response?.data?.message || "Failed to delete education."
-        );
-      }
-
+      setError(error.response?.data?.message || "Failed to delete education.");
       setIsProcessing(false);
     }
   };
 
   useEffect(() => {
-    login();
+    fetchEducation();
   }, []);
 
   const LoadingOverlay = () => (
@@ -319,7 +249,7 @@ const EducationSection: React.FC<EducationSectionProps> = ({
     <div className="text-red-500 p-4 rounded-lg bg-red-50 flex flex-col items-center">
       <p className="mb-3 text-center">{error}</p>
       <button
-        onClick={login}
+        onClick={fetchEducation}
         className="mt-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
       >
         Try Again

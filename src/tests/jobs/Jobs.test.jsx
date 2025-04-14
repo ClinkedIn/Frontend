@@ -3,6 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import axios from 'axios';
 import Jobs from '../../pages/jobs/Jobs';
+import { BASE_URL } from '../../constants';
 
 // Mock external components and libraries
 vi.mock('axios');
@@ -44,15 +45,15 @@ describe('Jobs Component', () => {
     
     await waitFor(() => {
       expect(axios.post).toHaveBeenCalledWith(
-        'http://localhost:3000/user/login',
+        `${BASE_URL}/user/login`,
         {
           email: "Charlie.Kreiger@yahoo.com",
           password: "password123"
         },
         { withCredentials: true }
       );
-      expect(axios.get).toHaveBeenCalledWith('http://localhost:3000/user/me', { withCredentials: true });
-      expect(axios.get).toHaveBeenCalledWith('http://localhost:3000/jobs', {});
+      expect(axios.get).toHaveBeenCalledWith(`${BASE_URL}/user/me`, { withCredentials: true });
+      expect(axios.get).toHaveBeenCalledWith(`${BASE_URL}/jobs`, {});
     });
   });
 

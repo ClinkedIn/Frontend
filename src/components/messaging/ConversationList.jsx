@@ -18,6 +18,19 @@ const ConversationList = ({
     onSelectUserFromSearch
 }) => {
         // Handler for Marking Read/Unread
+        /**
+         * Handles marking a conversation as read or unread for the current user.
+         *
+         * @function
+         * @param {string} conversationId - The ID of the conversation to update.
+         * @param {boolean} markAsUnread - A flag indicating whether to mark the conversation as unread (true) or read (false).
+         * @returns {Promise<void>} A promise that resolves when the unread count is successfully updated, or logs an error if the update fails.
+         * @throws Will log an error if the update to the database fails.
+         *
+         * @example
+         * handleMarkReadUnread('conversation123', true); // Marks the conversation as unread
+         * handleMarkReadUnread('conversation123', false); // Marks the conversation as read
+         */
         const handleMarkReadUnread = useCallback(async (conversationId, markAsUnread) => {
             if (!currentUser?.uid || !conversationId) return;
     
