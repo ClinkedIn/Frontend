@@ -60,6 +60,41 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
 
     setLoadingMetadata(true);
     const convDocRef = doc(db, 'conversations', conversationId);
+    const unsubscribeConv = onSnapshot(convDocRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setConversationData(data); // Set data if document exists
+
+        // Update block status
+        setIsBlockedByYou(data.blockedBy?.[currentUser.uid] || false);
+        setIsBlockedByOther(otherUserId ? (data.blockedBy?.[otherUserId] || false) : false);
+
+        // Update typing status 
+        setIsTyping(otherUserId ? (data.typing?.[otherUserId] || false) : false);
+
+        // Mark conversation as read (only if data exists)
+        if (data.unreadCounts?.[currentUser.uid] > 0) {
+           updateDoc(convDocRef, {
+               [`unreadCounts.${currentUser.uid}`]: 0
+           }).catch(err => console.error("Error marking conversation as read:", err));
+        }
+      } else {
+        
+        console.log("Conversation document not found (might be new):", conversationId);
+        setConversationData(null); // Ensure data is null
+        // Reset states that depend on data
+        setIsBlockedByYou(false);
+        setIsBlockedByOther(false);
+        setIsTyping(false);
+      }
+       setLoadingMetadata(false); // Metadata loading finished 
+    }, (error) => {
+       console.error("Error fetching conversation details:", error);
+       setLoadingMetadata(false);
+       setConversationData(null); // Clear data on error
+    });
+
+    return () => unsubscribeConv();
     /**
      * Subscribes to real-time updates for a conversation document and updates the component state accordingly.
      * 

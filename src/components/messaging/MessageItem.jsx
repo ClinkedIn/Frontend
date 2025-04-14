@@ -2,7 +2,7 @@ import React from 'react';
 import { format } from 'date-fns'; 
 
 const MessageItem = ({ message, isOwnMessage, senderInfo, showReadReceipt }) => {
-  const defaultAvatar = 'https://via.placeholder.com/40/808080/FFFFFF?text=?';
+  const defaultAvatar = '/Images/user.svg';
 
   /**
    * Renders media content based on the type of media provided in the `message` object.
@@ -65,7 +65,7 @@ const MessageItem = ({ message, isOwnMessage, senderInfo, showReadReceipt }) => 
           </p>
         </div>
          {isOwnMessage && showReadReceipt && (
-           <p className="text-xs text-gray-500 mt-1">Read</p>
+           <p className="text-xs text-gray-500 mt-1">Seen</p>
          )}
           {isOwnMessage && !showReadReceipt && (
            <p className="text-xs text-gray-500 mt-1">Sent</p>

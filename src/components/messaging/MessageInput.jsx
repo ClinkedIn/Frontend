@@ -18,6 +18,29 @@ const MessageInput = ({ currentUser, otherUserId, onTyping }) => {
   const typingTimeoutRef = useRef(null);
 
    // Debounced typing indicator function
+      const handleTyping = useCallback(() => {
+        onTyping(true); // Indicate start typing
+        if (typingTimeoutRef.current) {
+            clearTimeout(typingTimeoutRef.current);
+        }
+        typingTimeoutRef.current = setTimeout(() => {
+            onTyping(false); // Indicate stop typing after delay
+        }, 1000); 
+    }, [onTyping]);
+
+    const handleFileChange = (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        setAttachment({ file: file, type: file.type });
+        setError(null); // Clear previous errors on new file selection
+      }
+      // Reset file input value so the same file can be selected again if removed
+      if(fileInputRef.current) fileInputRef.current.value = '';
+    };
+
+    const handleRemoveAttachment = () => {
+      setAttachment(null);
+    };
   /**
    * Handles the typing state of the user by notifying when typing starts
    * and stops after a specified delay.
