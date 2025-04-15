@@ -2,6 +2,21 @@
 import React, { useState, useEffect } from 'react';
 import { IoMdSearch } from "react-icons/io";
 
+/**
+ * ConversationSearch component provides a search bar to filter and select users from a list of connections.
+ *
+ * @component
+ * @param {Object} props - The component props.
+ * @param {Function} props.onSelectUser - Callback function triggered when a user is selected from the search results.
+ * @param {Array<Object>} props.connections - Array of user connection objects to search through.
+ * @param {string} props.connections[].userId - The unique identifier of a user.
+ * @param {string} props.connections[].fullName - The full name of a user.
+ * @param {string} [props.connections[].profilePicture] - The URL of the user's profile picture.
+ * @param {boolean} props.loading - Indicates whether the connections data is being loaded.
+ * @param {string} [props.error] - Error message to display if there is an issue loading connections.
+ *
+ * @returns {JSX.Element} The rendered ConversationSearch component.
+ */
 const ConversationSearch = ({ onSelectUser,connections,loading,error }) => {
  
   const [searchTerm, setSearchTerm] = useState('');
@@ -22,6 +37,16 @@ const ConversationSearch = ({ onSelectUser,connections,loading,error }) => {
     }
   }, [searchTerm, connections]);
 
+  /**
+   * Handles the selection of a user from the search results.
+   *
+   * @param {Object} user - The selected user object.
+   * @param {string} user.userId - The unique identifier of the user.
+   * @param {string} user.fullName - The full name of the user.
+   * @param {string} user.profilePicture - The URL of the user's profile picture.
+   *
+   * @returns {void}
+   */
   const handleSelect = (user) => {
     onSelectUser(user); // Pass the selected user object { userId, fullName, profilePicture }
     setSearchTerm(''); // Clear search term

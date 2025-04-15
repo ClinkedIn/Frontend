@@ -1,9 +1,15 @@
-import React, { useState, ChangeEvent, FormEvent } from "react";
+import { useState, ChangeEvent, FormEvent } from "react";
 import Button from "../../Button";
-
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faX, faChevronDown } from "@fortawesome/free-solid-svg-icons";
 
+/**
+ * Represents the structure of the form data used in the UpdateUserNameForm component.
+ * 
+ * @property firstName - The first name of the user.
+ * @property lastName - The last name of the user.
+ * @property additionalName - An additional name or middle name of the user.
+ */
 interface FormData {
   firstName: string;
   lastName: string;
@@ -11,12 +17,31 @@ interface FormData {
 }
 
 export default function UpdateUserNameForm() {
+  /**
+   * State hook to manage the form data for updating the user's name.
+   * 
+   * @typedef {Object} FormData
+   * @property {string} firstName - The first name of the user.
+   * @property {string} lastName - The last name of the user.
+   * @property {string} additionalName - An additional name or middle name of the user.
+   * 
+   * @constant
+   * @type {[FormData, React.Dispatch<React.SetStateAction<FormData>>]}
+   * @description Initializes the form data with empty strings for `firstName`, `lastName`, and `additionalName`.
+   */
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
     lastName: "",
     additionalName: "",
   });
 
+  // Handle input changes
+  /**
+   * Handles the change event for input fields in the form.
+   * Updates the form data state with the new value for the input field that triggered the event.
+   *
+   * @param {ChangeEvent<HTMLInputElement>} e - The change event triggered by an input field.
+   */
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -25,6 +50,14 @@ export default function UpdateUserNameForm() {
     }));
   };
 
+  // Handle form submission
+  /**
+   * Handles the form submission event for updating the username.
+   *
+   * @param e - The form submission event of type `FormEvent<HTMLFormElement>`.
+   * Prevents the default form submission behavior and logs the form data.
+   * Additional logic, such as an API call, can be added here.
+   */
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log("Form submitted:", formData);
@@ -32,19 +65,18 @@ export default function UpdateUserNameForm() {
   };
 
   return (
-    <div className=" container lg:w-4xl mx-auto my-10 rounded-lg  shadow-2xl ">
-      <div
-        className="p-4 border-b border-gray-400 relative top-0 left-0 right-0
-                flex justify-between items-center"
-      >
+    <div className="container lg:w-4xl mx-auto my-10 rounded-lg shadow-2xl">
+      {/* Header */}
+      <div className="p-4 border-b border-gray-400 relative flex justify-between items-center">
         <h1 className="text-3xl">Edit intro</h1>
         <button className="cursor-pointer p-2">
           <FontAwesomeIcon icon={faX} />
         </button>
       </div>
 
+      {/* Premium Section */}
       <div className="p-4">
-        <div className="flex flex-col p-4  rounded-lg shadow-sm my-5">
+        <div className="flex flex-col p-4 rounded-lg shadow-sm my-5">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
               <div className="bg-amber-100 p-2 rounded-md">
@@ -55,15 +87,12 @@ export default function UpdateUserNameForm() {
               </h2>
             </div>
             <button
-              className="cursor-pointer p-2 "
+              className="cursor-pointer p-2"
               onClick={() => {
-                // Add logic to toggle the visibility of the premiumSection
-                const premiumSection =
-                  document.getElementById("premuimSection");
+                const premiumSection = document.getElementById("premuimSection");
                 if (premiumSection) {
                   premiumSection.classList.toggle("hidden");
                 }
-                // Add logic to toggle the chevron icon
                 const chevron = document.getElementById("chevron");
                 if (chevron) {
                   chevron.classList.toggle("rotate-180");
@@ -104,12 +133,14 @@ export default function UpdateUserNameForm() {
         </div>
       </div>
 
+      {/* Form */}
       <form onSubmit={handleSubmit}>
-        <div className="p-4 max-h-[570px]  overflow-y-auto">
+        <div className="p-4 max-h-[570px] overflow-y-auto">
           <p className="text-sm text-gray-600 mb-4">
             <span className="text-red-600">*</span> Indicates required
           </p>
 
+          {/* First Name Field */}
           <div className="mb-4">
             <label htmlFor="firstName" className="block mb-1">
               First name<span className="text-red-600">*</span>
@@ -125,6 +156,7 @@ export default function UpdateUserNameForm() {
             />
           </div>
 
+          {/* Last Name Field */}
           <div className="mb-4">
             <label htmlFor="lastName" className="block mb-1">
               Last name<span className="text-red-600">*</span>
@@ -140,6 +172,7 @@ export default function UpdateUserNameForm() {
             />
           </div>
 
+          {/* Additional Name Field */}
           <div className="mb-4">
             <label htmlFor="additionalName" className="block mb-1">
               Additional name
@@ -155,7 +188,8 @@ export default function UpdateUserNameForm() {
           </div>
         </div>
 
-        <div className="text-right  border-t border-gray-400 p-3">
+        {/* Save Button */}
+        <div className="text-right border-t border-gray-400 p-3">
           <Button
             type="submit"
             className="btn-class px-6 py-2"

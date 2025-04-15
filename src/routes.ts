@@ -21,13 +21,17 @@ import CompanyProfileAdminViewPage from "./pages/CompanyPages/CompanyProfileAdmi
 import CompanyHomePage from "./components/CompanyPageSections/Home"
 import CompanyPostsPage from "./components/CompanyPageSections/Posts"
 import CompanyJobsPage from "./components/CompanyPageSections/Jobs"
-import Settings from "./components/Settings/Settings.jsx";
+import SettingsPage from "./components/Settings/Settings.tsx";
 import MyJobs from "./pages/jobs/MyJobs.jsx";
 import MessagingPage from "./pages/messaging/Messaging.jsx";
 import JobBoardPage from "./pages/jobs/JobBoardPage.jsx";
 import JobListing from "./components/AdminPanel/JobListing";
 import Analytics from "./components/AdminPanel/Analytics";
 import AdminPanel from "./components/AdminPanel/AdminPanel";
+
+
+
+import UserProfileViewPage from "./pages/myProfile/OtherProfile/UserProfileViewPage";
 
 // Define your routes as an array of RouteObject (compatible with React Router v6)
 const routes: RouteObject[] = [
@@ -155,13 +159,22 @@ const routes: RouteObject[] = [
   },
     {
     path: "/settings",
-    element: React.createElement(Settings),
+    element: React.createElement(SettingsPage),
   },
   {
     path:"/messaging/:id",
     element: React.createElement(MessagingPage),
   }
 
+
+
+
+
+  ,
+  {
+  path: "/user/:userId",
+  element: React.createElement(UserProfileViewPage),
+}
 ];
 
 export default routes;

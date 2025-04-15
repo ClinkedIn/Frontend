@@ -18,30 +18,70 @@ const MessageInput = ({ currentUser, otherUserId, onTyping }) => {
   const typingTimeoutRef = useRef(null);
 
    // Debounced typing indicator function
-   const handleTyping = useCallback(() => {
-      onTyping(true); // Indicate start typing
-      if (typingTimeoutRef.current) {
-          clearTimeout(typingTimeoutRef.current);
+      const handleTyping = useCallback(() => {
+        onTyping(true); // Indicate start typing
+        if (typingTimeoutRef.current) {
+            clearTimeout(typingTimeoutRef.current);
+        }
+        typingTimeoutRef.current = setTimeout(() => {
+            onTyping(false); // Indicate stop typing after delay
+        }, 1000); 
+    }, [onTyping]);
+
+    const handleFileChange = (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        setAttachment({ file: file, type: file.type });
+        setError(null); // Clear previous errors on new file selection
       }
-      typingTimeoutRef.current = setTimeout(() => {
-          onTyping(false); // Indicate stop typing after delay
-      }, 1000); 
-   }, [onTyping]);
+      // Reset file input value so the same file can be selected again if removed
+      if(fileInputRef.current) fileInputRef.current.value = '';
+    };
 
-   const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      setAttachment({ file: file, type: file.type });
-      setError(null); // Clear previous errors on new file selection
-    }
-    // Reset file input value so the same file can be selected again if removed
-    if(fileInputRef.current) fileInputRef.current.value = '';
-  };
+    const handleRemoveAttachment = () => {
+      setAttachment(null);
+    };
+  /**
+   * Handles the typing state of the user by notifying when typing starts
+   * and stops after a specified delay.
+   *
+   * @callback handleTyping
+   * @returns {void}
+   * @description This function triggers the `onTyping` callback with `true` 
+   * to indicate that typing has started. It also sets a timeout to call 
+   * `onTyping` with `false` after 1 second of inactivity, indicating that 
+   * typing has stopped. If the function is called again before the timeout 
+   * expires, the previous timeout is cleared and a new one is set.
+   *
+   * @param {boolean} onTyping - A callback function to notify the typing state.
+   */
 
-  const handleRemoveAttachment = () => {
-    setAttachment(null);
-  };
-
+  /**
+   * Sends a message to the backend and updates Firestore with the message and conversation metadata.
+   * Handles text messages and optional file attachments.
+   *
+   * @async
+   * @function sendMessage
+   * @param {Object} e - The event object from the form submission.
+   * @returns {Promise<void>} - Resolves when the message is successfully sent and Firestore is updated.
+   *
+   * @throws {Error} - Throws an error if the message sending or Firestore update fails.
+   *
+   * @description
+   * This function performs the following steps:
+   * 1. Prevents the default form submission behavior.
+   * 2. Validates the message input to ensure it is not empty.
+   * 3. Sends the message and optional attachment to the backend API.
+   * 4. Updates Firestore with the message data and conversation metadata.
+   * 5. Handles errors by restoring input fields and setting an error message.
+   *
+   * @example
+   * // Usage example:
+   * <form onSubmit={sendMessage}>
+   *   <input type="text" value={messageText} onChange={(e) => setMessageText(e.target.value)} />
+   *   <button type="submit">Send</button>
+   * </form>
+   */
   const sendMessage = async (e) => {
     e.preventDefault();
     if ((!messageText.trim() && !attachment) || isSending)return; // Don't send empty messages
@@ -161,6 +201,10 @@ const MessageInput = ({ currentUser, otherUserId, onTyping }) => {
 
   };
 
+  /**
+   * Triggers a click event on the file input element.
+   * This allows the user to open the file selection dialog programmatically.
+   */
    const triggerFileInput = () => {
      fileInputRef.current?.click();
    };

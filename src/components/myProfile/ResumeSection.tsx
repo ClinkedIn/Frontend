@@ -9,13 +9,10 @@ import {
   ExternalLink,
   X,
 } from "lucide-react";
-import { BASE_URL } from "../../constants";
 
-const API_BASE_URL = BASE_URL;
-const API_ROUTES = {
-  login: `${API_BASE_URL}/user/login`,
-  resume: `${API_BASE_URL}/user/resume`,
-};
+// Simplified base URL without authentication
+const API_BASE_URL = "/api"; // You can adjust this as needed
+const RESUME_ENDPOINT = `${API_BASE_URL}/resume`;
 
 interface ResumeSectionProps {
   showResumeForm?: boolean;
@@ -28,9 +25,8 @@ const ResumeSection: React.FC<ResumeSectionProps> = ({
 }) => {
   const [resumeUrl, setResumeUrl] = useState<string | null>(null);
   const [googleDocsUrl, setGoogleDocsUrl] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -52,53 +48,12 @@ const ResumeSection: React.FC<ResumeSectionProps> = ({
     }
   };
 
-  const login = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      const credentials = {
-        email: "john.doe@example.com",
-        password: "Password123!",
-      };
-
-      const response = await axios.post(API_ROUTES.login, credentials, {
-        withCredentials: true,
-      });
-
-      if (response.data) {
-        axios.defaults.withCredentials = true;
-
-        if (response.data.token) {
-          axios.defaults.headers.common[
-            "Authorization"
-          ] = `Bearer ${response.data.token}`;
-        }
-
-        setIsAuthenticated(true);
-        await fetchResume();
-      } else {
-        throw new Error("Invalid response from server");
-      }
-    } catch (error: any) {
-      console.error("Login error:", error);
-      setIsAuthenticated(false);
-      setError(
-        error.response?.data?.message ||
-          "Login failed. Please check your credentials."
-      );
-      setIsLoading(false);
-    }
-  };
-
   const fetchResume = async () => {
     try {
       setIsLoading(true);
       setError(null);
 
-      const response = await axios.get(API_ROUTES.resume, {
-        withCredentials: true,
-      });
+      const response = await axios.get(RESUME_ENDPOINT);
 
       if (response.data && response.data.resume) {
         setResumeUrl(response.data.resume);
@@ -111,28 +66,14 @@ const ResumeSection: React.FC<ResumeSectionProps> = ({
       setIsLoading(false);
     } catch (error: any) {
       console.error("Error fetching resume data:", error);
-
-      if (error.response && error.response.status === 400) {
-        setResumeUrl(null);
-        setGoogleDocsUrl(null);
-        setIsLoading(false);
-      } else if (error.response && error.response.status === 401) {
-        setIsAuthenticated(false);
-        setError("Your session has expired. Please login again.");
-        setIsLoading(false);
-      } else {
-        setError(
-          error.response?.data?.message || "Failed to load resume data."
-        );
-        setIsLoading(false);
-      }
+      setResumeUrl(null);
+      setGoogleDocsUrl(null);
+      setIsLoading(false);
     }
   };
 
   const validateFile = (file: File): boolean => {
     setFileError(null);
-
-    console.log("Validating file:", file.name, file.type, file.size);
 
     const maxSize = 10 * 1024 * 1024;
     if (file.size > maxSize) {
@@ -173,7 +114,6 @@ const ResumeSection: React.FC<ResumeSectionProps> = ({
     const files = e.target.files;
     if (files && files.length > 0) {
       const file = files[0];
-      console.log("Selected file:", file.name, file.type, file.size);
 
       if (validateFile(file)) {
         setSelectedFile(file);
@@ -197,15 +137,7 @@ const ResumeSection: React.FC<ResumeSectionProps> = ({
       const formData = new FormData();
       formData.append("resume", selectedFile);
 
-      console.log(
-        "Uploading file:",
-        selectedFile.name,
-        selectedFile.type,
-        selectedFile.size
-      );
-
-      const response = await axios.post(API_ROUTES.resume, formData, {
-        withCredentials: true,
+      const response = await axios.post(RESUME_ENDPOINT, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           Accept: "application/json",
@@ -219,8 +151,6 @@ const ResumeSection: React.FC<ResumeSectionProps> = ({
           }
         },
       });
-
-      console.log("Upload response:", response.data);
 
       if (response.data && response.data.resume) {
         setResumeUrl(response.data.resume);
@@ -239,21 +169,11 @@ const ResumeSection: React.FC<ResumeSectionProps> = ({
       setIsProcessing(false);
     } catch (error: any) {
       console.error("Error uploading resume:", error);
-      console.log("Error response:", error.response?.data);
 
-      if (error.response && error.response.status === 400) {
-        setFileError(
-          error.response?.data?.message ||
-            "Server rejected the file. Please make sure it's a valid PDF, DOC, or DOCX under 10MB."
-        );
-      } else if (error.response && error.response.status === 401) {
-        setIsAuthenticated(false);
-        setError("Your session has expired. Please login again.");
-      } else {
-        setFileError(
-          error.response?.data?.message || "Failed to upload resume."
-        );
-      }
+      setFileError(
+        error.response?.data?.message ||
+          "Failed to upload resume. Please try again later."
+      );
 
       setIsProcessing(false);
     }
@@ -263,7 +183,7 @@ const ResumeSection: React.FC<ResumeSectionProps> = ({
     setIsProcessing(true);
 
     try {
-      await axios.delete(API_ROUTES.resume, { withCredentials: true });
+      await axios.delete(RESUME_ENDPOINT);
 
       setResumeUrl(null);
       setGoogleDocsUrl(null);
@@ -272,20 +192,13 @@ const ResumeSection: React.FC<ResumeSectionProps> = ({
       setIsProcessing(false);
     } catch (error: any) {
       console.error("Error deleting resume:", error);
-
-      if (error.response && error.response.status === 401) {
-        setIsAuthenticated(false);
-        setError("Your session has expired. Please login again.");
-      } else {
-        setError(error.response?.data?.message || "Failed to delete resume.");
-      }
-
+      setError(error.response?.data?.message || "Failed to delete resume.");
       setIsProcessing(false);
     }
   };
 
   useEffect(() => {
-    login();
+    fetchResume();
   }, []);
 
   const getFileNameFromUrl = (url: string): string => {
@@ -325,7 +238,7 @@ const ResumeSection: React.FC<ResumeSectionProps> = ({
     <div className="text-red-500 p-4 rounded-lg bg-red-50 flex flex-col items-center">
       <p className="mb-3 text-center">{error}</p>
       <button
-        onClick={login}
+        onClick={fetchResume}
         className="mt-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
       >
         Try Again

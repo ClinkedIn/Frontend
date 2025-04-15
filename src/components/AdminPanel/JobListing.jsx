@@ -39,7 +39,7 @@ const JobListing = () => {
     }
               */
 
-        const response = await fetch(`${API_BASE_URL}/jobs`, {
+        const response = await fetch(`${BASE_URL}/jobs`, {
           method: "GET",
           credentials: "include",
         });
@@ -100,7 +100,7 @@ const JobListing = () => {
     // const fetchJobs = async () => {
     //   try {
     //     setIsLoading(true);
-    //     const response = await axios.get(`${API_BASE_URL}/jobs`, {
+    //     const response = await axios.get(`${BASE_URL}/jobs`, {
     //       withCredentials: true,
     //     });
     //     if (response.status !== 200) {
@@ -183,7 +183,7 @@ const JobListing = () => {
   // Handler functions that will make API calls
   const handleApprove = async (id) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/jobs/${id}/approve`, {
+      const response = await fetch(`${BASE_URL}/jobs/${id}/approve`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -209,7 +209,7 @@ const JobListing = () => {
 
   const handleReject = async (id) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/jobs/${id}/reject`, {
+      const response = await fetch(`${BASE_URL}/jobs/${id}/reject`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -234,7 +234,7 @@ const JobListing = () => {
 
   const handleDelete = async (id) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/jobs/${id}`, {
+      const response = await fetch(`${BASE_URL}/jobs/${id}`, {
         method: "DELETE",
         credentials: "include",
       });
@@ -254,7 +254,7 @@ const JobListing = () => {
 
   const handleResolveFlag = async (id) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/jobs/${id}/resolve-flag`, {
+      const response = await fetch(`${BASE_URL}/jobs/${id}/resolve-flag`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

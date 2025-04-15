@@ -1,5 +1,19 @@
 import React, { useState, useRef, useEffect } from 'react';
 
+/**
+ * CreatePostModal is a React component that renders a modal for creating a post.
+ * It allows users to input text, upload media files, and set privacy options for the post.
+ *
+ * @param {Object} props - The component props.
+ * @param {boolean} props.isOpen - Determines whether the modal is open or closed.
+ * @param {Function} props.onClose - Callback function to close the modal.
+ * @param {Function} props.onSubmit - Callback function to handle form submission. Receives an object with post details.
+ * @param {Object} props.authorInfo - Information about the post author.
+ * @param {string} props.authorInfo.name - The name of the author.
+ * @param {string} props.authorInfo.profileImage - The URL of the author's profile image.
+ *
+ * @returns {JSX.Element|null} The rendered modal component or null if the modal is closed.
+ */
 const CreatePostModal = ({ isOpen, onClose, onSubmit, authorInfo }) => {
   const [postText, setPostText] = useState('');
   const [mediaFiles, setMediaFiles] = useState([]);
@@ -34,6 +48,21 @@ const CreatePostModal = ({ isOpen, onClose, onSubmit, authorInfo }) => {
   }, [isOpen, onClose]);
 
   // Handle media file upload
+  /**
+   * Handles the file upload process, including validation and updating state.
+   *
+   * @param {Event} e - The event object triggered by the file input change.
+   * @property {FileList} e.target.files - The list of files selected by the user.
+   *
+   * @throws {Error} Will alert the user if:
+   * - The total number of files exceeds 10.
+   * - Videos are mixed with other file types.
+   *
+   * @description
+   * - Limits the total number of uploaded files to 10.
+   * - Ensures that videos are uploaded alone and not mixed with other file types.
+   * - Updates the state with the new files and their preview URLs.
+   */
   const handleFileUpload = (e) => {
     const files = Array.from(e.target.files);
     
@@ -61,6 +90,16 @@ const CreatePostModal = ({ isOpen, onClose, onSubmit, authorInfo }) => {
   };
 
   // Remove a media item
+  /**
+   * Removes a media file and its corresponding preview URL from the state.
+   *
+   * @param {number} index - The index of the media file to be removed.
+   * 
+   * This function performs the following steps:
+   * 1. Revokes the object URL associated with the media preview at the given index.
+   * 2. Removes the media file at the specified index from the `mediaFiles` state.
+   * 3. Removes the preview URL at the specified index from the `mediaPreviewUrls` state.
+   */
   const removeMedia = (index) => {
     URL.revokeObjectURL(mediaPreviewUrls[index]);
     
@@ -74,6 +113,21 @@ const CreatePostModal = ({ isOpen, onClose, onSubmit, authorInfo }) => {
   };
 
   // Handle form submission
+  /**
+   * Handles the submission of a post creation form. Validates the input,
+   * triggers the submission callback, and resets the form state.
+   *
+   * @function
+   * @returns {void}
+   *
+   * @description
+   * - Prevents submission if the post text is empty and no media files are attached.
+   * - Calls the `onSubmit` callback with the post data, including text, media files,
+   *   and privacy options for visibility and comments.
+   * - Resets the form state by clearing the post text, revoking object URLs for media
+   *   previews, and resetting media files and preview URLs.
+   * - Closes the form modal or UI component by invoking the `onClose` callback.
+   */
   const handleSubmit = () => {
     if (!postText.trim() && mediaFiles.length === 0) return;
     
