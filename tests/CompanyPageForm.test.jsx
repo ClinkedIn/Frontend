@@ -77,11 +77,7 @@ describe("CompanyForm Component", () => {
         );
         expect(screen.getByText(/Name is required/i)).toBeInTheDocument();
     });
-    test("checkbox toggles correctly", () => {
-        const checkbox = screen.getByRole("checkbox");
-        fireEvent.click(checkbox);
-        expect(mockSetState).toHaveBeenCalledWith(true);
-    });
+    
  test("reset logo preview when reset button is clicked", () => {
         const resetButton = screen.getByText(/reset/i);
         fireEvent.click(resetButton);

@@ -129,6 +129,7 @@ const CompanyProfileAdminViewPage = () => {
             setOrganizationType(response.data.organizationType)
             setLogoPreview(response.data.logo)
             setTagline(response.data.tagLine)
+            console.log("company data:", response.data);
             
         } catch (error) {
             console.error("Error fetching company info:", error);
@@ -179,7 +180,7 @@ const CompanyProfileAdminViewPage = () => {
     },[]);
 
     return (
-        <div className="   justify-center bg-[#f4f2ee] min-h-screen  items-center flex flex-col">
+        <div className="   bg-[#f4f2ee] min-h-screen  items-center flex flex-col">
             
             <Header notifications={notifications} />
             {showForm ? 
@@ -222,7 +223,7 @@ const CompanyProfileAdminViewPage = () => {
             :(companyInfo && 
             (<div className="lg:w-1/2 lg:h-3/4 md:w-3/4 max-[430px]:w-full ">
                 <div className="bg-white rounded-lg shadow-lg mt-16 relative"> 
-                    <img src="/Images/card-bg.svg" alt="cover page" className="w-full h-30 rounded-t-lg" />
+                    <img src="/Images/card-bg.svg"  className="w-full h-30 rounded-t-lg" />
                         <button
                             className="absolute top-4 right-4 bg-white rounded-full shadow-md hover:cursor-pointer px-3 py-2 m-2"
                             aria-label="Change cover photo"
@@ -235,7 +236,7 @@ const CompanyProfileAdminViewPage = () => {
                             />
                         </button>
                     <div className="flex flex-column justify-between">
-                        <img src={ companyInfo.logo ? companyInfo.logo  :"/Images/building-icon.png"} alt="profile" className="w-28 h-28 -mt-10 ml-5  " />
+                        <img src={ companyInfo.logo.includes("localhost") ? "/Images/building-icon.png":companyInfo.logo  }  className="w-28 h-28 -mt-10 ml-5  " />
                         <button className="rounded-full  hover:bg-gray-100 m-4 p-4" 
                         onClick={()=>{setShowForm(true)}}>
                         < MdModeEdit size=" 24"/>
