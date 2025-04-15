@@ -576,7 +576,7 @@ import { data } from "react-router-dom";
 import { BASE_URL } from "../../constants";
 
 // Base URL configuration - adjust as needed for your environment
-//const BASE_URL = "http://localhost:3000";
+//const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
 const ReportedPosts = () => {
   const [reportedPosts, setReportedPosts] = useState([]);
@@ -646,7 +646,9 @@ const ReportedPosts = () => {
             reporter: {
               id: dataitem.report.userId._id,
               name: `${dataitem.report.userId.firstName} ${dataitem.report.userId.lastName}`,
-              avatar: dataitem.report.userId.profilePicture || "/api/placeholder/40/40",
+              avatar:
+                dataitem.report.userId.profilePicture ||
+                "/api/placeholder/40/40",
             },
             reason: dataitem.report.policy,
             details:
@@ -946,7 +948,7 @@ const ReportedPosts = () => {
                 >
                   Pending
                 </button>
-                <button
+                {/* <button
                   type="button"
                   className={`inline-flex items-center px-4 py-2 text-sm font-medium border-t border-b border-r ${
                     statusFilter === "reviewed"
@@ -956,7 +958,7 @@ const ReportedPosts = () => {
                   onClick={() => setStatusFilter("reviewed")}
                 >
                   Reviewed
-                </button>
+                </button> */}
                 <button
                   type="button"
                   className={`inline-flex items-center px-4 py-2 text-sm font-medium border-t border-b border-r ${
@@ -981,13 +983,13 @@ const ReportedPosts = () => {
                 </button>
               </div>
 
-              <button
+              {/* <button
                 type="button"
                 className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#0a66c2] bg-white border border-[#0a66c2] rounded-md hover:bg-[#f3f9ff]"
               >
                 <Filter className="h-4 w-4" />
                 More Filters
-              </button>
+              </button> */}
             </div>
 
             {/* Results count */}

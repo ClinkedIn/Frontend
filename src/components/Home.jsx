@@ -1,10 +1,11 @@
-import Leftside from "./Leftside";
+import Leftside from "../components/LeftSide";
 import Main from "./Main";
-import Rightside from "./Rightside";
+import Rightside from "../components/RightSide";
 import Header from "./UpperNavBar";
 
 const Home = () => {
   document.title = "Feed | LinkedIn";
+
   return (
     <div className="w-screen bg-[#f5f5f5]">
       {/* Navbar at the top */}

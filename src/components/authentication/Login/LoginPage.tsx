@@ -14,7 +14,10 @@ const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState<{ username?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{
+    username?: string;
+    password?: string;
+  }>({});
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { setAuthToken } = useAuth();
@@ -69,11 +72,14 @@ const LoginPage = () => {
    *          it is used. Otherwise, a default "Invalid credentials" message is returned.
    */
   const getErrorMessage = (err: unknown): string => {
-    const errorResponse = err as { response?: { status?: number; data?: { error?: string } } };
+    const errorResponse = err as {
+      response?: { status?: number; data?: { error?: string } };
+    };
     const statusCode = errorResponse.response?.status;
     const errorMessageFromServer = errorResponse.response?.data?.error;
 
-    if (statusCode === 404) return "User not found. Please check your email or password.";
+    if (statusCode === 404)
+      return "User not found. Please check your email or password.";
     if (errorMessageFromServer) return errorMessageFromServer; // Use the error message from the server
     return "Invalid credentials"; // Default fallback message
   };
@@ -104,9 +110,17 @@ const LoginPage = () => {
    * - Extracts and displays an error message using `getErrorMessage`.
    * - Displays an error toast notification.
    */
-  const loginMutation = useMutation<void, unknown, { email: string; password: string }>({
+  const loginMutation = useMutation<
+    void,
+    unknown,
+    { email: string; password: string }
+  >({
     mutationFn: async ({ email, password }) =>
-      await axios.post(`${BASE_URL}/user/login`, { email, password }, { withCredentials: true }),
+      await axios.post(
+        `${BASE_URL}/user/login`,
+        { email, password },
+        { withCredentials: true }
+      ),
 
     onSuccess: (data: any) => {
       console.log("Login successful:", data);
@@ -117,7 +131,25 @@ const LoginPage = () => {
     },
 
     onError: (err) => {
-      const errorMessage = getErrorMessage(err);
+      // Extract error details from the response
+      const errorResponse = err as {
+        response?: { status?: number; data?: { error?: string } };
+      };
+      const statusCode = errorResponse.response?.status;
+      const errorMessageFromServer = errorResponse.response?.data?.error;
+
+      // Define the error message based on the status code or default fallback
+      let errorMessage: string;
+
+      if (statusCode === 404) {
+        errorMessage = "User not found. Please check your email or password.";
+      } else if (errorMessageFromServer) {
+        errorMessage = errorMessageFromServer; // Use the error message from the server
+      } else {
+        errorMessage = "Invalid credentials"; // Default fallback message
+      }
+
+      // Display the error message using toast
       toast.error(errorMessage);
     },
   });
@@ -127,7 +159,7 @@ const LoginPage = () => {
    * Handles the form submission event for the login page.
    *
    * @param e - The form submission event.
-   * 
+   *
    * Prevents the default form submission behavior, validates the form,
    * and triggers the login mutation with the provided username and password.
    * If the form validation fails, the submission is halted.
@@ -150,7 +182,9 @@ const LoginPage = () => {
 
       {/* Login Form */}
       <motion.div className="w-full max-w-sm p-6 bg-white rounded-lg shadow-lg">
-        <h2 className="text-3xl font-semibold text-gray-900 text-left mb-4">Sign in</h2>
+        <h2 className="text-3xl font-semibold text-gray-900 text-left mb-4">
+          Sign in
+        </h2>
 
         {/* Google Login Button */}
         <GoogleLogin className="w-full" />
