@@ -61,29 +61,6 @@ const LoginPage = () => {
     }
   };
 
-  // Helper function to extract error messages
-  /**
-   * Extracts and returns an appropriate error message based on the provided error object.
-   *
-   * @param err - The error object, which can be of any type. It is expected to potentially
-   *              contain a `response` property with `status` and `data.error` fields.
-   * @returns A string representing the error message. If the status code is 404, a specific
-   *          "User not found" message is returned. If the server provides an error message,
-   *          it is used. Otherwise, a default "Invalid credentials" message is returned.
-   */
-  const getErrorMessage = (err: unknown): string => {
-    const errorResponse = err as {
-      response?: { status?: number; data?: { error?: string } };
-    };
-    const statusCode = errorResponse.response?.status;
-    const errorMessageFromServer = errorResponse.response?.data?.error;
-
-    if (statusCode === 404)
-      return "User not found. Please check your email or password.";
-    if (errorMessageFromServer) return errorMessageFromServer; // Use the error message from the server
-    return "Invalid credentials"; // Default fallback message
-  };
-
   // Login mutation hook
   /**
    * A custom hook that creates a mutation for handling user login.
