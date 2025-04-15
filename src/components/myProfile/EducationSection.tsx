@@ -4,6 +4,20 @@ import EducationForm from "./Forms/EducationForm";
 import ConfirmationDialog from "./ConfirmationDialog";
 import { Loader, Plus, Pencil, X, Trash2 } from "lucide-react";
 
+/**
+ * Interface representing an education entry in a user's profile
+ * @interface Education
+ * @property {number} [index] - The index of the education entry in the array
+ * @property {string} school - The name of the school or institution
+ * @property {string} [degree] - The degree obtained (optional)
+ * @property {string} [fieldOfStudy] - Field of study or major (optional)
+ * @property {string} startDate - The start date in ISO format (YYYY-MM-DD)
+ * @property {string} [endDate] - The end date in ISO format (YYYY-MM-DD) or undefined for ongoing education
+ * @property {string} [grade] - The grade or GPA achieved (optional)
+ * @property {string} [activitiesAndSocieties] - Activities and societies participation (optional)
+ * @property {string} [description] - Description of the education experience (optional)
+ * @property {string[]} [skills] - Skills associated with this education (optional)
+ */
 interface Education {
   index?: number;
   school: string;
@@ -17,6 +31,21 @@ interface Education {
   skills?: string[];
 }
 
+/**
+ * Interface for education form data used in the UI
+ * @interface EducationFormData
+ * @property {number} [index] - The index of the education entry being edited
+ * @property {string} school - The name of the school or institution
+ * @property {string} degree - The degree obtained
+ * @property {string} fieldOfStudy - Field of study or major
+ * @property {string} startMonth - The starting month (e.g., "January")
+ * @property {string} startYear - The starting year (e.g., "2020")
+ * @property {string} [endMonth] - The ending month (optional)
+ * @property {string} [endYear] - The ending year (optional)
+ * @property {string} [grade] - The grade or GPA achieved (optional)
+ * @property {string} [activities] - Activities and societies participation (optional)
+ * @property {string} [description] - Description of the education experience (optional)
+ */
 interface EducationFormData {
   index?: number;
   school: string;
@@ -31,22 +60,33 @@ interface EducationFormData {
   description?: string;
 }
 
+/**
+ * Props for the EducationSection component
+ * @interface EducationSectionProps
+ * @property {boolean} [showEducationForm] - External control for showing/hiding the education form
+ * @property {React.Dispatch<React.SetStateAction<boolean>>} [setShowEducationForm] - External setter for the form visibility state
+ */
 interface EducationSectionProps {
   showEducationForm?: boolean;
   setShowEducationForm?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+const API_BASE_URL = "http://localhost:3000";
 const API_ROUTES = {
   education: `${API_BASE_URL}/user/education`,
 };
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/",
   headers: {
     "Content-Type": "application/json",
   },
 });
+
+/**
+ * Converts month name to two-digit month number string (01-12)
+ * @param {string} monthName - The full name of the month (e.g., "January")
+ * @returns {string} - Two-digit month number as string (e.g., "01" for January)
+ */
 const getMonthNumber = (monthName: string): string => {
   const months = [
     "January",
@@ -68,16 +108,20 @@ const getMonthNumber = (monthName: string): string => {
     : "01";
 };
 
+/**
+ * Education Section Component - Displays and manages user education information
+ * @component
+ * @param {EducationSectionProps} props - Component props
+ * @returns {React.ReactElement} The rendered education section
+ */
 const EducationSection: React.FC<EducationSectionProps> = ({
   showEducationForm: externalShowForm,
   setShowEducationForm: externalSetShowForm,
 }) => {
-  // State management
   const [educations, setEducations] = useState<Education[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // UI state
   const [showForm, setShowFormInternal] = useState(false);
   const [showAddConfirmation, setShowAddConfirmation] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
@@ -98,7 +142,11 @@ const EducationSection: React.FC<EducationSectionProps> = ({
     }
   };
 
-  // Convert form data to API format
+  /**
+   * Converts education form data to API format
+   * @param {EducationFormData} formData - The form data from the education form
+   * @returns {Education} The education data formatted for the API
+   */
   const convertFormToApiFormat = (formData: EducationFormData): Education => {
     const startDate = `${formData.startYear}-${getMonthNumber(
       formData.startMonth
@@ -123,7 +171,11 @@ const EducationSection: React.FC<EducationSectionProps> = ({
     };
   };
 
-  // Parse education data from API response
+  /**
+   * Parses education data from API response to component format
+   * @param {any} data - Response data from the API
+   * @returns {Education[]} Array of education entries with proper formatting
+   */
   const parseEducationData = (data: any): Education[] => {
     if (Array.isArray(data)) {
       return data.map((edu, idx) => ({ ...edu, index: idx }));
@@ -153,7 +205,11 @@ const EducationSection: React.FC<EducationSectionProps> = ({
     return [];
   };
 
-  // Fetch education data
+  /**
+   * Fetches education data from the API
+   * @async
+   * @returns {Promise<void>}
+   */
   const fetchEducation = async () => {
     try {
       setIsLoading(true);
@@ -172,7 +228,12 @@ const EducationSection: React.FC<EducationSectionProps> = ({
     }
   };
 
-  // Save education data
+  /**
+   * Handles saving education data to the API
+   * @async
+   * @param {EducationFormData} formData - The form data to be saved
+   * @returns {Promise<void>}
+   */
   const handleSaveEducation = async (formData: EducationFormData) => {
     try {
       setIsProcessing(true);
@@ -200,6 +261,11 @@ const EducationSection: React.FC<EducationSectionProps> = ({
     }
   };
 
+  /**
+   * Handles deleting an education entry
+   * @async
+   * @returns {Promise<void>}
+   */
   const handleDeleteEducation = async () => {
     setIsProcessing(true);
 
@@ -230,12 +296,20 @@ const EducationSection: React.FC<EducationSectionProps> = ({
     fetchEducation();
   }, []);
 
+  /**
+   * Loading overlay component shown during processing
+   * @returns {React.ReactElement}
+   */
   const LoadingOverlay = () => (
     <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
       <Loader className="h-8 w-8 text-gray-600 animate-spin" />
     </div>
   );
 
+  /**
+   * Loading skeleton view for the education section
+   * @returns {React.ReactElement}
+   */
   const LoadingSkeletonView = () => (
     <div className="bg-white rounded-lg shadow p-4 mb-4 w-full">
       <div className="animate-pulse">
@@ -245,6 +319,10 @@ const EducationSection: React.FC<EducationSectionProps> = ({
     </div>
   );
 
+  /**
+   * Error view component shown when data fetching fails
+   * @returns {React.ReactElement}
+   */
   const ErrorView = () => (
     <div className="text-red-500 p-4 rounded-lg bg-red-50 flex flex-col items-center">
       <p className="mb-3 text-center">{error}</p>
@@ -257,7 +335,10 @@ const EducationSection: React.FC<EducationSectionProps> = ({
     </div>
   );
 
-  // Education Entry Form View (Empty State)
+  /**
+   * Empty state view shown when no education entries exist
+   * @returns {React.ReactElement}
+   */
   const EmptyStateView = () => (
     <div className="p-4 border border-gray-200 rounded-lg">
       <div className="flex items-center mb-3">
@@ -292,17 +373,14 @@ const EducationSection: React.FC<EducationSectionProps> = ({
     </div>
   );
 
-  // If still loading data
   if (isLoading) {
     return <LoadingSkeletonView />;
   }
 
   return (
     <div className="bg-white rounded-lg shadow p-4 mb-4 w-[900px] m-auto relative">
-      {/* Processing Overlay */}
       {isProcessing && <LoadingOverlay />}
 
-      {/* Header with title and add button */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold text-gray-800">Education</h2>
         {educations.length > 0 && (
@@ -329,7 +407,6 @@ const EducationSection: React.FC<EducationSectionProps> = ({
       ) : educations.length > 0 ? (
         <div className="space-y-4">
           {educations.map((edu, idx) => {
-            // Format years for display
             const startYear = edu.startDate
               ? new Date(edu.startDate).getFullYear().toString()
               : "";
@@ -337,7 +414,6 @@ const EducationSection: React.FC<EducationSectionProps> = ({
               ? new Date(edu.endDate).getFullYear().toString()
               : "Present";
 
-            // Format degree and field of study
             const degreeAndField = [edu.degree, edu.fieldOfStudy]
               .filter(Boolean)
               .join(", ");
@@ -387,7 +463,6 @@ const EducationSection: React.FC<EducationSectionProps> = ({
                     {startYear} - {endYear}
                   </p>
 
-                  {/* Show additional details if available */}
                   {edu.grade && (
                     <p className="text-gray-500 text-sm mt-1">
                       Grade: {edu.grade}
@@ -427,7 +502,6 @@ const EducationSection: React.FC<EducationSectionProps> = ({
         <EmptyStateView />
       )}
 
-      {/* Education Form Modal */}
       {showEducationFormState && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-lg max-w-md w-full max-h-screen overflow-auto">
@@ -454,7 +528,6 @@ const EducationSection: React.FC<EducationSectionProps> = ({
         </div>
       )}
 
-      {/* Add Confirmation Dialog */}
       {showAddConfirmation && (
         <ConfirmationDialog
           title="Education Added Successfully"
@@ -470,7 +543,6 @@ const EducationSection: React.FC<EducationSectionProps> = ({
         />
       )}
 
-      {/* Delete Confirmation Dialog */}
       {showDeleteConfirmation && (
         <ConfirmationDialog
           title="Delete Education"
@@ -485,7 +557,6 @@ const EducationSection: React.FC<EducationSectionProps> = ({
         />
       )}
 
-      {/* Delete Success Dialog */}
       {showDeleteSuccess && (
         <ConfirmationDialog
           title="Education Deleted Successfully"
