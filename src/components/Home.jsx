@@ -1,6 +1,6 @@
-import Leftside from "./Leftside";
+import Leftside from "../components/LeftSide";
 import Main from "./Main";
-import Rightside from "./Rightside";
+import Rightside from "../components/RightSide";
 import Header from "./UpperNavBar";
 
 const Home = () => {

@@ -4,12 +4,25 @@ import SkillsForm from "./Forms/SkillsForm";
 import ConfirmationDialog from "./ConfirmationDialog";
 import { Loader, Plus, Pencil, Trash2, X } from "lucide-react";
 
+/**
+ * Interface representing a user skill with related education and experience
+ * @interface Skill
+ * @property {string} skillName - The name of the skill
+ * @property {number[]} education - Array of indices pointing to related education items
+ * @property {number[]} experience - Array of indices pointing to related experience items
+ */
 interface Skill {
   skillName: string;
   education: number[];
   experience: number[];
 }
 
+/**
+ * Props for the SkillsSection component
+ * @interface SkillsSectionProps
+ * @property {boolean} [showSkillsForm] - Optional external control for form visibility
+ * @property {React.Dispatch<React.SetStateAction<boolean>>} [setShowSkillsForm] - Optional external setter for form visibility
+ */
 interface SkillsSectionProps {
   showSkillsForm?: boolean;
   setShowSkillsForm?: React.Dispatch<React.SetStateAction<boolean>>;
@@ -21,6 +34,16 @@ const API_ROUTES = {
   skills: `${API_BASE_URL}/user/skills`,
 };
 
+/**
+ * SkillsSection component for managing user skills
+ *
+ * This component provides a complete interface for viewing, adding, editing, and deleting skills
+ * on a user's profile. It supports both internal and external form state management.
+ *
+ * @component
+ * @param {SkillsSectionProps} props - Component props
+ * @returns {React.ReactElement} Rendered SkillsSection component
+ */
 const SkillsSection: React.FC<SkillsSectionProps> = ({
   showSkillsForm: externalShowForm,
   setShowSkillsForm: externalSetShowForm,
@@ -44,6 +67,13 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({
   const showSkillsFormState =
     externalShowForm !== undefined ? externalShowForm : showForm;
 
+  /**
+   * Controls the visibility of the skills form
+   * Supports both internal and external state management
+   *
+   * @param {boolean} show - Whether to show or hide the form
+   * @returns {void}
+   */
   const setShowSkillsFormState = (show: boolean) => {
     if (externalSetShowForm) {
       externalSetShowForm(show);
@@ -52,6 +82,13 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({
     }
   };
 
+  /**
+   * Fetches the user's skills from the API
+   *
+   * @async
+   * @function fetchSkills
+   * @returns {Promise<void>}
+   */
   const fetchSkills = async () => {
     try {
       setIsLoading(true);
@@ -72,7 +109,19 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({
     }
   };
 
-  // Save skill
+  /**
+   * Saves a new skill or updates an existing one
+   *
+   * @async
+   * @function handleSaveSkill
+   * @param {Object} skillData - Data for the skill to save
+   * @param {string} skillData.skillName - Name of the skill
+   * @param {boolean} [skillData.isEditing] - Whether this is an edit operation
+   * @param {string} [skillData.originalSkillName] - Original name if editing
+   * @param {number[]} [skillData.educationIndexes] - Related education indices
+   * @param {number[]} [skillData.experienceIndexes] - Related experience indices
+   * @returns {Promise<void>}
+   */
   const handleSaveSkill = async (skillData: any) => {
     try {
       setIsProcessing(true);
@@ -110,7 +159,13 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({
     }
   };
 
-  // Delete skill
+  /**
+   * Deletes the currently pending delete skill
+   *
+   * @async
+   * @function handleDeleteSkill
+   * @returns {Promise<void>}
+   */
   const handleDeleteSkill = async () => {
     if (!pendingDeleteSkill) return;
 
@@ -131,17 +186,29 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({
     }
   };
 
+  // Load skills data on component mount
   useEffect(() => {
     fetchSkills();
   }, []);
 
-  // Component rendering helpers
+  /**
+   * Renders a full-screen loading overlay
+   *
+   * @function LoadingOverlay
+   * @returns {React.ReactElement} Loading overlay component
+   */
   const LoadingOverlay = () => (
     <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
       <Loader className="h-8 w-8 text-gray-600 animate-spin" />
     </div>
   );
 
+  /**
+   * Renders a loading skeleton placeholder
+   *
+   * @function LoadingSkeletonView
+   * @returns {React.ReactElement} Skeleton loader component
+   */
   const LoadingSkeletonView = () => (
     <div className="bg-white rounded-lg shadow p-4 mb-4 w-full">
       <div className="animate-pulse">
@@ -151,6 +218,12 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({
     </div>
   );
 
+  /**
+   * Renders an error message with retry option
+   *
+   * @function ErrorView
+   * @returns {React.ReactElement} Error view component
+   */
   const ErrorView = () => (
     <div className="text-red-500 p-4 rounded-lg bg-red-50 flex flex-col items-center">
       <p className="mb-3 text-center">{error}</p>
@@ -163,7 +236,12 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({
     </div>
   );
 
-  // Empty state view when no skills are added
+  /**
+   * Renders an empty state view when no skills exist
+   *
+   * @function EmptyStateView
+   * @returns {React.ReactElement} Empty state component
+   */
   const EmptyStateView = () => (
     <div className="p-4 border border-gray-200 rounded-lg">
       <div className="flex items-center mb-3">

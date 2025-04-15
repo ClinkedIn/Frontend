@@ -136,6 +136,11 @@ const MONTHS = [
 /**
  * Experience Form component
  * Allows users to add or edit professional experience entries
+ * @param {ExperienceFormProps} props - Component props
+ * @param {ExperienceFormData} [props.initialData] - Initial data for editing an existing experience
+ * @param {Function} props.onClose - Function to call when closing the form
+ * @param {Function} props.onSave - Function to call when saving experience data
+ * @returns {JSX.Element} Experience form component
  */
 const ExperienceForm: React.FC<ExperienceFormProps> = ({
   initialData,
@@ -167,7 +172,9 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
     (currentYear - i).toString()
   );
 
-  // Initialize form with existing data if provided
+  /**
+   * Initialize form with existing data if provided
+   */
   useEffect(() => {
     if (initialData) {
       setFormData(initialData);
@@ -183,7 +190,10 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
     }
   }, [initialData]);
 
-  // Handle input changes
+  /**
+   * Handles changes to form input fields
+   * @param {React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>} e - Change event
+   */
   const handleInputChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
@@ -205,7 +215,10 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
     }
   };
 
-  // Handle checkbox changes
+  /**
+   * Handles changes to checkbox inputs
+   * @param {React.ChangeEvent<HTMLInputElement>} e - Checkbox change event
+   */
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
     setFormData((prev) => ({
@@ -214,7 +227,10 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
     }));
   };
 
-  // Handle company selection change
+  /**
+   * Handles company selection changes, with special handling for "other" option
+   * @param {React.ChangeEvent<HTMLSelectElement>} e - Select change event
+   */
   const handleCompanyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
 
@@ -233,7 +249,10 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
     }
   };
 
-  // Handle custom company input
+  /**
+   * Handles input for custom company name when "other" is selected
+   * @param {React.ChangeEvent<HTMLInputElement>} e - Input change event
+   */
   const handleCustomCompanyChange = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -253,7 +272,9 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
     }
   };
 
-  // Skills management
+  /**
+   * Adds a custom skill to the skills list
+   */
   const addSkill = () => {
     if (customSkill && !formData.skills?.includes(customSkill)) {
       setFormData((prev) => ({
@@ -264,6 +285,10 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
     }
   };
 
+  /**
+   * Removes a skill from the skills list
+   * @param {string} skill - Skill to remove
+   */
   const removeSkill = (skill: string) => {
     setFormData((prev) => ({
       ...prev,
@@ -271,6 +296,10 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
     }));
   };
 
+  /**
+   * Adds a pre-defined common skill to the skills list
+   * @param {string} skill - Common skill to add
+   */
   const selectCommonSkill = (skill: string) => {
     if (!formData.skills?.includes(skill)) {
       setFormData((prev) => ({
@@ -280,7 +309,10 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
     }
   };
 
-  // Handle media file selection
+  /**
+   * Handles file selection for media uploads
+   * @param {React.ChangeEvent<HTMLInputElement>} e - File input change event
+   */
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setFormData((prev) => ({
@@ -290,7 +322,10 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
     }
   };
 
-  // Validate form before submission
+  /**
+   * Validates form fields before submission
+   * @returns {boolean} True if form is valid, false otherwise
+   */
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
 
@@ -337,14 +372,22 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  // Format date strings for API
+  /**
+   * Formats date values for API submission
+   * @param {string} month - Month name
+   * @param {string} year - Year string
+   * @returns {string} Formatted date string in YYYY-MM-DD format
+   */
   const formatDateForApi = (month: string, year: string) => {
     const monthIndex = MONTHS.indexOf(month);
     const formattedMonth = (monthIndex + 1).toString().padStart(2, "0");
     return `${year}-${formattedMonth}-01`;
   };
 
-  // Convert form data to API format for submission
+  /**
+   * Prepares form data in the format expected by the API
+   * @returns {Object} Formatted experience data ready for submission
+   */
   const prepareDataForSubmission = () => {
     const fromDate = formatDateForApi(formData.fromMonth, formData.fromYear);
 
@@ -370,7 +413,10 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
     };
   };
 
-  // Handle form submission
+  /**
+   * Handles the save button click
+   * Validates form and shows confirmation dialog if valid
+   */
   const handleSave = () => {
     if (validateForm()) {
       const data = prepareDataForSubmission();
@@ -379,12 +425,19 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
     }
   };
 
-  // Handle confirmation dialog actions
+  /**
+   * Handles confirmation dialog "Done" action
+   * Saves the data and closes the form
+   */
   const handleConfirm = () => {
     onSave(experienceData);
     onClose();
   };
 
+  /**
+   * Handles confirmation dialog "Add More" action
+   * Saves the current data and resets the form for another entry
+   */
   const handleAddMore = () => {
     onSave(experienceData);
     // Reset form

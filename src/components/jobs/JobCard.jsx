@@ -50,8 +50,8 @@ const JobCard = ({ job, jobs, state}) => {
       {/* Job Details */}
       <div className="flex-1 ml-3">
         <p 
-       onClick={() => handleJobClick(job)} className="cursor-pointer"
-        className="text-blue-600 font-semibold hover:underline">
+       onClick={() => handleJobClick(job)} 
+       className="cursor-pointer text-blue-600 font-semibold hover:underline">
           {job.title?? job.job?.title}
         </p>
         <p className="text-gray-700 text-sm">

@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo ,useCallback} from 'react';
 import { db } from '../../../firebase';
 import { collection, query, where, orderBy, onSnapshot,doc,updateDoc } from 'firebase/firestore';
 import ConversationSearch from './SearchBar';
-import ConversationListItem from './ConversationListItem';
+import ConversationListItem from '../../components/messaging/ConversationListitem';
 
 const ConversationList = ({
     selectedConversationId,
