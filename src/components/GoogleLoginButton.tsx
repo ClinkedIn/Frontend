@@ -1,11 +1,23 @@
 import React from "react";
 import clsx from "clsx";
+
+
 type ButtonProps = {
   className?: string;
   type?: "button" | "submit" | "reset";
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
 };
 
+/**
+ * A React functional component that renders a Google login button.
+ *
+ * @param {ButtonProps} props - The props for the GoogleLogin component.
+ * @param {string} [props.className] - Additional CSS classes to apply to the button.
+ * @param {string} [props.type] - The type attribute for the button element (e.g., "button", "submit").
+ * @param {() => void} [props.onClick] - The click event handler for the button.
+ *
+ * @returns {JSX.Element} A styled button element with a Google logo and text.
+ */
 export default function GoogleLogin({
  className,
   type,

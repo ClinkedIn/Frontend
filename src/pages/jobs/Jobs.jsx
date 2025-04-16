@@ -24,6 +24,8 @@ import { FaClipboardList, FaBookmark, FaFileAlt, FaPen,FaArrowRight } from 'reac
 import { IoMdClose } from 'react-icons/io';
 import JobCard from '../../components/jobs/JobCard';
 import { useLocation, useNavigate } from "react-router-dom";
+import { BASE_URL } from "../../constants";
+
 
 /**
  * Jobs functional component
@@ -43,7 +45,7 @@ const Jobs = () => {
    */
    const getJobs = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/jobs", {
+      const response = await axios.get(`${BASE_URL}/jobs`, {
       });
       setJobs(response.data)
       return response.data;
@@ -57,36 +59,7 @@ const Jobs = () => {
       }
     }
   };
- /**
-   * Simulates user login using test credentials
-   * @async
-   * @function
-   */
-   const testLogin = async () => {
-    try {
-      const response = await axios.post('http://localhost:3000/user/login', {
-        email: "Porter.Hodkiewicz@hotmail.com",
-        password: "password123"
-      },{
-        withCredentials:true
-      }
-      
-    );
 
-      console.log("Login Response:", response.data);
-    } catch (error) {
-      if (error.response) {
-  
-        console.error("Login Error - Server Response:", error.response.data);
-      } else if (error.request) {
-        // Request made but no response received
-        console.error("Login Error - No Response:", error.request);
-      } else {
-        // Something else happened
-        console.error("Login Error:", error.message);
-      }
-    }
-  };
  /**
    * Fetches current user profile data
    * @async
@@ -94,7 +67,7 @@ const Jobs = () => {
    */
   const fetchUser = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/user/me", {
+      const response = await axios.get(`${BASE_URL}/user/me`, {
     
         withCredentials:true
       });
@@ -106,13 +79,13 @@ const Jobs = () => {
     }
   };
   useEffect(() => {
-    const loginAndFetchData = async () => {
-      await testLogin(); // Ensure login is completed first
+    // const loginAndFetchData = async () => {
+      // await testLogin(); // Ensure login is completed first
       fetchUser();
       getJobs(); 
-    };
+    // };
   
-    loginAndFetchData();
+    // loginAndFetchData();
   }, []);
  /**
    * Handles change in search query input

@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { BASE_URL } from "../../constants";
+
 /**
  * The Filter component provides an interface for users to filter job search results based on company, 
  * experience, and work type. It fetches company data from an API and allows users to select filters 
@@ -27,7 +29,7 @@ const Filter = () => {
    */
   const fetchCompanies= async () => {
     try {
-      const response = await axios.get("http://localhost:3000/companies'");
+      const response = await axios.get(`${BASE_URL}/companies`);
   
       setCompanies(response.data);
     } catch (error) {
@@ -51,7 +53,7 @@ const Filter = () => {
         if(selectedCompany) params.append('companyId', selectedCompany)
         
         const response = await axios.get(
-          `http://localhost:3000/search/jobs?${params}`, 
+          `${BASE_URL}/search/jobs?${params}`, 
         );
         console.log("jobs filter", response.data)
         
@@ -61,7 +63,7 @@ const Filter = () => {
     };
 
   useEffect(() => {
-    fetchCompanies
+    fetchCompanies()
   }, []);
   useEffect(() => {
     handleFilter();
@@ -71,7 +73,7 @@ const Filter = () => {
   return (
     <div className="fixed top-[56px] left-0 right-0 bg-white shadow-sm border-t border-b border-gray-200">
       <div className="flex items-center gap-3 px-56 py-3 overflow-x-auto">
-      <label className="mb-1">
+      <label htmlFor='experience' className="mb-1">
         Experience: <span className="font-medium">{experience} yrs</span>
       </label>
         <span className="w-8 text-left">0</span>

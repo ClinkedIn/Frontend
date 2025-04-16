@@ -73,15 +73,12 @@ const CompanyForm = ({ errors,companyName, setCompanyName, tagline, setTagline, 
                     className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
                 >
                         <option value="">Select size</option>
-                        <option value="0-1">0-1 employees</option>
-                        <option value="2-10">2-10 employees</option>
+                        <option value="1-10">1-10 employees</option>
                         <option value="11-50">11-50 employees</option>
                         <option value="51-200">51-200 employees</option>
                         <option value="201-500">201-500 employees</option>
                         <option value="501-1000">501-1000 employees</option>
                         <option value="1001-5000">1001-5000 employees</option>
-                        <option value="5001-10000">5001-10,000 employees</option>
-                        <option value="10000+">10,000+ employees</option>
                 </select>
                 {errors.organizationSize && <p className="text-red-500 text-sm mt-1">{errors.organizationSize}</p>}
             </div>
@@ -96,12 +93,13 @@ const CompanyForm = ({ errors,companyName, setCompanyName, tagline, setTagline, 
                 >
                         <option value="">Select type</option>
                         <option value="Public">Public company</option>
+                        <option value="Private">Privately held</option>
                         <option value="Self-employed">Self-employed</option>
                         <option value="Government">Government agency</option>
                         <option value="Nonprofit">Non-profit</option>
-                        <option value="Sole proprietorship">Sole proprietorship</option>
-                        <option value="Private">Privately held</option>
-                        <option value="Partnership">Partnership</option>
+                        <option value="Educational">Educational</option>
+                       
+                        
                 </select>
                 {errors.organizationType && <p className="text-red-500 text-sm mt-1">{errors.organizationType}</p>}
             </div>

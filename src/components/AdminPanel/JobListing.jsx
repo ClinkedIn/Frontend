@@ -10,8 +10,10 @@ import {
   Search,
   Trash2,
 } from "lucide-react";
+import axios from "axios";
+import { BASE_URL } from "../../constants";
 
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = BASE_URL;
 
 const JobListing = () => {
   const [jobs, setJobs] = useState([]);
@@ -24,35 +26,23 @@ const JobListing = () => {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        /**const response = await fetch(`${API_BASE_URL}/user/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          email: "john.doe@example.com",
-          password: "Password123!",
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Login failed");
-      }
-
-      const data = await response.json();
-
-      // Store the token in cookies
-      setCookie("accessToken", data.token, {
-        path: "/",
-        maxAge: 3600, // 1 hour
-        secure: true,
-        sameSite: "strict",
-      });
- */
-
         setIsLoading(true);
-        const response = await fetch(`${API_BASE_URL}/jobs`);
+
+        /*
+              login using :
+              send this body :
+              {
+      "email": "Porter.Hodkiewicz@hotmail.com",
+      "password": "Aa12345678",
+        "fcmToken": "fcm123abc456"
+
+    }
+              */
+
+        const response = await fetch(`${BASE_URL}/jobs`, {
+          method: "GET",
+          credentials: "include",
+        });
 
         if (!response.ok) {
           throw new Error(`API error: ${response.status}`);
@@ -106,6 +96,63 @@ const JobListing = () => {
       }
     };
 
+    // use axios to fetch the data
+    // const fetchJobs = async () => {
+    //   try {
+    //     setIsLoading(true);
+    //     const response = await axios.get(`${BASE_URL}/jobs`, {
+    //       withCredentials: true,
+    //     });
+    //     if (response.status !== 200) {
+    //       throw new Error(`API error: ${response.status}`);
+    //     }
+    //     const data = response.data;
+    //     // Transform API data to match the component's expected structure
+    //     const transformedJobs = data
+    //       .map((job) => ({
+    //         id: job._id,
+    //         title: job.title,
+    //         company: job.companyId, // You might want to fetch company names separately
+    //         location: job.jobLocation,
+    //         status:
+    //           job.applicants.length > 0 &&
+    //           job.accepted.length === 0 &&
+    //           job.rejected.length === 0
+    //             ? "pending"
+    //             : job.accepted.length > 0
+    //             ? "active"
+    //             : job.rejected.length > 0
+    //             ? "inactive"
+    //             : "pending",
+    //         flagged: job.screeningQuestions.some(
+    //           (q) => q.mustHave && job.autoRejectMustHave
+    //         ),
+    //         date: new Date(job.createdAt).toISOString().split("T")[0],
+    //         reason: job.screeningQuestions.some(
+    //           (q) => q.mustHave && job.autoRejectMustHave
+    //         )
+    //           ? "Must-have screening questions with auto-reject"
+    //           : "",
+    //         applicantCount: job.applicants.length,
+    //         acceptedCount: job.accepted.length,
+    //         rejectedCount: job.rejected.length,
+    //         workplaceType: job.workplaceType,
+    //         jobType: job.jobType,
+    //         industry: job.industry,
+    //         isActive: job.isActive,
+    //       }))
+    //       .filter((job) => job.isActive === true);
+
+    //     setJobs(transformedJobs);
+    //     setError(null);
+    //   } catch (err) {
+    //     setError(err.message);
+    //     console.error("Error fetching jobs:", err);
+    //   } finally {
+    //     setIsLoading(false);
+    //   }
+    // };
+
     fetchJobs();
   }, []);
 
@@ -136,11 +183,12 @@ const JobListing = () => {
   // Handler functions that will make API calls
   const handleApprove = async (id) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/jobs/${id}/approve`, {
+      const response = await fetch(`${BASE_URL}/jobs/${id}/approve`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
       });
 
       if (!response.ok) {
@@ -161,11 +209,12 @@ const JobListing = () => {
 
   const handleReject = async (id) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/jobs/${id}/reject`, {
+      const response = await fetch(`${BASE_URL}/jobs/${id}/reject`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
       });
 
       if (!response.ok) {
@@ -185,8 +234,9 @@ const JobListing = () => {
 
   const handleDelete = async (id) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/jobs/${id}`, {
+      const response = await fetch(`${BASE_URL}/jobs/${id}`, {
         method: "DELETE",
+        credentials: "include",
       });
 
       if (!response.ok) {
@@ -204,11 +254,12 @@ const JobListing = () => {
 
   const handleResolveFlag = async (id) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/jobs/${id}/resolve-flag`, {
+      const response = await fetch(`${BASE_URL}/jobs/${id}/resolve-flag`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
       });
 
       if (!response.ok) {

@@ -6,6 +6,8 @@ import { FaPlus,FaUpload } from "react-icons/fa6";
 import axios from "axios";
 import CompanyForm from "../../components/CompanyPageSections/CompanyPageForm";
 import { postRequest } from "../../services/axios";
+import { BASE_URL } from "../../constants";
+import { toast,Toaster } from "react-hot-toast";
 
 
 
@@ -34,31 +36,7 @@ const CreateCompanyPage = () => {
             [field]: value.toLowerCase().includes("select") ? "Please choose a valid option." : ""
         }));
     };*/
-    const testLogin = async () => {
-        try {
-          const response = await axios.post('http://localhost:3000/user/login', {
-            email: "Porter.Hodkiewicz@hotmail.com",
-            password: "Aa12345678"
-          },{
-            withCredentials:true
-          }
-          
-        );
     
-          console.log("Login Response:", response.data);
-        } catch (error) {
-          if (error.response) {
-      
-            console.error("Login Error - Server Response:", error.response.data);
-          } else if (error.request) {
-            // Request made but no response received
-            console.error("Login Error - No Response:", error.request);
-          } else {
-            // Something else happened
-            console.error("Login Error:", error.message);
-          }
-        }
-      };
      /**
        * Fetches current user profile data
        * @async
@@ -66,7 +44,7 @@ const CreateCompanyPage = () => {
        */
       const fetchUser = async () => {
         try {
-          const response = await axios.get("http://localhost:3000/user/me", {
+          const response = await axios.get(`${BASE_URL}/user/me`, {
         
             withCredentials:true
           });
@@ -128,7 +106,7 @@ const CreateCompanyPage = () => {
     };
       useEffect(() => {
         const loginAndFetchData = async () => {
-          await testLogin(); // Ensure login is completed first
+          //await testLogin(); // Ensure login is completed first
           fetchUser(); 
         };
       
@@ -136,8 +114,6 @@ const CreateCompanyPage = () => {
       }, []);
     const createPage = async() => {
         if(isValid()){
-           
-            
             console.log("Page Created")
             const company ={
                 userId: user.user._id,
@@ -147,15 +123,23 @@ const CreateCompanyPage = () => {
                 industry: industry,
                 organizationSize: organizationSize,
                 organizationType: organizationType,
-                logo: "",
+                logo: logoPreview,
                 tagLine: tagline,
                 
             }
-            //const response = await axios.post("http://localhost:3000/companies",company)
-            const response = await postRequest("http://localhost:3000/companies",company)
-            console.log(response.data)
-            navigate(`/company/${response.data._id}/admin`)
-            
+           
+           try{
+              //const response = await axios.post("http://localhost:3000/companies",company)
+              const response = await postRequest(`${BASE_URL}/companies`,company) 
+              console.log(response.data)          
+              navigate(`/company/${response.data._id}/admin`)
+
+
+           } 
+           catch(err){
+               console.log(err.response.data)
+              toast.error("Error creating company" );
+           }    
         }
 
     }
@@ -203,6 +187,7 @@ const CreateCompanyPage = () => {
                         }
                     >
             </CompanyForm>
+            <Toaster position="top-center" />
                 <button className="justify-end rounded-full  py-3 px-5 m-2 text-white cursor-pointer font-semibold bg-[#0A66C2] " onClick={()=>{createPage()}}>Create Page </button>
             </div>
             <aside className="md:px-4 md:w-[60%]  lg:w-[40%] h-fit rounded-lg lg:sticky lg:top-24">

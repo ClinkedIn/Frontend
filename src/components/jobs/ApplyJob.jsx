@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { BASE_URL } from "../../constants";
+
 
 
 /**
@@ -56,39 +58,7 @@ const ApplyJob = ({ isOpen, onClose, job , jobId}) => {
    */
   const [id, setId] = useState();
 
-  /**
-   * Logs in the user for the application process.
-   * 
-   * @async
-   * @returns {Promise<void>} A promise indicating login completion
-   */
- console.log("job:", job)
- console.log("job id inside apply", jobId)
-  const testLogin = async () => {
-    try {
-      const response = await axios.post('http://localhost:3000/user/login', {
-        email: "Colin.Miller@hotmail.com",
-        password: "password123"
-      },{
-        withCredentials:true
-      }
-      
-    );
 
-      console.log("Login Response:", response.data);
-    } catch (error) {
-      if (error.response) {
-  
-        console.error("Login Error - Server Response:", error.response.data);
-      } else if (error.request) {
-        // Request made but no response received
-        console.error("Login Error - No Response:", error.request);
-      } else {
-        // Something else happened
-        console.error("Login Error:", error.message);
-      }
-    }
-  };
  /**
    * Fetches the current user's data.
    * 
@@ -97,7 +67,7 @@ const ApplyJob = ({ isOpen, onClose, job , jobId}) => {
    */
   const fetchUser = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/user/me", {
+      const response = await axios.get(`${BASE_URL}/user/me`, {
     
         withCredentials:true
       });
@@ -109,12 +79,12 @@ const ApplyJob = ({ isOpen, onClose, job , jobId}) => {
     }
   };
   useEffect(() => {
-    const loginAndFetchData = async () => {
-      await testLogin(); // Ensure login is completed first
-      await fetchUser();
-    };
+    // const loginAndFetchData = async () => {
+      // await testLogin(); // Ensure login is completed first
+    fetchUser();
+    // };
   
-    loginAndFetchData();
+    // loginAndFetchData();
   }, []);
     /**
    * Handles the job application submission.
@@ -143,7 +113,7 @@ const ApplyJob = ({ isOpen, onClose, job , jobId}) => {
   
     try {
       const response = await axios.post(
-        `http://localhost:3000/jobs/${id}/apply`,
+        `${BASE_URL}/jobs/${id}/apply`,
         applicationData,
         { withCredentials: true }
       );

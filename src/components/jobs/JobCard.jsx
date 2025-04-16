@@ -2,6 +2,8 @@ import React, {useState, useEffect} from "react";
 import { X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { BASE_URL } from "../../constants";
+
 /**
  * The JobCard component displays the details of a job listing, including the company logo, job title,
  * job location, and the time since the job was posted. It also includes a clickable job title that 
@@ -48,8 +50,8 @@ const JobCard = ({ job, jobs, state}) => {
       {/* Job Details */}
       <div className="flex-1 ml-3">
         <p 
-       onClick={() => handleJobClick(job)} className="cursor-pointer"
-        className="text-blue-600 font-semibold hover:underline">
+       onClick={() => handleJobClick(job)} 
+       className="cursor-pointer text-blue-600 font-semibold hover:underline">
           {job.title?? job.job?.title}
         </p>
         <p className="text-gray-700 text-sm">

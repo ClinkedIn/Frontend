@@ -2,6 +2,22 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { formatDistanceToNowStrict } from 'date-fns'; // For relative time
 import { BsThreeDotsVertical, BsCheckCircle, BsEnvelope } from 'react-icons/bs';
+/**
+ * ConversationListItem component renders a single conversation item in a list.
+ * It displays the other user's profile picture, name, last message, timestamp, 
+ * and an unread message count badge. It also includes a dropdown menu for 
+ * marking the conversation as read or unread.
+ *
+ * @param {Object} props - The props object.
+ * @param {Object} props.conversation - The conversation object containing details about the conversation.
+ * @param {Object} props.currentUser - The current logged-in user object.
+ * @param {Object} props.otherUserInfo - The other user's information object (e.g., profile picture, full name).
+ * @param {boolean} props.isSelected - Indicates whether the conversation is currently selected.
+ * @param {Function} props.onClick - Callback function triggered when the conversation item is clicked.
+ * @param {Function} props.onMarkReadUnread - Callback function to mark the conversation as read or unread.
+ * 
+ * @returns {JSX.Element} The rendered ConversationListItem component.
+ */
 const ConversationListItem = ({
   conversation,
   currentUser,
@@ -50,11 +66,23 @@ const ConversationListItem = ({
   const timestamp = conversation.lastUpdatedAt?.toDate();
   const unreadCount = conversation.unreadCounts?.[currentUser?.uid] || 0;
 
+  /**
+   * Toggles the state of the menu and prevents the click event from propagating.
+   *
+   * @param {React.MouseEvent} e - The mouse event triggered by the user interaction.
+   */
   const handleMenuToggle = (e) => {
     e.stopPropagation(); // Prevent item click when opening menu
     setMenuOpen(!menuOpen);
   };
 
+  /**
+   * Handles the click event for marking a conversation as read or unread.
+   *
+   * @param {Object} e - The event object from the click event.
+   * @param {boolean} markAsUnread - A flag indicating whether to mark the conversation as unread (true) or read (false).
+   * @returns {void}
+   */
   const handleMarkClick = (e, markAsUnread) => {
     e.stopPropagation(); // Prevent item click
     setMenuOpen(false); // Close menu

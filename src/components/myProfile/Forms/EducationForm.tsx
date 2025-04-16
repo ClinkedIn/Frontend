@@ -1,47 +1,134 @@
 import React, { useState } from "react";
+import ConfirmationDialog from "../ConfirmationDialog";
 
 interface EducationFormProps {
   onClose: () => void;
-  onSave: (education: {
-    school: string;
-    degree: string;
-    fieldOfStudy: string;
-    startMonth: string;
-    startYear: string;
-    endMonth: string;
-    endYear: string;
-    grade?: string;
-    activities?: string;
-    description?: string;
-  }) => void;
+  onSave: (education: any) => void;
 }
+
+const UNIVERSITIES = [
+  "Harvard University",
+  "Cairo University",
+  "Alexandria University",
+  "Ain Shams University",
+  "Stanford University",
+  "Massachusetts Institute of Technology",
+  "University of Cambridge",
+  "University of Oxford",
+  "Yale University",
+  "Princeton University",
+  "Columbia University",
+  "University of Chicago",
+  "University of California, Berkeley",
+  "Boston University",
+  "New York University",
+  "University of London",
+  "University of Toronto",
+  "McGill University",
+  "University of Sydney",
+  "University of Melbourne",
+  "National University of Singapore",
+  "Tsinghua University",
+  "Peking University",
+];
+
+const DEGREE_TYPES = [
+  "Bachelor's",
+  "Master's",
+  "PhD",
+  "Associate's",
+  "Bachelor of Arts (BA)",
+  "Bachelor of Science (BS)",
+  "Bachelor of Fine Arts (BFA)",
+  "Bachelor of Business Administration (BBA)",
+  "Master of Arts (MA)",
+  "Master of Science (MS)",
+  "Master of Business Administration (MBA)",
+  "Master of Fine Arts (MFA)",
+  "Doctor of Philosophy (PhD)",
+  "Doctor of Medicine (MD)",
+  "Juris Doctor (JD)",
+  "High School Diploma",
+  "Certificate",
+];
+
+const FIELDS_OF_STUDY = [
+  "Computer Science",
+  "Business Administration",
+  "Economics",
+  "Psychology",
+  "Biology",
+  "Engineering",
+  "Mathematics",
+  "Communications",
+  "Political Science",
+  "English Literature",
+  "History",
+  "Chemistry",
+  "Physics",
+  "Sociology",
+  "Marketing",
+  "Finance",
+  "Nursing",
+  "Education",
+  "Architecture",
+  "Graphic Design",
+];
+
+const COMMON_SKILLS = [
+  "Python",
+  "JavaScript",
+  "HTML",
+  "CSS",
+  "React",
+  "Node.js",
+  "SQL",
+  "Java",
+  "C++",
+  "AI",
+  "Machine Learning",
+  "Data Science",
+  "Project Management",
+  "Leadership",
+  "Communication",
+  "Problem Solving",
+  "Critical Thinking",
+  "Teamwork",
+];
 
 const EducationForm: React.FC<EducationFormProps> = ({ onClose, onSave }) => {
   const [school, setSchool] = useState("");
+  const [customSchool, setCustomSchool] = useState("");
   const [degree, setDegree] = useState("");
   const [fieldOfStudy, setFieldOfStudy] = useState("");
-  const [startMonth, setStartMonth] = useState("");
-  const [startYear, setStartYear] = useState("");
-  const [endMonth, setEndMonth] = useState("");
-  const [endYear, setEndYear] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [grade, setGrade] = useState("");
-  const [activities, setActivities] = useState("");
+  const [activitiesAndSocieties, setActivitiesAndSocieties] = useState("");
   const [description, setDescription] = useState("");
+  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+  const [customSkill, setCustomSkill] = useState("");
+  const [media, setMedia] = useState("");
   const [errors, setErrors] = useState<{
     school?: string;
     startDate?: string;
   }>({});
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [educationData, setEducationData] = useState<any>(null);
+  const [showOtherSchool, setShowOtherSchool] = useState(false);
 
   const validateForm = () => {
     const newErrors: { school?: string; startDate?: string } = {};
     let isValid = true;
 
-    if (!school.trim()) {
+    const actualSchool = showOtherSchool ? customSchool : school;
+
+    if (!actualSchool.trim()) {
       newErrors.school = "School name is required";
       isValid = false;
     }
 
-    if (!startMonth || !startYear) {
+    if (!startDate) {
       newErrors.startDate = "Start date is required";
       isValid = false;
     }
@@ -52,19 +139,72 @@ const EducationForm: React.FC<EducationFormProps> = ({ onClose, onSave }) => {
 
   const handleSave = () => {
     if (validateForm()) {
-      onSave({
-        school,
+      const finalSchool = showOtherSchool ? customSchool : school;
+      const data = {
+        school: finalSchool,
         degree,
         fieldOfStudy,
-        startMonth,
-        startYear,
-        endMonth,
-        endYear,
-        grade,
-        activities,
-        description,
-      });
-      onClose();
+        startDate,
+        endDate: endDate || undefined,
+        grade: grade || undefined,
+        activitiesAndSocieties: activitiesAndSocieties || undefined,
+        description: description || undefined,
+        skills: selectedSkills.length > 0 ? selectedSkills : undefined,
+        media: media || undefined,
+      };
+
+      setEducationData(data);
+      setShowConfirmation(true);
+    }
+  };
+
+  const handleConfirm = () => {
+    // Call the onSave function with the education data
+    onSave(educationData);
+    onClose();
+  };
+
+  const handleAddMore = () => {
+    // Save current data and reset form
+    onSave(educationData);
+    resetForm();
+  };
+
+  const resetForm = () => {
+    setSchool("");
+    setCustomSchool("");
+    setDegree("");
+    setFieldOfStudy("");
+    setGrade("");
+    setActivitiesAndSocieties("");
+    setDescription("");
+    setSelectedSkills([]);
+    setCustomSkill("");
+    setMedia("");
+    setShowConfirmation(false);
+    setShowOtherSchool(false);
+  };
+
+  const handleSchoolChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    setSchool(value);
+    setShowOtherSchool(value === "other");
+  };
+
+  const addSkill = () => {
+    if (customSkill && !selectedSkills.includes(customSkill)) {
+      setSelectedSkills([...selectedSkills, customSkill]);
+      setCustomSkill("");
+    }
+  };
+
+  const removeSkill = (skill: string) => {
+    setSelectedSkills(selectedSkills.filter((s) => s !== skill));
+  };
+
+  const selectSkill = (skill: string) => {
+    if (!selectedSkills.includes(skill)) {
+      setSelectedSkills([...selectedSkills, skill]);
     }
   };
 
@@ -101,16 +241,35 @@ const EducationForm: React.FC<EducationFormProps> = ({ onClose, onSave }) => {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 School<span className="text-red-500">*</span>
               </label>
-              <input
-                type="text"
-                placeholder="Ex: Boston University"
+              <select
                 value={school}
-                onChange={(e) => setSchool(e.target.value)}
+                onChange={handleSchoolChange}
                 className={`w-full px-3 py-2 border rounded-md ${
-                  errors.school ? "border-red-500" : ""
+                  errors.school && !showOtherSchool ? "border-red-500" : ""
                 }`}
                 required
-              />
+              >
+                <option value="">Select a school</option>
+                {UNIVERSITIES.map((uni, index) => (
+                  <option key={index} value={uni}>
+                    {uni}
+                  </option>
+                ))}
+                <option value="other">Other (not listed)</option>
+              </select>
+
+              {showOtherSchool && (
+                <input
+                  type="text"
+                  placeholder="Enter school name"
+                  value={customSchool}
+                  onChange={(e) => setCustomSchool(e.target.value)}
+                  className={`w-full px-3 py-2 border rounded-md mt-2 ${
+                    errors.school ? "border-red-500" : ""
+                  }`}
+                />
+              )}
+
               {errors.school && (
                 <p className="text-red-500 text-sm mt-1">{errors.school}</p>
               )}
@@ -120,117 +279,73 @@ const EducationForm: React.FC<EducationFormProps> = ({ onClose, onSave }) => {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Degree
               </label>
-              <input
-                type="text"
-                placeholder="Ex: Bachelor's"
+              <select
                 value={degree}
                 onChange={(e) => setDegree(e.target.value)}
                 className="w-full px-3 py-2 border rounded-md"
-              />
+              >
+                <option value="">Select a degree</option>
+                {DEGREE_TYPES.map((degreeType, index) => (
+                  <option key={index} value={degreeType}>
+                    {degreeType}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Field of study
               </label>
-              <input
-                type="text"
-                placeholder="Ex: Business"
+              <select
                 value={fieldOfStudy}
                 onChange={(e) => setFieldOfStudy(e.target.value)}
                 className="w-full px-3 py-2 border rounded-md"
-              />
+              >
+                <option value="">Select field of study</option>
+                {FIELDS_OF_STUDY.map((field, index) => (
+                  <option key={index} value={field}>
+                    {field}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Start date<span className="text-red-500">*</span>
               </label>
-              <div className="grid grid-cols-2 gap-2">
-                <select
-                  value={startMonth}
-                  onChange={(e) => setStartMonth(e.target.value)}
-                  className={`border rounded-md px-3 py-2 appearance-none ${
-                    errors.startDate ? "border-red-500" : ""
-                  }`}
-                >
-                  <option value="">Month</option>
-                  <option value="January">January</option>
-                  <option value="February">February</option>
-                  <option value="March">March</option>
-                  <option value="April">April</option>
-                  <option value="May">May</option>
-                  <option value="June">June</option>
-                  <option value="July">July</option>
-                  <option value="August">August</option>
-                  <option value="September">September</option>
-                  <option value="October">October</option>
-                  <option value="November">November</option>
-                  <option value="December">December</option>
-                </select>
-                <select
-                  value={startYear}
-                  onChange={(e) => setStartYear(e.target.value)}
-                  className={`border rounded-md px-3 py-2 appearance-none ${
-                    errors.startDate ? "border-red-500" : ""
-                  }`}
-                >
-                  <option value="">Year</option>
-                  {Array.from(
-                    { length: 50 },
-                    (_, i) => new Date().getFullYear() - i
-                  ).map((year) => (
-                    <option key={year} value={year.toString()}>
-                      {year}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <input
+                type="text"
+                placeholder="YYYY-MM-DD (e.g., 2017-09-01)"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className={`w-full px-3 py-2 border rounded-md ${
+                  errors.startDate ? "border-red-500" : ""
+                }`}
+              />
               {errors.startDate && (
                 <p className="text-red-500 text-sm mt-1">{errors.startDate}</p>
               )}
+              <p className="text-xs text-gray-500 mt-1">
+                Format: YYYY-MM-DD (e.g., 2017-09-01)
+              </p>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 End date (or expected)
               </label>
-              <div className="grid grid-cols-2 gap-2">
-                <select
-                  value={endMonth}
-                  onChange={(e) => setEndMonth(e.target.value)}
-                  className="border rounded-md px-3 py-2 appearance-none"
-                >
-                  <option value="">Month</option>
-                  <option value="January">January</option>
-                  <option value="February">February</option>
-                  <option value="March">March</option>
-                  <option value="April">April</option>
-                  <option value="May">May</option>
-                  <option value="June">June</option>
-                  <option value="July">July</option>
-                  <option value="August">August</option>
-                  <option value="September">September</option>
-                  <option value="October">October</option>
-                  <option value="November">November</option>
-                  <option value="December">December</option>
-                </select>
-                <select
-                  value={endYear}
-                  onChange={(e) => setEndYear(e.target.value)}
-                  className="border rounded-md px-3 py-2 appearance-none"
-                >
-                  <option value="">Year</option>
-                  {Array.from(
-                    { length: 50 },
-                    (_, i) => new Date().getFullYear() - i
-                  ).map((year) => (
-                    <option key={year} value={year.toString()}>
-                      {year}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <input
+                type="text"
+                placeholder="YYYY-MM-DD (e.g., 2021-06-01)"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="w-full px-3 py-2 border rounded-md"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Format: YYYY-MM-DD (e.g., 2021-06-01)
+              </p>
             </div>
 
             <div>
@@ -251,15 +366,15 @@ const EducationForm: React.FC<EducationFormProps> = ({ onClose, onSave }) => {
                 Activities and societies
               </label>
               <textarea
-                placeholder="Ex: Alpha Phi Omega, Marching Band, Volleyball"
-                value={activities}
-                onChange={(e) => setActivities(e.target.value)}
+                placeholder="Ex: Coding Club, Debate Team"
+                value={activitiesAndSocieties}
+                onChange={(e) => setActivitiesAndSocieties(e.target.value)}
                 className="w-full px-3 py-2 border rounded-md h-24 resize-none"
                 maxLength={500}
               ></textarea>
               <div className="flex justify-end">
                 <span className="text-xs text-gray-500">
-                  {activities.length}/500
+                  {activitiesAndSocieties.length}/500
                 </span>
               </div>
             </div>
@@ -269,11 +384,83 @@ const EducationForm: React.FC<EducationFormProps> = ({ onClose, onSave }) => {
                 Description
               </label>
               <textarea
-                placeholder="You can write about the courses you took, projects, achievements, etc."
+                placeholder="You can write about projects, achievements, etc."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 className="w-full px-3 py-2 border rounded-md h-32 resize-none"
               ></textarea>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Skills
+              </label>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {selectedSkills.map((skill, index) => (
+                  <div
+                    key={index}
+                    className="bg-blue-100 px-3 py-1 rounded-full flex items-center"
+                  >
+                    <span>{skill}</span>
+                    <button
+                      onClick={() => removeSkill(skill)}
+                      className="ml-2 text-blue-500 hover:text-blue-700"
+                    >
+                      &times;
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Add a skill"
+                  value={customSkill}
+                  onChange={(e) => setCustomSkill(e.target.value)}
+                  className="flex-grow px-3 py-2 border rounded-md"
+                  onKeyPress={(e) => e.key === "Enter" && addSkill()}
+                />
+                <button
+                  onClick={addSkill}
+                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                >
+                  Add
+                </button>
+              </div>
+              <div className="mt-2">
+                <p className="text-sm font-medium text-gray-700 mb-1">
+                  Common skills:
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {COMMON_SKILLS.map((skill, index) => (
+                    <button
+                      key={index}
+                      onClick={() => selectSkill(skill)}
+                      disabled={selectedSkills.includes(skill)}
+                      className={`px-3 py-1 rounded-full text-sm ${
+                        selectedSkills.includes(skill)
+                          ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                          : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                      }`}
+                    >
+                      {skill}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Media (Transcripts, Certificates, etc.)
+              </label>
+              <input
+                type="text"
+                placeholder="URL to your document (e.g., https://example.com/transcript.pdf)"
+                value={media}
+                onChange={(e) => setMedia(e.target.value)}
+                className="w-full px-3 py-2 border rounded-md"
+              />
             </div>
           </div>
         </div>
@@ -287,6 +474,20 @@ const EducationForm: React.FC<EducationFormProps> = ({ onClose, onSave }) => {
           </button>
         </div>
       </div>
+
+      {showConfirmation && (
+        <ConfirmationDialog
+          title="Education Added"
+          message={`${
+            showOtherSchool ? customSchool : school
+          } has been added to your profile.`}
+          confirmText="Done"
+          onConfirm={handleConfirm}
+          onCancel={() => setShowConfirmation(false)}
+          showAddMore={true}
+          onAddMore={handleAddMore}
+        />
+      )}
     </div>
   );
 };

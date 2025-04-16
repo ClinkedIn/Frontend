@@ -10,12 +10,16 @@ import { faCamera } from "@fortawesome/free-solid-svg-icons";
 import CompanyForm from "../../components/CompanyPageSections/CompanyPageForm";
 import axios from "axios";
 import { putRequest } from "../../services/axios";
+import { BASE_URL } from "../../constants";
+import { set } from "date-fns";
+import {toast,Toaster} from "react-hot-toast";
 
 
 const CompanyProfileAdminViewPage = () => {
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
     const {companyId, section = "Feed"} = useParams();
+    const [isUpdating, setIsUpdating] = useState(false);
     const [activeTab, setActiveTab] = useState(section);
     const [companyInfo, setCompanyInfo] = useState();
     const [showForm, setShowForm] = useState(false);
@@ -32,31 +36,7 @@ const CompanyProfileAdminViewPage = () => {
     const [errors, setErrors] = useState({ });
     const [notifications, setNotifications] = useState([]);
     const Tabs =["Feed","Activity","Analytics"];
-    const testLogin = async () => {
-        try {
-          const response = await axios.post('http://localhost:3000/user/login', {
-            email: "Porter.Hodkiewicz@hotmail.com",
-            password: "Aa12345678"
-          },{
-            withCredentials:true
-          }
-          
-        );
-    
-          console.log("Login Response:", response.data);
-        } catch (error) {
-          if (error.response) {
-      
-            console.error("Login Error - Server Response:", error.response.data);
-          } else if (error.request) {
-            // Request made but no response received
-            console.error("Login Error - No Response:", error.request);
-          } else {
-            // Something else happened
-            console.error("Login Error:", error.message);
-          }
-        }
-      };
+
      /**
        * Fetches current user profile data
        * @async
@@ -64,7 +44,7 @@ const CompanyProfileAdminViewPage = () => {
        */
       const fetchUser = async () => {
         try {
-          const response = await axios.get("http://localhost:3000/user/me", {
+          const response = await axios.get(`${BASE_URL}/user/me`, {
         
             withCredentials:true
           });
@@ -138,7 +118,7 @@ const CompanyProfileAdminViewPage = () => {
     const fetchCompanyInfo=async()=>{
         try {
             const response = await axios.get(
-                `http://localhost:3000/companies/${companyId}`
+                `${BASE_URL}/companies/${companyId}`
             );
             setCompanyInfo(response.data); 
             setCompanyName(response.data.name)
@@ -149,6 +129,7 @@ const CompanyProfileAdminViewPage = () => {
             setOrganizationType(response.data.organizationType)
             setLogoPreview(response.data.logo)
             setTagline(response.data.tagLine)
+            console.log("company data:", response.data);
             
         } catch (error) {
             console.error("Error fetching company info:", error);
@@ -156,41 +137,50 @@ const CompanyProfileAdminViewPage = () => {
     }
     useEffect(() => {
         const loginAndFetchData = async () => {
-          await testLogin(); // Ensure login is completed first
+         // await testLogin(); // Ensure login is completed first
           fetchUser(); 
         };
       
         loginAndFetchData();
       }, []);
-    const handleUpdatePage =async()=>{
-       
-        if(isValid()){
-            
-            console.log("Page updated")
-            const company ={
-                userId: user.user._id,
+      const handleUpdatePage = async () => {
+        if (!isValid()) return;
+        
+        setIsUpdating(true);
+        try {
+            const company = {
+                userId: user?.user?._id,
                 name: companyName,
-                address:companyAddress,
+                address: companyAddress,
                 website: website,
                 industry: industry,
                 organizationSize: organizationSize,
                 organizationType: organizationType,
                 logo: logoPreview,
                 tagLine: tagline
-            }
-            const response = await putRequest(`http://localhost:3000/companies/${companyId}`,company);
-            console.log(response)
-            setShowForm(false)
-
+            };
+    
+            const response = await putRequest(`${BASE_URL}/companies/${companyId}`, company);
+            
+            
+                setCompanyInfo(response.data); 
+                setShowForm(false);
+                
+        } catch (error) {
+            console.error('Error updating company:', error);
+            toast.error("Error updating company" );
+            
+            
+        } finally {
+            setIsUpdating(false);
         }
-
     }
     useEffect(()=>{
         if(!companyInfo) fetchCompanyInfo();
     },[]);
 
     return (
-        <div className="   justify-center bg-[#f4f2ee] min-h-screen  items-center flex flex-col">
+        <div className="   bg-[#f4f2ee] min-h-screen  items-center flex flex-col">
             
             <Header notifications={notifications} />
             {showForm ? 
@@ -212,6 +202,7 @@ const CompanyProfileAdminViewPage = () => {
                         companyAddress={companyAddress} setCompanyAddress={setCompanyAddress}
                         logoPreview={logoPreview} setLogoPreview={setLogoPreview}
                     />
+                     <Toaster position="top-center" />
                     <div className="flex justify-end gap-4 mt-4">
                         <button 
                             className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
@@ -222,8 +213,9 @@ const CompanyProfileAdminViewPage = () => {
                         <button 
                             className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
                             onClick={handleUpdatePage}
+                            disabled={isUpdating}
                         >
-                            Update
+                            {isUpdating ? 'Updating...' : 'Update'}
                         </button>
                     </div>
                 </div>
@@ -231,7 +223,7 @@ const CompanyProfileAdminViewPage = () => {
             :(companyInfo && 
             (<div className="lg:w-1/2 lg:h-3/4 md:w-3/4 max-[430px]:w-full ">
                 <div className="bg-white rounded-lg shadow-lg mt-16 relative"> 
-                    <img src="/Images/card-bg.svg" alt="cover page" className="w-full h-30 rounded-t-lg" />
+                    <img src="/Images/card-bg.svg"  className="w-full h-30 rounded-t-lg" />
                         <button
                             className="absolute top-4 right-4 bg-white rounded-full shadow-md hover:cursor-pointer px-3 py-2 m-2"
                             aria-label="Change cover photo"
@@ -244,7 +236,7 @@ const CompanyProfileAdminViewPage = () => {
                             />
                         </button>
                     <div className="flex flex-column justify-between">
-                        <img src={ companyInfo.logo ? companyInfo.logo  :"/Images/building-icon.png"} alt="profile" className="w-28 h-28 -mt-10 ml-5  " />
+                        <img src={ companyInfo.logo.includes("localhost") ? "/Images/building-icon.png":companyInfo.logo  }  className="w-28 h-28 -mt-10 ml-5  " />
                         <button className="rounded-full  hover:bg-gray-100 m-4 p-4" 
                         onClick={()=>{setShowForm(true)}}>
                         < MdModeEdit size=" 24"/>

@@ -6,6 +6,8 @@ import { useLocation } from "react-router-dom";
 import JobCard from '../../components/jobs/JobCard';
 import Filter from "../../components/jobs/Filter";
 import ApplyJob from "../../components/jobs/ApplyJob";
+import { BASE_URL } from "../../constants";
+
 
 /**
  * The JobBoardPage component displays a list of available jobs and allows users to view details,
@@ -54,7 +56,7 @@ const JobBoardPage = () => {
   
     try {
       const response = await axios.post(
-        `http://localhost:3000/jobs/${jobId}/save`,
+        `${BASE_URL}/jobs/${jobId}/save`,
         {}, 
         { withCredentials: true }
       );
