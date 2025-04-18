@@ -1504,7 +1504,7 @@ export default function AdminDashboard() {
   // Fetch data from API
   useEffect(() => {
     const BASE_URL =
-      import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+      import.meta.env.VITE_API_BASE_URL;;
 
     const fetchAnalytics = async () => {
       try {

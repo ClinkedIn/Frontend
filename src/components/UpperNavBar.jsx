@@ -3,7 +3,7 @@ import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import { MdLocationPin, MdSearch } from "react-icons/md";
 import Jobs from "../pages/jobs/Jobs";
-
+import { BASE_URL } from "../../../constants";
 /**
  * Header component representing the upper navigation bar of the application.
  *
@@ -48,7 +48,7 @@ const Header = ({ notifications }) => {
     const fetchUnreadCount = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:3000/notifications/unread-count",
+          `${BASE_URL}/notifications/unread-count`,
           { withCredentials: true }
         );
         console.log("unread count:", response);
@@ -124,7 +124,7 @@ const Header = ({ notifications }) => {
       if (location) params.append("location", location);
 
       const response = await axios.get(
-        `http://localhost:3000/search/jobs?${params}`
+        `${BASE_URL}/search/jobs?${params}`
       );
 
       navigate("/job-board", {

@@ -3,7 +3,7 @@ import axios from "axios";
 import EducationForm from "./Forms/EducationForm";
 import ConfirmationDialog from "./ConfirmationDialog";
 import { Loader, Plus, Pencil, X, Trash2 } from "lucide-react";
-
+import { BASE_URL } from "../../constants";
 /**
  * Interface representing an education entry in a user's profile
  * @interface Education
@@ -71,12 +71,13 @@ interface EducationSectionProps {
   setShowEducationForm?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = BASE_URL;
 const API_ROUTES = {
   education: `${API_BASE_URL}/user/education`,
 };
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/",
+  baseURL: import.meta.env.VITE_API_BASE_URL || API_BASE_URL,
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },

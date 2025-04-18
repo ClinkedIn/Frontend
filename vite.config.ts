@@ -23,7 +23,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       "/api": {
-        target: "https://localhost:5173",
+        target: "https://lockedin-cufe.me",
         changeOrigin: true,
         secure: false,
     },

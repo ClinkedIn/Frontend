@@ -3,6 +3,7 @@ import axios from "axios";
 import ExperienceForm from "./Forms/ExperienceForm";
 import ConfirmationDialog from "./ConfirmationDialog";
 import { Loader, Plus, Pencil, Trash2 } from "lucide-react";
+import { BASE_URL } from "../../constants";
 
 /**
  * Interface representing an experience entry
@@ -60,7 +61,7 @@ interface ExperienceSectionProps {
  * Base URL for API requests
  * @constant {string}
  */
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = BASE_URL;
 
 /**
  * API route endpoints
