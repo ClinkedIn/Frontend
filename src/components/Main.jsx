@@ -4,7 +4,7 @@ import PostMenu from './PostMenu.jsx';
 import CreatePostModal from './PostCreation.jsx';
 import PostReactions from './PostReactions.jsx';
 import CommentSection from './CommentSection.jsx';
-import { BASE_URL } from "../../../constants";
+import { BASE_URL } from "../constants";
 
 // Set axios defaults to include credentials with all requests
 axios.defaults.withCredentials = true;

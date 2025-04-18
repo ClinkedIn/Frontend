@@ -3,7 +3,7 @@ import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import { MdLocationPin, MdSearch } from "react-icons/md";
 import Jobs from "../pages/jobs/Jobs";
-import { BASE_URL } from "../../../constants";
+import { BASE_URL } from "../constants";
 /**
  * Header component representing the upper navigation bar of the application.
  *
