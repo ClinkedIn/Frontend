@@ -13,7 +13,7 @@ const WelcomePage = () => {
       <nav className="bg-white py-3 px-4 md:px-12 flex flex-wrap items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center">
-          <img src="/public/images/login-logo.svg" alt="LinkedIn Logo" className="h-6" />
+          <img src="/public/Images/login-logo.svg" alt="LockedIn Logo" className="h-6" />
         </Link>
 
         {/* Icons & Buttons */}
@@ -96,7 +96,7 @@ const WelcomePage = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            <img src="/public/images/google-white.png" alt="Google" className="h-6 w-6 mr-2" />
+            <img src="/public/Images/google-white.png" alt="Google" className="h-6 w-6 mr-2" />
             Continue with Google
           </motion.button>
 
@@ -140,7 +140,7 @@ const WelcomePage = () => {
         {/* Right Section */}
         <div className="flex justify-end w-full">
           <motion.img
-            src="/public/images/hero.svg"
+            src="../../../public/Images/hero.svg"
             alt="Hero"
             className="hidden md:block w-[650px]"
             initial={{ x: 30, opacity: 0 }}
