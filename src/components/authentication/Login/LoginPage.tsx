@@ -176,7 +176,7 @@ const LoginPage = () => {
       {/* Logo */}
       <img
         className="absolute top-6 left-13 h-7"
-        src="/public/images/login-logo.svg"
+        src="/Images/login-logo.svg"
         alt="LinkedIn"
       />
 

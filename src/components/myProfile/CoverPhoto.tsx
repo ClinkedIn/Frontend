@@ -17,7 +17,7 @@ interface CoverPhotoProps {
 }
 
 /** Default cover photo path used when no custom image is set */
-const DEFAULT_COVER_PHOTO = "../../../public/Images/defaultCover.png";
+const DEFAULT_COVER_PHOTO = "/Images/defaultCover.png";
 
 /**
  * Component for displaying and managing a user's profile cover photo

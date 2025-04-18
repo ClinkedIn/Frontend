@@ -262,7 +262,7 @@ const SignupPage = () => {
       <div className="flex flex-col items-center justify-center bg-gray-100 pt-16 pb-20">
         <img
           className="absolute top-6 left-32 h-8.5"
-          src="/public/images/login-logo.svg"
+          src="/Images/login-logo.svg"
           alt="LinkedIn"
         />
         <h1 className="text-3xl font-normal text-gray-900 mb-4 text-center">
