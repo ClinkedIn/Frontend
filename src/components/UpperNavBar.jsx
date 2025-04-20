@@ -1,9 +1,11 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, use } from "react";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import { MdLocationPin, MdSearch } from "react-icons/md";
 import Jobs from "../pages/jobs/Jobs";
 import { BASE_URL } from "../constants";
+import { collection, addDoc,getDoc,setDoc, serverTimestamp, doc, updateDoc, arrayUnion, onSnapshot, orderBy, query, where } from 'firebase/firestore';
+import React from "react";
 /**
  * Header component representing the upper navigation bar of the application.
  *
@@ -43,6 +45,9 @@ const Header = ({ notifications }) => {
   const locations = useLocation();
   const currentPath = locations.pathname.split("/")[1];
   const dropdownRef = useRef(null);
+  const [unreadCountMessages, setunreadCountMessages] = setState(0)
+  const [conversations, setConversations] = useState([]);
+  const [loadingConversations, setLoadingConversations] = useState(true);
 
   useEffect(() => {
     const fetchUnreadCount = async () => {
@@ -60,6 +65,24 @@ const Header = ({ notifications }) => {
 
     fetchUnreadCount();
   }, [notifications]);
+
+  useEffect(() => {
+    const fetchUnreadCountMessages = async () => {
+      try {
+        const response = await axios.get(
+          `${BASE_URL}/messages/unread-count`,
+          { withCredentials: true }
+        );
+        console.log("unread count messages:", response);
+        setunreadCountMessages(response.data.unreadCount);
+      } catch (error) {
+        console.error("Error fetching unread count messages:", error);
+      }
+    };
+
+    fetchUnreadCountMessages();
+  }
+, [unreadCountMessages]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -227,6 +250,14 @@ const Header = ({ notifications }) => {
               className="w-6 h-6"
             />
           </button>
+          {unreadCountMessages > 0 && (
+              <div
+                className="absolute -top-1 -right-1 bg-[#cb112d] text-white rounded-full 
+                w-5 h-5 flex items-center justify-center text-xs font-medium"
+              >
+                {unreadCount}
+              </div>
+            )}
           <button
             className="hover:bg-gray-200 p-2 rounded-lg relative"
             onClick={handleNotificationsClick}
