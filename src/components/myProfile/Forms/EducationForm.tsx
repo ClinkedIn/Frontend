@@ -1,11 +1,22 @@
 import React, { useState } from "react";
 import ConfirmationDialog from "../ConfirmationDialog";
 
+/**
+ * @interface EducationFormProps
+ * @description Props for the EducationForm component
+ * @property {function} onClose - Function to close the form
+ * @property {function} onSave - Function to save the education data
+ */
 interface EducationFormProps {
   onClose: () => void;
   onSave: (education: any) => void;
 }
 
+/**
+ * @constant UNIVERSITIES
+ * @description List of predefined universities available for selection
+ * @type {string[]}
+ */
 const UNIVERSITIES = [
   "Harvard University",
   "Cairo University",
@@ -32,6 +43,11 @@ const UNIVERSITIES = [
   "Peking University",
 ];
 
+/**
+ * @constant DEGREE_TYPES
+ * @description List of degree types available for selection
+ * @type {string[]}
+ */
 const DEGREE_TYPES = [
   "Bachelor's",
   "Master's",
@@ -52,6 +68,11 @@ const DEGREE_TYPES = [
   "Certificate",
 ];
 
+/**
+ * @constant FIELDS_OF_STUDY
+ * @description List of fields of study available for selection
+ * @type {string[]}
+ */
 const FIELDS_OF_STUDY = [
   "Computer Science",
   "Business Administration",
@@ -75,6 +96,11 @@ const FIELDS_OF_STUDY = [
   "Graphic Design",
 ];
 
+/**
+ * @constant COMMON_SKILLS
+ * @description List of common skills that can be added to education
+ * @type {string[]}
+ */
 const COMMON_SKILLS = [
   "Python",
   "JavaScript",
@@ -96,7 +122,14 @@ const COMMON_SKILLS = [
   "Teamwork",
 ];
 
+/**
+ * @component EducationForm
+ * @description A form component that allows users to add or edit their educational history
+ * @param {EducationFormProps} props - Component props containing onClose and onSave functions
+ * @returns {React.ReactElement} The rendered education form
+ */
 const EducationForm: React.FC<EducationFormProps> = ({ onClose, onSave }) => {
+  // State definitions
   const [school, setSchool] = useState("");
   const [customSchool, setCustomSchool] = useState("");
   const [degree, setDegree] = useState("");
@@ -117,6 +150,11 @@ const EducationForm: React.FC<EducationFormProps> = ({ onClose, onSave }) => {
   const [educationData, setEducationData] = useState<any>(null);
   const [showOtherSchool, setShowOtherSchool] = useState(false);
 
+  /**
+   * @function validateForm
+   * @description Validates the form fields before submission
+   * @returns {boolean} True if the form is valid, false otherwise
+   */
   const validateForm = () => {
     const newErrors: { school?: string; startDate?: string } = {};
     let isValid = true;
@@ -137,6 +175,10 @@ const EducationForm: React.FC<EducationFormProps> = ({ onClose, onSave }) => {
     return isValid;
   };
 
+  /**
+   * @function handleSave
+   * @description Validates the form and shows the confirmation dialog if valid
+   */
   const handleSave = () => {
     if (validateForm()) {
       const finalSchool = showOtherSchool ? customSchool : school;
@@ -158,18 +200,30 @@ const EducationForm: React.FC<EducationFormProps> = ({ onClose, onSave }) => {
     }
   };
 
+  /**
+   * @function handleConfirm
+   * @description Finalizes the save operation when user confirms
+   */
   const handleConfirm = () => {
     // Call the onSave function with the education data
     onSave(educationData);
     onClose();
   };
 
+  /**
+   * @function handleAddMore
+   * @description Saves the current education data and resets the form for adding more
+   */
   const handleAddMore = () => {
     // Save current data and reset form
     onSave(educationData);
     resetForm();
   };
 
+  /**
+   * @function resetForm
+   * @description Resets all form fields to their initial state
+   */
   const resetForm = () => {
     setSchool("");
     setCustomSchool("");
@@ -185,12 +239,21 @@ const EducationForm: React.FC<EducationFormProps> = ({ onClose, onSave }) => {
     setShowOtherSchool(false);
   };
 
+  /**
+   * @function handleSchoolChange
+   * @description Handles changes to the school selection dropdown
+   * @param {React.ChangeEvent<HTMLSelectElement>} e - The change event
+   */
   const handleSchoolChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     setSchool(value);
     setShowOtherSchool(value === "other");
   };
 
+  /**
+   * @function addSkill
+   * @description Adds a custom skill to the selected skills list
+   */
   const addSkill = () => {
     if (customSkill && !selectedSkills.includes(customSkill)) {
       setSelectedSkills([...selectedSkills, customSkill]);
@@ -198,10 +261,20 @@ const EducationForm: React.FC<EducationFormProps> = ({ onClose, onSave }) => {
     }
   };
 
+  /**
+   * @function removeSkill
+   * @description Removes a skill from the selected skills list
+   * @param {string} skill - The skill to remove
+   */
   const removeSkill = (skill: string) => {
     setSelectedSkills(selectedSkills.filter((s) => s !== skill));
   };
 
+  /**
+   * @function selectSkill
+   * @description Adds a predefined skill from the common skills list
+   * @param {string} skill - The skill to add
+   */
   const selectSkill = (skill: string) => {
     if (!selectedSkills.includes(skill)) {
       setSelectedSkills([...selectedSkills, skill]);

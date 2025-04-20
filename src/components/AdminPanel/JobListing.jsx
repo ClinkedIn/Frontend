@@ -1,3 +1,14 @@
+/*
+              login using :
+              send this body :
+              {
+      "email": "Porter.Hodkiewicz@hotmail.com",
+      "password": "Aa12345678",
+        "fcmToken": "fcm123abc456"
+
+    }
+              */
+
 import React, { useState, useEffect } from "react";
 import {
   AlarmClock,
@@ -27,17 +38,6 @@ const JobListing = () => {
     const fetchJobs = async () => {
       try {
         setIsLoading(true);
-
-        /*
-              login using :
-              send this body :
-              {
-      "email": "Porter.Hodkiewicz@hotmail.com",
-      "password": "Aa12345678",
-        "fcmToken": "fcm123abc456"
-
-    }
-              */
 
         const response = await fetch(`${BASE_URL}/jobs`, {
           method: "GET",
@@ -95,63 +95,6 @@ const JobListing = () => {
         setIsLoading(false);
       }
     };
-
-    // use axios to fetch the data
-    // const fetchJobs = async () => {
-    //   try {
-    //     setIsLoading(true);
-    //     const response = await axios.get(`${BASE_URL}/jobs`, {
-    //       withCredentials: true,
-    //     });
-    //     if (response.status !== 200) {
-    //       throw new Error(`API error: ${response.status}`);
-    //     }
-    //     const data = response.data;
-    //     // Transform API data to match the component's expected structure
-    //     const transformedJobs = data
-    //       .map((job) => ({
-    //         id: job._id,
-    //         title: job.title,
-    //         company: job.companyId, // You might want to fetch company names separately
-    //         location: job.jobLocation,
-    //         status:
-    //           job.applicants.length > 0 &&
-    //           job.accepted.length === 0 &&
-    //           job.rejected.length === 0
-    //             ? "pending"
-    //             : job.accepted.length > 0
-    //             ? "active"
-    //             : job.rejected.length > 0
-    //             ? "inactive"
-    //             : "pending",
-    //         flagged: job.screeningQuestions.some(
-    //           (q) => q.mustHave && job.autoRejectMustHave
-    //         ),
-    //         date: new Date(job.createdAt).toISOString().split("T")[0],
-    //         reason: job.screeningQuestions.some(
-    //           (q) => q.mustHave && job.autoRejectMustHave
-    //         )
-    //           ? "Must-have screening questions with auto-reject"
-    //           : "",
-    //         applicantCount: job.applicants.length,
-    //         acceptedCount: job.accepted.length,
-    //         rejectedCount: job.rejected.length,
-    //         workplaceType: job.workplaceType,
-    //         jobType: job.jobType,
-    //         industry: job.industry,
-    //         isActive: job.isActive,
-    //       }))
-    //       .filter((job) => job.isActive === true);
-
-    //     setJobs(transformedJobs);
-    //     setError(null);
-    //   } catch (err) {
-    //     setError(err.message);
-    //     console.error("Error fetching jobs:", err);
-    //   } finally {
-    //     setIsLoading(false);
-    //   }
-    // };
 
     fetchJobs();
   }, []);
@@ -440,9 +383,7 @@ const JobListing = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          {/* <button className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-            + Add New Job
-          </button> */}
+          
         </div>
 
         {/* Jobs Table */}
@@ -534,42 +475,7 @@ const JobListing = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-3">
-                        {/* {job.status === "pending" && (
-                          <button
-                            onClick={() => handleApprove(job.id)}
-                            className="text-green-600 hover:text-green-900"
-                            title="Approve"
-                          >
-                            <CheckCircle className="h-5 w-5" />
-                          </button>
-                        )}
-
-                        {job.status === "active" && (
-                          <button
-                            onClick={() => handleReject(job.id)}
-                            className="text-gray-600 hover:text-gray-900"
-                            title="Deactivate"
-                          >
-                            <EyeOff className="h-5 w-5" />
-                          </button>
-                        )}
-
-                        {job.flagged && (
-                          <button
-                            onClick={() => handleResolveFlag(job.id)}
-                            className="text-blue-600 hover:text-blue-900"
-                            title="Resolve Flag"
-                          >
-                            <CheckCircle className="h-5 w-5" />
-                          </button>
-                        )}
-
-                        <button
-                          className="text-indigo-600 hover:text-indigo-900"
-                          title="Edit"
-                        >
-                          <Edit className="h-5 w-5" />
-                        </button> */}
+                        
 
                         <button
                           onClick={() => handleDelete(job.id)}

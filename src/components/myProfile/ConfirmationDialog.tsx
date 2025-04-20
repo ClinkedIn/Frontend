@@ -1,17 +1,44 @@
 // src/components/ConfirmationDialog.tsx
 import React from "react";
 
+/**
+ * Props for the ConfirmationDialog component.
+ */
 interface ConfirmationDialogProps {
+  /** Title displayed at the top of the dialog */
   title: string;
+  /** Main message content of the dialog */
   message: string;
+  /** Text for the confirm button (defaults to "Done") */
   confirmText?: string;
+  /** Text for the cancel button (defaults to "Cancel") */
   cancelText?: string;
+  /** Function called when the confirm button is clicked */
   onConfirm: () => void;
+  /** Function called when the cancel button is clicked */
   onCancel: () => void;
+  /** Whether to show the "Add More" button */
   showAddMore?: boolean;
+  /** Function called when the "Add More" button is clicked */
   onAddMore?: () => void;
+  /** Class name for the confirm button (optional) */
+  confirmButtonClass?: string;
 }
 
+/**
+ * A confirmation dialog component that displays a message with action buttons.
+ *
+ * @param {object} props - Component props
+ * @param {string} props.title - Title of the dialog
+ * @param {string} props.message - Message to display in the dialog
+ * @param {string} [props.confirmText="Done"] - Text for the confirmation button
+ * @param {string} [props.cancelText] - Text for the cancel button (not currently used in implementation)
+ * @param {Function} props.onConfirm - Callback function when user confirms
+ * @param {Function} props.onCancel - Callback function when user cancels
+ * @param {boolean} [props.showAddMore=false] - Whether to show an "Add More" button
+ * @param {Function} [props.onAddMore] - Callback function when "Add More" is clicked
+ * @returns {JSX.Element} Rendered confirmation dialog
+ */
 const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   title,
   message,

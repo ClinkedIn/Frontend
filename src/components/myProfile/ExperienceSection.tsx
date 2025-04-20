@@ -2,8 +2,13 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import ExperienceForm from "./Forms/ExperienceForm";
 import ConfirmationDialog from "./ConfirmationDialog";
-import { Loader, Plus, Pencil, X, Trash2 } from "lucide-react";
+import { Loader, Plus, Pencil, Trash2 } from "lucide-react";
+import { BASE_URL } from "../../constants";
 
+/**
+ * Interface representing an experience entry
+ * @interface Experience
+ */
 interface Experience {
   index?: number;
   jobTitle: string;
@@ -18,9 +23,13 @@ interface Experience {
   foundVia?: string;
   skills?: string[];
   media?: File | null;
-  _id?: string; // Added to handle MongoDB IDs
+  _id?: string;
 }
 
+/**
+ * Interface representing the form data structure for experience
+ * @interface ExperienceFormData
+ */
 interface ExperienceFormData {
   index?: number;
   jobTitle: string;
@@ -39,18 +48,34 @@ interface ExperienceFormData {
   foundVia?: string;
 }
 
+/**
+ * Props for the ExperienceSection component
+ * @interface ExperienceSectionProps
+ */
 interface ExperienceSectionProps {
   showExperienceForm?: boolean;
   setShowExperienceForm?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-// Update to use API_BASE_URL from environment or config
-const API_BASE_URL = "http://localhost:3000";
+/**
+ * Base URL for API requests
+ * @constant {string}
+ */
+const API_BASE_URL = BASE_URL;
+
+/**
+ * API route endpoints
+ * @constant {Object}
+ */
 const API_ROUTES = {
   me: `${API_BASE_URL}/user/me`,
   experience: `${API_BASE_URL}/user/experience`,
 };
 
+/**
+ * List of month names
+ * @constant {string[]}
+ */
 const MONTHS = [
   "January",
   "February",
@@ -66,6 +91,11 @@ const MONTHS = [
   "December",
 ];
 
+/**
+ * Converts month name to two-digit month number string
+ * @param {string} monthName - The name of the month
+ * @returns {string} Two-digit month number as string (01-12)
+ */
 const getMonthNumber = (monthName: string): string => {
   const monthIndex = MONTHS.findIndex((m) => m === monthName);
   return monthIndex !== -1
@@ -73,7 +103,11 @@ const getMonthNumber = (monthName: string): string => {
     : "01";
 };
 
-// Function to extract month and year from date string
+/**
+ * Extracts month and year from a date string
+ * @param {string} dateString - Date in ISO format
+ * @returns {{month: string, year: string}} Object containing month name and year
+ */
 const extractDateInfo = (dateString: string) => {
   if (!dateString) return { month: "January", year: "2023" };
 
@@ -88,17 +122,21 @@ const extractDateInfo = (dateString: string) => {
   }
 };
 
+/**
+ * Component for displaying and managing work experience entries
+ * @component
+ * @param {ExperienceSectionProps} props - Component props
+ * @returns {JSX.Element} Experience section component
+ */
 const ExperienceSection: React.FC<ExperienceSectionProps> = ({
   showExperienceForm: externalShowForm,
   setShowExperienceForm: externalSetShowForm,
 }) => {
-  // State management
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userData, setUserData] = useState<any>(null);
 
-  // UI state
   const [showForm, setShowFormInternal] = useState(false);
   const [showAddConfirmation, setShowAddConfirmation] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
@@ -111,9 +149,20 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
     null
   );
 
+  /**
+   * Combined state for showing experience form
+   * Uses external state if provided, otherwise uses internal state
+   * @type {boolean}
+   */
   const showExperienceFormState =
     externalShowForm !== undefined ? externalShowForm : showForm;
 
+  /**
+   * Sets the visibility state of the experience form
+   * Uses external setter if provided, otherwise uses internal setter
+   * @param {boolean} show - Whether to show the form
+   * @returns {void}
+   */
   const setShowExperienceFormState = (show: boolean) => {
     if (externalSetShowForm) {
       externalSetShowForm(show);
@@ -122,7 +171,11 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
     }
   };
 
-  // Convert form data to API format
+  /**
+   * Converts experience form data to API format
+   * @param {any} formData - The form data to be converted
+   * @returns {Experience} Experience data in API format
+   */
   const convertFormToApiFormat = (formData: any): Experience => {
     const fromDate = `${formData.fromYear}-${getMonthNumber(
       formData.fromMonth
@@ -149,7 +202,11 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
     };
   };
 
-  // Convert API experience to form data format
+  /**
+   * Converts API experience data to form format
+   * @param {Experience} experience - Experience data from API
+   * @returns {ExperienceFormData} Experience data in form format
+   */
   const convertApiToFormData = (experience: Experience): ExperienceFormData => {
     const { month: fromMonth, year: fromYear } = extractDateInfo(
       experience.fromDate
@@ -181,7 +238,11 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
     };
   };
 
-  // Fetch user data with experiences from /user/me endpoint
+  /**
+   * Fetches current user data including experience information
+   * @async
+   * @returns {Promise<void>}
+   */
   const fetchUserData = async () => {
     try {
       setIsLoading(true);
@@ -192,7 +253,6 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
       if (response.data && response.data.user) {
         setUserData(response.data.user);
 
-        // Extract and format work experience from user data
         const workExp = response.data.user.workExperience || [];
         const formattedExperiences = workExp.map((exp: any, idx: number) => ({
           ...exp,
@@ -214,37 +274,37 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
     }
   };
 
-  // Save experience data
+  /**
+   * Handles saving or updating an experience entry
+   * @async
+   * @param {any} formData - The form data to be saved
+   * @returns {Promise<void>}
+   */
   const handleSaveExperience = async (formData: any) => {
     try {
       setIsProcessing(true);
 
-      // Create FormData object for multipart form data submission (for media files)
       const apiData = convertFormToApiFormat(formData);
 
-      // Use FormData for API submission to handle media files properly
+      /**
+       * FormData object for API submission
+       * @type {FormData}
+       */
       const formDataForApi = new FormData();
 
-      // Add all fields to FormData
       Object.keys(apiData).forEach((key) => {
         if (key === "skills" && Array.isArray(apiData[key])) {
-          // Handle skills array properly
           apiData[key].forEach((skill: string) => {
             formDataForApi.append("skills", skill);
           });
         } else if (key === "media" && apiData[key] instanceof File) {
-          // Add media file if it exists
           formDataForApi.append("media", apiData[key]);
-        } else if (apiData[key] !== undefined && apiData[key] !== null) {
-          // Add other fields
-          formDataForApi.append(key, apiData[key].toString());
         }
       });
 
       let response;
 
       if (formData.index !== undefined && experiences[formData.index]?._id) {
-        // Update existing experience
         const experienceId = experiences[formData.index]._id;
         response = await axios.patch(
           `${API_ROUTES.experience}/${experienceId}`,
@@ -256,7 +316,6 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
           }
         );
       } else {
-        // Add new experience
         response = await axios.post(API_ROUTES.experience, formDataForApi, {
           headers: {
             "Content-Type": "multipart/form-data",
@@ -264,7 +323,6 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
         });
       }
 
-      // Refresh user data to get updated experiences
       await fetchUserData();
 
       setShowExperienceFormState(false);
@@ -280,11 +338,21 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
     }
   };
 
+  /**
+   * Prepares form for editing an existing experience
+   * @param {Experience} exp - The experience to edit
+   * @returns {void}
+   */
   const handleEditExperience = (exp: Experience) => {
     setEditingExperience(exp);
     setShowExperienceFormState(true);
   };
 
+  /**
+   * Handles deleting an experience entry
+   * @async
+   * @returns {Promise<void>}
+   */
   const handleDeleteExperience = async () => {
     if (pendingDeleteIndex === undefined) {
       return;
@@ -300,7 +368,6 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
 
       await axios.delete(`${API_ROUTES.experience}/${experienceId}`);
 
-      // Refresh user data
       await fetchUserData();
 
       setShowDeleteConfirmation(false);
@@ -314,16 +381,27 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
     }
   };
 
+  /**
+   * Fetches user data on component mount
+   */
   useEffect(() => {
     fetchUserData();
   }, []);
 
+  /**
+   * Renders a loading overlay with spinner
+   * @returns {JSX.Element} Loading overlay component
+   */
   const LoadingOverlay = () => (
     <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
       <Loader className="h-8 w-8 text-gray-600 animate-spin" />
     </div>
   );
 
+  /**
+   * Renders a skeleton loading view
+   * @returns {JSX.Element} Loading skeleton component
+   */
   const LoadingSkeletonView = () => (
     <div className="bg-white rounded-lg shadow p-4 mb-4 w-full">
       <div className="animate-pulse">
@@ -333,6 +411,10 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
     </div>
   );
 
+  /**
+   * Renders an error message with retry button
+   * @returns {JSX.Element} Error view component
+   */
   const ErrorView = () => (
     <div className="text-red-500 p-4 rounded-lg bg-red-50 flex flex-col items-center">
       <p className="mb-3 text-center">{error}</p>
@@ -345,7 +427,10 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
     </div>
   );
 
-  // Experience Entry Form View (Empty State)
+  /**
+   * Renders an empty state view when no experiences exist
+   * @returns {JSX.Element} Empty state component
+   */
   const EmptyStateView = () => (
     <div className="p-4 border border-gray-200 rounded-lg">
       <div className="flex items-center mb-3">
@@ -380,17 +465,14 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
     </div>
   );
 
-  // If still loading data
   if (isLoading) {
     return <LoadingSkeletonView />;
   }
 
   return (
     <div className="bg-white rounded-lg shadow p-4 mb-4 w-[900px] m-auto relative">
-      {/* Processing Overlay */}
       {isProcessing && <LoadingOverlay />}
 
-      {/* Header with title and add button */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold text-gray-800">Experience</h2>
         {experiences.length > 0 && (
@@ -414,7 +496,6 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
       ) : experiences.length > 0 ? (
         <div className="space-y-4">
           {experiences.map((exp, idx) => {
-            // Format years for display
             const startYear = exp.fromDate
               ? new Date(exp.fromDate).getFullYear().toString()
               : "";
@@ -508,7 +589,6 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
         <EmptyStateView />
       )}
 
-      {/* Experience Form Dialog */}
       {showExperienceFormState && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <ExperienceForm
@@ -526,7 +606,6 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
         </div>
       )}
 
-      {/* Add Confirmation Dialog */}
       {showAddConfirmation && (
         <ConfirmationDialog
           title={
@@ -551,7 +630,6 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
         />
       )}
 
-      {/* Delete Confirmation Dialog */}
       {showDeleteConfirmation && (
         <ConfirmationDialog
           title="Delete Experience"
@@ -566,7 +644,6 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
         />
       )}
 
-      {/* Delete Success Dialog */}
       {showDeleteSuccess && (
         <ConfirmationDialog
           title="Experience Deleted Successfully"
