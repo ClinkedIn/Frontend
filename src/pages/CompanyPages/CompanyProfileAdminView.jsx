@@ -143,7 +143,8 @@ const CompanyProfileAdminViewPage = () => {
       
         loginAndFetchData();
       }, []);
-      const handleUpdatePage = async () => {
+      const handleUpdatePage = async (e) => {
+        e.preventDefault();
         if (!isValid()) return;
         
         setIsUpdating(true);

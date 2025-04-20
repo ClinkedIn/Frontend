@@ -19,7 +19,8 @@ const CompanyProfileMemberViewPage = () => {
         navigate(`/company/${companyId}/${tab}`);
       };
 
-    const handleClickFollowingButton = async() => {
+    const handleClickFollowingButton = async(e) => {
+        e.preventDefault();
         const userId ={user_Id :"12345"}
         if(isFollowing) {
             const response = await axios.delete(`${BASE_URL}/companies/${companyId}/unfollow`,{userId});
