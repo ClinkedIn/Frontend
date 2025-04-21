@@ -45,7 +45,7 @@ const Header = ({ notifications }) => {
   const locations = useLocation();
   const currentPath = locations.pathname.split("/")[1];
   const dropdownRef = useRef(null);
-  const [unreadCountMessages, setunreadCountMessages] = setState(0)
+  const [unreadCountMessages, setunreadCountMessages] = useState(0)
   const [conversations, setConversations] = useState([]);
   const [loadingConversations, setLoadingConversations] = useState(true);
 
