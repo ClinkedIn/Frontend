@@ -172,24 +172,22 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
   // Scroll to bottom
 
   useEffect(() => {
-    const scrollToBottom = () => {
     if (!messagesContainerRef.current || !messagesEndRef.current) return;
-    
-    requestAnimationFrame(() => {
-      messagesEndRef.current.scrollIntoView({ 
-        behavior: 'smooth' ,
-        block: 'end'
-      });
-    });
+    const scrollToBottom = () => {
+        requestAnimationFrame(() => {
+          messagesEndRef.current.scrollIntoView({ 
+            behavior: 'smooth' ,
+            block: 'end'
+          });
+        });
   };
-  
 
-  // Initial scroll
-  scrollToBottom();
-  // Set up a small delay to handle content loading
-  const timeoutId = setTimeout(scrollToBottom, 100);
+    scrollToBottom();
 
-  return () => clearTimeout(timeoutId);
+    // Set up a small delay to handle content loading
+    const timeoutId = setTimeout(scrollToBottom, 100);
+
+    return () => clearTimeout(timeoutId);
   }, [messages, loadingMessages, loadingMetadata]);
 
   //Handle Typing Indicator Updates 
