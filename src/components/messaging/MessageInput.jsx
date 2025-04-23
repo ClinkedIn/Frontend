@@ -211,7 +211,7 @@ const MessageInput = ({ currentUser, otherUserId, onTyping }) => {
 
 
   return (
-    <form onSubmit={sendMessage} className="p-4 border-t bg-gray-50">
+    <form onSubmit={sendMessage} className="p-4 border-t border-gray-400 bg-gray-50">
            {/* Display Error Message */}
            {error && (
         <div className="mb-2 p-2 border rounded bg-red-100 text-red-700 text-sm flex justify-between items-center">

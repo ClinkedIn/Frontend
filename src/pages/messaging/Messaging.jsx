@@ -191,7 +191,7 @@ const MessagingPage = () => {
             <Header notifications={notifications} />
             {/* Conversation List (Left Sidebar) */}
              {/* Conditional rendering for mobile: hide list when chat is shown */}
-             <div className="w-2/3 max-[1100px]:w-[90%] max-[600px]:w-full h-full flex flex-row bg-white mt-16 rounded-lg shadow-lg overflow-hidden">
+             <div className="w-2/3 max-[1100px]:w-[90%] max-[600px]:w-full h-full flex flex-row bg-white mt-16 rounded-lg shadow-lg border border-gray-400 overflow-hidden">
             <div className={`
                 ${showChatOnMobile ? 'hidden md:flex' : 'flex'}
                 flex-col flex-grow

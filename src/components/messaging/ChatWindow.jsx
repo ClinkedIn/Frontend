@@ -296,9 +296,9 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
   const isNewChat = !loadingMetadata && !conversationData;
   
   return (
-    <div className="flex-grow flex flex-col h-full bg-white border-l border-gray-200 ">
+    <div className="flex-grow flex flex-col h-full bg-white border-l border-gray-400 ">
       {/* Chat Header */}
-      <div className="p-3 border-b flex justify-between items-center bg-gray-50 ">
+      <div className="p-3 border-b border-gray-400 flex justify-between items-center bg-gray-50 ">
          <div className="flex items-center gap-3 min-w-0"> 
             <button
                 onClick={onBack}
