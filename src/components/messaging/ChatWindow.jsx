@@ -172,6 +172,7 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
   // Scroll to bottom
 
   useEffect(() => {
+    const container = messagesContainerRef.current;
     if (!messagesContainerRef.current || !messagesEndRef.current) return;
     const scrollToBottom = () => {
         requestAnimationFrame(() => {
@@ -181,13 +182,14 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
           });
         });
   };
+    
+    const scrollDistanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
+    if (scrollDistanceFromBottom > 50) {
+      const timeoutId = setTimeout(scrollToBottom, 100);
+      return () => clearTimeout(timeoutId); 
+    }
 
-    scrollToBottom();
-
-    // Set up a small delay to handle content loading
-    const timeoutId = setTimeout(scrollToBottom, 100);
-
-    return () => clearTimeout(timeoutId);
+    
   }, [messages, loadingMessages, loadingMetadata]);
 
   //Handle Typing Indicator Updates 
@@ -334,7 +336,7 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
       </div>
 
       {/* Messages Area */}
-      <div className="flex-grow overflow-y-auto p-4 space-y-1 bg-gray-100 h-[calc(100vh-200px)]" ref={messagesContainerRef} key ={messages.length}>
+      <div className="flex-grow overflow-y-auto p-4 space-y-1 bg-gray-100 h-[calc(100vh-200px)]" ref={messagesContainerRef} >
         {isNewChat && messages.length === 0 && (
              <div className="text-center text-gray-500 pt-10">
                  Send a message to start the conversation with {otherUserInfo?.fullName || 'this user'}.
