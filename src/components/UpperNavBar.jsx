@@ -5,6 +5,7 @@ import { MdLocationPin, MdSearch } from "react-icons/md";
 import Jobs from "../pages/jobs/Jobs";
 import { BASE_URL } from "../constants";
 import { collection, addDoc,getDoc,setDoc, serverTimestamp, doc, updateDoc, arrayUnion, onSnapshot, orderBy, query, where } from 'firebase/firestore';
+import { db } from "../../firebase"; // Adjust the import path as necessary
 import React from "react";
 /**
  * Header component representing the upper navigation bar of the application.
@@ -45,9 +46,12 @@ const Header = ({ notifications }) => {
   const locations = useLocation();
   const currentPath = locations.pathname.split("/")[1];
   const dropdownRef = useRef(null);
-  const [unreadCountMessages, setunreadCountMessages] = useState(0)
+  const [unreadCountMessages, setUnreadCountMessages] = useState(0)
   const [conversations, setConversations] = useState([]);
   const [loadingConversations, setLoadingConversations] = useState(true);
+  const currentUser ={
+    uid:"123"
+  }
 
   useEffect(() => {
     const fetchUnreadCount = async () => {
@@ -67,22 +71,36 @@ const Header = ({ notifications }) => {
   }, [notifications]);
 
   useEffect(() => {
-    const fetchUnreadCountMessages = async () => {
-      try {
-        const response = await axios.get(
-          `${BASE_URL}/messages/unread-count`,
-          { withCredentials: true }
-        );
-        console.log("unread count messages:", response);
-        setunreadCountMessages(response.data.unreadCount);
-      } catch (error) {
-        console.error("Error fetching unread count messages:", error);
-      }
+    const conversationsRef = collection(db, 'conversations');
+    const q = query(
+      conversationsRef,
+      where('participants', 'array-contains', currentUser.uid)
+    );
+
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      let totalUnread = 0;
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        const countForUser = data.unreadCounts?.[currentUser.uid] || 0;
+        totalUnread += countForUser;
+      });
+
+      console.log("Total unread messages from Firestore:", totalUnread);
+      setUnreadCountMessages(totalUnread);
+
+    }, (error) => {
+      
+      console.error("Error fetching unread message count from Firestore:", error);
+      setUnreadCountMessages(0); 
+    });
+    return () => {
+      console.log("Cleaning up Firestore listener for unread messages count.");
+      unsubscribe();
     };
 
-    fetchUnreadCountMessages();
+
   }
-, [unreadCountMessages]);
+, [currentUser?.uid]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -240,24 +258,14 @@ const Header = ({ notifications }) => {
           >
             <img src="/Images/nav-jobs.svg" alt="Jobs" className="w-6 h-6" />
           </button>
-          <button
-            className="hover:bg-gray-200 p-2 rounded-lg"
-            onClick={handleMessagingClick}
-          >
-            <img
-              src="/Images/nav-messaging.svg"
-              alt="Messaging"
-              className="w-6 h-6"
-            />
-          </button>
-          {unreadCountMessages > 0 && (
-              <div
-                className="absolute -top-1 -right-1 bg-[#cb112d] text-white rounded-full 
-                w-5 h-5 flex items-center justify-center text-xs font-medium"
-              >
-                {unreadCount}
+          <button className="relative flex flex-col items-center text-xs text-gray-600 hover:text-black p-1" onClick={handleMessagingClick}>
+            <img src="/Images/nav-messaging.svg" alt="Messaging" className="w-6 h-6" />
+            {unreadCountMessages > 0 && (
+              <div className="absolute -top-1 left-1/2 ml-1 bg-[#cb112d] text-white rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-[10px] md:text-xs font-medium">
+                {unreadCountMessages > 10 ? '10+' : unreadCountMessages} 
               </div>
             )}
+          </button>
           <button
             className="hover:bg-gray-200 p-2 rounded-lg relative"
             onClick={handleNotificationsClick}
