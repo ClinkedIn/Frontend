@@ -53,9 +53,9 @@ const ConversationList = ({
         }, [currentUser?.uid]); // Dependency: currentUser.uid
 
     return (
-        <div className="w-full  md:border-r h-full flex flex-col bg-white">
+        <div className="w-full  md:border-r md:border-gray-400 h-full flex flex-col bg-white">
             {/* Header/Search Area */}
-            <div className="p-4 border-b">
+            <div className="p-4 border-b border-gray-400">
                 <h2 className="text-xl font-bold">Messaging</h2>
 
             </div>

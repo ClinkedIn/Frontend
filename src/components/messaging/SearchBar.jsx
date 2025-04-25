@@ -54,7 +54,7 @@ const ConversationSearch = ({ onSelectUser,connections,loading,error }) => {
   };
 
   return (
-    <div className="p-3 border-b relative">
+    <div className="p-3 border-b border-gray-400 relative">
       <div className="relative">
         <input
           type="text"
@@ -63,7 +63,7 @@ const ConversationSearch = ({ onSelectUser,connections,loading,error }) => {
           onChange={(e) => setSearchTerm(e.target.value)}
           onFocus={() => searchTerm.trim() && setShowResults(true)} // Show results on focus if there's text
          
-          className="w-full pl-10 pr-4 py-2 border rounded-full bg-gray-100 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
+          className="w-full pl-10 pr-4 py-2 border border-gray-400 rounded-full bg-gray-100 focus:bg-white focus:outline-none focus:ring-1 focus:ring-black text-sm"
         />
        
        <IoMdSearch className="h-5 w-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />

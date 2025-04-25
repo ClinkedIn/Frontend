@@ -28,14 +28,6 @@ const CreateCompanyPage = () => {
     const [errors, setErrors] = useState({ });
     const [notifications, setNotifications] = useState([]);
 
-    /*const handleSelectChange = (setter, field) => (e) => {
-        const value = e.target.value;
-        setter(value);
-        setErrors((prev) => ({
-            ...prev,
-            [field]: value.toLowerCase().includes("select") ? "Please choose a valid option." : ""
-        }));
-    };*/
     
      /**
        * Fetches current user profile data
@@ -112,7 +104,8 @@ const CreateCompanyPage = () => {
       
         loginAndFetchData();
       }, []);
-    const createPage = async() => {
+    const createPage = async(e) => {
+        e.preventDefault();
         if(isValid()){
             console.log("Page Created")
             const company ={
@@ -188,7 +181,7 @@ const CreateCompanyPage = () => {
                     >
             </CompanyForm>
             <Toaster position="top-center" />
-                <button className="justify-end rounded-full  py-3 px-5 m-2 text-white cursor-pointer font-semibold bg-[#0A66C2] " onClick={()=>{createPage()}}>Create Page </button>
+                <button className="justify-end rounded-full  py-3 px-5 m-2 text-white cursor-pointer font-semibold bg-[#0A66C2] " onClick={createPage}>Create Page </button>
             </div>
             <aside className="md:px-4 md:w-[60%]  lg:w-[40%] h-fit rounded-lg lg:sticky lg:top-24">
                     <section className="mt-8 shadow-lg rounded-lg flex flex-col">

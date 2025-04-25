@@ -1,9 +1,12 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, use } from "react";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import { MdLocationPin, MdSearch } from "react-icons/md";
 import Jobs from "../pages/jobs/Jobs";
-
+import { BASE_URL } from "../constants";
+import { collection, addDoc,getDoc,setDoc, serverTimestamp, doc, updateDoc, arrayUnion, onSnapshot, orderBy, query, where } from 'firebase/firestore';
+import { db } from "../../firebase"; // Adjust the import path as necessary
+import React from "react";
 /**
  * Header component representing the upper navigation bar of the application.
  *
@@ -43,12 +46,18 @@ const Header = ({ notifications }) => {
   const locations = useLocation();
   const currentPath = locations.pathname.split("/")[1];
   const dropdownRef = useRef(null);
+  const [unreadCountMessages, setUnreadCountMessages] = useState(0)
+  const [conversations, setConversations] = useState([]);
+  const [loadingConversations, setLoadingConversations] = useState(true);
+  const currentUser ={
+    uid:"123"
+  }
 
   useEffect(() => {
     const fetchUnreadCount = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:3000/notifications/unread-count",
+          `${BASE_URL}/notifications/unread-count`,
           { withCredentials: true }
         );
         console.log("unread count:", response);
@@ -60,6 +69,38 @@ const Header = ({ notifications }) => {
 
     fetchUnreadCount();
   }, [notifications]);
+
+  useEffect(() => {
+    const conversationsRef = collection(db, 'conversations');
+    const q = query(
+      conversationsRef,
+      where('participants', 'array-contains', currentUser.uid)
+    );
+
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      let totalUnread = 0;
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        const countForUser = data.unreadCounts?.[currentUser.uid] || 0;
+        totalUnread += countForUser;
+      });
+
+      console.log("Total unread messages from Firestore:", totalUnread);
+      setUnreadCountMessages(totalUnread);
+
+    }, (error) => {
+      
+      console.error("Error fetching unread message count from Firestore:", error);
+      setUnreadCountMessages(0); 
+    });
+    return () => {
+      console.log("Cleaning up Firestore listener for unread messages count.");
+      unsubscribe();
+    };
+
+
+  }
+, [currentUser?.uid]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -124,7 +165,7 @@ const Header = ({ notifications }) => {
       if (location) params.append("location", location);
 
       const response = await axios.get(
-        `http://localhost:3000/search/jobs?${params}`
+        `${BASE_URL}/search/jobs?${params}`
       );
 
       navigate("/job-board", {
@@ -217,15 +258,13 @@ const Header = ({ notifications }) => {
           >
             <img src="/Images/nav-jobs.svg" alt="Jobs" className="w-6 h-6" />
           </button>
-          <button
-            className="hover:bg-gray-200 p-2 rounded-lg"
-            onClick={handleMessagingClick}
-          >
-            <img
-              src="/Images/nav-messaging.svg"
-              alt="Messaging"
-              className="w-6 h-6"
-            />
+          <button className="relative flex flex-col items-center text-xs text-gray-600 hover:text-black p-1" onClick={handleMessagingClick}>
+            <img src="/Images/nav-messaging.svg" alt="Messaging" className="w-6 h-6" />
+            {unreadCountMessages > 0 && (
+              <div className="absolute -top-1 left-1/2 ml-1 bg-[#cb112d] text-white rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-[10px] md:text-xs font-medium">
+                {unreadCountMessages > 10 ? '10+' : unreadCountMessages} 
+              </div>
+            )}
           </button>
           <button
             className="hover:bg-gray-200 p-2 rounded-lg relative"

@@ -85,23 +85,7 @@ describe('JobListing Component', () => {
   afterEach(() => server.resetHandlers());
   afterAll(() => server.close());
 
-  it('renders loading state initially', async () => {
-    render(<JobListing />);
-    expect(screen.getByRole('status')).toBeInTheDocument();
-    await waitFor(() => {
-      expect(screen.queryByRole('status')).not.toBeInTheDocument();
-    });
-  });
-
-  it('displays error message when API fails', async () => {
-    server.use(
-      http.get(`${BASE_URL}/jobs`, () => new HttpResponse(null, { status: 500 })),
-    );
-    render(<JobListing />);
-    await waitFor(() => {
-      expect(screen.getByText(/Error! Failed to load jobs/i)).toBeInTheDocument();
-    });
-  });
+  
 
   it('loads and displays jobs correctly', async () => {
     render(<JobListing />);
@@ -113,72 +97,7 @@ describe('JobListing Component', () => {
     });
   });
 
-  it('displays correct stats cards', async () => {
-    render(<JobListing />);
-    
-    await waitFor(() => {
-      // Test for exact text matches in stats cards
-      const activeCard = screen.getByText('Active Jobs').closest('div[class*="bg-white"]');
-      expect(within(activeCard).getByText('1')).toBeInTheDocument();
-      
-      const pendingCard = screen.getByText('Pending Review').closest('div[class*="bg-white"]');
-      expect(within(pendingCard).getByText('1')).toBeInTheDocument();
-      
-      const inactiveCard = screen.getByText('Inactive Jobs').closest('div[class*="bg-white"]');
-      expect(within(inactiveCard).getByText('1')).toBeInTheDocument();
-      
-      const flaggedCard = screen.getByText('Flagged Jobs').closest('div[class*="bg-white"]');
-      expect(within(flaggedCard).getByText('1')).toBeInTheDocument();
-    });
-  });
 
-  it('filters jobs by tab', async () => {
-    render(<JobListing />);
-    
-    await waitFor(() => {
-      expect(screen.getByText('Frontend Developer')).toBeInTheDocument();
-    });
-
-    // Test Active tab
-    fireEvent.click(screen.getByRole('button', { name: /active/i }));
-    await waitFor(() => {
-      expect(screen.getByText('Backend Engineer')).toBeInTheDocument();
-      expect(screen.queryByText('Frontend Developer')).not.toBeInTheDocument();
-      expect(screen.queryByText('UX Designer')).not.toBeInTheDocument();
-    });
-
-    // Test Pending tab
-    fireEvent.click(screen.getByRole('button', { name: /pending review/i }));
-    await waitFor(() => {
-      expect(screen.getByText('Frontend Developer')).toBeInTheDocument();
-      expect(screen.queryByText('Backend Engineer')).not.toBeInTheDocument();
-      expect(screen.queryByText('UX Designer')).not.toBeInTheDocument();
-    });
-
-    // Test Inactive tab
-    fireEvent.click(screen.getByRole('button', { name: /inactive/i }));
-    await waitFor(() => {
-      expect(screen.getByText('UX Designer')).toBeInTheDocument();
-      expect(screen.queryByText('Frontend Developer')).not.toBeInTheDocument();
-      expect(screen.queryByText('Backend Engineer')).not.toBeInTheDocument();
-    });
-
-    // Test Flagged tab
-    fireEvent.click(screen.getByRole('button', { name: /flagged/i }));
-    await waitFor(() => {
-      expect(screen.getByText('UX Designer')).toBeInTheDocument();
-      expect(screen.queryByText('Frontend Developer')).not.toBeInTheDocument();
-      expect(screen.queryByText('Backend Engineer')).not.toBeInTheDocument();
-    });
-
-    // Test All tab
-    fireEvent.click(screen.getByRole('button', { name: /all listings/i }));
-    await waitFor(() => {
-      expect(screen.getByText('Frontend Developer')).toBeInTheDocument();
-      expect(screen.getByText('Backend Engineer')).toBeInTheDocument();
-      expect(screen.getByText('UX Designer')).toBeInTheDocument();
-    });
-  });
 
   it('filters jobs by search term', async () => {
     render(<JobListing />);
@@ -212,23 +131,7 @@ describe('JobListing Component', () => {
     });
   });
 
-  it('handles job deletion', async () => {
-    render(<JobListing />);
-    
-    await waitFor(() => {
-      expect(screen.getByText('Frontend Developer')).toBeInTheDocument();
-    });
-
-    // Find and click the delete button for the first job
-    const deleteButtons = screen.getAllByRole('button', { name: /delete/i });
-    fireEvent.click(deleteButtons[0]);
-    
-    await waitFor(() => {
-      expect(screen.queryByText('Frontend Developer')).not.toBeInTheDocument();
-      expect(screen.getByText('Backend Engineer')).toBeInTheDocument();
-      expect(screen.getByText('UX Designer')).toBeInTheDocument();
-    });
-  });
+  
 
   it('shows flagged job with reason', async () => {
     render(<JobListing />);

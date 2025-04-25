@@ -3,7 +3,7 @@ import CoverPhoto from "./CoverPhoto";
 import ProfilePhoto from "./ProfilePicture";
 import { useNavigate } from "react-router";
 import axios from "axios";
-
+import { BASE_URL } from "../../constants";  
 /**
  * Interface representing the contact information of a user
  * @interface ContactInfo
@@ -114,7 +114,7 @@ const ProfileHeaderMain: React.FC = () => {
     const fetchUserData = async () => {
       try {
         setLoading(true);
-        const response = await axios.get("http://localhost:3000/user/me");
+        const response = await axios.get(`${BASE_URL}/user/me`);
 
         if (response.data && response.data.user) {
           setUser(response.data.user);
@@ -196,7 +196,7 @@ const ProfileHeaderMain: React.FC = () => {
   const handleAboutSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await axios.patch("http://localhost:3000/user/about", {
+      const response = await axios.patch(`${BASE_URL}/user/about`, {
         about: {
           description: aboutText,
           skills: aboutSkills,
@@ -232,7 +232,7 @@ const ProfileHeaderMain: React.FC = () => {
     e.preventDefault();
     try {
       const response = await axios.patch(
-        "http://localhost:3000/user/contact-info",
+        `${BASE_URL}/user/contact-info`,
         contactInfo
       );
 

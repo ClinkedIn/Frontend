@@ -2,8 +2,21 @@
 import { FaPlus,FaUpload } from "react-icons/fa6";
 
 
+
 const CompanyForm = ({ errors,companyName, setCompanyName, tagline, setTagline, industry, setIndustry, organizationType, setOrganizationType, organizationSize, setOrganizationSize, website, setWebsite, checkbox, setCheckbox, companyAddress, setCompanyAddress, logoPreview, setLogoPreview ,children}) =>{
 
+    const handleOnChngeLogo =(e)=>{
+        if (e.target.files?.[0]) {
+            const file = e.target.files[0];
+            setLogoPreview(URL.createObjectURL(file));
+        // setLogo(file);
+        }
+    
+    }
+    const handleSetLogo =(e)=>{
+        e.preventDefault();
+        setLogoPreview(null);
+    }
 
     return(
         <div>
@@ -121,15 +134,9 @@ const CompanyForm = ({ errors,companyName, setCompanyName, tagline, setTagline, 
                         id="logoUpload"
                         className="hidden"
                         accept="image/png, image/jpeg, image/jpg"
-                        onChange={(e) => {
-                            if (e.target.files?.[0]) {
-                                const file = e.target.files[0];
-                                setLogoPreview(URL.createObjectURL(file));
-                            // setLogo(file);
-                            }
-                        }}
+                        onChange={handleOnChngeLogo}
                     />
-                    <button type="reset"className="cursor-pointer flex items-center justify-center px-4 py-2 bg-[#0A66C2] text-white text-sm font-medium rounded-lg shadow-md hover:bg-blue-700 " onClick={()=>{setLogoPreview(null)}}>reset </button>
+                    <button type="reset"className="cursor-pointer flex items-center justify-center px-4 py-2 bg-[#0A66C2] text-white text-sm font-medium rounded-lg shadow-md hover:bg-blue-700 " onClick={handleSetLogo}>reset </button>
 
                     <img src={logoPreview || "/Images/CompanyLogo.png"} alt="Logo Preview" className="w-32 h-32  " />
 

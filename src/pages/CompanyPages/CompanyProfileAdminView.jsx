@@ -143,7 +143,8 @@ const CompanyProfileAdminViewPage = () => {
       
         loginAndFetchData();
       }, []);
-      const handleUpdatePage = async () => {
+      const handleUpdatePage = async (e) => {
+        e.preventDefault();
         if (!isValid()) return;
         
         setIsUpdating(true);
@@ -236,7 +237,7 @@ const CompanyProfileAdminViewPage = () => {
                             />
                         </button>
                     <div className="flex flex-column justify-between">
-                        <img src={ companyInfo.logo.includes("localhost") ? "/Images/building-icon.png":companyInfo.logo  }  className="w-28 h-28 -mt-10 ml-5  " />
+                        <img src={ companyInfo.logo ? companyInfo.logo : "/Images/Company-icon.png"  }  className="w-28 h-28 -mt-10 ml-5  " />
                         <button className="rounded-full  hover:bg-gray-100 m-4 p-4" 
                         onClick={()=>{setShowForm(true)}}>
                         < MdModeEdit size=" 24"/>

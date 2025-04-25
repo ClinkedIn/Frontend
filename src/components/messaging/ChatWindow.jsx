@@ -41,14 +41,13 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
   const [isBlockedByYou, setIsBlockedByYou] = useState(false);
   const [isBlockedByOther, setIsBlockedByOther] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const messagesContainerRef = useRef(null);
   const messagesEndRef = useRef(null);
 
  
   const otherUserInfo = otherUser
   const otherUserId = otherUser?.userId || null; // Use userId from otherUser prop
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  
 
   // Fetch Conversation Metadata
   useEffect(() => {
@@ -171,17 +170,26 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
   }, [conversationId, currentUser?.uid]);
 
   // Scroll to bottom
+
   useEffect(() => {
-    const scrollThreshold = 100;
-    const container = messagesEndRef.current?.parentNode;
-    if (container) {
-        const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < scrollThreshold;
-        if (isNearBottom || loadingMessages || loadingMetadata) { // Scroll if loading anything
-            scrollToBottom();
-        }
-    } else {
-         scrollToBottom();
+    const container = messagesContainerRef.current;
+    if (!messagesContainerRef.current || !messagesEndRef.current) return;
+    const scrollToBottom = () => {
+        requestAnimationFrame(() => {
+          messagesEndRef.current.scrollIntoView({ 
+            behavior: 'smooth' ,
+            block: 'end'
+          });
+        });
+  };
+    
+    const scrollDistanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
+    if (scrollDistanceFromBottom > 50) {
+      const timeoutId = setTimeout(scrollToBottom, 100);
+      return () => clearTimeout(timeoutId); 
     }
+
+    
   }, [messages, loadingMessages, loadingMetadata]);
 
   //Handle Typing Indicator Updates 
@@ -290,9 +298,9 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
   const isNewChat = !loadingMetadata && !conversationData;
   
   return (
-    <div className="flex-grow flex flex-col h-full bg-white border-l border-gray-200 ">
+    <div className="flex-grow flex flex-col h-full bg-white border-l border-gray-400 ">
       {/* Chat Header */}
-      <div className="p-3 border-b flex justify-between items-center bg-gray-50 ">
+      <div className="p-3 border-b border-gray-400 flex justify-between items-center bg-gray-50 ">
          <div className="flex items-center gap-3 min-w-0"> 
             <button
                 onClick={onBack}
@@ -328,7 +336,7 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
       </div>
 
       {/* Messages Area */}
-      <div className="flex-grow overflow-y-auto p-4 space-y-1 bg-gray-100">
+      <div className="flex-grow overflow-y-auto p-4 space-y-1 bg-gray-100 h-[calc(100vh-200px)]" ref={messagesContainerRef} >
         {isNewChat && messages.length === 0 && (
              <div className="text-center text-gray-500 pt-10">
                  Send a message to start the conversation with {otherUserInfo?.fullName || 'this user'}.
@@ -348,7 +356,7 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
            />
         ))}
          {/* Anchor for scrolling */}
-        <div ref={messagesEndRef} style={{ height: '1px' }} /> {/* Ensure anchor has some height */}
+        <div ref={messagesEndRef} className="h-0" />
       </div>
 
       {/* Blocked Message / Message Input Area */}
