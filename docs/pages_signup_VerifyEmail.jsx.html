@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: pages/signup/VerifyEmail.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: pages/signup/VerifyEmail.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import { useState, useEffect } from "react";
+import axios from "axios";
+import { IoShieldHalf } from "react-icons/io5";
+import { BASE_URL } from "../../constants";
+
+const VerifyEmail = () => {
+  const [code, setCode] = useState(""); // OTP input
+  const [message, setMessage] = useState(""); // Feedback message
+  const [isLoading, setIsLoading] = useState(false); // Loading state for verification
+  const [isVerified, setIsVerified] = useState(false); // Verification status
+  const [user, setUser] = useState(null); // User data
+  const [newEmail, setNewEmail] = useState(""); // New email for editing
+  const [canRequestOTP, setCanRequestOTP] = useState(true); // Cooldown for OTP requests
+  const [timer, setTimer] = useState(0); // Timer for cooldown
+
+  // Request OTP API call
+  /**
+   * Sends a request to obtain a One-Time Password (OTP) and manages the countdown timer for re-requesting.
+   * 
+   * This function performs the following:
+   * - Prevents multiple OTP requests within a short time frame.
+   * - Displays a countdown timer to indicate when the user can request another OTP.
+   * - Sends an HTTP GET request to the `/request-otp` endpoint to request an OTP.
+   * - Handles success and error responses from the server.
+   * - Updates the UI with appropriate messages based on the request status.
+   * 
+   * @async
+   * @function requestOTP
+   * @returns {Promise&lt;void>} Resolves when the OTP request process is complete.
+   * 
+   * @throws {Error} If there is a network error or the server response indicates failure.
+   */
+  const requestOTP = async () => {
+    if (!canRequestOTP) return;
+    setMessage("Requesting OTP...");
+    setCanRequestOTP(false);
+    setTimer(30);
+
+    // Start countdown timer
+    const countdown = setInterval(() => {
+      setTimer((prev) => {
+        if (prev === 1) {
+          clearInterval(countdown);
+          setCanRequestOTP(true);
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    try {
+      const response = await axios.get("/request-otp");
+      if (response.data.success) {
+        setMessage("✅ OTP sent! Check console.");
+        console.log("Mock OTP:", response.data.otp);
+      } else {
+        setMessage("❌ Failed to request OTP. Try again.");
+        setCanRequestOTP(true);
+        clearInterval(countdown);
+      }
+    } catch (error) {
+      setMessage("❌ Network error. Please try again.");
+      setCanRequestOTP(true);
+      clearInterval(countdown);
+    }
+  };
+
+  // Fetch user data on component load
+  useEffect(() => {
+    /**
+     * Fetches the user data from the server and updates the state with the retrieved information.
+     * 
+     * @async
+     * @function fetchUser
+     * @returns {Promise&lt;void>} A promise that resolves when the user data is successfully fetched and state is updated.
+     * @throws Will log an error to the console if the request fails.
+     */
+    const fetchUser = async () => {
+      try {
+        const response = await axios.get(`${BASE_URL}/user`);
+        setUser(response.data);
+        setNewEmail(response.data.email);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
+    };
+
+    // Initial calls
+    requestOTP();
+    fetchUser();
+  }, []);
+
+  // Verify OTP API call
+  /**
+   * Verifies the OTP (One-Time Password) entered by the user.
+   * Sends a POST request to the "/verify-otp" endpoint with the provided OTP code.
+   * Updates the UI state based on the verification result.
+   *
+   * @async
+   * @function verifyOTP
+   * @returns {Promise&lt;void>} No return value.
+   * @throws Will set an error message if the network request fails or the OTP is invalid.
+   */
+  const verifyOTP = async () => {
+    setIsLoading(true);
+    setMessage("Verifying OTP...");
+    try {
+      const response = await axios.post("/verify-otp", { otp: code });
+      if (response.data.success) {
+        setIsVerified(true);
+        setMessage(response.data.message);
+      } else {
+        setMessage(response.data.message || "Invalid OTP. Please try again.");
+      }
+    } catch (error) {
+      setMessage(error.response?.data?.message || "Network error. Please try again.");
+    }
+    setIsLoading(false);
+  };
+
+  return (
+    &lt;div className="container mx-auto flex flex-col items-center justify-center h-screen">
+      {/* Header */}
+      &lt;h2 className="text-2xl font-semibold text-center">Confirm your email&lt;/h2>
+      &lt;p className="text-gray-600 text-center mt-2">
+        Type in the code we sent to{" "}
+        &lt;strong>{newEmail || "your email"}&lt;/strong>.
+        {!isEditing ? (
+          &lt;button
+            className="text-blue-500 cursor-pointer ml-2"
+            onClick={() => setIsEditing(true)}
+          >
+            Edit email
+          &lt;/button>
+        ) : (
+          &lt;>
+            &lt;input
+              type="email"
+              value={newEmail}
+              onChange={(e) => setNewEmail(e.target.value)}
+              className="border border-gray-400 rounded px-2 py-1 ml-2"
+            />
+            &lt;button
+              className="ml-2 text-green-500"
+              onClick={() => setIsEditing(false)}
+            >
+              Save
+            &lt;/button>
+          &lt;/>
+        )}
+      &lt;/p>
+
+      {/* OTP Input */}
+      &lt;input
+        type="text"
+        value={code}
+        onChange={(e) => setCode(e.target.value)}
+        placeholder="------"
+        maxLength={6}
+        className="mt-4 text-center text-2xl tracking-widest border-2 border-gray-500 rounded-lg p-3 outline-none focus:ring-2 focus:ring-black leading-tight"
+      />
+
+      {/* Feedback Message */}
+      {message &amp;&amp; &lt;p className="mt-2 text-lg">{message}&lt;/p>}
+
+      {/* Privacy Notice */}
+      &lt;div className="mt-4 p-4 text-sm text-gray-700 rounded-lg w-full md:max-w-sm text-left bg-white border border-gray-300 shadow-sm flex items-start gap-3">
+        &lt;IoShieldHalf className="text-gray-600 text-lg" />
+        &lt;div className="font-sans w-full">
+          &lt;p className="font-semibold">Your privacy is important&lt;/p>
+          &lt;p className="mt-1 leading-relaxed">
+            We may send you member updates, recruiter messages, job suggestions,
+            invitations, reminders, and promotional messages from us and our partners.
+            You can change your{" "}
+            &lt;span className="text-blue-500 cursor-pointer">preferences&lt;/span> anytime.
+          &lt;/p>
+        &lt;/div>
+      &lt;/div>
+
+      {/* Resend OTP Button */}
+      &lt;p className="text-center mt-4 text-gray-700">
+        Didn't receive the code?{" "}
+        &lt;button
+          className={`cursor-pointer ${
+            canRequestOTP ? "text-blue-500" : "text-gray-400 cursor-not-allowed"
+          }`}
+          onClick={canRequestOTP ? requestOTP : undefined}
+          disabled={!canRequestOTP}
+        >
+          {canRequestOTP ? "Send again" : `Wait ${timer}s`}
+        &lt;/button>
+      &lt;/p>
+
+      {/* Verify Button */}
+      &lt;button
+        className={`mt-4 py-3 px-8 rounded-lg font-semibold ${
+          isVerified
+            ? "bg-green-600 text-white cursor-pointer"
+            : "bg-blue-600 text-white cursor-pointer"
+        } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+        onClick={verifyOTP}
+        disabled={isLoading || isVerified}
+      >
+        {isVerified ? "✅ Confirmed" : isLoading ? "Verifying..." : "Agree &amp; Confirm"}
+      &lt;/button>
+    &lt;/div>
+  );
+};
+
+export default VerifyEmail;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#ApplyJob">ApplyJob</a></li><li><a href="global.html#ChatWindow">ChatWindow</a></li><li><a href="global.html#CommentSection">CommentSection</a></li><li><a href="global.html#ConversationListItem">ConversationListItem</a></li><li><a href="global.html#ConversationSearch">ConversationSearch</a></li><li><a href="global.html#CreatePostModal">CreatePostModal</a></li><li><a href="global.html#Filter">Filter</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#JobBoardPage">JobBoardPage</a></li><li><a href="global.html#JobCard">JobCard</a></li><li><a href="global.html#Jobs">Jobs</a></li><li><a href="global.html#MyJobs">MyJobs</a></li><li><a href="global.html#Notification">Notification</a></li><li><a href="global.html#PostMenu">PostMenu</a></li><li><a href="global.html#PostReactions">PostReactions</a></li><li><a href="global.html#closeModal">closeModal</a></li><li><a href="global.html#fetchCompanies">fetchCompanies</a></li><li><a href="global.html#fetchNotifications">fetchNotifications</a></li><li><a href="global.html#fetchUser">fetchUser</a></li><li><a href="global.html#filteredNotifications">filteredNotifications</a></li><li><a href="global.html#getReactionIcon">getReactionIcon</a></li><li><a href="global.html#handleBlockUser">handleBlockUser</a></li><li><a href="global.html#handleClick">handleClick</a></li><li><a href="global.html#handleDeleteNotification">handleDeleteNotification</a></li><li><a href="global.html#handleFilter">handleFilter</a></li><li><a href="global.html#handleJobClick">handleJobClick</a></li><li><a href="global.html#handleLikeClick">handleLikeClick</a></li><li><a href="global.html#handleMainFilterChange">handleMainFilterChange</a></li><li><a href="global.html#handleMessagingClick">handleMessagingClick</a></li><li><a href="global.html#handleMuteDuration">handleMuteDuration</a></li><li><a href="global.html#handleNotificationClick">handleNotificationClick</a></li><li><a href="global.html#handleSave">handleSave</a></li><li><a href="global.html#handleSearch">handleSearch</a></li><li><a href="global.html#handleSendTestNotification">handleSendTestNotification</a></li><li><a href="global.html#handleSubmit">handleSubmit</a></li><li><a href="global.html#openModal">openModal</a></li><li><a href="global.html#requestOTP">requestOTP</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#useEffect">useEffect</a></li><li><a href="global.html#verifyOTP">verifyOTP</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun Apr 20 2025 18:19:03 GMT+0200 (Eastern European Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

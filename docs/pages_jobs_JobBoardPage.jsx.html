@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: pages/jobs/JobBoardPage.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: pages/jobs/JobBoardPage.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>// JobBoardPage.jsx
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import Header from "../../components/UpperNavBar";
+import { useLocation } from "react-router-dom";
+import JobCard from '../../components/jobs/JobCard';
+import Filter from "../../components/jobs/Filter";
+import ApplyJob from "../../components/jobs/ApplyJob";
+import { BASE_URL } from "../../constants";
+
+
+/**
+ * The JobBoardPage component displays a list of available jobs and allows users to view details,
+ * apply for jobs, and save jobs for later. It uses location state to display specific jobs based
+ * on search queries or location data passed through routing. It features a modal for applying to jobs
+ * and includes a filter component to refine job search results.
+ * 
+ * @component
+ * @example
+ * // Usage
+ * &lt;JobBoardPage />
+ */
+const JobBoardPage = () => {
+  const [jobs, setJobs] = useState([]);
+  const [selectedJob, setSelectedJob] = useState(null);
+  const [tab, setTab]=useState();
+  const location = useLocation();
+  const [applicants, setApplicants] = useState(0); 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  /**
+   * Opens the modal for applying to a job.
+   * 
+   * @function openModal
+   */
+  const openModal = () => setIsModalOpen(true);
+
+  /**
+   * Closes the modal for applying to a job.
+   * 
+   * @function closeModal
+   */
+  const closeModal = () => setIsModalOpen(false);
+/**
+   * Saves the selected job by sending a POST request to the backend.
+   * 
+   * @async
+   * @function handleSave
+   */
+  const handleSave = async () => {
+    const jobId = selectedJob?._id || selectedJob?.id;
+    if (!jobId) {
+      console.error("Job ID is missing, cannot save job.");
+      return;
+    }
+  
+    try {
+      const response = await axios.post(
+        `${BASE_URL}/jobs/${jobId}/save`,
+        {}, 
+        { withCredentials: true }
+      );
+      console.log("Job saved successfully:", response.data);
+      alert("Job saved!");
+    } catch (error) {
+      console.error("Error saving job:", error);
+      if (error.response) {
+        alert(`Failed to save job: ${error.response.data.message}`);
+      }
+    }
+  }; 
+  /**
+  * useEffect hook to load jobs, selected job, and current tab information
+  * from location state when the component mounts.
+  * 
+  * @hook
+  * @function useEffect
+  */
+  useEffect(() => {
+    if (location.state) {
+      setJobs(location.state.jobs || []);
+      setSelectedJob(location.state.selectedJob || null);
+      setTab(location.state.currentPath||null)
+    }
+  }, [location.state]);
+  
+  console.log("Job board: ", jobs)
+  console.log("tab", tab)
+
+
+  return (
+    &lt;div className={`flex flex-col md:flex-row h-screen ${tab ? "mt-28" : "mt-16"} md:pl-[172px] md:pr-[172px]`}>
+        &lt;Header/>
+        {/*Upper Filter */}
+        {tab &amp;&amp; (
+       &lt;Filter/>
+      )}
+      {/* Left Panel - Job List */}
+      &lt;div className="md:w-1/3 w-full h-1/2 md:h-full overflow-y-auto border-r border-gray-300  bg-gray-50">
+      &lt;div className="pl-2 py-3 text-sm bg-[#0a66c2] text-white w-full">
+          {location.state?.searchQuery || location.state?.location 
+            ? `Search Results for ${location.state.searchQuery || location.state.location} `
+            : "Top job picks for you"}&lt;br/>
+            {jobs.length || 0} results
+        &lt;/div>
+        {jobs &amp;&amp; jobs.length > 0 ? (
+                    jobs.map((job, index) => (
+                      &lt;div >&lt;JobCard key={index} 
+                      job={job} jobs={jobs}
+                      />&lt;/div>
+                      
+                    ))
+                  ) : (
+                    &lt;p>No jobs available at the moment.&lt;/p>
+                  )}
+      &lt;/div>
+
+      {/* Right Panel - Job Details */}
+      &lt;div className="md:w-2/3 w-full h-1/2 md:h-full overflow-y-auto p-6 bg-white">
+        {selectedJob ? (
+          &lt;div >
+            &lt;div className="flex flex-row gap-5">
+            &lt;img
+        src={selectedJob?.companyId?.logo|| ""}
+        alt="Company Logo"
+        className="w-12 h-12 object-contain"
+      />
+      &lt;p>{selectedJob?.companyId?.name||""}&lt;/p>
+
+            &lt;/div>
+            &lt;h2 className="text-xl font-semibold mb-2">{selectedJob.title}&lt;/h2>
+            &lt;p className="text-sm text-gray-600 mb-1">
+            {selectedJob.jobLocation} 
+            &lt;/p>
+            &lt;span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded mr-2">
+              {selectedJob.jobType || "Full-time"}
+            &lt;/span>
+            &lt;span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
+              {selectedJob.workplaceType || "On-site"}
+            &lt;/span>
+            
+            &lt;div className="mt-4">
+            &lt;button 
+            onClick={openModal}
+            className="mt-4 mr-4 bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700">
+             Easy Apply
+            &lt;/button>
+           
+             &lt;ApplyJob isOpen={isModalOpen} onClose={closeModal} job={selectedJob} jobId={selectedJob._id}/>
+             &lt;button
+              onClick={handleSave}
+              className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700"
+            >
+              Save
+            &lt;/button>
+              &lt;h3 className="font-medium text-sm mb-1 mt-2">About the job&lt;/h3>
+              &lt;p className="text-sm text-gray-700 whitespace-pre-wrap">
+                {selectedJob.description || "No description available."}
+              &lt;/p>
+            &lt;/div>
+            
+          &lt;/div>
+        ) : (
+          &lt;p className="text-center text-gray-500">Select a job to see details&lt;/p>
+        )}
+      &lt;/div>
+    &lt;/div>
+  );
+};
+
+export default JobBoardPage;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#ApplyJob">ApplyJob</a></li><li><a href="global.html#ChatWindow">ChatWindow</a></li><li><a href="global.html#CommentSection">CommentSection</a></li><li><a href="global.html#ConversationListItem">ConversationListItem</a></li><li><a href="global.html#ConversationSearch">ConversationSearch</a></li><li><a href="global.html#CreatePostModal">CreatePostModal</a></li><li><a href="global.html#Filter">Filter</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#JobBoardPage">JobBoardPage</a></li><li><a href="global.html#JobCard">JobCard</a></li><li><a href="global.html#Jobs">Jobs</a></li><li><a href="global.html#MyJobs">MyJobs</a></li><li><a href="global.html#Notification">Notification</a></li><li><a href="global.html#PostMenu">PostMenu</a></li><li><a href="global.html#PostReactions">PostReactions</a></li><li><a href="global.html#closeModal">closeModal</a></li><li><a href="global.html#fetchCompanies">fetchCompanies</a></li><li><a href="global.html#fetchNotifications">fetchNotifications</a></li><li><a href="global.html#fetchUser">fetchUser</a></li><li><a href="global.html#filteredNotifications">filteredNotifications</a></li><li><a href="global.html#getReactionIcon">getReactionIcon</a></li><li><a href="global.html#handleBlockUser">handleBlockUser</a></li><li><a href="global.html#handleClick">handleClick</a></li><li><a href="global.html#handleDeleteNotification">handleDeleteNotification</a></li><li><a href="global.html#handleFilter">handleFilter</a></li><li><a href="global.html#handleJobClick">handleJobClick</a></li><li><a href="global.html#handleLikeClick">handleLikeClick</a></li><li><a href="global.html#handleMainFilterChange">handleMainFilterChange</a></li><li><a href="global.html#handleMessagingClick">handleMessagingClick</a></li><li><a href="global.html#handleMuteDuration">handleMuteDuration</a></li><li><a href="global.html#handleNotificationClick">handleNotificationClick</a></li><li><a href="global.html#handleSave">handleSave</a></li><li><a href="global.html#handleSearch">handleSearch</a></li><li><a href="global.html#handleSendTestNotification">handleSendTestNotification</a></li><li><a href="global.html#handleSubmit">handleSubmit</a></li><li><a href="global.html#openModal">openModal</a></li><li><a href="global.html#requestOTP">requestOTP</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#useEffect">useEffect</a></li><li><a href="global.html#verifyOTP">verifyOTP</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun Apr 20 2025 18:19:03 GMT+0200 (Eastern European Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

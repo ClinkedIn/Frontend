@@ -121,11 +121,11 @@ const JobBoardPage = () => {
           <div >
             <div className="flex flex-row gap-5">
             <img
-        src={selectedJob.companyId.logo}
+        src={selectedJob?.companyId?.logo|| ""}
         alt="Company Logo"
         className="w-12 h-12 object-contain"
       />
-      <p>{selectedJob.companyId.name}</p>
+      <p>{selectedJob?.companyId?.name||""}</p>
 
             </div>
             <h2 className="text-xl font-semibold mb-2">{selectedJob.title}</h2>

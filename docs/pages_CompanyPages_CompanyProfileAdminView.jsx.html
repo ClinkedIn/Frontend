@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: pages/CompanyPages/CompanyProfileAdminView.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: pages/CompanyPages/CompanyProfileAdminView.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import { FaPlus } from "react-icons/fa6";
+import { Outlet, useNavigate,useParams } from "react-router-dom";
+import Header from "../../components/UpperNavBar";
+import InlineTabs from "../../components/CompanyPageSections/InlineTabs"
+import { useState,useEffect } from "react";
+import { TiEye } from "react-icons/ti";
+import { MdModeEdit } from "react-icons/md";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCamera } from "@fortawesome/free-solid-svg-icons";
+import CompanyForm from "../../components/CompanyPageSections/CompanyPageForm";
+import axios from "axios";
+import { putRequest } from "../../services/axios";
+import { BASE_URL } from "../../constants";
+import { set } from "date-fns";
+import {toast,Toaster} from "react-hot-toast";
+
+
+const CompanyProfileAdminViewPage = () => {
+    const navigate = useNavigate();
+    const [user, setUser] = useState(null);
+    const {companyId, section = "Feed"} = useParams();
+    const [isUpdating, setIsUpdating] = useState(false);
+    const [activeTab, setActiveTab] = useState(section);
+    const [companyInfo, setCompanyInfo] = useState();
+    const [showForm, setShowForm] = useState(false);
+    const [companyName, setCompanyName] = useState("");
+    const [tagline, setTagline] = useState("");
+    const [industry, setIndustry] = useState("");
+    const [organizationType, setOrganizationType] = useState("");
+    const [organizationSize, setOrganizationSize] = useState("");
+    const [website, setWebsite] = useState("");
+    const [checkbox, setCheckbox] = useState(false);
+    //const [logo, setLogo] = useState&lt;File | null>(null);
+    const [companyAddress, setCompanyAddress] = useState("");   
+    const [logoPreview, setLogoPreview] = useState(null);
+    const [errors, setErrors] = useState({ });
+    const [notifications, setNotifications] = useState([]);
+    const Tabs =["Feed","Activity","Analytics"];
+
+     /**
+       * Fetches current user profile data
+       * @async
+       * @function
+       */
+      const fetchUser = async () => {
+        try {
+          const response = await axios.get(`${BASE_URL}/user/me`, {
+        
+            withCredentials:true
+          });
+      
+          setUser(response.data);
+          console.log("User data:", response.data);
+        } catch (error) {
+          console.error("Error fetching user:", error);
+        }
+      };
+
+    const isValid = () => {
+        let newErrors = {};
+
+        if (!companyName) {
+            newErrors.companyName = "Please enter the company name";
+        } else {
+            newErrors.companyName = "";
+        }
+    
+        if (!companyAddress) {
+            newErrors.companyAddress = "Please enter the company address";
+        } else {
+            newErrors.companyAddress = "";
+        }
+    
+        const pattern = /^(https?:\/\/|www\.)[a-zA-Z0-9.-]+\.(com|org)(:\d+)?(\/\S*)?(\?\S*)?$/;
+        if (!website ||  !pattern.test(website)) {
+            newErrors.website = "Please enter a valid website URL.";
+        } else {
+            newErrors.website = "";
+        }
+    
+        if (!organizationSize) {
+            newErrors.organizationSize = "Please choose a valid option.";
+        } else {
+            newErrors.organizationSize = "";
+        }
+    
+        if (!organizationType) {
+            newErrors.organizationType = "Please choose a valid option.";
+        } else {
+            newErrors.organizationType = "";
+        }
+    
+        if (!industry) {
+            newErrors.industry = "Please enter the industry";
+        } else {
+            newErrors.industry = "";
+        }
+    
+
+        
+        setErrors(newErrors);
+        return Object.keys(newErrors).filter((key) => newErrors[key]).length === 0;
+    };
+
+    const handleTabClick = (tab) => {
+        setActiveTab(tab);
+        navigate(`/company/${companyId}/admin/${tab}`);
+      };
+
+    const handleClickCreateButton =() =>{
+        console.log("create ")
+    }
+    
+    const handleModifyCoverPicture=() =>{
+        console.log("ModifyCoverPicture ")
+    }
+
+    const fetchCompanyInfo=async()=>{
+        try {
+            const response = await axios.get(
+                `${BASE_URL}/companies/${companyId}`
+            );
+            setCompanyInfo(response.data); 
+            setCompanyName(response.data.name)
+            setCompanyAddress(response.data.address)
+            setWebsite(response.data.website)
+            setIndustry(response.data.industry)
+            setOrganizationSize(response.data.organizationSize)
+            setOrganizationType(response.data.organizationType)
+            setLogoPreview(response.data.logo)
+            setTagline(response.data.tagLine)
+            console.log("company data:", response.data);
+            
+        } catch (error) {
+            console.error("Error fetching company info:", error);
+         }
+    }
+    useEffect(() => {
+        const loginAndFetchData = async () => {
+         // await testLogin(); // Ensure login is completed first
+          fetchUser(); 
+        };
+      
+        loginAndFetchData();
+      }, []);
+      const handleUpdatePage = async () => {
+        if (!isValid()) return;
+        
+        setIsUpdating(true);
+        try {
+            const company = {
+                userId: user?.user?._id,
+                name: companyName,
+                address: companyAddress,
+                website: website,
+                industry: industry,
+                organizationSize: organizationSize,
+                organizationType: organizationType,
+                logo: logoPreview,
+                tagLine: tagline
+            };
+    
+            const response = await putRequest(`${BASE_URL}/companies/${companyId}`, company);
+            
+            
+                setCompanyInfo(response.data); 
+                setShowForm(false);
+                
+        } catch (error) {
+            console.error('Error updating company:', error);
+            toast.error("Error updating company" );
+            
+            
+        } finally {
+            setIsUpdating(false);
+        }
+    }
+    useEffect(()=>{
+        if(!companyInfo) fetchCompanyInfo();
+    },[]);
+
+    return (
+        &lt;div className="   bg-[#f4f2ee] min-h-screen  items-center flex flex-col">
+            
+            &lt;Header notifications={notifications} />
+            {showForm ? 
+                (&lt;div className="fixed inset-0 flex items-center justify-center bg-black/50 bg-opacity-50 z-50 "
+                onClick={() => setShowForm(false)} 
+                >
+                &lt;div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl relative max-h-[90vh] overflow-y-auto  "
+                    onClick={(e) => e.stopPropagation()} 
+                >
+                    &lt;CompanyForm 
+                        errors={errors}
+                        companyName={companyName} setCompanyName={setCompanyName}
+                        tagline={tagline} setTagline={setTagline}
+                        industry={industry} setIndustry={setIndustry}
+                        organizationType={organizationType} setOrganizationType={setOrganizationType}
+                        organizationSize={organizationSize} setOrganizationSize={setOrganizationSize}
+                        website={website} setWebsite={setWebsite}
+                        checkbox={checkbox} setCheckbox={setCheckbox}
+                        companyAddress={companyAddress} setCompanyAddress={setCompanyAddress}
+                        logoPreview={logoPreview} setLogoPreview={setLogoPreview}
+                    />
+                     &lt;Toaster position="top-center" />
+                    &lt;div className="flex justify-end gap-4 mt-4">
+                        &lt;button 
+                            className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
+                            onClick={() => setShowForm(false)}
+                        >
+                            Cancel
+                        &lt;/button>
+                        &lt;button 
+                            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                            onClick={handleUpdatePage}
+                            disabled={isUpdating}
+                        >
+                            {isUpdating ? 'Updating...' : 'Update'}
+                        &lt;/button>
+                    &lt;/div>
+                &lt;/div>
+            &lt;/div>)
+            :(companyInfo &amp;&amp; 
+            (&lt;div className="lg:w-1/2 lg:h-3/4 md:w-3/4 max-[430px]:w-full ">
+                &lt;div className="bg-white rounded-lg shadow-lg mt-16 relative"> 
+                    &lt;img src="/Images/card-bg.svg"  className="w-full h-30 rounded-t-lg" />
+                        &lt;button
+                            className="absolute top-4 right-4 bg-white rounded-full shadow-md hover:cursor-pointer px-3 py-2 m-2"
+                            aria-label="Change cover photo"
+                            onClick={handleModifyCoverPicture}
+                        >
+                            &lt;FontAwesomeIcon
+                                className="text-[#005cb7] hover:text-[#004182]"
+                                size="sm"
+                                icon={faCamera}
+                            />
+                        &lt;/button>
+                    &lt;div className="flex flex-column justify-between">
+                        &lt;img src={ companyInfo.logo.includes("localhost") ? "/Images/building-icon.png":companyInfo.logo  }  className="w-28 h-28 -mt-10 ml-5  " />
+                        &lt;button className="rounded-full  hover:bg-gray-100 m-4 p-4" 
+                        onClick={()=>{setShowForm(true)}}>
+                        &lt; MdModeEdit size=" 24"/>
+                        &lt;/button>
+                    &lt;/div>
+
+                    
+
+                    &lt;div className="px-5 pt-5">
+                        &lt;h1 className="text-2xl">{companyInfo.name}&lt;/h1>
+                        &lt;div className="flex gap-2">
+                            &lt;p className="text-gray-500 text-sm">{companyInfo.industry}&lt;/p>
+                            &lt;p className="text-gray-500 text-sm">{companyInfo.address}&lt;/p>
+                            &lt;p className="text-gray-500 text-sm">{companyInfo.followers.length} followers&lt;/p>
+                            &lt;p className="text-gray-500 text-sm">{companyInfo.organizationSize} emplyees&lt;/p>
+                        &lt;/div>
+                        &lt;div className="flex gap-4 max-[430px]:flex-col max-[430px]:gap-0">
+                            &lt;button className="    mt-4 flex items-center justify-center gap-2 bg-[#0A66C2] text-white font-semibold py-2 px-8 rounded-full hover:bg-[#004182]" onClick={()=>{handleClickCreateButton()}}>
+                                &lt;FaPlus className="w-4 h-4"  />
+                                Create 
+                            &lt;/button> 
+                            &lt;button className="  mt-4 flex items-center justify-center gap-2 bg-white text-gray-500  border-2 font-semibold py-2 px-8 rounded-full hover:bg-gray-200 "  onClick={()=>{navigate(`/company/${companyId}/`)}}>
+                                &lt;TiEye className="size-6"  />
+                                View as a member
+                            &lt;/button>
+                        &lt;/div>
+                    &lt;/div>
+                    &lt;hr className="border-gray-300 my-2" />
+                    &lt;InlineTabs activeTab={activeTab} Tabs={Tabs} handleTabClick={handleTabClick} />  
+                &lt;/div>
+                &lt;div className="mt-4">
+                   &lt;Outlet context={{companyInfo}}/>
+                &lt;/div>
+            &lt;/div>)
+            )
+        }
+        &lt;/div>
+    )
+}
+export default CompanyProfileAdminViewPage;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#ApplyJob">ApplyJob</a></li><li><a href="global.html#ChatWindow">ChatWindow</a></li><li><a href="global.html#CommentSection">CommentSection</a></li><li><a href="global.html#ConversationListItem">ConversationListItem</a></li><li><a href="global.html#ConversationSearch">ConversationSearch</a></li><li><a href="global.html#CreatePostModal">CreatePostModal</a></li><li><a href="global.html#Filter">Filter</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#JobBoardPage">JobBoardPage</a></li><li><a href="global.html#JobCard">JobCard</a></li><li><a href="global.html#Jobs">Jobs</a></li><li><a href="global.html#MyJobs">MyJobs</a></li><li><a href="global.html#Notification">Notification</a></li><li><a href="global.html#PostMenu">PostMenu</a></li><li><a href="global.html#PostReactions">PostReactions</a></li><li><a href="global.html#closeModal">closeModal</a></li><li><a href="global.html#fetchCompanies">fetchCompanies</a></li><li><a href="global.html#fetchNotifications">fetchNotifications</a></li><li><a href="global.html#fetchUser">fetchUser</a></li><li><a href="global.html#filteredNotifications">filteredNotifications</a></li><li><a href="global.html#getReactionIcon">getReactionIcon</a></li><li><a href="global.html#handleBlockUser">handleBlockUser</a></li><li><a href="global.html#handleClick">handleClick</a></li><li><a href="global.html#handleDeleteNotification">handleDeleteNotification</a></li><li><a href="global.html#handleFilter">handleFilter</a></li><li><a href="global.html#handleJobClick">handleJobClick</a></li><li><a href="global.html#handleLikeClick">handleLikeClick</a></li><li><a href="global.html#handleMainFilterChange">handleMainFilterChange</a></li><li><a href="global.html#handleMessagingClick">handleMessagingClick</a></li><li><a href="global.html#handleMuteDuration">handleMuteDuration</a></li><li><a href="global.html#handleNotificationClick">handleNotificationClick</a></li><li><a href="global.html#handleSave">handleSave</a></li><li><a href="global.html#handleSearch">handleSearch</a></li><li><a href="global.html#handleSendTestNotification">handleSendTestNotification</a></li><li><a href="global.html#handleSubmit">handleSubmit</a></li><li><a href="global.html#openModal">openModal</a></li><li><a href="global.html#requestOTP">requestOTP</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#useEffect">useEffect</a></li><li><a href="global.html#verifyOTP">verifyOTP</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun Apr 20 2025 18:19:03 GMT+0200 (Eastern European Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
