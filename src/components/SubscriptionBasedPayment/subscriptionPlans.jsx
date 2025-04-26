@@ -324,7 +324,7 @@ const SubscriptionPlans = () => {
 
     try {
       const response = await fetch(`${BASE_URL}/stripe/cancel-subscription`, {
-        method: "POST",
+        method: "DELETE",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("token")}`,

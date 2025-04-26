@@ -12,7 +12,7 @@ const SubscriptionStatus = () => {
     const fetchSubscriptionDetails = async () => {
       try {
         // Replace with your actual API endpoint
-        const response = await fetch(`${BASE_URL}/api/user/subscription`, {
+        const response = await fetch(`${BASE_URL}/api/user/me`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
@@ -23,6 +23,7 @@ const SubscriptionStatus = () => {
         }
 
         const data = await response.json();
+        console.log("data:", data);
         setSubscription(data);
       } catch (err) {
         setError("Could not load subscription details");
