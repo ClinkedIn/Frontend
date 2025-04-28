@@ -67,11 +67,11 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
         setIsTyping(otherUserId ? (data.typing?.[otherUserId] || false) : false);
 
         // Mark conversation as read (only if data exists)
-        if (data.unreadCounts?.[currentUser.uid] > 0) {
+        /*if (data.unreadCounts?.[currentUser.uid] > 0) {
            updateDoc(convDocRef, {
                [`unreadCounts.${currentUser.uid}`]: 0
            }).catch(err => console.error("Error marking conversation as read:", err));
-        }
+        }*/
       } else {
         
         console.log("Conversation document not found (might be new):", conversationId);
@@ -109,6 +109,41 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
      * Logs any errors encountered while fetching the conversation details or updating the document.
      */
   }, [conversationId, currentUser?.uid, otherUserId]); 
+
+   // --- NEW EFFECT: Mark conversation as read when it is selected/opened ---
+   useEffect(() => {
+    if (!conversationId || !currentUser?.uid) {
+        return;
+    }
+
+    const convDocRef = doc(db, 'conversations', conversationId);
+
+    // Use getDoc to check current state and mark as read only once on load/selection
+    const markAsReadOnLoad = async () => {
+         try {
+            const docSnap = await getDoc(convDocRef);
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                // Check if the current user has unread messages
+                if (data.unreadCounts?.[currentUser.uid] > 0) {
+                     console.log(`Marking conversation ${conversationId} as READ on selection.`);
+                    await updateDoc(convDocRef, {
+                        [`unreadCounts.${currentUser.uid}`]: 0,
+                        ['forceUnread']: false
+                    });
+                }
+            }
+         } catch (error) {
+            console.error("Error marking conversation as read on selection:", error);
+         }
+    };
+
+    // Trigger the mark as read logic when conversationId or currentUser changes
+    markAsReadOnLoad();
+
+}, [conversationId, currentUser?.uid]); // Dependencies: Run when conversationId or currentUser changes
+
+
   useEffect(() => {
     if (!conversationId || !currentUser?.uid) {
       setLoadingMetadata(false);
@@ -398,7 +433,7 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
             </div>
         )}
         {/* Show prompt if chat exists but has no messages */}
-        {!isNewChat && messages.length === 0 && !loadingMessages && (
+        {!isNewChat && messages.length === 0 && !loadingMessages && !loadingMetadata && (
             <div className="text-center text-gray-500 pt-10">No messages yet.</div>
         )}
         {messages.map((msg) => (
