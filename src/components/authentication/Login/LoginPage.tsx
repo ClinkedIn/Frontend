@@ -10,6 +10,30 @@ import { useAuth } from "../../../context/AuthContext";
 import axios from "axios";
 import { BASE_URL } from "../../../constants";
 
+/**
+ * The `LoginPage` component renders a login form for user authentication.
+ * It includes input fields for email and password, a Google login button,
+ * and a submit button to trigger the login process. The component also
+ * handles form validation, error display, and login mutation using React Query.
+ *
+ * Features:
+ * - Validates user input for email and password fields.
+ * - Displays error messages for invalid inputs.
+ * - Toggles password visibility.
+ * - Handles login requests and manages authentication tokens.
+ * - Redirects the user to the feed page upon successful login.
+ * - Provides a link to the signup page for new users.
+ *
+ * Dependencies:
+ * - React Query for managing the login mutation.
+ * - Axios for making HTTP requests.
+ * - React Router for navigation.
+ * - Framer Motion for animations.
+ * - Toast notifications for success and error messages.
+ *
+ * @component
+ * @returns {JSX.Element} The rendered login page component.
+ */
 const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -59,29 +83,6 @@ const LoginPage = () => {
     if (data.refreshToken) {
       localStorage.setItem("refreshToken", data.refreshToken); // Persist refreshToken
     }
-  };
-
-  // Helper function to extract error messages
-  /**
-   * Extracts and returns an appropriate error message based on the provided error object.
-   *
-   * @param err - The error object, which can be of any type. It is expected to potentially
-   *              contain a `response` property with `status` and `data.error` fields.
-   * @returns A string representing the error message. If the status code is 404, a specific
-   *          "User not found" message is returned. If the server provides an error message,
-   *          it is used. Otherwise, a default "Invalid credentials" message is returned.
-   */
-  const getErrorMessage = (err: unknown): string => {
-    const errorResponse = err as {
-      response?: { status?: number; data?: { error?: string } };
-    };
-    const statusCode = errorResponse.response?.status;
-    const errorMessageFromServer = errorResponse.response?.data?.error;
-
-    if (statusCode === 404)
-      return "User not found. Please check your email or password.";
-    if (errorMessageFromServer) return errorMessageFromServer; // Use the error message from the server
-    return "Invalid credentials"; // Default fallback message
   };
 
   // Login mutation hook

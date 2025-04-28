@@ -9,6 +9,45 @@ import { useSignup } from "../../../context/SignUpContext";
 import { useAuth } from "../../../context/AuthContext";
 import { auth, provider, signInWithPopup } from "../../../../firebase";
 
+/**
+ * The `SignupPage` component renders a user interface for signing up to the application.
+ * It includes form fields for first name, last name, email, and password, along with
+ * validation logic for each field. The component also integrates Google Sign-Up and
+ * reCAPTCHA for enhanced security and user convenience.
+ *
+ * @component
+ *
+ * @description
+ * This component provides the following features:
+ * - Input fields for first name, last name, email, and password with real-time validation.
+ * - Error messages for invalid inputs.
+ * - A "Remember me" checkbox for user preference.
+ * - reCAPTCHA integration to prevent automated sign-ups.
+ * - Google Sign-Up functionality using Firebase Authentication.
+ * - A responsive design with animations for a better user experience.
+ *
+ * @remarks
+ * - The component uses the `useSignup` and `useAuth` hooks for managing user data and authentication state.
+ * - It relies on environment variables (`VITE_SITEKEY` and `VITE_API_BASE_URL`) for reCAPTCHA and API integration.
+ * - The `motion` library is used for animations, and `react-toastify` is used for displaying notifications.
+ *
+ * @example
+ * ```tsx
+ * import SignupPage from './SignUpPage';
+ *
+ * const App = () => {
+ *   return (
+ *     <div>
+ *       <SignupPage />
+ *     </div>
+ *   );
+ * };
+ *
+ * export default App;
+ * ```
+ *
+ * @returns {JSX.Element} The rendered sign-up page component.
+ */
 const SignupPage = () => {
   const { signupData, setSignupData } = useSignup();
   const [emailError, setEmailError] = useState("");

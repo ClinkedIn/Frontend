@@ -3,10 +3,27 @@ import { motion } from "framer-motion";
 import { auth, provider, signInWithPopup } from "../../../firebase";
 import toast from "react-hot-toast";
 import Footer from "../../components/Footer/Footer";
+import { useAuth } from "../../context/AuthContext";
+import { useEffect } from "react";
 
-const WelcomePage = () => {
+const LandingPage = () => {
+  const { isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (!loading && isAuthenticated) {
+      navigate("/feed", { replace: true });
+    }
+  }, [isAuthenticated, loading, navigate]);
+
+  if (loading) {
+    return <div>Loading...</div>; 
+  }
+
+  if (isAuthenticated) {
+    return null;
+  }
+  
   return (
     <div className="relative min-h-screen flex flex-col">
       {/* Navbar */}
@@ -158,4 +175,4 @@ const WelcomePage = () => {
   );
 };
 
-export default WelcomePage;
+export default LandingPage;

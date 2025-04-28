@@ -1,10 +1,37 @@
-import React, { useState, useEffect } from 'react';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/Main.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/Main.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import PostMenu from './PostMenu.jsx';
 import CreatePostModal from './PostCreation.jsx';
 import PostReactions from './PostReactions.jsx';
 import CommentSection from './CommentSection.jsx';
-import { BASE_URL } from "../constants";
 
 // Set axios defaults to include credentials with all requests
 axios.defaults.withCredentials = true;
@@ -24,9 +51,9 @@ axios.defaults.withCredentials = true;
  * 
  * function App() {
  *   return (
- *     <div>
- *       <Main />
- *     </div>
+ *     &lt;div>
+ *       &lt;Main />
+ *     &lt;/div>
  *   );
  * }
  *
@@ -82,8 +109,8 @@ const Main = () => {
   const [loadingComments, setLoadingComments] = useState({});
   
   // Use exact API endpoint as specified
-  const API_ENDPOINT = `${BASE_URL}/posts`;
-  const COMMENTS_ENDPOINT = `${BASE_URL}/comments`;
+  const API_ENDPOINT = 'http://localhost:3000/posts';
+  const COMMENTS_ENDPOINT = 'http://localhost:3000/comments';
   
   // Available reaction types
   /**
@@ -131,11 +158,11 @@ const Main = () => {
    *
    * @async
    * @function fetchUser
-   * @returns {Promise<void>} A promise that resolves when the user data is fetched and logged, or rejects if an error occurs.
+   * @returns {Promise&lt;void>} A promise that resolves when the user data is fetched and logged, or rejects if an error occurs.
    */
   const fetchUser = async () => {
     try {
-      const response = await axios.get(`${BASE_URL}/user/profile`, { withCredentials: true });
+      const response = await axios.get('http://localhost:3000/user/profile', { withCredentials: true });
       console.log("User data:", response.data);
     } catch (error) {
       console.error("Error fetching user data:", error);
@@ -153,12 +180,12 @@ const Main = () => {
    * 
    * @async
    * @function fetchNotifications
-   * @returns {Promise<void>} A promise that resolves when the notifications
+   * @returns {Promise&lt;void>} A promise that resolves when the notifications
    * are successfully fetched and logged, or rejects if an error occurs.
    */
   const fetchNotifications = async () => {
     try {
-      const response = await axios.get(`${BASE_URL}/notifications`, { withCredentials: true });
+      const response = await axios.get('http://localhost:3000/notifications', { withCredentials: true });
       console.log("Notifications:", response.data);
     } catch (error) {
       console.error("Error fetching notifications:", error);
@@ -191,7 +218,7 @@ const Main = () => {
       let postsData = response.data;
       
       // Check if response has posts property (from the JSON example you provided)
-      if (response.data && response.data.posts) {
+      if (response.data &amp;&amp; response.data.posts) {
         postsData = response.data.posts;
         console.log("Pagination info:", response.data.pagination);
       }
@@ -231,7 +258,7 @@ const Main = () => {
    * @async
    * @function fetchComments
    * @param {string} postId - The ID of the post for which to fetch comments.
-   * @returns {Promise<void>} A promise that resolves when the comments are fetched and state is updated.
+   * @returns {Promise&lt;void>} A promise that resolves when the comments are fetched and state is updated.
    */
   const fetchComments = async (postId) => {
     try {
@@ -243,7 +270,7 @@ const Main = () => {
       const response = await axios.get(endpoint);
       console.log(`Comments response for post ${postId}:`, response.data);
       
-      if (response.data && response.data.comments) {
+      if (response.data &amp;&amp; response.data.comments) {
         setComments(prev => ({
           ...prev,
           [postId]: response.data.comments
@@ -270,7 +297,7 @@ const Main = () => {
    * @async
    * @function toggleComments
    * @param {string} postId - The unique identifier of the post whose comments are being toggled.
-   * @returns {Promise<void>} A promise that resolves when the comments are fetched (if needed).
+   * @returns {Promise&lt;void>} A promise that resolves when the comments are fetched (if needed).
    */
   const toggleComments = async (postId) => {
     const isExpanded = expandedComments[postId];
@@ -281,7 +308,7 @@ const Main = () => {
     }));
     
     // If expanding comments and we don't have them yet, fetch them
-    if (!isExpanded && !comments[postId]) {
+    if (!isExpanded &amp;&amp; !comments[postId]) {
       await fetchComments(postId);
     }
   };
@@ -295,10 +322,10 @@ const Main = () => {
    * @param {string} postId - The ID of the post to which the comment is being added.
    * @param {string} commentText - The content of the comment.
    * @param {File|null} [attachment=null] - An optional file attachment for the comment.
-   * @param {Array<string>} [taggedUsers=[]] - An optional array of user IDs to tag in the comment.
+   * @param {Array&lt;string>} [taggedUsers=[]] - An optional array of user IDs to tag in the comment.
    * @param {string|null} [parentComment=null] - The ID of the parent comment if this is a reply.
    * @param {string|null} [attachmentUrl=null] - An optional URL for an attachment.
-   * @returns {Promise<Object>} The response data from the API, including the posted comment.
+   * @returns {Promise&lt;Object>} The response data from the API, including the posted comment.
    * @throws {Error} Throws an error if the comment could not be posted.
    *
    * @example
@@ -337,7 +364,7 @@ const Main = () => {
       }
       
       // Add tagged users if any
-      if (taggedUsers && taggedUsers.length > 0) {
+      if (taggedUsers &amp;&amp; taggedUsers.length > 0) {
         formData.append('taggedUsers', JSON.stringify(taggedUsers));
       }
       
@@ -364,7 +391,7 @@ const Main = () => {
       console.log(`Comment posted successfully:`, response.data);
       
       // If we receive the comment in the response, add it to our comment list
-      if (response.data && response.data.comment) {
+      if (response.data &amp;&amp; response.data.comment) {
         setComments(prev => {
           const existingComments = prev[postId] || [];
           
@@ -445,7 +472,7 @@ const Main = () => {
    * @param {string} commentId - The ID of the comment to react to.
    * @param {string} [reactionType='like'] - The type of reaction to send (e.g., 'like', 'dislike').
    * @param {boolean} [isRemove=false] - Whether to remove the reaction instead of adding it.
-   * @returns {Promise<void>} - A promise that resolves when the reaction is processed.
+   * @returns {Promise&lt;void>} - A promise that resolves when the reaction is processed.
    * @throws {Error} - Throws an error if the reaction request fails.
    */
   const handleReactToComment = async (postId, commentId, reactionType = 'like', isRemove = false) => {
@@ -527,8 +554,8 @@ const Main = () => {
       formData.append('description', postData.text);
       
       // Add attachments if any
-      if (postData.files && postData.files.length > 0) {
-        for (let i = 0; i < postData.files.length; i++) {
+      if (postData.files &amp;&amp; postData.files.length > 0) {
+        for (let i = 0; i &lt; postData.files.length; i++) {
           formData.append('files', postData.files[i]);
         }
       }
@@ -581,7 +608,7 @@ const Main = () => {
    * @param {string|number} postId - The ID of the post to react to.
    * @param {string} [reactionType='like'] - The type of reaction to add (e.g., 'like', 'love').
    * @param {boolean} [isRemove=false] - Whether to remove the reaction instead of adding it.
-   * @returns {Promise<void>} - A promise that resolves when the reaction is processed.
+   * @returns {Promise&lt;void>} - A promise that resolves when the reaction is processed.
    *
    * @description
    * This function sends a reaction to the server using either a POST (to add) or DELETE (to remove) request.
@@ -645,9 +672,9 @@ const Main = () => {
               if (post.id === postId || post.postId === postId) {
                 // Simple if-check for metrics update
                 let likeDelta = 0;
-                if (!isRemove && !post.isLiked) {
+                if (!isRemove &amp;&amp; !post.isLiked) {
                   likeDelta = 1; // Add a like if not already liked
-                } else if (isRemove && post.isLiked) {
+                } else if (isRemove &amp;&amp; post.isLiked) {
                   likeDelta = -1; // Remove a like if already liked
                 }
                 
@@ -689,7 +716,7 @@ const Main = () => {
    * @param {string|number} postId - The unique identifier of the post to be hidden.
    */
   const handleHidePost = (postId) => {
-    setPosts(posts.filter(post => post.id !== postId && post.postId !== postId));
+    setPosts(posts.filter(post => post.id !== postId &amp;&amp; post.postId !== postId));
   };
 
   /**
@@ -698,7 +725,7 @@ const Main = () => {
    * @async
    * @function handleSavePost
    * @param {string} postId - The unique identifier of the post to be saved.
-   * @returns {Promise<void>} - A promise that resolves when the post is successfully saved.
+   * @returns {Promise&lt;void>} - A promise that resolves when the post is successfully saved.
    * @throws Will display an alert and log an error if the save operation fails.
    */
   const handleSavePost = async (postId) => {
@@ -718,7 +745,7 @@ const Main = () => {
    * @async
    * @function handleReportPost
    * @param {string} postId - The unique identifier of the post to be reported.
-   * @returns {Promise<void>} Resolves when the report request is successfully sent.
+   * @returns {Promise&lt;void>} Resolves when the report request is successfully sent.
    * @throws Will log an error and display an alert if the report request fails.
    */
   const handleReportPost = async (postId) => {
@@ -751,11 +778,11 @@ const Main = () => {
     const now = new Date();
     const diffInSeconds = Math.floor((now - date) / 1000);
     
-    if (diffInSeconds < 60) {
+    if (diffInSeconds &lt; 60) {
       return 'Just now';
-    } else if (diffInSeconds < 3600) {
+    } else if (diffInSeconds &lt; 3600) {
       return `${Math.floor(diffInSeconds / 60)}m ago`;
-    } else if (diffInSeconds < 86400) {
+    } else if (diffInSeconds &lt; 86400) {
       return `${Math.floor(diffInSeconds / 3600)}h ago`;
     } else {
       return date.toLocaleDateString();
@@ -763,186 +790,186 @@ const Main = () => {
   };
 
   if (loading) return (
-    <div className="bg-[#f3f2ef] min-h-screen">
-      <div className="grid-area-main">Loading posts...</div>
-    </div>
+    &lt;div className="bg-[#f3f2ef] min-h-screen">
+      &lt;div className="grid-area-main">Loading posts...&lt;/div>
+    &lt;/div>
   );
   
   if (error) return (
-    <div className="bg-[#f3f2ef] min-h-screen">
-      <div className="grid-area-main">{error}</div>
-    </div>
+    &lt;div className="bg-[#f3f2ef] min-h-screen">
+      &lt;div className="grid-area-main">{error}&lt;/div>
+    &lt;/div>
   );
 
   return (
-    <div className="bg-[#f3f2ef] min-h-screen pb-8">
-      <div className="grid-area-main">
+    &lt;div className="bg-[#f3f2ef] min-h-screen pb-8">
+      &lt;div className="grid-area-main">
         {/* Create Post Form */}
-        <div className="overflow-hidden text-center mb-2 bg-white rounded-md border-none shadow-[0_0_0_1px_rgba(0,0,0,0.15),0_0_0_rgba(0,0,0,0.20)]">
-          <div className="flex flex-col text-[#958b7b] mb-2 bg-white">
-            <div className="flex items-center p-2 pl-4 pr-4">
-              <img
+        &lt;div className="overflow-hidden text-center mb-2 bg-white rounded-md border-none shadow-[0_0_0_1px_rgba(0,0,0,0.15),0_0_0_rgba(0,0,0,0.20)]">
+          &lt;div className="flex flex-col text-[#958b7b] mb-2 bg-white">
+            &lt;div className="flex items-center p-2 pl-4 pr-4">
+              &lt;img
                 src={authorInfo.profileImage}
                 alt="user"
                 className="w-12 h-12 rounded-full mr-2"
               />
-              <button
+              &lt;button
                 onClick={() => setIsPostModalOpen(true)}
                 className="text-[rgba(0,0,0,0.6)] outline-none min-h-[48px] leading-1.5 text-sm font-semibold flex items-center p-2 pl-4 flex-grow border border-[rgba(0,0,0,0.15)] rounded-[35px] cursor-pointer hover:bg-[rgba(0,0,0,0.08)] text-left"
               >
                 Start a post
-              </button>
-            </div>
+              &lt;/button>
+            &lt;/div>
 
-            <div className="flex justify-around flex-wrap p-1 pb-1">
-              <button 
+            &lt;div className="flex justify-around flex-wrap p-1 pb-1">
+              &lt;button 
                 onClick={() => setIsPostModalOpen(true)}
                 className="text-[rgba(0,0,0,0.6)] outline-none border-none bg-transparent min-h-[48px] leading-1.5 text-sm font-semibold flex items-center transition duration-200 p-2 hover:bg-[rgba(0,0,0,0.08)] rounded-md"
               >
-                <img src="/Images/photo-icon.svg" alt="pic" className="mr-2.5 ml-[-0.5rem]" />
-                <span>Photo</span>
-              </button>
-              <button 
+                &lt;img src="/Images/photo-icon.svg" alt="pic" className="mr-2.5 ml-[-0.5rem]" />
+                &lt;span>Photo&lt;/span>
+              &lt;/button>
+              &lt;button 
                 onClick={() => setIsPostModalOpen(true)}
                 className="text-[rgba(0,0,0,0.6)] outline-none border-none bg-transparent min-h-[48px] leading-1.5 text-sm font-semibold flex items-center transition duration-200 p-2 hover:bg-[rgba(0,0,0,0.08)] rounded-md"
               >
-                <img src="/Images/vedio-icon.svg" alt="vedio" className="mr-2.5 ml-[-0.5rem]" />
-                <span>Video</span>
-              </button>
-              <button
+                &lt;img src="/Images/vedio-icon.svg" alt="vedio" className="mr-2.5 ml-[-0.5rem]" />
+                &lt;span>Video&lt;/span>
+              &lt;/button>
+              &lt;button
                 onClick={() => setIsPostModalOpen(true)}
                 className="text-[rgba(0,0,0,0.6)] outline-none border-none bg-transparent min-h-[48px] leading-1.5 text-sm font-semibold flex items-center transition duration-200 p-2 hover:bg-[rgba(0,0,0,0.08)] rounded-md"
               >
-                <img src="/Images/job-icon.svg" alt="job" className="mr-2.5 ml-[-0.5rem]" />
-                <span>Job</span>
-              </button>
-              <button
+                &lt;img src="/Images/job-icon.svg" alt="job" className="mr-2.5 ml-[-0.5rem]" />
+                &lt;span>Job&lt;/span>
+              &lt;/button>
+              &lt;button
                 onClick={() => setIsPostModalOpen(true)}
                 className="text-[rgba(0,0,0,0.6)] outline-none border-none bg-transparent min-h-[48px] leading-1.5 text-sm font-semibold flex items-center transition duration-200 p-2 hover:bg-[rgba(0,0,0,0.08)] rounded-md"
               >
-                <img src="/Images/article-icon.svg" alt="article" className="mr-2.5 ml-[-0.5rem]" />
-                <span>Write article</span>
-              </button>
-            </div>
-          </div>
-        </div>
+                &lt;img src="/Images/article-icon.svg" alt="article" className="mr-2.5 ml-[-0.5rem]" />
+                &lt;span>Write article&lt;/span>
+              &lt;/button>
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
 
         {/* Post List */}
         {posts.map((post) => (
-          <article key={post.id || post.postId} className="overflow-visible p-0 mb-2 bg-white rounded-md border-none shadow-[0_0_0_1px_rgba(0,0,0,0.15),0_0_0_rgba(0,0,0,0.20)]">
-            <div className="p-3 pr-10 pb-0 flex justify-between items-start relative">
-              <a href="/feed" className="overflow-hidden flex">
-                <img 
+          &lt;article key={post.id || post.postId} className="overflow-visible p-0 mb-2 bg-white rounded-md border-none shadow-[0_0_0_1px_rgba(0,0,0,0.15),0_0_0_rgba(0,0,0,0.20)]">
+            &lt;div className="p-3 pr-10 pb-0 flex justify-between items-start relative">
+              &lt;a href="/feed" className="overflow-hidden flex">
+                &lt;img 
                   src={post.author?.profileImage || post.profilePicture} 
                   alt="user" 
                   className="w-12 h-12 rounded-full mr-2.5" 
                 />
-                <div className="text-start">
-                  <h6 className="text-base text-black font-semibold">
+                &lt;div className="text-start">
+                  &lt;h6 className="text-base text-black font-semibold">
                     {post.author?.name || `${post.firstName} ${post.lastName}`}
-                  </h6>
-                  <span className="text-sm text-[rgba(0,0,0,0.6)] block">
+                  &lt;/h6>
+                  &lt;span className="text-sm text-[rgba(0,0,0,0.6)] block">
                     {post.author?.headline || post.headline}
-                  </span>
-                  <span className="text-sm text-[rgba(0,0,0,0.6)] block">
+                  &lt;/span>
+                  &lt;span className="text-sm text-[rgba(0,0,0,0.6)] block">
                     {formatDate(post.timestamp || post.createdAt)}
-                  </span>
-                </div>
-              </a>
+                  &lt;/span>
+                &lt;/div>
+              &lt;/a>
               
-              <PostMenu
+              &lt;PostMenu
                 postId={post.id || post.postId}
                 onHide={handleHidePost}
                 onSave={handleSavePost}
                 onReport={handleReportPost}
                 isSaved={post.isSaved}
               />
-            </div>
-            <div className="text-base text-start p-0 pl-4 pr-4 text-[rgba(0,0,0,0.9)] overflow-hidden">
+            &lt;/div>
+            &lt;div className="text-base text-start p-0 pl-4 pr-4 text-[rgba(0,0,0,0.9)] overflow-hidden">
               {post.content?.text || post.postDescription}
-            </div>
+            &lt;/div>
             
             {/* Handle different media formats */}
-            {(post.content?.files && post.content.files.length > 0) && (
-              <div className="w-full relative bg-[#f9fafb] mt-2">
-                <div className="aspect-[16/9] relative overflow-hidden">
-                  <img 
+            {(post.content?.files &amp;&amp; post.content.files.length > 0) &amp;&amp; (
+              &lt;div className="w-full relative bg-[#f9fafb] mt-2">
+                &lt;div className="aspect-[16/9] relative overflow-hidden">
+                  &lt;img 
                     src={post.content.files[0].url} 
                     alt={post.content.files[0].alt || "Post image"} 
                     className="absolute inset-0 w-full h-full object-cover"
                     loading="lazy"
                   />
-                </div>
-              </div>
+                &lt;/div>
+              &lt;/div>
             )}
             
-            {(post.attachments && post.attachments.length > 0) && (
-              <div className="w-full relative bg-[#f9fafb] mt-2">
-                <div className="aspect-[16/9] relative overflow-hidden">
-                  <img 
+            {(post.attachments &amp;&amp; post.attachments.length > 0) &amp;&amp; (
+              &lt;div className="w-full relative bg-[#f9fafb] mt-2">
+                &lt;div className="aspect-[16/9] relative overflow-hidden">
+                  &lt;img 
                     src={post.attachments[0]} 
                     alt="Post attachment" 
                     className="absolute inset-0 w-full h-full object-cover"
                     loading="lazy"
                   />
-                </div>
-              </div>
+                &lt;/div>
+              &lt;/div>
             )}
             
             {/* Updated metrics section with reaction emojis */}
-            <ul className="flex justify-between mx-4 p-2 border-b border-[#e9e5df] text-sm overflow-auto">
-              <li className="flex items-center cursor-pointer hover:text-[#0a66c2] hover:underline">
-                <div className="flex items-center">
+            &lt;ul className="flex justify-between mx-4 p-2 border-b border-[#e9e5df] text-sm overflow-auto">
+              &lt;li className="flex items-center cursor-pointer hover:text-[#0a66c2] hover:underline">
+                &lt;div className="flex items-center">
                   {/* Handle different reaction formats */}
-                  {post.reactions && post.reactions.length > 0 && (
-                    <div className="flex -space-x-1 mr-1">
+                  {post.reactions &amp;&amp; post.reactions.length > 0 &amp;&amp; (
+                    &lt;div className="flex -space-x-1 mr-1">
                       {post.reactions.slice(0, 3).map((reaction, index) => (
-                        <span key={index} className="inline-block w-4 h-4 text-xs">
-                          {reaction.type === 'like' && '👍'}
-                          {reaction.type === 'celebrate' && '👏'}
-                          {reaction.type === 'support' && '❤️'}
-                          {reaction.type === 'insightful' && '💡'}
-                          {reaction.type === 'funny' && '😄'}
-                        </span>
+                        &lt;span key={index} className="inline-block w-4 h-4 text-xs">
+                          {reaction.type === 'like' &amp;&amp; '👍'}
+                          {reaction.type === 'celebrate' &amp;&amp; '👏'}
+                          {reaction.type === 'support' &amp;&amp; '❤️'}
+                          {reaction.type === 'insightful' &amp;&amp; '💡'}
+                          {reaction.type === 'funny' &amp;&amp; '😄'}
+                        &lt;/span>
                       ))}
-                    </div>
+                    &lt;/div>
                   )}
                   
                   {/* Handle impression counts format */}
-                  {post.impressionCounts && (
-                    <div className="flex -space-x-1 mr-1">
-                      {post.impressionCounts.like > 0 && <span className="inline-block w-4 h-4 text-xs">👍</span>}
-                      {post.impressionCounts.celebrate > 0 && <span className="inline-block w-4 h-4 text-xs">👏</span>}
-                      {post.impressionCounts.support > 0 && <span className="inline-block w-4 h-4 text-xs">❤️</span>}
-                      {post.impressionCounts.insightful > 0 && <span className="inline-block w-4 h-4 text-xs">💡</span>}
-                      {post.impressionCounts.funny > 0 && <span className="inline-block w-4 h-4 text-xs">😄</span>}
-                    </div>
+                  {post.impressionCounts &amp;&amp; (
+                    &lt;div className="flex -space-x-1 mr-1">
+                      {post.impressionCounts.like > 0 &amp;&amp; &lt;span className="inline-block w-4 h-4 text-xs">👍&lt;/span>}
+                      {post.impressionCounts.celebrate > 0 &amp;&amp; &lt;span className="inline-block w-4 h-4 text-xs">👏&lt;/span>}
+                      {post.impressionCounts.support > 0 &amp;&amp; &lt;span className="inline-block w-4 h-4 text-xs">❤️&lt;/span>}
+                      {post.impressionCounts.insightful > 0 &amp;&amp; &lt;span className="inline-block w-4 h-4 text-xs">💡&lt;/span>}
+                      {post.impressionCounts.funny > 0 &amp;&amp; &lt;span className="inline-block w-4 h-4 text-xs">😄&lt;/span>}
+                    &lt;/div>
                   )}
                   
                   {/* Display count based on available data */}
-                  <span>
+                  &lt;span>
                     {post.metrics?.likes || post.impressionCounts?.total || 0}
-                  </span>
-                </div>
-              </li>
-              <li 
+                  &lt;/span>
+                &lt;/div>
+              &lt;/li>
+              &lt;li 
                 className="flex items-center cursor-pointer hover:text-[#0a66c2] hover:underline"
                 onClick={() => toggleComments(post.id || post.postId)}
               >
-                <p>{post.metrics?.comments || post.commentCount || 0} comments</p>
-              </li>
+                &lt;p>{post.metrics?.comments || post.commentCount || 0} comments&lt;/p>
+              &lt;/li>
               
               {/* Show reposts if available */}
-              {(post.repostCount > 0) && (
-                <li className="flex items-center cursor-pointer hover:text-[#0a66c2] hover:underline">
-                  <p>{post.repostCount} reposts</p>
-                </li>
+              {(post.repostCount > 0) &amp;&amp; (
+                &lt;li className="flex items-center cursor-pointer hover:text-[#0a66c2] hover:underline">
+                  &lt;p>{post.repostCount} reposts&lt;/p>
+                &lt;/li>
               )}
-            </ul>
+            &lt;/ul>
             
             {/* Updated post action buttons with PostReactions component */}
-            <div className="p-0 px-4 flex justify-between min-h-[40px] overflow-hidden">
-              <PostReactions 
+            &lt;div className="p-0 px-4 flex justify-between min-h-[40px] overflow-hidden">
+              &lt;PostReactions 
                 postId={post.id || post.postId}
                 onReact={handleReact}
                 reactionTypes={reactionTypes}
@@ -953,30 +980,30 @@ const Main = () => {
                 }
               />
               
-              <button 
+              &lt;button 
                 onClick={() => toggleComments(post.id || post.postId)}
                 className="outline-none text-[rgba(0,0,0,0.6)] p-3 px-6 bg-transparent flex items-center cursor-pointer gap-1.25 rounded-md transition duration-200 hover:bg-[rgba(0,0,0,0.08)] font-semibold"
               >
-                <img src="/Images/comment.svg" alt="comment" />
-                <span>Comment</span>
-              </button>
-              <button className="outline-none text-[rgba(0,0,0,0.6)] p-3 px-6 bg-transparent flex items-center cursor-pointer gap-1.25 rounded-md transition duration-200 hover:bg-[rgba(0,0,0,0.08)] font-semibold">
-                <img src="/Images/share.svg" alt="share" />
-                <span>Share</span>
-              </button>
-              <button className="outline-none text-[rgba(0,0,0,0.6)] p-3 px-6 bg-transparent flex items-center cursor-pointer gap-1.25 rounded-md transition duration-200 hover:bg-[rgba(0,0,0,0.08)] font-semibold">
-                <img src="/Images/send.svg" alt="send" />
-                <span>Send</span>
-              </button>
-            </div>
+                &lt;img src="/Images/comment.svg" alt="comment" />
+                &lt;span>Comment&lt;/span>
+              &lt;/button>
+              &lt;button className="outline-none text-[rgba(0,0,0,0.6)] p-3 px-6 bg-transparent flex items-center cursor-pointer gap-1.25 rounded-md transition duration-200 hover:bg-[rgba(0,0,0,0.08)] font-semibold">
+                &lt;img src="/Images/share.svg" alt="share" />
+                &lt;span>Share&lt;/span>
+              &lt;/button>
+              &lt;button className="outline-none text-[rgba(0,0,0,0.6)] p-3 px-6 bg-transparent flex items-center cursor-pointer gap-1.25 rounded-md transition duration-200 hover:bg-[rgba(0,0,0,0.08)] font-semibold">
+                &lt;img src="/Images/send.svg" alt="send" />
+                &lt;span>Send&lt;/span>
+              &lt;/button>
+            &lt;/div>
             
             {/* Comment Section - Only show when expanded */}
-            {expandedComments[post.id || post.postId] && (
-              <div className="border-t border-[#e9e5df] p-4">
+            {expandedComments[post.id || post.postId] &amp;&amp; (
+              &lt;div className="border-t border-[#e9e5df] p-4">
                 {loadingComments[post.id || post.postId] ? (
-                  <div className="text-center py-4">Loading comments...</div>
+                  &lt;div className="text-center py-4">Loading comments...&lt;/div>
                 ) : (
-                  <CommentSection 
+                  &lt;CommentSection 
                     postId={post.id || post.postId}
                     comments={comments[post.id || post.postId] || []}
                     authorInfo={authorInfo}
@@ -988,21 +1015,43 @@ const Main = () => {
                     formatDate={formatDate}
                   />
                 )}
-              </div>
+              &lt;/div>
             )}
-          </article>
+          &lt;/article>
         ))}
-      </div>
+      &lt;/div>
       
       {/* Post Creation Modal */}
-      <CreatePostModal 
+      &lt;CreatePostModal 
         isOpen={isPostModalOpen}
         onClose={() => setIsPostModalOpen(false)}
         onSubmit={handleCreatePost}
         authorInfo={authorInfo}
       />
-    </div>
+    &lt;/div>
   );
 };
 
-export default Main;
+export default Main;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#ApplyJob">ApplyJob</a></li><li><a href="global.html#ChatWindow">ChatWindow</a></li><li><a href="global.html#CommentSection">CommentSection</a></li><li><a href="global.html#ConversationListItem">ConversationListItem</a></li><li><a href="global.html#ConversationSearch">ConversationSearch</a></li><li><a href="global.html#CreatePostModal">CreatePostModal</a></li><li><a href="global.html#Filter">Filter</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#JobBoardPage">JobBoardPage</a></li><li><a href="global.html#JobCard">JobCard</a></li><li><a href="global.html#Jobs">Jobs</a></li><li><a href="global.html#Main">Main</a></li><li><a href="global.html#MyJobs">MyJobs</a></li><li><a href="global.html#Notification">Notification</a></li><li><a href="global.html#PostMenu">PostMenu</a></li><li><a href="global.html#PostReactions">PostReactions</a></li><li><a href="global.html#closeModal">closeModal</a></li><li><a href="global.html#fetchComments">fetchComments</a></li><li><a href="global.html#fetchCompanies">fetchCompanies</a></li><li><a href="global.html#fetchNotifications">fetchNotifications</a></li><li><a href="global.html#fetchPosts">fetchPosts</a></li><li><a href="global.html#fetchUser">fetchUser</a></li><li><a href="global.html#filteredNotifications">filteredNotifications</a></li><li><a href="global.html#getReactionIcon">getReactionIcon</a></li><li><a href="global.html#handleAddComment">handleAddComment</a></li><li><a href="global.html#handleBlockUser">handleBlockUser</a></li><li><a href="global.html#handleClick">handleClick</a></li><li><a href="global.html#handleCreatePost">handleCreatePost</a></li><li><a href="global.html#handleDeleteNotification">handleDeleteNotification</a></li><li><a href="global.html#handleFilter">handleFilter</a></li><li><a href="global.html#handleJobClick">handleJobClick</a></li><li><a href="global.html#handleLikeClick">handleLikeClick</a></li><li><a href="global.html#handleMainFilterChange">handleMainFilterChange</a></li><li><a href="global.html#handleMessagingClick">handleMessagingClick</a></li><li><a href="global.html#handleMuteDuration">handleMuteDuration</a></li><li><a href="global.html#handleNotificationClick">handleNotificationClick</a></li><li><a href="global.html#handleReact">handleReact</a></li><li><a href="global.html#handleReactToComment">handleReactToComment</a></li><li><a href="global.html#handleReportPost">handleReportPost</a></li><li><a href="global.html#handleSave">handleSave</a></li><li><a href="global.html#handleSavePost">handleSavePost</a></li><li><a href="global.html#handleSearch">handleSearch</a></li><li><a href="global.html#handleSendTestNotification">handleSendTestNotification</a></li><li><a href="global.html#handleSubmit">handleSubmit</a></li><li><a href="global.html#openModal">openModal</a></li><li><a href="global.html#requestOTP">requestOTP</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#toggleComments">toggleComments</a></li><li><a href="global.html#useEffect">useEffect</a></li><li><a href="global.html#verifyOTP">verifyOTP</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun Apr 20 2025 19:24:33 GMT+0200 (Eastern European Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
