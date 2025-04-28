@@ -18,11 +18,11 @@ const MessageItem = ({ message, isOwnMessage, senderInfo, showReadReceipt }) => 
    * The rendered elements include appropriate styling and accessibility attributes.
    */
   const renderMedia = () => {
-    if (!message.mediaUrl) return null;
+    if (!message.mediaUrl || !message.mediaType) return null;
 
-    if (message.mediaType?.startsWith('image/')) {
+    if (message.mediaUrl?.includes('image/')) {
       return <img src={message.mediaUrl} alt="Uploaded content" className="max-w-xs max-h-64 rounded mt-1" />;
-    } else if (message.mediaType?.startsWith('video/')) {
+    } else if (message.mediaUrl?.includes('video/')) {
       return <video src={message.mediaUrl} controls className="max-w-xs max-h-64 rounded mt-1" />;
     } else {
       return (
@@ -32,7 +32,7 @@ const MessageItem = ({ message, isOwnMessage, senderInfo, showReadReceipt }) => 
           rel="noopener noreferrer"
           className="text-blue-500 hover:underline mt-1 block"
         >
-          View Document ({message.mediaType || 'file'})
+          View Document ({'file'})
         </a>
       );
     }
