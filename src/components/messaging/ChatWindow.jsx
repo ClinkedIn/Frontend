@@ -5,6 +5,7 @@ import MessageItem from '../../components/messaging/MessageItem';
 import { FaArrowLeft } from "react-icons/fa";
 import { FiUserMinus } from "react-icons/fi";
 import { db } from '../../../firebase';
+import { format, isToday, isYesterday } from 'date-fns';
 
 
 /**
@@ -344,7 +345,45 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
        // setIsBlockedByYou(currentlyBlocked);
     }
   };
+      //Memoize messages with date separators 
+      const messagesWithDates = useMemo(() => {
+        const items = [];
+        let lastDate = null;
 
+        const formatDateSeparator = (date) => {
+            if (isToday(date)) {
+                return 'Today';
+            }
+            if (isYesterday(date)) {
+                return 'Yesterday';
+            }
+            return format(date, 'MMMM d, yyyy'); 
+        };
+
+        messages.forEach((message) => {
+            const messageDate = message.timestamp.toDate(); // Convert Firestore Timestamp to Date
+            const messageDateString = format(messageDate, 'yyyy-MM-dd'); // Format for comparison
+
+            if (lastDate === null || messageDateString !== lastDate) {
+                // Add date separator
+                items.push({
+                    type: 'date',
+                    date: formatDateSeparator(messageDate),
+                    key: `date-${messageDateString}` // Unique key for the date separator
+                });
+                lastDate = messageDateString;
+            }
+
+            // Add the message itself
+            items.push({
+                type: 'message',
+                message: message,
+                key: message.id // Use message ID as the key
+            });
+        });
+
+        return items;
+      }, [messages]); // Re-compute whenever the 'messages' state changes
 
 
 
@@ -436,15 +475,28 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
         {!isNewChat && messages.length === 0 && !loadingMessages && !loadingMetadata && (
             <div className="text-center text-gray-500 pt-10">No messages yet.</div>
         )}
-        {messages.map((msg) => (
-          <MessageItem
-            key={msg.id}
-            message={msg}
-            isOwnMessage={msg.senderId === currentUser.uid}
-            senderInfo={msg.senderId === otherUserId ? otherUserInfo : null}
-            showReadReceipt={msg.readBy?.includes(otherUserId) }
-           />
-        ))}
+        {messagesWithDates.map((item) => {
+                    if (item.type === 'date') {
+                        
+                        return (
+                            <div key={item.key} className="text-center text-xs text-gray-500 my-4 select-none sticky top-0 z-10 ">
+                                <span className="bg-gray-200 px-3 py-1 rounded-full shadow-sm">
+                                   {item.date}
+                                </span>
+                            </div>
+                        );
+                    } else {
+                        
+                        return (
+                            <MessageItem
+                                key={item.key} 
+                                message={item.message}
+                                isOwnMessage={item.message.senderId === currentUser.uid}
+                                senderInfo={item.message.senderId === otherUserId ? otherUserInfo : null}
+                                showReadReceipt={item.message.senderId === currentUser?.uid && item.message.readBy?.includes(otherUserId)}
+                            />
+                        );
+                    }})}
          {/* Anchor for scrolling */}
         <div ref={messagesEndRef} className="h-0" />
       </div>
