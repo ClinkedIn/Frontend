@@ -18,7 +18,7 @@ const MessageItem = ({ message, isOwnMessage, senderInfo, showReadReceipt }) => 
    * The rendered elements include appropriate styling and accessibility attributes.
    */
   const renderMedia = () => {
-    if (!message.mediaUrl || !message.mediaType) return null;
+    if (!message.mediaUrl ) return null;
 
     if (message.mediaUrl?.includes('image/')) {
       return <img src={message.mediaUrl} alt="Uploaded content" className="max-w-xs max-h-64 rounded mt-1" />;
