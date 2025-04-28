@@ -4,7 +4,7 @@ import { auth, provider, signInWithPopup } from "../../../firebase";
 import toast from "react-hot-toast";
 import Footer from "../../components/Footer/Footer";
 
-const WelcomePage = () => {
+const LandingPage = () => {
   const navigate = useNavigate();
 
   return (
@@ -158,4 +158,4 @@ const WelcomePage = () => {
   );
 };
 
-export default WelcomePage;
+export default LandingPage;

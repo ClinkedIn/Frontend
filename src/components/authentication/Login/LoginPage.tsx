@@ -10,6 +10,30 @@ import { useAuth } from "../../../context/AuthContext";
 import axios from "axios";
 import { BASE_URL } from "../../../constants";
 
+/**
+ * The `LoginPage` component renders a login form for user authentication.
+ * It includes input fields for email and password, a Google login button,
+ * and a submit button to trigger the login process. The component also
+ * handles form validation, error display, and login mutation using React Query.
+ *
+ * Features:
+ * - Validates user input for email and password fields.
+ * - Displays error messages for invalid inputs.
+ * - Toggles password visibility.
+ * - Handles login requests and manages authentication tokens.
+ * - Redirects the user to the feed page upon successful login.
+ * - Provides a link to the signup page for new users.
+ *
+ * Dependencies:
+ * - React Query for managing the login mutation.
+ * - Axios for making HTTP requests.
+ * - React Router for navigation.
+ * - Framer Motion for animations.
+ * - Toast notifications for success and error messages.
+ *
+ * @component
+ * @returns {JSX.Element} The rendered login page component.
+ */
 const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
