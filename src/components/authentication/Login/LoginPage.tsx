@@ -117,7 +117,7 @@ const LoginPage = () => {
   >({
     mutationFn: async ({ email, password }) =>
       await axios.post(
-        `${BASE_URL}/user/login`,
+        `${BASE_URL}/api/user/login`,
         { email, password },
         { withCredentials: true }
       ),
