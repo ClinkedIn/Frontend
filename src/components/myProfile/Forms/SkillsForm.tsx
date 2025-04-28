@@ -1,6 +1,16 @@
 import React, { useState } from "react";
 import ConfirmationDialog from "../ConfirmationDialog";
 
+/**
+ * Props interface for the SkillsForm component
+ * @interface SkillsFormProps
+ * @property {Function} onClose - Function to handle closing the form
+ * @property {Function} onSave - Function to handle saving the skill data
+ * @property {Object} [editSkill] - Optional skill object for editing existing skills
+ * @property {string} editSkill.skillName - Name of the skill being edited
+ * @property {number[]} editSkill.educationIndexes - Array of education indexes related to this skill
+ * @property {number[]} editSkill.experienceIndexes - Array of experience indexes related to this skill
+ */
 interface SkillsFormProps {
   onClose: () => void;
   onSave: (skill: any) => void;
@@ -11,6 +21,10 @@ interface SkillsFormProps {
   };
 }
 
+/**
+ * Array of commonly used skills for quick selection
+ * @constant {string[]} COMMON_SKILLS
+ */
 const COMMON_SKILLS = [
   "HTML",
   "CSS",
@@ -37,6 +51,13 @@ const COMMON_SKILLS = [
   "Data Analysis",
 ];
 
+/**
+ * SkillsForm component for adding or editing skills in user profile
+ *
+ * @component
+ * @param {SkillsFormProps} props - The component props
+ * @returns {React.ReactElement} A form modal for adding or editing skills
+ */
 const SkillsForm: React.FC<SkillsFormProps> = ({
   onClose,
   onSave,
@@ -49,6 +70,11 @@ const SkillsForm: React.FC<SkillsFormProps> = ({
   const [isEditing, setIsEditing] = useState(!!editSkill);
   const [errors, setErrors] = useState<{ skillName?: string }>({});
 
+  /**
+   * Validates the form input fields
+   *
+   * @returns {boolean} True if form is valid, false otherwise
+   */
   const validateForm = () => {
     const newErrors: { skillName?: string } = {};
     let isValid = true;
@@ -62,6 +88,9 @@ const SkillsForm: React.FC<SkillsFormProps> = ({
     return isValid;
   };
 
+  /**
+   * Handles saving the skill data after validation
+   */
   const handleSave = () => {
     if (validateForm()) {
       onSave({
@@ -72,6 +101,11 @@ const SkillsForm: React.FC<SkillsFormProps> = ({
     }
   };
 
+  /**
+   * Sets the skill name to a selected common skill
+   *
+   * @param {string} skill - The selected common skill
+   */
   const selectCommonSkill = (skill: string) => {
     setSkillName(skill);
   };

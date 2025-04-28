@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback,useMemo } from 'react';
-import { collection, query, orderBy, onSnapshot, doc, updateDoc, arrayUnion, getDoc, setDoc } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, doc, updateDoc, arrayUnion,arrayRemove, getDoc, setDoc } from 'firebase/firestore';
 import MessageInput from '../../components/messaging/MessageInput';
 import MessageItem from '../../components/messaging/MessageItem';
 import { FaArrowLeft } from "react-icons/fa";
@@ -41,14 +41,12 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
   const [isBlockedByYou, setIsBlockedByYou] = useState(false);
   const [isBlockedByOther, setIsBlockedByOther] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const messagesContainerRef = useRef(null);
   const messagesEndRef = useRef(null);
 
  
   const otherUserInfo = otherUser
   const otherUserId = otherUser?.userId || null; // Use userId from otherUser prop
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
 
   // Fetch Conversation Metadata
   useEffect(() => {
@@ -65,10 +63,6 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
         const data = docSnap.data();
         setConversationData(data); // Set data if document exists
 
-        // Update block status
-        setIsBlockedByYou(data.blockedBy?.[currentUser.uid] || false);
-        setIsBlockedByOther(otherUserId ? (data.blockedBy?.[otherUserId] || false) : false);
-
         // Update typing status 
         setIsTyping(otherUserId ? (data.typing?.[otherUserId] || false) : false);
 
@@ -82,9 +76,6 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
         
         console.log("Conversation document not found (might be new):", conversationId);
         setConversationData(null); // Ensure data is null
-        // Reset states that depend on data
-        setIsBlockedByYou(false);
-        setIsBlockedByOther(false);
         setIsTyping(false);
       }
        setLoadingMetadata(false); // Metadata loading finished 
@@ -118,7 +109,46 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
      * Logs any errors encountered while fetching the conversation details or updating the document.
      */
   }, [conversationId, currentUser?.uid, otherUserId]); 
+  useEffect(() => {
+    if (!conversationId || !currentUser?.uid) {
+      setLoadingMetadata(false);
+      setConversationData(null); // Ensure data is null if no ID
+      return;
+  };
+  const currentUserDocRef = doc(db, 'user', currentUser.uid);
+  const otherUserDocRef = doc(db, 'user', otherUserId);
+  const unsubscribeCurrentUser = onSnapshot(currentUserDocRef, (docSnap) => {
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      setIsBlockedByYou(data.blockedUsers?.includes(otherUserId) || false); // Check if the other user is blocked by current user
+    } else {
+      console.log("Current user document not found:", currentUser.uid);
+      setIsBlockedByYou(false); // Reset state if document doesn't exist
+    }
+  }, (error) => {
+    console.error("Error fetching current user details:", error);
+    setIsBlockedByYou(false); // Reset state on error
+  });
+  const unsubscribeOtherUser = onSnapshot(otherUserDocRef, (docSnap) => {
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      setIsBlockedByOther(data.blockedUsers?.includes(currentUser.uid) || false); // Check if the current user is blocked by other user
+    } else {
+      console.log("Other user document not found:", otherUserId);
+      setIsBlockedByOther(false); // Reset state if document doesn't exist
+    }
+  }
+  , (error) => {
+    console.error("Error fetching other user details:", error);
+    setIsBlockedByOther(false); // Reset state on error
+  });
+  // Cleanup listeners on unmount
+  return () => {
+    unsubscribeCurrentUser();
+    unsubscribeOtherUser();
+  };
 
+  },[conversationId, currentUser?.uid, otherUserId]); // Re-run if conversationId or user changes
 
   // Fetch Messages 
   useEffect(() => {
@@ -171,17 +201,26 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
   }, [conversationId, currentUser?.uid]);
 
   // Scroll to bottom
+
   useEffect(() => {
-    const scrollThreshold = 100;
-    const container = messagesEndRef.current?.parentNode;
-    if (container) {
-        const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < scrollThreshold;
-        if (isNearBottom || loadingMessages || loadingMetadata) { // Scroll if loading anything
-            scrollToBottom();
-        }
-    } else {
-         scrollToBottom();
+    const container = messagesContainerRef.current;
+    if (!messagesContainerRef.current || !messagesEndRef.current) return;
+    const scrollToBottom = () => {
+        requestAnimationFrame(() => {
+          messagesEndRef.current.scrollIntoView({ 
+            behavior: 'smooth' ,
+            block: 'end'
+          });
+        });
+  };
+    
+    const scrollDistanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
+    if (scrollDistanceFromBottom > 50) {
+      const timeoutId = setTimeout(scrollToBottom, 100);
+      return () => clearTimeout(timeoutId); 
     }
+
+    
   }, [messages, loadingMessages, loadingMetadata]);
 
   //Handle Typing Indicator Updates 
@@ -231,21 +270,46 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
    * - Updates the local state to reflect the new block status.
    */
   const handleBlockUser = async () => {
-    if (!conversationId || !currentUser?.uid || !otherUserId) return;
-    const convDocRef = doc(db, 'conversations', conversationId);
+    if (!currentUser?.uid || !otherUserId) {
+        console.error("Cannot block/unblock: Missing user IDs.");
+        return;
+    }
+
+    // --- Corrected collection name to 'users' ---
+    const userDocRef = doc(db, 'user', currentUser.uid); // Reference to the CURRENT user's document
     const currentlyBlocked = isBlockedByYou;
-    const newBlockStatus = !currentlyBlocked;
+
+    console.log(`Attempting to ${currentlyBlocked ? 'unblock' : 'block'} user: ${otherUserId}`);
+
     try {
-      // This might fail if the document doesn't exist yet. 
-      await updateDoc(convDocRef, {
-        [`blockedBy.${currentUser.uid}`]: newBlockStatus
-      });
-      setIsBlockedByYou(newBlockStatus);
+      if (currentlyBlocked) {
+        // --- UNBLOCK ---
+        // Use updateDoc, assuming doc exists if unblocking
+        await updateDoc(userDocRef, {
+          blockedUsers: arrayRemove(otherUserId)
+        });
+        setIsBlockedByYou(false); // Optimistic UI update
+        console.log(`User ${otherUserId} unblocked successfully.`);
+      } else {
+        // --- BLOCK ---
+        // Use setDoc with merge: true to create or update
+        await setDoc(userDocRef,
+          {
+            // Data to set/merge: only the blockedUsers field modification
+            blockedUsers: arrayUnion(otherUserId)
+          },
+          { merge: true } // Option to merge data
+        );
+        setIsBlockedByYou(true); // Optimistic UI update
+        console.log(`User ${otherUserId} blocked successfully (doc created if needed).`);
+      }
     } catch (error) {
-       console.error("Error blocking/unblocking user (doc might not exist yet):", error);
-       
+       console.error("Error updating block status on user document:", error);
+       // Consider reverting optimistic UI update here if needed
+       // setIsBlockedByYou(currentlyBlocked);
     }
   };
+
 
 
 
@@ -290,9 +354,9 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
   const isNewChat = !loadingMetadata && !conversationData;
   
   return (
-    <div className="flex-grow flex flex-col h-full bg-white border-l border-gray-200 ">
+    <div className="flex-grow flex flex-col h-full bg-white border-l border-gray-400 ">
       {/* Chat Header */}
-      <div className="p-3 border-b flex justify-between items-center bg-gray-50 ">
+      <div className="p-3 border-b border-gray-400 flex justify-between items-center bg-gray-50 ">
          <div className="flex items-center gap-3 min-w-0"> 
             <button
                 onClick={onBack}
@@ -317,7 +381,6 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
          {!isBlockedByOther && (
             <button
                 onClick={handleBlockUser}
-                disabled={!conversationData} // Disable block if chat is new/doc missing
                 className={`p-2 rounded-full flex-shrink-0 ${isBlockedByYou ? 'bg-red-100 text-red-600 hover:bg-red-200' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'} disabled:opacity-50 disabled:cursor-not-allowed`}
                 title={isBlockedByYou ? `Unblock ${otherUserInfo?.fullName || 'user'}` : `Block ${otherUserInfo?.fullName || 'user'}`}
                 aria-label={isBlockedByYou ? 'Unblock user' : 'Block user'}
@@ -328,7 +391,7 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
       </div>
 
       {/* Messages Area */}
-      <div className="flex-grow overflow-y-auto p-4 space-y-1 bg-gray-100">
+      <div className="flex-grow overflow-y-auto p-4 space-y-1 bg-gray-100 h-[calc(100vh-200px)]" ref={messagesContainerRef} >
         {isNewChat && messages.length === 0 && (
              <div className="text-center text-gray-500 pt-10">
                  Send a message to start the conversation with {otherUserInfo?.fullName || 'this user'}.
@@ -348,7 +411,7 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
            />
         ))}
          {/* Anchor for scrolling */}
-        <div ref={messagesEndRef} style={{ height: '1px' }} /> {/* Ensure anchor has some height */}
+        <div ref={messagesEndRef} className="h-0" />
       </div>
 
       {/* Blocked Message / Message Input Area */}

@@ -118,7 +118,7 @@ const LoginPage = () => {
   >({
     mutationFn: async ({ email, password }) =>
       await axios.post(
-        `${BASE_URL}/user/login`,
+        `${BASE_URL}/api/user/login`,
         { email, password },
         { withCredentials: true }
       ),
@@ -177,7 +177,7 @@ const LoginPage = () => {
       {/* Logo */}
       <img
         className="absolute top-6 left-13 h-7"
-        src="/public/images/login-logo.svg"
+        src="/Images/login-logo.svg"
         alt="LinkedIn"
       />
 

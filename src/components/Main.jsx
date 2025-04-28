@@ -4,6 +4,7 @@ import PostMenu from './PostMenu.jsx';
 import CreatePostModal from './PostCreation.jsx';
 import PostReactions from './PostReactions.jsx';
 import CommentSection from './CommentSection.jsx';
+import { BASE_URL } from "../constants";
 
 // Set axios defaults to include credentials with all requests
 axios.defaults.withCredentials = true;
@@ -81,8 +82,8 @@ const Main = () => {
   const [loadingComments, setLoadingComments] = useState({});
   
   // Use exact API endpoint as specified
-  const API_ENDPOINT = 'http://localhost:3000/posts';
-  const COMMENTS_ENDPOINT = 'http://localhost:3000/comments';
+  const API_ENDPOINT = `${BASE_URL}/posts`;
+  const COMMENTS_ENDPOINT = `${BASE_URL}/comments`;
   
   // Available reaction types
   /**
@@ -134,7 +135,7 @@ const Main = () => {
    */
   const fetchUser = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/user/profile', { withCredentials: true });
+      const response = await axios.get(`${BASE_URL}/user/profile`, { withCredentials: true });
       console.log("User data:", response.data);
     } catch (error) {
       console.error("Error fetching user data:", error);
@@ -157,7 +158,7 @@ const Main = () => {
    */
   const fetchNotifications = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/notifications', { withCredentials: true });
+      const response = await axios.get(`${BASE_URL}/notifications`, { withCredentials: true });
       console.log("Notifications:", response.data);
     } catch (error) {
       console.error("Error fetching notifications:", error);

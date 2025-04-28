@@ -120,7 +120,7 @@ const Navbar = () => {
         <div className="flex justify-between items-center py-3">
           <div className="flex items-center space-x-4">
             <Link to="/">
-              <img className="h-8 rounded" src="/public/images/small-logo.png" alt="LinkedIn" />
+              <img className="h-8 rounded" src="/Images/small-logo.png" alt="LockedIn" />
             </Link>
           </div>
           <div className="flex items-center gap-2 md:gap-6">

@@ -3,13 +3,29 @@ import CoverPhotoForm from "./Forms/CoverPhotoForm";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCamera } from "@fortawesome/free-solid-svg-icons";
 
+/**
+ * Interface for CoverPhoto component props
+ * @interface CoverPhotoProps
+ * @property {string} [currentImageUrl] - URL of the current cover photo if one exists
+ * @property {function} onImageChange - Callback function to handle when a new image is selected
+ * @property {function} onImageDelete - Callback function to handle when the image is deleted
+ */
 interface CoverPhotoProps {
   currentImageUrl?: string;
   onImageChange: (file: File) => void;
   onImageDelete: () => void;
 }
-const DEFAULT_COVER_PHOTO = "../../../public/Images/defaultCover.png";
 
+/** Default cover photo path used when no custom image is set */
+const DEFAULT_COVER_PHOTO = "/Images/defaultCover.png";
+
+/**
+ * Component for displaying and managing a user's profile cover photo
+ *
+ * @component
+ * @param {CoverPhotoProps} props - The component props
+ * @returns {JSX.Element} Rendered CoverPhoto component
+ */
 const CoverPhoto: React.FC<CoverPhotoProps> = ({
   currentImageUrl,
   onImageChange,
@@ -20,10 +36,17 @@ const CoverPhoto: React.FC<CoverPhotoProps> = ({
   const fileInputRef = useRef(null);
   const [currentImage, setCurrentImage] = useState(DEFAULT_COVER_PHOTO);
 
+  /**
+   * Opens the cover photo form when camera button is clicked
+   */
   const handleButtonClick = () => {
     setShowForm(true);
   };
 
+  /**
+   * Handles file selection from the file input
+   * @param {React.ChangeEvent<HTMLInputElement>} e - File input change event
+   */
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       onImageChange(e.target.files[0]);
@@ -32,16 +55,25 @@ const CoverPhoto: React.FC<CoverPhotoProps> = ({
     }
   };
 
+  /**
+   * Opens the image selection form and closes the options menu
+   */
   const handleSelectImage = () => {
     setShowForm(true);
     setShowOptions(false);
   };
 
+  /**
+   * Triggers the image deletion callback and closes the options menu
+   */
   const handleDeleteImage = () => {
     onImageDelete();
     setShowOptions(false);
   };
 
+  /**
+   * Closes the cover photo form
+   */
   const handleCloseForm = () => {
     setShowForm(false);
   };

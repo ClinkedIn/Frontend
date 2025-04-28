@@ -14,7 +14,7 @@ function App() {
       {/* Header */}
       <header className="w-full py-4 flex justify-between items-center px-6">
         <img
-          src="./public/Images/linkedin.png" // Ensure this path is correct for your project
+          src="./Images/linkedin.png" // Ensure this path is correct for your project
           alt="LinkedIn Logo"
           className="h-8"
         />

@@ -2,12 +2,24 @@ import React, { useState, useRef } from "react";
 import ConfirmationDialog from "../ConfirmationDialog";
 import { Upload, FileText, AlertCircle, CheckCircle } from "lucide-react";
 
+/**
+ * Props for the ResumeForm component
+ * @interface ResumeFormProps
+ * @property {() => void} onClose - Function to close the resume form
+ * @property {(file: File) => void} onSave - Function called when a file is saved/uploaded
+ * @property {string} [currentResumeUrl] - URL to the currently uploaded resume if any
+ */
 interface ResumeFormProps {
   onClose: () => void;
   onSave: (file: File) => void;
   currentResumeUrl?: string;
 }
 
+/**
+ * ResumeForm component for uploading resume files
+ * @param {ResumeFormProps} props - The component props
+ * @returns {JSX.Element} The rendered component
+ */
 const ResumeForm: React.FC<ResumeFormProps> = ({
   onClose,
   onSave,
@@ -19,6 +31,10 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
   const [showConfirmation, setShowConfirmation] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  /**
+   * Handles drag events to toggle the active state during drag and drop
+   * @param {React.DragEvent<HTMLDivElement>} e - The drag event
+   */
   const handleDrag = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
@@ -29,6 +45,11 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
     }
   };
 
+  /**
+   * Validates the selected file meets the requirements
+   * @param {File} file - The file to validate
+   * @returns {boolean} Whether the file is valid
+   */
   const validateFile = (file: File): boolean => {
     // Check file type
     const allowedTypes = [
@@ -50,6 +71,10 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
     return true;
   };
 
+  /**
+   * Handles file drop events
+   * @param {React.DragEvent<HTMLDivElement>} e - The drop event
+   */
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
@@ -64,6 +89,10 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
     }
   };
 
+  /**
+   * Handles file selection via the file input
+   * @param {React.ChangeEvent<HTMLInputElement>} e - The change event
+   */
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setError(null);
     if (e.target.files && e.target.files.length > 0) {
@@ -74,6 +103,9 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
     }
   };
 
+  /**
+   * Initiates the file upload process
+   */
   const handleSave = () => {
     if (selectedFile) {
       onSave(selectedFile);
@@ -83,16 +115,27 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
     }
   };
 
+  /**
+   * Handles confirmation after successful upload
+   */
   const handleConfirm = () => {
     onClose();
   };
 
+  /**
+   * Opens the file selector dialog
+   */
   const openFileSelector = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
   };
 
+  /**
+   * Returns an appropriate file type icon based on file extension
+   * @param {string} fileName - The name of the file
+   * @returns {JSX.Element | null} The icon for the file type
+   */
   const getFileTypeIcon = (fileName: string) => {
     const extension = fileName.split(".").pop()?.toLowerCase();
     if (extension === "pdf") {
@@ -103,6 +146,11 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
     return null;
   };
 
+  /**
+   * Formats file size into a human-readable string
+   * @param {number} size - The file size in bytes
+   * @returns {string} Formatted file size with units
+   */
   const formatFileSize = (size: number) => {
     if (size < 1024) {
       return `${size} B`;

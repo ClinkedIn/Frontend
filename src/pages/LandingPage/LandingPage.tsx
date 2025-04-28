@@ -13,7 +13,7 @@ const LandingPage = () => {
       <nav className="bg-white py-3 px-4 md:px-12 flex flex-wrap items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center">
-          <img src="/public/images/login-logo.svg" alt="LinkedIn Logo" className="h-6" />
+          <img src="/Images/login-logo.svg" alt="LockedIn Logo" className="h-6" />
         </Link>
 
         {/* Icons & Buttons */}
@@ -21,31 +21,31 @@ const LandingPage = () => {
           {/* Navigation Links */}
           <div className="flex flex-wrap items-center space-x-4 md:space-x-6 text-gray-500">
             <Link to="/articles" className="text-xs hover:text-black flex flex-col items-center">
-              <img src="/public/Images/article.jpg" alt="Articles" className="h-5 w-5 mb-1" />
+              <img src="/Images/article.jpg" alt="Articles" className="h-5 w-5 mb-1" />
               Articles
             </Link>
             <Link to="/people" className="text-xs hover:text-black flex flex-col items-center">
-              <img src="/public/Images/people-outline.png" alt="People" className="h-5 w-5 mb-1" />
+              <img src="/Images/people-outline.png" alt="People" className="h-5 w-5 mb-1" />
               People
             </Link>
             <Link to="/learning" className="text-xs hover:text-black flex flex-col items-center">
-              <img src="/public/Images/learning-.png" alt="Learning" className="h-5 w-5 mb-1" />
+              <img src="/Images/learning-.png" alt="Learning" className="h-5 w-5 mb-1" />
               Learning
             </Link>
             <Link to="/jobs" className="text-xs hover:text-black flex flex-col items-center">
               <img
-                src="/public/Images/job-icon.svg"
+                src="/Images/job-icon.svg"
                 alt="Jobs"
                 className="h-5 w-5 mb-1 filter grayscale brightness-75"
               />
               Jobs
             </Link>
             <Link to="/games" className="text-xs hover:text-black flex flex-col items-center">
-              <img src="/public/Images/games.png" alt="Games" className="h-5 w-5 mb-1" />
+              <img src="/Images/games.png" alt="Games" className="h-5 w-5 mb-1" />
               Games
             </Link>
             <Link to="/app" className="text-xs hover:text-black flex flex-col items-center">
-              <img src="/public/Images/app.png" alt="Get the app" className="h-5 w-5 mb-1" />
+              <img src="/Images/app.png" alt="Get the app" className="h-5 w-5 mb-1" />
               Get the app
             </Link>
           </div>
@@ -96,7 +96,7 @@ const LandingPage = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            <img src="/public/images/google-white.png" alt="Google" className="h-6 w-6 mr-2" />
+            <img src="/Images/google-white.png" alt="Google" className="h-6 w-6 mr-2" />
             Continue with Google
           </motion.button>
 
@@ -140,7 +140,7 @@ const LandingPage = () => {
         {/* Right Section */}
         <div className="flex justify-end w-full">
           <motion.img
-            src="/public/images/hero.svg"
+            src="/Images/hero.svg"
             alt="Hero"
             className="hidden md:block w-[650px]"
             initial={{ x: 30, opacity: 0 }}

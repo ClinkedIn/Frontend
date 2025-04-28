@@ -3,40 +3,86 @@ import CoverPhoto from "./CoverPhoto";
 import ProfilePhoto from "./ProfilePicture";
 import { useNavigate } from "react-router";
 import axios from "axios";
-
+import { BASE_URL } from "../../constants";  
+/**
+ * Interface representing the contact information of a user
+ * @interface ContactInfo
+ */
 interface ContactInfo {
+  /** Birthday information with day and month */
   birthDay?: {
+    /** Day of birth (1-31) */
     day: number;
+    /** Month of birth (January-December) */
     month: string;
   };
+  /** Website information */
   website?: {
+    /** Website URL */
     url: string | null;
+    /** Type of website (Personal, Company, Blog, etc.) */
     type: string | null;
   };
+  /** Phone number */
   phone: string;
+  /** Type of phone (Home, Work, Mobile) */
   phoneType: string;
+  /** Physical address */
   address: string;
 }
 
+/**
+ * Interface representing user's about information
+ * @interface AboutInfo
+ */
 interface AboutInfo {
+  /** User description/bio */
   description: string | null;
+  /** List of user's skills */
   skills: string[];
 }
 
+/**
+ * Interface representing a user profile
+ * @interface User
+ */
 interface User {
+  /** User's first name */
   firstName: string;
+  /** User's last name */
   lastName: string;
+  /** User's contact information */
   contactInfo: ContactInfo;
+  /** User's about information */
   about: AboutInfo;
+  /** URL to user's profile picture */
   profilePicture: string | null;
+  /** URL to user's cover picture */
   coverPicture: string | null;
+  /** User's professional headline */
   headline: string | null;
+  /** User's additional name (e.g. middle name) */
   additionalName: string | null;
+  /** User's personal or professional website */
   website: string | null;
+  /** User's location */
   location: string | null;
+  /** User's industry/sector */
   industry: string | null;
 }
 
+/**
+ * Profile header component that displays and manages the user's profile information
+ *
+ * This component handles:
+ * - Display of user profile and cover images
+ * - User name and headline
+ * - About section with description and skills
+ * - Contact information
+ * - Editing functionality for all profile sections
+ *
+ * @returns {JSX.Element} Rendered profile header component
+ */
 const ProfileHeaderMain: React.FC = () => {
   const [coverImageUrl, setCoverImageUrl] = useState<string | undefined>(
     "/default-cover.jpg"
@@ -68,7 +114,7 @@ const ProfileHeaderMain: React.FC = () => {
     const fetchUserData = async () => {
       try {
         setLoading(true);
-        const response = await axios.get("http://localhost:3000/user/me");
+        const response = await axios.get(`${BASE_URL}/user/me`);
 
         if (response.data && response.data.user) {
           setUser(response.data.user);
@@ -104,33 +150,53 @@ const ProfileHeaderMain: React.FC = () => {
     fetchUserData();
   }, []);
 
+  /**
+   * Handles changing the cover image
+   * @param {File} file - The new cover image file
+   */
   const handleCoverImageChange = (file: File) => {
     const url = URL.createObjectURL(file);
     setCoverImageUrl(url);
   };
 
+  /**
+   * Handles deletion of the cover image
+   */
   const handleCoverImageDelete = () => {
     setCoverImageUrl(undefined);
   };
 
+  /**
+   * Handles changing the profile image
+   * @param {File} file - The new profile image file
+   */
   const handleProfileImageChange = (file: File) => {
     const url = URL.createObjectURL(file);
     setProfileImageUrl(url);
   };
 
+  /**
+   * Handles deletion of the profile image
+   */
   const handleProfileImageDelete = () => {
     setProfileImageUrl(undefined);
   };
 
+  /**
+   * Navigates to the username update page
+   */
   const handleEditName = () => {
     navigate("/update-username");
   };
 
-  // Handle About Section Update
+  /**
+   * Submits the updated about section to the server
+   * @param {React.FormEvent} e - Form submission event
+   */
   const handleAboutSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await axios.patch("http://localhost:3000/user/about", {
+      const response = await axios.patch(`${BASE_URL}/user/about`, {
         about: {
           description: aboutText,
           skills: aboutSkills,
@@ -158,12 +224,15 @@ const ProfileHeaderMain: React.FC = () => {
     }
   };
 
-  // Handle Contact Info Update
+  /**
+   * Submits the updated contact information to the server
+   * @param {React.FormEvent} e - Form submission event
+   */
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const response = await axios.patch(
-        "http://localhost:3000/user/contact-info",
+        `${BASE_URL}/user/contact-info`,
         contactInfo
       );
 
