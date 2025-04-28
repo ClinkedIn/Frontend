@@ -31,7 +31,7 @@
 //     setError(null);
 
 //     try {
-//       const response = await fetch(`${BASE_URL}/stripe/create-checkout-session`, {
+//       const response = await fetch(`${BASE_URL}/api/stripe/create-checkout-session`, {
 //         method: 'POST',
 //         headers: {
 //           'Content-Type': 'application/json',
@@ -279,7 +279,7 @@ const SubscriptionPlans = () => {
 
     try {
       const response = await fetch(
-        `${BASE_URL}/stripe/create-checkout-session`,
+        `${BASE_URL}/api/stripe/create-checkout-session`,
         {
           method: "POST",
           headers: {
@@ -323,7 +323,7 @@ const SubscriptionPlans = () => {
     setError(null);
 
     try {
-      const response = await fetch(`${BASE_URL}/stripe/cancel-subscription`, {
+      const response = await fetch(`${BASE_URL}/api/stripe/cancel-subscription`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
