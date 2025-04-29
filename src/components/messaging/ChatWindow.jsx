@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback,useMemo } from 'react';
-import { collection, query, orderBy, onSnapshot, doc, updateDoc, arrayUnion,arrayRemove, getDoc, setDoc } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, doc, updateDoc, arrayUnion,arrayRemove, getDoc, setDoc,  serverTimestamp} from 'firebase/firestore';
 import MessageInput from '../../components/messaging/MessageInput';
 import MessageItem from '../../components/messaging/MessageItem';
 import { FaArrowLeft } from "react-icons/fa";
@@ -361,6 +361,8 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
         };
 
         messages.forEach((message) => {
+          if (!message.timestamp)
+            return;
             const messageDate = message.timestamp.toDate(); // Convert Firestore Timestamp to Date
             const messageDateString = format(messageDate, 'yyyy-MM-dd'); // Format for comparison
 
@@ -385,6 +387,56 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
         return items;
       }, [messages]); // Re-compute whenever the 'messages' state changes
 
+    //Delete Message Handler
+    const handleDeleteMessage = useCallback(async (messageId) => {
+      if (!conversationId || !messageId) {
+          console.error("Cannot delete message: Missing conversation or message ID.");
+          return;
+      }
+      console.log(`Attempting to delete message ${messageId} from conversation ${conversationId}`);
+      const messageDocRef = doc(db, 'conversations', conversationId, 'messages', messageId);
+  
+      try {
+        await updateDoc(messageDocRef, {
+            text: "This message has been deleted", 
+            mediaUrls: [], 
+            mediaTypes: [],
+            isDeleted: true, 
+            editedAt: serverTimestamp() 
+        });
+        console.log("Message soft-deleted successfully.");
+    } catch (error) {
+        console.error("Error soft-deleting message:", error);
+        
+    }
+    }, [conversationId]); 
+  
+  
+    // Update Message Handler 
+    const handleUpdateMessage = useCallback(async (messageId, newText) => {
+        if (!conversationId || !messageId || typeof newText !== 'string') {
+            console.error("Cannot update message: Missing IDs or invalid text.");
+            return;
+        }
+        console.log(`Attempting to update message ${messageId} in conversation ${conversationId}`);
+        const messageDocRef = doc(db, 'conversations', conversationId, 'messages', messageId);
+  
+        try {
+          await updateDoc(messageDocRef, { text: newText, editedAt: serverTimestamp() });
+          console.log("Message updated successfully.");
+          // Update lastMessage snippet if this was the last message
+          if (messages.length > 0 && messages[messages.length - 1].id === messageId) {
+              const convDocRef = doc(db, 'conversations', conversationId);
+              await updateDoc(convDocRef, {
+                  'lastMessage.text': newText,
+                  'lastMessage.timestamp': serverTimestamp(),
+                  'lastUpdatedAt': serverTimestamp()
+              }).catch(err => console.error("Error updating lastMessage snippet after edit:", err));
+          }
+      } catch (error) {
+         console.error("Error updating message:", error);
+     }
+    }, [conversationId, messages]);
 
 
   if (!conversationId) {
@@ -421,7 +473,7 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
              </div>
          );
     }
-    return null; // No blocks active
+    return null; 
   };
 
 // Determine if the chat is brand new (Firestore doc doesn't exist yet)
@@ -465,7 +517,7 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
       </div>
 
       {/* Messages Area */}
-      <div className="flex-grow overflow-y-auto p-4 space-y-1 bg-gray-100 h-[calc(100vh-200px)]" ref={messagesContainerRef} >
+      <div className="flex-grow overflow-y-auto  space-y-1 bg-gray-100 h-[calc(100vh-200px)]" ref={messagesContainerRef} >
         {isNewChat && messages.length === 0 && (
              <div className="text-center text-gray-500 pt-10">
                  Send a message to start the conversation with {otherUserInfo?.fullName || 'this user'}.
@@ -494,6 +546,8 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
                                 isOwnMessage={item.message.senderId === currentUser.uid}
                                 senderInfo={item.message.senderId === otherUserId ? otherUserInfo : null}
                                 showReadReceipt={item.message.senderId === currentUser?.uid && item.message.readBy?.includes(otherUserId)}
+                                onDeleteMessage={handleDeleteMessage} 
+                                onUpdateMessage={handleUpdateMessage}
                             />
                         );
                     }})}
