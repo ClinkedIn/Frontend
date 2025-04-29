@@ -49,10 +49,27 @@ const Header = ({ notifications }) => {
   const [unreadCountMessages, setUnreadCountMessages] = useState(0)
   const [conversations, setConversations] = useState([]);
   const [loadingConversations, setLoadingConversations] = useState(true);
-  const currentUser ={
-    uid:"123"
-  }
+  const [currentUser, setUser] = useState();
 
+
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await axios.get(`${BASE_URL}/api/user/me`, {
+      
+          withCredentials:true
+        });
+    
+        setUser(response.data.user);
+        console.log("User data:", response.data.user);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
+    };
+    fetchUser();
+
+  }, []);
   useEffect(() => {
     const fetchUnreadCount = async () => {
       try {
@@ -70,19 +87,23 @@ const Header = ({ notifications }) => {
     fetchUnreadCount();
   }, [notifications]);
 
+
+
   useEffect(() => {
+    if (!currentUser?._id)
+      return;
     const conversationsRef = collection(db, 'conversations');
     const q = query(
       conversationsRef,
-      where('participants', 'array-contains', currentUser.uid)
+      where('participants', 'array-contains', currentUser._id)
     );
 
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       let totalUnread = 0;
       querySnapshot.forEach((doc) => {
         const data = doc.data();
-        const countForUser = data.unreadCounts?.[currentUser.uid] || 0;
-        if (data.forceUnread[currentUser.uid] === true) countForUser = 0 ;
+        const countForUser = data.unreadCounts?.[currentUser._id] || 0;
+        if (data.forceUnread[currentUser._id] === true) countForUser = 0 ;
         totalUnread += countForUser;
       });
 
@@ -101,7 +122,7 @@ const Header = ({ notifications }) => {
 
 
   }
-, [currentUser?.uid]);
+, [currentUser?._id]);
 
   // Close dropdown when clicking outside
   useEffect(() => {

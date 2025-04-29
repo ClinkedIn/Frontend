@@ -27,7 +27,7 @@ const ConversationSearch = ({ onSelectUser,connections,loading,error }) => {
     if (searchTerm.trim()) {
       const lowerSearchTerm = searchTerm.toLowerCase();
       const results = connections.filter(conn =>
-        conn.fullName.toLowerCase().includes(lowerSearchTerm)
+        conn.firstName.toLowerCase().includes(lowerSearchTerm) || conn.lastName.toLowerCase().includes(lowerSearchTerm) 
       );
       setFilteredConnections(results);
       setShowResults(true); // Show results when searching
@@ -80,16 +80,16 @@ const ConversationSearch = ({ onSelectUser,connections,loading,error }) => {
           )}
           {!loading && !error && filteredConnections.map(user => (
             <div
-              key={user.userId}
+              key={user._id}
               onClick={() => handleSelect(user)}
               className="flex items-center p-3 hover:bg-gray-100 cursor-pointer"
             >
               <img
                 src={user.profilePicture || 'https://via.placeholder.com/40'}
-                alt={user.fullName}
+                alt={user.fisrtName}
                 className="w-8 h-8 rounded-full mr-3"
               />
-              <span className="text-sm">{user.fullName}</span>
+              <span className="text-sm">{user.firstName + " " + user.lastName}</span>
             </div>
           ))}
         </div>

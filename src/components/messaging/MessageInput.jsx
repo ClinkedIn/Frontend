@@ -143,12 +143,12 @@ const MessageInput = ({ currentUser, otherUserId, onTyping }) => {
 
      // Add Message to Firestore using API's conversationId 
      const messageDataForFirestore = {
-       senderId: currentUser.uid,
+       senderId: currentUser._id,
        text: textToSend,
        mediaUrl: null, 
        mediaType: null, 
        timestamp: serverTimestamp(), // Use Firestore server timestamp for consistency
-       readBy: [currentUser.uid], // Sender has implicitly read it
+       readBy: [currentUser._id], // Sender has implicitly read it
 
      };
      const conversationDocRef = doc(db, 'conversations', apiConversationId);
@@ -161,12 +161,12 @@ const MessageInput = ({ currentUser, otherUserId, onTyping }) => {
      const conversationUpdateData = {
          lastMessage: {
              text: textToSend || `Sent a ${mediaType?.split('/')[0] || 'file'}`,
-             senderId: currentUser.uid,
+             senderId: currentUser._id,
              timestamp: messageDataForFirestore.timestamp, // Use the same timestamp object
          },
          lastUpdatedAt: messageDataForFirestore.timestamp, // Use the same timestamp object
-         participants: [currentUser.uid, otherUserId].sort(),
-         typing: { [currentUser.uid]: false, [otherUserId]: false },
+         participants: [currentUser._id, otherUserId].sort(),
+         typing: { [currentUser._id]: false, [otherUserId]: false },
          blockedBy: {},
          unreadCounts: {},
      };
@@ -180,7 +180,7 @@ const MessageInput = ({ currentUser, otherUserId, onTyping }) => {
      conversationUpdateData.unreadCounts = {
          ...currentUnreadCounts, // Keep existing counts
          [otherUserId]: otherUserUnreadCount, // Increment other user's count
-         [currentUser.uid]: currentUnreadCounts[currentUser.uid] || 0 // Ensure current user count exists
+         [currentUser._id]: currentUnreadCounts[currentUser._id] || 0 // Ensure current user count exists
      };
 
 
