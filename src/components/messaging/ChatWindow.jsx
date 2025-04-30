@@ -6,6 +6,8 @@ import { FaArrowLeft } from "react-icons/fa";
 import { FiUserMinus } from "react-icons/fi";
 import { db } from '../../../firebase';
 import { format, isToday, isYesterday } from 'date-fns';
+import { BASE_URL } from '../../constants';
+import axios from 'axios';
 
 
 /**
@@ -393,18 +395,24 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
           console.error("Cannot delete message: Missing conversation or message ID.");
           return;
       }
-      console.log(`Attempting to delete message ${messageId} from conversation ${conversationId}`);
-      const messageDocRef = doc(db, 'conversations', conversationId, 'messages', messageId);
+     
+      //const messageDocRef = doc(db, 'conversations', conversationId, 'messages', messageId);
   
       try {
-        await updateDoc(messageDocRef, {
+        console.log(`Attempting to delete message ${messageId} from conversation ${conversationId}`);
+        const response = await axios.delete(`${BASE_URL}/api/messages/${messageId}`,{
+            withCredentials: true
+        });
+        console.log("Message deleted successfully:", response.data);
+
+        /*await updateDoc(messageDocRef, {
             text: "This message has been deleted", 
             mediaUrls: [], 
             mediaTypes: [],
             isDeleted: true, 
             editedAt: serverTimestamp() 
         });
-        console.log("Message soft-deleted successfully.");
+        console.log("Message soft-deleted successfully.");*/
     } catch (error) {
         console.error("Error soft-deleting message:", error);
         
@@ -419,10 +427,15 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
             return;
         }
         console.log(`Attempting to update message ${messageId} in conversation ${conversationId}`);
-        const messageDocRef = doc(db, 'conversations', conversationId, 'messages', messageId);
+        //const messageDocRef = doc(db, 'conversations', conversationId, 'messages', messageId);
+        
   
         try {
-          await updateDoc(messageDocRef, { text: newText, editedAt: serverTimestamp() });
+          const response = await axios.patch(`${BASE_URL}/api/messages/${messageId}`,{messageText : newText},{
+            withCredentials: true
+          });
+          console.log("Message updated successfully:", response.data);
+          /*await updateDoc(messageDocRef, { text: newText, editedAt: serverTimestamp() });
           console.log("Message updated successfully.");
           // Update lastMessage snippet if this was the last message
           if (messages.length > 0 && messages[messages.length - 1].id === messageId) {
@@ -432,7 +445,7 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
                   'lastMessage.timestamp': serverTimestamp(),
                   'lastUpdatedAt': serverTimestamp()
               }).catch(err => console.error("Error updating lastMessage snippet after edit:", err));
-          }
+          }*/
       } catch (error) {
          console.error("Error updating message:", error);
      }

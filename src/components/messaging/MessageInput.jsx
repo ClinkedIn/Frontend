@@ -5,6 +5,8 @@ import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { v4 as uuidv4 } from 'uuid'; // For unique file names
 import { SlPaperClip } from "react-icons/sl";
 import { FaCircleXmark } from "react-icons/fa6";
+import axios from 'axios'; // For API calls
+import { BASE_URL } from '../../constants';
 
 //  API endpoint URL
 //const API_SEND_MESSAGE_URL = '/api/messages/'; 
@@ -94,11 +96,12 @@ const MessageInput = ({ currentUser, otherUserId, onTyping }) => {
     const attachmentToSend = attachment;
     // Use formData to send text and potentially a file
     const formData = new FormData();
-    formData.append('recipientId', otherUserId);
-    formData.append('text', textToSend);
+    formData.append('receiverId', otherUserId);
+    formData.append('messageText', textToSend);
+    formData.append('type', "direct");
 
     if (attachmentToSend) {
-      formData.append('file', attachmentToSend.file); 
+      formData.append('messageAttachment', attachmentToSend.file); 
     }
    
     // Clear input fields immediately for better UX 
@@ -106,11 +109,17 @@ const MessageInput = ({ currentUser, otherUserId, onTyping }) => {
     setAttachment(null);
     onTyping(false); // Stop typing indicator on send attempt
 
-    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    if (typingTimeoutRef.current) 
+      clearTimeout(typingTimeoutRef.current);
     //let mediaUrl = null;
     //let mediaType = null;
+
     try {
       //Call Backend API to Send Message (with attachment if present)
+      const response = await axios.post(`${BASE_URL}/api/messages`, formData, {
+      
+        withCredentials:true
+      })
       /*console.log("Sending message via API:", API_SEND_MESSAGE_URL);
 
       const response = await fetch(API_SEND_MESSAGE_URL, {
@@ -119,6 +128,7 @@ const MessageInput = ({ currentUser, otherUserId, onTyping }) => {
         // headers: { 'Authorization': `Bearer ${your_auth_token}` },
         body: formData,
       });
+      
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -137,7 +147,7 @@ const MessageInput = ({ currentUser, otherUserId, onTyping }) => {
 
       console.log("Send Message API Success:", result);*/
       // const apiConversationId = result.conversationId;
-     const apiConversationId ="12345"
+     /*const apiConversationId ="12345"
 
      console.log("API Success, Conversation ID:", apiConversationId);
 
@@ -187,7 +197,7 @@ const MessageInput = ({ currentUser, otherUserId, onTyping }) => {
 
      await setDoc(conversationDocRef, conversationUpdateData, { merge: true });
 
-     console.log("Firestore conversation metadata updated:", apiConversationId);
+     console.log("Firestore conversation metadata updated:", apiConversationId);*/
 
     } catch (err) {
       console.error("Error sending message:", err);
