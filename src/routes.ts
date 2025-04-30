@@ -32,6 +32,12 @@ import AdminPanel from "./components/AdminPanel/AdminPanel";
 
 
 import UserProfileViewPage from "./pages/myProfile/OtherProfile/UserProfileViewPage";
+import HirePage from "./pages/jobs/HirePage.jsx";
+import JobDescriptionPage from "./pages/jobs/JobDescriptionPage.jsx";
+import JobSettingsPage from "./pages/jobs/JobSettingsPage.jsx";
+import Review from "./pages/jobs/Review.jsx";
+import JobDetails from "./pages/jobs/JobDetails.jsx";
+import ManageJob from "./pages/jobs/ManageJob.jsx";
 
 // Define your routes as an array of RouteObject (compatible with React Router v6)
 const routes: RouteObject[] = [
@@ -83,6 +89,29 @@ const routes: RouteObject[] = [
   {
     path: "/jobs",
     element: React.createElement(Jobs),
+  },
+  {
+    path: "/jobdescription",
+    element: React.createElement(JobDescriptionPage),
+  },
+  {
+    path: "/jobsettings",
+    element: React.createElement(JobSettingsPage),
+  },
+  {
+    path: "/jobdetails",
+    element: React.createElement(JobDetails),
+  },
+  {
+    path: "/managejob",
+    element: React.createElement(ManageJob),
+  },
+  {
+    path: "/starthiring",
+    element: React.createElement(HirePage),
+  }, {
+    path: "/review",
+    element: React.createElement(Review),
   },
   {
     path: "/myjobs",
