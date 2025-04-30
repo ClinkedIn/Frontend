@@ -70,8 +70,9 @@ const Header = ({ notifications }) => {
       let totalUnread = 0;
       querySnapshot.forEach((doc) => {
         const data = doc.data();
-        const countForUser = data.unreadCounts?.[currentUser._id] || 0;
-        if (data.forceUnread[currentUser._id] === true) countForUser = 0 ;
+        let countForUser = data.unreadCounts?.[currentUser._id] || 0;
+        if (data.forceUnread) 
+          countForUser = countForUser-1 ;
         totalUnread += countForUser;
       });
 
