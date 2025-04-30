@@ -128,7 +128,10 @@ const MessageInput = ({ currentUser, otherUserId, onTyping }) => {
     try {
       //Call Backend API to Send Message (with attachment if present)
       const response = await axios.post(`${BASE_URL}/api/messages`, formData,{
-          withCredentials:true
+          withCredentials:true,
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          }
       })
       /*console.log("Sending message via API:", API_SEND_MESSAGE_URL);
 

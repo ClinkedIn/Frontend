@@ -132,7 +132,7 @@ const MessageItem = ({ message, isOwnMessage, senderInfo, showReadReceipt,onDele
             return (
               <div
                 key={index}
-                className="p-4 mt-2 border rounded-lg bg-gray-100 cursor-pointer hover:bg-gray-200 shadow-md w-full max-w-sm text-center"
+                className="p-4 mt-2  rounded-lg bg-gray-100 cursor-pointer hover:bg-gray-200  w-full max-w-sm text-center"
                 onClick={() => window.open(url, "_blank")}
               >
                 <p className="text-blue-500 font-medium">📄 Click to open document</p>
