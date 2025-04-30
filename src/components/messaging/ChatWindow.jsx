@@ -530,7 +530,7 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
       </div>
 
       {/* Messages Area */}
-      <div className="flex-grow overflow-y-auto  space-y-1 bg-gray-100 h-[calc(100vh-200px)]" ref={messagesContainerRef} >
+      <div className="flex-grow overflow-y-auto  space-y-1  h-[calc(100vh-200px)]" ref={messagesContainerRef} >
         {isNewChat && messages.length === 0 && (
              <div className="text-center text-gray-500 pt-10">
                  Send a message to start the conversation with {otherUserInfo?.fullName || 'this user'}.

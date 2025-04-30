@@ -99,26 +99,46 @@ const MessageItem = ({ message, isOwnMessage, senderInfo, showReadReceipt,onDele
    * The rendered elements include appropriate styling and accessibility attributes.
    */
   const renderMedia = () => {
-    
-    if (message.mediaUrl.length === 0) // No media URL provided
-      return null;
-
-    if (message.mediaUrl?.includes('image/')) {
-      return <img src={message.mediaUrl} alt="Uploaded content" className="max-w-xs max-h-64 rounded mt-1" />;
-    } else if (message.mediaUrl?.includes('video/')) {
-      return <video src={message.mediaUrl} controls className="max-w-xs max-h-64 rounded mt-1" />;
-    } else {
-      return (
-        <a
-          href={message.mediaUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-500 hover:underline mt-1 block"
-        >
-          View Document ({'file'})
-        </a>
-      );
+    if (!message.mediaUrl || message.mediaUrl.length === 0) {
+      return;
     }
+  
+    return (
+      <div className="flex flex-wrap gap-2">
+        {message.mediaUrl.map((url, index) => {
+          if (url.includes("image")) {
+            return (
+              <img
+                key={index}
+                src={url}
+                alt={`Uploaded content ${index + 1}`}
+                className="max-w-xs max-h-64 rounded mt-2 cursor-pointer"
+                onClick={() => window.open(url, "_blank")}
+              />
+            );
+          } else if (url.includes("video")) {
+            return (
+              <video
+                key={index}
+                src={url}
+                controls
+                className="max-w-xs max-h-64 rounded mt-2"
+              />
+            );
+          } else {
+            return (
+              <div
+                key={index}
+                className="p-3 mt-2 border rounded bg-gray-100 cursor-pointer hover:bg-gray-200"
+                onClick={() => window.open(url, "_blank")}
+              >
+                <p className="text-blue-500">📄 Click to open document</p>
+              </div>
+            );
+          }
+        })}
+      </div>
+    );
   };
 // --- Timestamp Formatting ---
 const formatTimestamp = (ts) => {
@@ -186,15 +206,15 @@ return (
   <div className={`relative flex flex-col ${isOwnMessage ? 'items-end' : 'items-start'}`}>
      {/* Bubble styling */}
      <div
-       className={`relative max-w-md lg:max-w-lg px-3 py-2 rounded-lg ${
+       className={`relative max-w-md lg:max-w-lg px-3 py-2 rounded-lg bg-gray-200 text-gray-800 ${
          isOwnMessage
-           ? 'bg-blue-500 text-white rounded-br-none'
-           : 'bg-gray-200 text-gray-800 rounded-bl-none'
+           ? ' rounded-br-none'
+           : ' rounded-bl-none'
        }`}
      >
        
        {!isOwnMessage && senderInfo && (
-          <p className="text-xs font-semibold mb-1 text-gray-700">{senderInfo.fullName}</p>
+          <p className="text-xs font-semibold mb-1 text-gray-700">{senderInfo.firstName + " " + senderInfo.lastName}</p>
         )}
 
        {/* Message Content (Editing or Display) */}
