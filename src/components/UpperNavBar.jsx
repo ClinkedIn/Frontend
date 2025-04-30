@@ -147,7 +147,7 @@ const Header = ({ notifications }) => {
     navigate("/settings");
     setShowUser(false);
   };
-  const handleMessagingClick = () => navigate("/messaging/123");
+  const handleMessagingClick = () => navigate("/messaging");
 
   // Submit job search
   const handleJobSearch = async (e) => {
