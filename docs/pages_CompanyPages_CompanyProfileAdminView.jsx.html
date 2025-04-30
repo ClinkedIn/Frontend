@@ -157,7 +157,10 @@ const CompanyProfileAdminViewPage = () => {
             setOrganizationType(response.data.organizationType)
             setLogoPreview(response.data.logo)
             setTagline(response.data.tagLine)
+<<<<<<< HEAD
+=======
             console.log("company data:", response.data);
+>>>>>>> 298a4e887adcb76e5ff0b30368755f329fc82575
             
         } catch (error) {
             console.error("Error fetching company info:", error);
@@ -208,7 +211,11 @@ const CompanyProfileAdminViewPage = () => {
     },[]);
 
     return (
+<<<<<<< HEAD
+        &lt;div className="   justify-center bg-[#f4f2ee] min-h-screen  items-center flex flex-col">
+=======
         &lt;div className="   bg-[#f4f2ee] min-h-screen  items-center flex flex-col">
+>>>>>>> 298a4e887adcb76e5ff0b30368755f329fc82575
             
             &lt;Header notifications={notifications} />
             {showForm ? 
@@ -251,7 +258,11 @@ const CompanyProfileAdminViewPage = () => {
             :(companyInfo &amp;&amp; 
             (&lt;div className="lg:w-1/2 lg:h-3/4 md:w-3/4 max-[430px]:w-full ">
                 &lt;div className="bg-white rounded-lg shadow-lg mt-16 relative"> 
+<<<<<<< HEAD
+                    &lt;img src="/Images/card-bg.svg" alt="cover page" className="w-full h-30 rounded-t-lg" />
+=======
                     &lt;img src="/Images/card-bg.svg"  className="w-full h-30 rounded-t-lg" />
+>>>>>>> 298a4e887adcb76e5ff0b30368755f329fc82575
                         &lt;button
                             className="absolute top-4 right-4 bg-white rounded-full shadow-md hover:cursor-pointer px-3 py-2 m-2"
                             aria-label="Change cover photo"
@@ -264,7 +275,11 @@ const CompanyProfileAdminViewPage = () => {
                             />
                         &lt;/button>
                     &lt;div className="flex flex-column justify-between">
+<<<<<<< HEAD
+                        &lt;img src={ companyInfo.logo ? companyInfo.logo  :"/Images/building-icon.png"} alt="profile" className="w-28 h-28 -mt-10 ml-5  " />
+=======
                         &lt;img src={ companyInfo.logo.includes("localhost") ? "/Images/building-icon.png":companyInfo.logo  }  className="w-28 h-28 -mt-10 ml-5  " />
+>>>>>>> 298a4e887adcb76e5ff0b30368755f329fc82575
                         &lt;button className="rounded-full  hover:bg-gray-100 m-4 p-4" 
                         onClick={()=>{setShowForm(true)}}>
                         &lt; MdModeEdit size=" 24"/>
@@ -314,13 +329,21 @@ export default CompanyProfileAdminViewPage;</code></pre>
 </div>
 
 <nav>
+<<<<<<< HEAD
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#ApplyJob">ApplyJob</a></li><li><a href="global.html#ChatWindow">ChatWindow</a></li><li><a href="global.html#CommentSection">CommentSection</a></li><li><a href="global.html#ConversationListItem">ConversationListItem</a></li><li><a href="global.html#ConversationSearch">ConversationSearch</a></li><li><a href="global.html#CreatePostModal">CreatePostModal</a></li><li><a href="global.html#Filter">Filter</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#JobBoardPage">JobBoardPage</a></li><li><a href="global.html#JobCard">JobCard</a></li><li><a href="global.html#Jobs">Jobs</a></li><li><a href="global.html#Main">Main</a></li><li><a href="global.html#MyJobs">MyJobs</a></li><li><a href="global.html#Notification">Notification</a></li><li><a href="global.html#PostMenu">PostMenu</a></li><li><a href="global.html#PostReactions">PostReactions</a></li><li><a href="global.html#closeModal">closeModal</a></li><li><a href="global.html#fetchComments">fetchComments</a></li><li><a href="global.html#fetchCompanies">fetchCompanies</a></li><li><a href="global.html#fetchNotifications">fetchNotifications</a></li><li><a href="global.html#fetchPosts">fetchPosts</a></li><li><a href="global.html#fetchUser">fetchUser</a></li><li><a href="global.html#filteredNotifications">filteredNotifications</a></li><li><a href="global.html#getReactionIcon">getReactionIcon</a></li><li><a href="global.html#handleAddComment">handleAddComment</a></li><li><a href="global.html#handleBlockUser">handleBlockUser</a></li><li><a href="global.html#handleClick">handleClick</a></li><li><a href="global.html#handleCreatePost">handleCreatePost</a></li><li><a href="global.html#handleDeleteNotification">handleDeleteNotification</a></li><li><a href="global.html#handleFilter">handleFilter</a></li><li><a href="global.html#handleJobClick">handleJobClick</a></li><li><a href="global.html#handleLikeClick">handleLikeClick</a></li><li><a href="global.html#handleMainFilterChange">handleMainFilterChange</a></li><li><a href="global.html#handleMessagingClick">handleMessagingClick</a></li><li><a href="global.html#handleMuteDuration">handleMuteDuration</a></li><li><a href="global.html#handleNotificationClick">handleNotificationClick</a></li><li><a href="global.html#handleReact">handleReact</a></li><li><a href="global.html#handleReactToComment">handleReactToComment</a></li><li><a href="global.html#handleReportPost">handleReportPost</a></li><li><a href="global.html#handleSave">handleSave</a></li><li><a href="global.html#handleSavePost">handleSavePost</a></li><li><a href="global.html#handleSearch">handleSearch</a></li><li><a href="global.html#handleSendTestNotification">handleSendTestNotification</a></li><li><a href="global.html#handleSubmit">handleSubmit</a></li><li><a href="global.html#openModal">openModal</a></li><li><a href="global.html#requestOTP">requestOTP</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#toggleComments">toggleComments</a></li><li><a href="global.html#useEffect">useEffect</a></li><li><a href="global.html#verifyOTP">verifyOTP</a></li></ul>
+=======
     <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#ApplyJob">ApplyJob</a></li><li><a href="global.html#ChatWindow">ChatWindow</a></li><li><a href="global.html#CommentSection">CommentSection</a></li><li><a href="global.html#ConversationListItem">ConversationListItem</a></li><li><a href="global.html#ConversationSearch">ConversationSearch</a></li><li><a href="global.html#CreatePostModal">CreatePostModal</a></li><li><a href="global.html#Filter">Filter</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#JobBoardPage">JobBoardPage</a></li><li><a href="global.html#JobCard">JobCard</a></li><li><a href="global.html#Jobs">Jobs</a></li><li><a href="global.html#MyJobs">MyJobs</a></li><li><a href="global.html#Notification">Notification</a></li><li><a href="global.html#PostMenu">PostMenu</a></li><li><a href="global.html#PostReactions">PostReactions</a></li><li><a href="global.html#closeModal">closeModal</a></li><li><a href="global.html#fetchCompanies">fetchCompanies</a></li><li><a href="global.html#fetchNotifications">fetchNotifications</a></li><li><a href="global.html#fetchUser">fetchUser</a></li><li><a href="global.html#filteredNotifications">filteredNotifications</a></li><li><a href="global.html#getReactionIcon">getReactionIcon</a></li><li><a href="global.html#handleBlockUser">handleBlockUser</a></li><li><a href="global.html#handleClick">handleClick</a></li><li><a href="global.html#handleDeleteNotification">handleDeleteNotification</a></li><li><a href="global.html#handleFilter">handleFilter</a></li><li><a href="global.html#handleJobClick">handleJobClick</a></li><li><a href="global.html#handleLikeClick">handleLikeClick</a></li><li><a href="global.html#handleMainFilterChange">handleMainFilterChange</a></li><li><a href="global.html#handleMessagingClick">handleMessagingClick</a></li><li><a href="global.html#handleMuteDuration">handleMuteDuration</a></li><li><a href="global.html#handleNotificationClick">handleNotificationClick</a></li><li><a href="global.html#handleSave">handleSave</a></li><li><a href="global.html#handleSearch">handleSearch</a></li><li><a href="global.html#handleSendTestNotification">handleSendTestNotification</a></li><li><a href="global.html#handleSubmit">handleSubmit</a></li><li><a href="global.html#openModal">openModal</a></li><li><a href="global.html#requestOTP">requestOTP</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#useEffect">useEffect</a></li><li><a href="global.html#verifyOTP">verifyOTP</a></li></ul>
+>>>>>>> 298a4e887adcb76e5ff0b30368755f329fc82575
 </nav>
 
 <br class="clear">
 
 <footer>
+<<<<<<< HEAD
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun Apr 20 2025 19:24:34 GMT+0200 (Eastern European Standard Time)
+=======
     Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun Apr 20 2025 18:19:03 GMT+0200 (Eastern European Standard Time)
+>>>>>>> 298a4e887adcb76e5ff0b30368755f329fc82575
 </footer>
 
 <script> prettyPrint(); </script>
