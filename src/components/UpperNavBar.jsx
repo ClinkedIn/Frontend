@@ -3,7 +3,7 @@ import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import { MdSearch } from "react-icons/md";
 import { BASE_URL } from "../constants";
-import { db } from "../firebase";
+import { db } from "../../firebase";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 
 const Header = ({ notifications }) => {
