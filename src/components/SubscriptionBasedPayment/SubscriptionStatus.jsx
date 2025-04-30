@@ -3,6 +3,7 @@ import { Clock, AlertCircle } from "lucide-react";
 
 const SubscriptionStatus = () => {
   const [subscription, setSubscription] = useState(null);
+  const [isPremium, setIsPremium] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const BASE_URL =
@@ -12,10 +13,11 @@ const SubscriptionStatus = () => {
     const fetchSubscriptionDetails = async () => {
       try {
         // Replace with your actual API endpoint
-        const response = await fetch(`${BASE_URL}/user/me`, {
+        const response = await fetch(`${BASE_URL}/api/user/me`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
+          credentials: "include",
         });
 
         if (!response.ok) {
@@ -23,8 +25,8 @@ const SubscriptionStatus = () => {
         }
 
         const data = await response.json();
-        console.log("data:", data);
-        setSubscription(data);
+        console.log("data:", data.user.isPremium);
+        setIsPremium(data.user.isPremium);
       } catch (err) {
         setError("Could not load subscription details");
         console.error(err);
@@ -62,10 +64,11 @@ const SubscriptionStatus = () => {
 
   // Mock subscription data for display purposes
   const mockSubscription = {
-    type: "premium", // or 'free'
+    // type: "premium", if isPremium is true, else "free"
+    type: isPremium ? "premium" : "free",
     status: "active", // or 'inactive', 'canceled', 'past_due'
     currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-    renewalAmount: "$9.99",
+    renewalAmount: "$20.00",
     features: [
       "Unlimited job applications",
       "Connect with 500+ people",
@@ -98,7 +101,7 @@ const SubscriptionStatus = () => {
   };
 
   return (
-    <div className="bg-white shadow rounded-lg overflow-hidden">
+    <div className="bg-white m-4 shadow rounded-lg overflow-hidden">
       <div className="border-b border-gray-200 px-6 py-5">
         <h3 className="text-lg font-medium text-gray-900">
           Subscription Details

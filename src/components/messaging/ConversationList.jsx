@@ -32,7 +32,7 @@ const ConversationList = ({
          * handleMarkReadUnread('conversation123', false); // Marks the conversation as read
          */
         const handleMarkReadUnread = useCallback(async (conversationId, markAsUnread) => {
-            if (!currentUser?.uid || !conversationId) return;
+            if (!currentUser?._id || !conversationId) return;
     
             console.log(`Marking conversation ${conversationId} as ${markAsUnread ? 'UNREAD' : 'READ'}`);
             const conversationDocRef = doc(db, 'conversations', conversationId);
@@ -42,16 +42,16 @@ const ConversationList = ({
             try {
                 await updateDoc(conversationDocRef, {
                     
-                    [`unreadCounts.${currentUser.uid}`]: newUnreadValue,
+                    [`unreadCounts.${currentUser._id}`]: newUnreadValue,
                     ['forceUnread']: markAsUnread ? true : false,
                 });
-                console.log(`Successfully updated unread count for ${currentUser.uid} in ${conversationId}`);
+                console.log(`Successfully updated unread count for ${currentUser._id} in ${conversationId}`);
                 
             } catch (error) {
                 console.error("Error updating unread status:", error);
                 
             }
-        }, [currentUser?.uid]); // Dependency: currentUser.uid
+        }, [currentUser?._id]); // Dependency: currentUser.uid
 
     return (
         <div className="w-full  md:border-r md:border-gray-400 h-full flex flex-col bg-white">
@@ -76,8 +76,8 @@ const ConversationList = ({
                 )}
 
                 {!loadingConversations && conversations.map(convo => {
-                    const otherUserId = convo.participants.find(id => id !== currentUser.uid);
-                    const otherUserInfo = otherUserId ? connections.find(user => user.userId === otherUserId) : null; 
+                    const otherUserId = convo.participants.find(id => id !== currentUser._id);
+                    const otherUserInfo = otherUserId ? connections.find(user => user._id === otherUserId) : null; 
                     
                     
                     return (

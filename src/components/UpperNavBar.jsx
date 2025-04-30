@@ -34,6 +34,8 @@ const Header = ({ notifications }) => {
     fetchUnreadCount();
   }, [notifications]);
 
+
+
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {

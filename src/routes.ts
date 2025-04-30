@@ -163,7 +163,7 @@ const routes: RouteObject[] = [
     element: React.createElement(SettingsPage),
   },
   {
-    path: "/messaging/:id",
+    path: "/messaging",
     element: React.createElement(MessagingPage),
   }
 
