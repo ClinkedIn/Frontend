@@ -100,39 +100,42 @@ const MessageItem = ({ message, isOwnMessage, senderInfo, showReadReceipt,onDele
    */
   const renderMedia = () => {
     if (!message.mediaUrl || message.mediaUrl.length === 0) {
-      return;
+      return ;
     }
   
     return (
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-col gap-4 items-center">
         {message.mediaUrl.map((url, index) => {
           if (url.includes("image")) {
             return (
-              <img
-                key={index}
-                src={url}
-                alt={`Uploaded content ${index + 1}`}
-                className="max-w-xs max-h-64 rounded mt-2 cursor-pointer"
-                onClick={() => window.open(url, "_blank")}
-              />
+              <div key={index} className="relative group w-full max-w-sm">
+                <img
+                  src={url}
+                  alt={`Uploaded content ${index + 1}`}
+                  className="w-40 h-40 rounded-lg shadow-lg transition-transform transform group-hover:scale-105 cursor-pointer"
+                  onClick={() => window.open(url, "_blank")}
+                />
+                
+              </div>
             );
           } else if (url.includes("video")) {
             return (
-              <video
-                key={index}
-                src={url}
-                controls
-                className="max-w-xs max-h-64 rounded mt-2"
-              />
+              <div key={index} className="w-full max-w-sm">
+                <video
+                  src={url}
+                  controls
+                  className="w-40 h-40 rounded-lg shadow-lg transition-transform transform hover:scale-105"
+                />
+              </div>
             );
           } else {
             return (
               <div
                 key={index}
-                className="p-3 mt-2 border rounded bg-gray-100 cursor-pointer hover:bg-gray-200"
+                className="p-4 mt-2 border rounded-lg bg-gray-100 cursor-pointer hover:bg-gray-200 shadow-md w-full max-w-sm text-center"
                 onClick={() => window.open(url, "_blank")}
               >
-                <p className="text-blue-500">📄 Click to open document</p>
+                <p className="text-blue-500 font-medium">📄 Click to open document</p>
               </div>
             );
           }
