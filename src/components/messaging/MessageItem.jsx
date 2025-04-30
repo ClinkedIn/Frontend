@@ -231,6 +231,9 @@ return (
      {isOwnMessage && showReadReceipt && !isEditing && (
        <p className="text-xs text-gray-500 mt-0.5 mr-1">Read</p>
      )}
+     {isOwnMessage && !showReadReceipt && !isEditing && (
+       <p className="text-xs text-gray-500 mt-0.5 mr-1">Sent</p>
+     )}
   </div>
 
   {/* Spacer for own messages to align left content */}

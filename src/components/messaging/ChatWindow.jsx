@@ -558,7 +558,7 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
                                 message={item.message}
                                 isOwnMessage={item.message.senderId === currentUser._id}
                                 senderInfo={item.message.senderId === otherUserId ? otherUserInfo : null}
-                                showReadReceipt={item.message.senderId === currentUser?._id && item.message.readBy[otherUserId] === true}
+                                showReadReceipt={item.message.senderId === currentUser?._id && item.message.readBy[otherUserId]}
                                 onDeleteMessage={handleDeleteMessage} 
                                 onUpdateMessage={handleUpdateMessage}
                             />
