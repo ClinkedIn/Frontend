@@ -17,15 +17,15 @@ const createConversationId = (uid1, uid2) => {
 
 const MessagingPage = () => {
     const location = useLocation();
-    const { other } = location.state || {};
-    const [otherUser, setOtherUser] = useState(other);
+    const { jobApplicant } = location.state || {};
+    const [otherUser, setOtherUser] = useState(jobApplicant);
     const [currentUser, setUser] = useState();
     const [selectedConversationId, setSelectedConversationId] = useState(null);
-    const [showChatOnMobile, setShowChatOnMobile] = useState(!!other); // For mobile ui
+    const [showChatOnMobile, setShowChatOnMobile] = useState(!!jobApplicant); // For mobile ui
     const [notifications, setNotifications] = useState([]);
     const [conversations, setConversations] = useState([]);
     const [loadingConversations, setLoadingConversations] = useState(true);
-    const [errorConversations, setErrorConversations] = useState(other ? createConversationId(currentUser?._id, other.userId) : null);
+    const [errorConversations, setErrorConversations] = useState(jobApplicant ? createConversationId(currentUser?._id, jobApplicant._id) : null);
     
    
 
@@ -94,15 +94,15 @@ const MessagingPage = () => {
             setShowChatOnMobile(false);
         }
     }, [currentUser]);
-    
+
     useEffect(() => {
-      if (other && currentUser?._id) {
-          const conversationId = createConversationId(currentUser._id, other.userId);
+      if (jobApplicant && currentUser?._id) {
+          const conversationId = createConversationId(currentUser._id, jobApplicant._id);
           setSelectedConversationId(conversationId);
-          setOtherUser(other);
+          setOtherUser(jobApplicant);
           setShowChatOnMobile(true);
       }
-  }, [currentUser?._id, other]);
+  }, [currentUser?._id, jobApplicant]);
 
     const handleSelectConversation = (conversationId,otherUserInfo) => {
         setSelectedConversationId(conversationId);
