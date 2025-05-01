@@ -38,7 +38,7 @@ import ManageJob from "./pages/jobs/ManageJob.jsx";
 import SubscriptionPlans from "./components/SubscriptionBasedPayment/subscriptionPlans.jsx";
 import SubscriptionStatus from './components/SubscriptionBasedPayment/SubscriptionStatus';
 import PaymentSuccess from './components/SubscriptionBasedPayment/PaymentSuccessHandler';
-
+import Network from './components/Network/network';
 
 // Define your routes as an array of RouteObject (compatible with React Router v6)
 const routes: RouteObject[] = [
@@ -125,6 +125,10 @@ const routes: RouteObject[] = [
   {
     path: "/",
     element: React.createElement(LandingPage),
+  },
+  {
+    path: "/network",
+    element: React.createElement(Network),
   },
   {
     path: "/admin",
