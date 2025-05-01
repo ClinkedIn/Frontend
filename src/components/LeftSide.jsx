@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import { getUserInfo } from './Main.jsx';
 
 // Dummy user data - replace with real user data from your auth system
 const dummyUser = {

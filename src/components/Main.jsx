@@ -80,6 +80,7 @@ const Main = () => {
   const [expandedComments, setExpandedComments] = useState({});
   const [comments, setComments] = useState({});
   const [loadingComments, setLoadingComments] = useState({});
+  const [authorInfo, setAuthorInfo] = useState(null);
   
   // Use exact API endpoint as specified
   const API_ENDPOINT = `${BASE_URL}/posts`;
@@ -106,23 +107,18 @@ const Main = () => {
   ];
 
   
-  
-  // Author information (normally would come from your auth system)
-  /**
-   * Object representing the author's information.
-   * 
-   * @typedef {Object} AuthorInfo
-   * @property {string} id - The unique identifier for the author.
-   * @property {string} name - The name of the author.
-   * @property {string} headline - The professional headline or title of the author.
-   * @property {string} profileImage - The URL of the author's profile image.
-   */
-  const authorInfo = {
-    id: "user456",
-    name: "Hamsa Saber",
-    headline: "Software Engineer at Tech Company",
-    profileImage: "https://picsum.photos/80?random=1",
-  };
+
+  useEffect(() => {
+    const fetchAndSetUser = async () => {
+      try {
+        const response = await axios.get(`${BASE_URL}/api/user/me`, { withCredentials: true });
+        setAuthorInfo(response.data);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+    fetchAndSetUser();
+  }, []);
 
   // Define fetchUser and fetchNotifications functions
   /**
@@ -137,7 +133,7 @@ const Main = () => {
    */
   const fetchUser = async () => {
     try {
-      const response = await axios.get(`${BASE_URL}/user/profile`, { withCredentials: true });
+      const response = await axios.get(`${BASE_URL}/api/user/me`, { withCredentials: true });
       console.log("User data:", response.data);
     } catch (error) {
       console.error("Error fetching user data:", error);
@@ -784,7 +780,7 @@ const Main = () => {
           <div className="flex flex-col text-[#958b7b] mb-2 bg-white">
             <div className="flex items-center p-2 pl-4 pr-4">
               <img
-                src={authorInfo.profileImage}
+                src={authorInfo.user.profilePicture}
                 alt="user"
                 className="w-12 h-12 rounded-full mr-2"
               />
