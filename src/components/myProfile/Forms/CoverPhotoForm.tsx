@@ -3,12 +3,29 @@ import Form from "./Form";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowUpFromBracket } from "@fortawesome/free-solid-svg-icons";
 
+/**
+ * Props interface for the CoverPhotoForm component
+ *
+ * @interface CoverPhotoFormProps
+ * @property {Function} onUpload - Callback function triggered when a file is uploaded
+ * @property {Function} onCancel - Callback function triggered when the user cancels the form
+ * @property {Function} onApply - Callback function triggered when the user applies the edited image
+ */
 interface CoverPhotoFormProps {
   onUpload: (file: File) => void;
   onCancel: () => void;
   onApply: (editedImage: string) => void;
 }
 
+/**
+ * CoverPhotoForm Component
+ *
+ * Allows users to upload and edit a cover photo with basic editing features like zoom and rotation.
+ * The component has two states: upload state and editing state.
+ *
+ * @param {CoverPhotoFormProps} props - Component props
+ * @returns {JSX.Element} - Rendered component
+ */
 const CoverPhotoForm: React.FC<CoverPhotoFormProps> = ({
   onCancel,
   onApply,
@@ -20,6 +37,12 @@ const CoverPhotoForm: React.FC<CoverPhotoFormProps> = ({
   const [straightenValue, setStraightenValue] = useState<number>(50);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
 
+  /**
+   * Handles file input change event
+   * Reads the selected file and sets the image preview URL
+   *
+   * @param {React.ChangeEvent<HTMLInputElement>} e - File input change event
+   */
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -32,15 +55,25 @@ const CoverPhotoForm: React.FC<CoverPhotoFormProps> = ({
     reader.readAsDataURL(file);
   };
 
+  /**
+   * Triggers click on the hidden file input element
+   */
   const handleUploadClick = () => {
     fileInputRef.current?.click();
   };
 
+  /**
+   * Resets the form state to upload mode
+   */
   const handleChangePhoto = () => {
     setIsEditing(false);
     setImagePreviewUrl(null);
   };
 
+  /**
+   * Applies the current edits to the image and passes the result to the parent component
+   * Creates a canvas element to apply rotation and zoom transformations to the image
+   */
   const handleApply = () => {
     if (!imagePreviewUrl) {
       alert("Please upload an image before applying changes.");
@@ -62,7 +95,9 @@ const CoverPhotoForm: React.FC<CoverPhotoFormProps> = ({
 
       ctx.save();
       ctx.translate(canvas.width / 2, canvas.height / 2);
+      // Convert straightenValue (0-100) to rotation angle (-10 to 10 degrees)
       ctx.rotate(((straightenValue - 50) / 50) * 10 * (Math.PI / 180));
+      // Calculate scale factor based on zoom value (0-100)
       const scale = 1 + zoomValue / 100;
       ctx.scale(scale, scale);
       ctx.drawImage(
@@ -82,6 +117,11 @@ const CoverPhotoForm: React.FC<CoverPhotoFormProps> = ({
     };
   };
 
+  /**
+   * Renders the upload interface when no image is selected
+   *
+   * @returns {JSX.Element} - Upload UI
+   */
   const renderUploadUI = () => (
     <div className="p-6 h-148 lg:h-154">
       <div className="flex items-center mb-6 ">
@@ -121,6 +161,12 @@ const CoverPhotoForm: React.FC<CoverPhotoFormProps> = ({
     </div>
   );
 
+  /**
+   * Renders the editor interface when an image is selected
+   * Displays the image preview with applied transformations and editing controls
+   *
+   * @returns {JSX.Element} - Editor UI
+   */
   const renderEditorUI = () => (
     <div>
       <div className="w-full h-80 overflow-hidden flex items-center justify-center">
@@ -290,6 +336,9 @@ const CoverPhotoForm: React.FC<CoverPhotoFormProps> = ({
     </div>
   );
 
+  /**
+   * Conditionally renders the footer buttons based on the current state
+   */
   const EditorFooter = isEditing ? (
     <>
       <button

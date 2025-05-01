@@ -1,10 +1,13 @@
 import React, { useEffect, useRef, useState, useCallback,useMemo } from 'react';
-import { collection, query, orderBy, onSnapshot, doc, updateDoc, arrayUnion, getDoc, setDoc } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, doc, updateDoc, arrayUnion,arrayRemove, getDoc, setDoc,  serverTimestamp} from 'firebase/firestore';
 import MessageInput from '../../components/messaging/MessageInput';
 import MessageItem from '../../components/messaging/MessageItem';
 import { FaArrowLeft } from "react-icons/fa";
 import { FiUserMinus } from "react-icons/fi";
 import { db } from '../../../firebase';
+import { format, isToday, isYesterday } from 'date-fns';
+import { BASE_URL } from '../../constants';
+import axios from 'axios';
 
 
 /**
@@ -41,18 +44,16 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
   const [isBlockedByYou, setIsBlockedByYou] = useState(false);
   const [isBlockedByOther, setIsBlockedByOther] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const messagesContainerRef = useRef(null);
   const messagesEndRef = useRef(null);
 
  
   const otherUserInfo = otherUser
-  const otherUserId = otherUser?.userId || null; // Use userId from otherUser prop
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  const otherUserId = otherUser?._id || null; // Use userId from otherUser prop
 
   // Fetch Conversation Metadata
   useEffect(() => {
-    if (!conversationId || !currentUser?.uid) {
+    if (!conversationId || !currentUser?._id) {
         setLoadingMetadata(false);
         setConversationData(null); // Ensure data is null if no ID
         return;
@@ -65,26 +66,19 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
         const data = docSnap.data();
         setConversationData(data); // Set data if document exists
 
-        // Update block status
-        setIsBlockedByYou(data.blockedBy?.[currentUser.uid] || false);
-        setIsBlockedByOther(otherUserId ? (data.blockedBy?.[otherUserId] || false) : false);
-
         // Update typing status 
         setIsTyping(otherUserId ? (data.typing?.[otherUserId] || false) : false);
 
         // Mark conversation as read (only if data exists)
-        if (data.unreadCounts?.[currentUser.uid] > 0) {
+        /*if (data.unreadCounts?.[currentUser.uid] > 0) {
            updateDoc(convDocRef, {
                [`unreadCounts.${currentUser.uid}`]: 0
            }).catch(err => console.error("Error marking conversation as read:", err));
-        }
+        }*/
       } else {
         
         console.log("Conversation document not found (might be new):", conversationId);
         setConversationData(null); // Ensure data is null
-        // Reset states that depend on data
-        setIsBlockedByYou(false);
-        setIsBlockedByOther(false);
         setIsTyping(false);
       }
        setLoadingMetadata(false); // Metadata loading finished 
@@ -117,13 +111,87 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
      * @error
      * Logs any errors encountered while fetching the conversation details or updating the document.
      */
-  }, [conversationId, currentUser?.uid, otherUserId]); 
+  }, [conversationId, currentUser?._id, otherUserId]); 
 
+   // --- NEW EFFECT: Mark conversation as read when it is selected/opened ---
+   useEffect(() => {
+    if (!conversationId || !currentUser?._id) {
+        return;
+    }
+
+    const convDocRef = doc(db, 'conversations', conversationId);
+
+    // Use getDoc to check current state and mark as read only once on load/selection
+    const markAsReadOnLoad = async () => {
+         try {
+            const docSnap = await getDoc(convDocRef);
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                // Check if the current user has unread messages
+                if (data.unreadCounts?.[currentUser._id] > 0) {
+                     console.log(`Marking conversation ${conversationId} as READ on selection.`);
+                    await updateDoc(convDocRef, {
+                        [`unreadCounts.${currentUser._id}`]: 0,
+                        ['forceUnread']: false
+                    });
+                }
+            }
+         } catch (error) {
+            console.error("Error marking conversation as read on selection:", error);
+         }
+    };
+
+    // Trigger the mark as read logic when conversationId or currentUser changes
+    markAsReadOnLoad();
+
+}, [conversationId, currentUser?._id]); // Dependencies: Run when conversationId or currentUser changes
+
+
+  useEffect(() => {
+    if (!conversationId || !currentUser?._id) {
+      setLoadingMetadata(false);
+      setConversationData(null); // Ensure data is null if no ID
+      return;
+  };
+  const currentUserDocRef = doc(db, 'user', currentUser._id);
+  const otherUserDocRef = doc(db, 'user', otherUserId);
+  const unsubscribeCurrentUser = onSnapshot(currentUserDocRef, (docSnap) => {
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      setIsBlockedByYou(data.blockedUsers?.includes(otherUserId) || false); // Check if the other user is blocked by current user
+    } else {
+      console.log("Current user document not found:", currentUser._id);
+      setIsBlockedByYou(false); // Reset state if document doesn't exist
+    }
+  }, (error) => {
+    console.error("Error fetching current user details:", error);
+    setIsBlockedByYou(false); // Reset state on error
+  });
+  const unsubscribeOtherUser = onSnapshot(otherUserDocRef, (docSnap) => {
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      setIsBlockedByOther(data.blockedUsers?.includes(currentUser._id) || false); // Check if the current user is blocked by other user
+    } else {
+      console.log("Other user document not found:", otherUserId);
+      setIsBlockedByOther(false); // Reset state if document doesn't exist
+    }
+  }
+  , (error) => {
+    console.error("Error fetching other user details:", error);
+    setIsBlockedByOther(false); // Reset state on error
+  });
+  // Cleanup listeners on unmount
+  return () => {
+    unsubscribeCurrentUser();
+    unsubscribeOtherUser();
+  };
+
+  },[conversationId, currentUser?._id, otherUserId]); // Re-run if conversationId or user changes
 
   // Fetch Messages 
   useEffect(() => {
     // Don't fetch messages if conversationId is missing
-    if (!conversationId || !currentUser?.uid) {
+    if (!conversationId || !currentUser?._id) {
         setMessages([]);
         setLoadingMessages(false);
         return;
@@ -153,10 +221,10 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
         msgs.push(messageData);
 
         // Mark message as read by current user 
-        if (messageData.senderId !== currentUser.uid && !messageData.readBy?.includes(currentUser.uid)) {
+        if (messageData.senderId !== currentUser._id && !messageData.readBy?.includes(currentUser._id)) {
            const messageDocRef = doc(messagesColRef, messageDoc.id);
            updateDoc(messageDocRef, {
-             readBy: arrayUnion(currentUser.uid)
+             readBy: arrayUnion(currentUser._id)
            }).catch(err => console.error("Error updating read receipt:", err));
         }
       });
@@ -168,20 +236,29 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
     });
 
     return () => unsubscribeMessages();
-  }, [conversationId, currentUser?.uid]);
+  }, [conversationId, currentUser?._id]);
 
   // Scroll to bottom
+
   useEffect(() => {
-    const scrollThreshold = 100;
-    const container = messagesEndRef.current?.parentNode;
-    if (container) {
-        const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < scrollThreshold;
-        if (isNearBottom || loadingMessages || loadingMetadata) { // Scroll if loading anything
-            scrollToBottom();
-        }
-    } else {
-         scrollToBottom();
+    const container = messagesContainerRef.current;
+    if (!messagesContainerRef.current || !messagesEndRef.current) return;
+    const scrollToBottom = () => {
+        requestAnimationFrame(() => {
+          messagesEndRef.current.scrollIntoView({ 
+            behavior: 'smooth' ,
+            block: 'end'
+          });
+        });
+  };
+    
+    const scrollDistanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
+    if (scrollDistanceFromBottom > 50) {
+      const timeoutId = setTimeout(scrollToBottom, 100);
+      return () => clearTimeout(timeoutId); 
     }
+
+    
   }, [messages, loadingMessages, loadingMetadata]);
 
   //Handle Typing Indicator Updates 
@@ -199,19 +276,19 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
    * updateTypingStatus(false); // Sets the typing status to false (user stopped typing).
    */
   const updateTypingStatus = useCallback(async (typing) => {
-    if (!conversationId || !currentUser?.uid) return;
+    if (!conversationId || !currentUser?._id) return;
     const convDocRef = doc(db, 'conversations', conversationId);
     try {
         
         await updateDoc(convDocRef, {
-            [`typing.${currentUser.uid}`]: typing
+            [`typing.${currentUser._id}`]: typing
         });
         
     } catch (error) {
         
         console.warn("Could not update typing status (doc might not exist yet):", error);
     }
-  }, [conversationId, currentUser?.uid]);
+  }, [conversationId, currentUser?._id]);
 
 
   // Block/Unblock User 
@@ -231,22 +308,148 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
    * - Updates the local state to reflect the new block status.
    */
   const handleBlockUser = async () => {
-    if (!conversationId || !currentUser?.uid || !otherUserId) return;
-    const convDocRef = doc(db, 'conversations', conversationId);
+    if (!currentUser?._id || !otherUserId) {
+        console.error("Cannot block/unblock: Missing user IDs.");
+        return;
+    }
+
+    // --- Corrected collection name to 'users' ---
+    const userDocRef = doc(db, 'user', currentUser._id); // Reference to the CURRENT user's document
     const currentlyBlocked = isBlockedByYou;
-    const newBlockStatus = !currentlyBlocked;
+
+    console.log(`Attempting to ${currentlyBlocked ? 'unblock' : 'block'} user: ${otherUserId}`);
+
     try {
-      // This might fail if the document doesn't exist yet. 
-      await updateDoc(convDocRef, {
-        [`blockedBy.${currentUser.uid}`]: newBlockStatus
-      });
-      setIsBlockedByYou(newBlockStatus);
+      if (currentlyBlocked) {
+        // --- UNBLOCK ---
+        // Use updateDoc, assuming doc exists if unblocking
+        await updateDoc(userDocRef, {
+          blockedUsers: arrayRemove(otherUserId)
+        });
+        setIsBlockedByYou(false); // Optimistic UI update
+        console.log(`User ${otherUserId} unblocked successfully.`);
+      } else {
+        // --- BLOCK ---
+        // Use setDoc with merge: true to create or update
+        await setDoc(userDocRef,
+          {
+            // Data to set/merge: only the blockedUsers field modification
+            blockedUsers: arrayUnion(otherUserId)
+          },
+          { merge: true } // Option to merge data
+        );
+        setIsBlockedByYou(true); // Optimistic UI update
+        console.log(`User ${otherUserId} blocked successfully (doc created if needed).`);
+      }
     } catch (error) {
-       console.error("Error blocking/unblocking user (doc might not exist yet):", error);
-       
+       console.error("Error updating block status on user document:", error);
+       // Consider reverting optimistic UI update here if needed
+       // setIsBlockedByYou(currentlyBlocked);
     }
   };
+      //Memoize messages with date separators 
+      const messagesWithDates = useMemo(() => {
+        const items = [];
+        let lastDate = null;
 
+        const formatDateSeparator = (date) => {
+            if (isToday(date)) {
+                return 'Today';
+            }
+            if (isYesterday(date)) {
+                return 'Yesterday';
+            }
+            return format(date, 'MMMM d, yyyy'); 
+        };
+
+        messages.forEach((message) => {
+          if (!message.timestamp)
+            return;
+            const messageDate = message.timestamp.toDate(); // Convert Firestore Timestamp to Date
+            const messageDateString = format(messageDate, 'yyyy-MM-dd'); // Format for comparison
+
+            if (lastDate === null || messageDateString !== lastDate) {
+                // Add date separator
+                items.push({
+                    type: 'date',
+                    date: formatDateSeparator(messageDate),
+                    key: `date-${messageDateString}` // Unique key for the date separator
+                });
+                lastDate = messageDateString;
+            }
+
+            // Add the message itself
+            items.push({
+                type: 'message',
+                message: message,
+                key: message.id // Use message ID as the key
+            });
+        });
+
+        return items;
+      }, [messages]); // Re-compute whenever the 'messages' state changes
+
+    //Delete Message Handler
+    const handleDeleteMessage = useCallback(async (messageId) => {
+      if (!conversationId || !messageId) {
+          console.error("Cannot delete message: Missing conversation or message ID.");
+          return;
+      }
+     
+      //const messageDocRef = doc(db, 'conversations', conversationId, 'messages', messageId);
+  
+      try {
+        console.log(`Attempting to delete message ${messageId} from conversation ${conversationId}`);
+        const response = await axios.delete(`${BASE_URL}/messages/${messageId}`,{
+            withCredentials: true
+        });
+        console.log("Message deleted successfully:", response.data);
+
+        /*await updateDoc(messageDocRef, {
+            text: "This message has been deleted", 
+            mediaUrls: [], 
+            mediaTypes: [],
+            isDeleted: true, 
+            editedAt: serverTimestamp() 
+        });
+        console.log("Message soft-deleted successfully.");*/
+    } catch (error) {
+        console.error("Error soft-deleting message:", error);
+        
+    }
+    }, [conversationId]); 
+  
+  
+    // Update Message Handler 
+    const handleUpdateMessage = useCallback(async (messageId, newText) => {
+        if (!conversationId || !messageId || typeof newText !== 'string') {
+            console.error("Cannot update message: Missing IDs or invalid text.");
+            return;
+        }
+        console.log(`Attempting to update message ${messageId} in conversation ${conversationId}`);
+        //const messageDocRef = doc(db, 'conversations', conversationId, 'messages', messageId);
+        
+  
+        try {
+          const response = await axios.patch(`${BASE_URL}/messages/${messageId}`,{messageText : newText},{
+            withCredentials: true
+          });
+          console.log("Message updated successfully:", response.data);
+          /*await updateDoc(messageDocRef, { text: newText, editedAt: serverTimestamp() });
+          console.log("Message updated successfully.");
+          // Update lastMessage snippet if this was the last message
+          if (messages.length > 0 && messages[messages.length - 1].id === messageId) {
+              const convDocRef = doc(db, 'conversations', conversationId);
+              await updateDoc(convDocRef, {
+                  'lastMessage.text': newText,
+                  'lastMessage.timestamp': serverTimestamp(),
+                  'lastUpdatedAt': serverTimestamp()
+              }).catch(err => console.error("Error updating lastMessage snippet after edit:", err));
+          }*/
+      } catch (error) {
+         console.error("Error updating message:", error);
+     }
+    }, [conversationId, messages]);
 
 
   if (!conversationId) {
@@ -283,16 +486,16 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
              </div>
          );
     }
-    return null; // No blocks active
+    return null; 
   };
 
 // Determine if the chat is brand new (Firestore doc doesn't exist yet)
   const isNewChat = !loadingMetadata && !conversationData;
   
   return (
-    <div className="flex-grow flex flex-col h-full bg-white border-l border-gray-200 ">
+    <div className="flex-grow flex flex-col h-full bg-white border-l border-gray-400 ">
       {/* Chat Header */}
-      <div className="p-3 border-b flex justify-between items-center bg-gray-50 ">
+      <div className="p-3 border-b border-gray-400 flex justify-between items-center bg-gray-50 ">
          <div className="flex items-center gap-3 min-w-0"> 
             <button
                 onClick={onBack}
@@ -308,7 +511,7 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
              className="w-10 h-10 rounded-full flex-shrink-0" 
            />
            <div className="min-w-0">
-             <p className="font-semibold truncate">{otherUserInfo?.fullName || 'Loading...'}</p>
+             <p className="font-semibold truncate">{(otherUserInfo?.fullName )  || 'Loading...'}</p>
              {isTyping && <p className="text-xs text-blue-600 animate-pulse">Typing...</p>}
              
            </div>
@@ -317,7 +520,6 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
          {!isBlockedByOther && (
             <button
                 onClick={handleBlockUser}
-                disabled={!conversationData} // Disable block if chat is new/doc missing
                 className={`p-2 rounded-full flex-shrink-0 ${isBlockedByYou ? 'bg-red-100 text-red-600 hover:bg-red-200' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'} disabled:opacity-50 disabled:cursor-not-allowed`}
                 title={isBlockedByYou ? `Unblock ${otherUserInfo?.fullName || 'user'}` : `Block ${otherUserInfo?.fullName || 'user'}`}
                 aria-label={isBlockedByYou ? 'Unblock user' : 'Block user'}
@@ -328,27 +530,42 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
       </div>
 
       {/* Messages Area */}
-      <div className="flex-grow overflow-y-auto p-4 space-y-1 bg-gray-100">
+      <div className="flex-grow overflow-y-auto  space-y-1  h-[calc(100vh-200px)]" ref={messagesContainerRef} >
         {isNewChat && messages.length === 0 && (
              <div className="text-center text-gray-500 pt-10">
                  Send a message to start the conversation with {otherUserInfo?.fullName || 'this user'}.
             </div>
         )}
         {/* Show prompt if chat exists but has no messages */}
-        {!isNewChat && messages.length === 0 && !loadingMessages && (
+        {!isNewChat && messages.length === 0 && !loadingMessages && !loadingMetadata && (
             <div className="text-center text-gray-500 pt-10">No messages yet.</div>
         )}
-        {messages.map((msg) => (
-          <MessageItem
-            key={msg.id}
-            message={msg}
-            isOwnMessage={msg.senderId === currentUser.uid}
-            senderInfo={msg.senderId === otherUserId ? otherUserInfo : null}
-            showReadReceipt={msg.readBy?.includes(otherUserId) }
-           />
-        ))}
+        {messagesWithDates.map((item) => {
+                    if (item.type === 'date') {
+                        
+                        return (
+                            <div key={item.key} className="text-center text-xs text-gray-500 my-4 select-none sticky top-0 z-10 ">
+                                <span className="bg-gray-200 px-3 py-1 rounded-full shadow-sm">
+                                   {item.date}
+                                </span>
+                            </div>
+                        );
+                    } else {
+                        
+                        return (
+                            <MessageItem
+                                key={item.key} 
+                                message={item.message}
+                                isOwnMessage={item.message.senderId === currentUser._id}
+                                senderInfo={item.message.senderId === otherUserId ? otherUserInfo : null}
+                                showReadReceipt={item.message.senderId === currentUser?._id && item.message.readBy[otherUserId]}
+                                onDeleteMessage={handleDeleteMessage} 
+                                onUpdateMessage={handleUpdateMessage}
+                            />
+                        );
+                    }})}
          {/* Anchor for scrolling */}
-        <div ref={messagesEndRef} style={{ height: '1px' }} /> {/* Ensure anchor has some height */}
+        <div ref={messagesEndRef} className="h-0" />
       </div>
 
       {/* Blocked Message / Message Input Area */}

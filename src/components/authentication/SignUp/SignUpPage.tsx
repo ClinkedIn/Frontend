@@ -9,6 +9,45 @@ import { useSignup } from "../../../context/SignUpContext";
 import { useAuth } from "../../../context/AuthContext";
 import { auth, provider, signInWithPopup } from "../../../../firebase";
 
+/**
+ * The `SignupPage` component renders a user interface for signing up to the application.
+ * It includes form fields for first name, last name, email, and password, along with
+ * validation logic for each field. The component also integrates Google Sign-Up and
+ * reCAPTCHA for enhanced security and user convenience.
+ *
+ * @component
+ *
+ * @description
+ * This component provides the following features:
+ * - Input fields for first name, last name, email, and password with real-time validation.
+ * - Error messages for invalid inputs.
+ * - A "Remember me" checkbox for user preference.
+ * - reCAPTCHA integration to prevent automated sign-ups.
+ * - Google Sign-Up functionality using Firebase Authentication.
+ * - A responsive design with animations for a better user experience.
+ *
+ * @remarks
+ * - The component uses the `useSignup` and `useAuth` hooks for managing user data and authentication state.
+ * - It relies on environment variables (`VITE_SITEKEY` and `VITE_API_BASE_URL`) for reCAPTCHA and API integration.
+ * - The `motion` library is used for animations, and `react-toastify` is used for displaying notifications.
+ *
+ * @example
+ * ```tsx
+ * import SignupPage from './SignUpPage';
+ *
+ * const App = () => {
+ *   return (
+ *     <div>
+ *       <SignupPage />
+ *     </div>
+ *   );
+ * };
+ *
+ * export default App;
+ * ```
+ *
+ * @returns {JSX.Element} The rendered sign-up page component.
+ */
 const SignupPage = () => {
   const { signupData, setSignupData } = useSignup();
   const [emailError, setEmailError] = useState("");
@@ -186,7 +225,7 @@ const SignupPage = () => {
 
       setSignupData((prev) => ({ ...prev, confirmationLink: data.confirmationLink }));
       toast.success("Signup successful! Check your email for confirmation.");
-      navigate("/feed");
+      navigate("/verify-email");
     } catch (error: any) {
       // Display the error message to the user
       toast.error(error.message || "An unexpected error occurred. Please try again.");
@@ -250,7 +289,7 @@ const SignupPage = () => {
   const handleGoogleSignUp = async () => {
     try {
       await signInWithPopup(auth, provider);
-      navigate("/feed");
+      navigate("/verify-email");
     } catch {
       toast.error("Google signup failed.");
     }
@@ -262,7 +301,7 @@ const SignupPage = () => {
       <div className="flex flex-col items-center justify-center bg-gray-100 pt-16 pb-20">
         <img
           className="absolute top-6 left-32 h-8.5"
-          src="/public/images/login-logo.svg"
+          src="/Images/login-logo.svg"
           alt="LinkedIn"
         />
         <h1 className="text-3xl font-normal text-gray-900 mb-4 text-center">

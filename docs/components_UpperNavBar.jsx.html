@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/UpperNavBar.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/UpperNavBar.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import { useState, useEffect, useRef } from "react";
+import axios from "axios";
+import { useNavigate, useLocation } from "react-router-dom";
+import { MdLocationPin, MdSearch } from "react-icons/md";
+import Jobs from "../pages/jobs/Jobs";
+
+/**
+ * Header component representing the upper navigation bar of the application.
+ *
+ * @component
+ * @param {Object} props - Component props.
+ * @param {Array} props.notifications - Array of notification objects.
+ *
+ * @returns {JSX.Element} The rendered Header component.
+ *
+ * @description
+ * The Header component includes:
+ * - A logo that navigates to the feed page.
+ * - A search bar for job searches (visible only on the "jobs" page).
+ * - Navigation icons for Home, Network, Jobs, Messaging, and Notifications.
+ * - User and Work dropdown icons.
+ *
+ * @example
+ * &lt;Header notifications={notifications} />
+ *
+ * @functionality
+ * - Fetches the unread notification count on mount.
+ * - Handles navigation to various pages (e.g., notifications, jobs, messaging).
+ * - Allows users to perform job searches with title and location filters.
+ * - Displays the unread notification count badge.
+ *
+ * @dependencies
+ * - React hooks: useState, useEffect.
+ * - React Router hooks: useNavigate, useLocation.
+ * - Axios for API requests.
+ */
+const Header = ({ notifications }) => {
+  const [showUser, setShowUser] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [location, setLocation] = useState("");
+  const navigate = useNavigate();
+  const locations = useLocation();
+  const currentPath = locations.pathname.split("/")[1];
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:3000/notifications/unread-count",
+          { withCredentials: true }
+        );
+        console.log("unread count:", response);
+        setUnreadCount(response.data.unreadCount);
+      } catch (error) {
+        console.error("Error fetching unread count:", error);
+      }
+    };
+
+    fetchUnreadCount();
+  }, [notifications]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current &amp;&amp; !dropdownRef.current.contains(event.target)) {
+        setShowUser(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  // Handler to navigate to notifications page
+  /**
+   * Navigates the user to the notifications page.
+   * This function is triggered when the notifications button is clicked.
+   */
+  const handleNotificationsClick = () => {
+    navigate("/notifications");
+  };
+
+  // Handler to navigate to jobs page
+  /**
+   * Navigates the user to the '/jobs' route.
+   * This function is typically used as an event handler for navigation actions.
+   */
+  const handleJobsClick = () => {
+    navigate("/jobs");
+  };
+
+  // Handler for profile navigation
+  const handleProfileClick = () => {
+    navigate("/profile");
+    setShowUser(false);
+  };
+
+  // Handler for settings navigation
+  const handleSettingsClick = () => {
+    navigate("/settings");
+    setShowUser(false);
+  };
+
+  /**
+   * Handles the search functionality by sending a GET request to the server
+   * with the provided search query and location parameters. Navigates to the
+   * job board page with the search results and relevant state data.
+   *
+   * @async
+   * @function handleSearch
+   * @param {Object} e - The event object from the form submission.
+   * @returns {Promise&lt;void>} - A promise that resolves when the search is complete.
+   * @throws {Error} - Logs an error to the console if the search request fails.
+   */
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    try {
+      const params = new URLSearchParams();
+      if (searchQuery) params.append("q", searchQuery);
+      if (location) params.append("location", location);
+
+      const response = await axios.get(
+        `http://localhost:3000/search/jobs?${params}`
+      );
+
+      navigate("/job-board", {
+        state: {
+<<<<<<< HEAD
+          jobs: response.data,
+=======
+          jobs: response.data.jobs,
+>>>>>>> 298a4e887adcb76e5ff0b30368755f329fc82575
+          searchQuery,
+          location,
+          currentPath,
+        },
+      });
+    } catch (error) {
+      console.error("Search error:", error);
+    }
+  };
+
+  /**
+   * Navigates the user to the messaging page with a specific ID.
+   *
+   * @function handleMessagingClick
+   * @description This function is triggered when the messaging button is clicked.
+   * It redirects the user to the `/messaging/123` route using the `navigate` function.
+   */
+  const handleMessagingClick = () => {
+    navigate("/messaging/123");
+  };
+
+  return (
+    &lt;header className="fixed top-0 left-0 w-full bg-white border-b border-gray-200 z-50">
+      &lt;div className="flex items-center justify-between max-w-6xl mx-auto px-4 py-2">
+        &lt;div className="flex">
+          {/* Logo */}
+          &lt;a href="/feed">
+            &lt;img src="/Images/home-logo.svg" alt="Logo" className="w-8 h-8" />
+          &lt;/a>
+          {/* Search Bar */}
+          {currentPath == "jobs" &amp;&amp; (
+            &lt;form onSubmit={handleSearch} className="flex rounded-lg">
+              &lt;div className="flex items-center bg-[#edf3f8] rounded-sm ml-2 ">
+                &lt;MdSearch color="#5f6163" className="w-4 h-4 mr-2 ml-1" />
+                &lt;input
+                  type="text"
+                  placeholder="Title, skill or company"
+                  className=" text-sm placeholder-[#5f6163] w-64"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              &lt;/div>
+
+              &lt;div className="flex items-center bg-[#edf3f8] rounded-sm ml-2">
+                &lt;MdLocationPin color="#5f6163" className="w-4 h-4 mr-2 ml-1" />
+                &lt;input
+                  type="text"
+                  placeholder="City, state, or zip code"
+                  className="placeholder-[#5f6163] text-sm w-64"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                />
+              &lt;/div>
+
+              &lt;button
+                type="submit"
+                className="bg-blue-600 ml-1 text-white px-2 py-2 rounded-lg hover:bg-blue-700"
+              >
+                Search
+              &lt;/button>
+            &lt;/form>
+          )}
+        &lt;/div>
+
+        {/* Navigation Icons */}
+        &lt;nav className="flex space-x-6">
+          &lt;button
+            className="hover:bg-gray-200 p-2 rounded-lg"
+            onClick={() => navigate("/feed")}
+          >
+            &lt;img src="/Images/nav-home.svg" alt="Home" className="w-6 h-6" />
+          &lt;/button>
+
+          &lt;button className="hover:bg-gray-200 p-2 rounded-lg">
+            &lt;img
+              src="/Images/nav-network.svg"
+              alt="Network"
+              className="w-6 h-6"
+            />
+          &lt;/button>
+
+          &lt;button
+            className="hover:bg-gray-200 p-2 rounded-lg"
+            onClick={handleJobsClick}
+          >
+            &lt;img src="/Images/nav-jobs.svg" alt="Jobs" className="w-6 h-6" />
+          &lt;/button>
+          &lt;button
+            className="hover:bg-gray-200 p-2 rounded-lg"
+            onClick={handleMessagingClick}
+          >
+            &lt;img
+              src="/Images/nav-messaging.svg"
+              alt="Messaging"
+              className="w-6 h-6"
+            />
+          &lt;/button>
+          &lt;button
+            className="hover:bg-gray-200 p-2 rounded-lg relative"
+            onClick={handleNotificationsClick}
+          >
+            &lt;img
+              src="/Images/nav-notifications.svg"
+              alt="Notifications"
+              className="w-6 h-6"
+            />
+            {unreadCount > 0 &amp;&amp; (
+              &lt;div
+                className="absolute -top-1 -right-1 bg-[#cb112d] text-white rounded-full 
+                w-5 h-5 flex items-center justify-center text-xs font-medium"
+              >
+                {unreadCount}
+              &lt;/div>
+            )}
+          &lt;/button>
+        &lt;/nav>
+
+        {/* User &amp; Work Icons with Dropdown */}
+        &lt;div className="flex space-x-4 items-center">
+          &lt;div className="relative" ref={dropdownRef}>
+            &lt;button
+              className="flex items-center space-x-2 hover:bg-gray-200 p-2 rounded-lg"
+              onClick={() => setShowUser(!showUser)}
+            >
+              &lt;img
+                src="/Images/user.svg"
+                alt="User"
+                className="w-6 h-6 rounded-full"
+              />
+              &lt;img
+                src="/Images/down-icon.svg"
+                alt="Dropdown"
+                className={`w-4 h-4 transition-transform duration-200 ${
+                  showUser ? "rotate-180" : ""
+                }`}
+              />
+            &lt;/button>
+
+            {/* User dropdown menu */}
+            {showUser &amp;&amp; (
+              &lt;div className="absolute right-0 mt-1 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200">
+                &lt;div className="px-4 py-2 border-b border-gray-200">
+                  &lt;div className="flex items-center">
+                    &lt;img
+                      src="/Images/user.svg"
+                      alt="User Profile"
+                      className="w-10 h-10 rounded-full mr-3"
+                    />
+                    &lt;div>
+                      &lt;p className="font-medium text-gray-800">John Doe&lt;/p>
+                      &lt;p className="text-xs text-gray-500">
+                        Software Developer
+                      &lt;/p>
+                    &lt;/div>
+                  &lt;/div>
+                &lt;/div>
+                &lt;button
+                  onClick={handleProfileClick}
+                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  My Profile
+                &lt;/button>
+                &lt;button
+                  onClick={handleSettingsClick}
+                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  Settings
+                &lt;/button>
+                {/* &lt;button className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 border-t border-gray-200">
+                  Sign Out
+                &lt;/button> */}
+              &lt;/div>
+            )}
+          &lt;/div>
+
+          &lt;button className="flex items-center space-x-2 hover:bg-gray-200 p-2 rounded-lg">
+            &lt;img src="/Images/nav-work.svg" alt="Work" className="w-6 h-6" />
+            &lt;img
+              src="/Images/down-icon.svg"
+              alt="Dropdown"
+              className="w-4 h-4"
+            />
+          &lt;/button>
+        &lt;/div>
+      &lt;/div>
+    &lt;/header>
+  );
+};
+
+export default Header;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+<<<<<<< HEAD
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#ApplyJob">ApplyJob</a></li><li><a href="global.html#ChatWindow">ChatWindow</a></li><li><a href="global.html#CommentSection">CommentSection</a></li><li><a href="global.html#ConversationListItem">ConversationListItem</a></li><li><a href="global.html#ConversationSearch">ConversationSearch</a></li><li><a href="global.html#CreatePostModal">CreatePostModal</a></li><li><a href="global.html#Filter">Filter</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#JobBoardPage">JobBoardPage</a></li><li><a href="global.html#JobCard">JobCard</a></li><li><a href="global.html#Jobs">Jobs</a></li><li><a href="global.html#Main">Main</a></li><li><a href="global.html#MyJobs">MyJobs</a></li><li><a href="global.html#Notification">Notification</a></li><li><a href="global.html#PostMenu">PostMenu</a></li><li><a href="global.html#PostReactions">PostReactions</a></li><li><a href="global.html#closeModal">closeModal</a></li><li><a href="global.html#fetchComments">fetchComments</a></li><li><a href="global.html#fetchCompanies">fetchCompanies</a></li><li><a href="global.html#fetchNotifications">fetchNotifications</a></li><li><a href="global.html#fetchPosts">fetchPosts</a></li><li><a href="global.html#fetchUser">fetchUser</a></li><li><a href="global.html#filteredNotifications">filteredNotifications</a></li><li><a href="global.html#getReactionIcon">getReactionIcon</a></li><li><a href="global.html#handleAddComment">handleAddComment</a></li><li><a href="global.html#handleBlockUser">handleBlockUser</a></li><li><a href="global.html#handleClick">handleClick</a></li><li><a href="global.html#handleCreatePost">handleCreatePost</a></li><li><a href="global.html#handleDeleteNotification">handleDeleteNotification</a></li><li><a href="global.html#handleFilter">handleFilter</a></li><li><a href="global.html#handleJobClick">handleJobClick</a></li><li><a href="global.html#handleLikeClick">handleLikeClick</a></li><li><a href="global.html#handleMainFilterChange">handleMainFilterChange</a></li><li><a href="global.html#handleMessagingClick">handleMessagingClick</a></li><li><a href="global.html#handleMuteDuration">handleMuteDuration</a></li><li><a href="global.html#handleNotificationClick">handleNotificationClick</a></li><li><a href="global.html#handleReact">handleReact</a></li><li><a href="global.html#handleReactToComment">handleReactToComment</a></li><li><a href="global.html#handleReportPost">handleReportPost</a></li><li><a href="global.html#handleSave">handleSave</a></li><li><a href="global.html#handleSavePost">handleSavePost</a></li><li><a href="global.html#handleSearch">handleSearch</a></li><li><a href="global.html#handleSendTestNotification">handleSendTestNotification</a></li><li><a href="global.html#handleSubmit">handleSubmit</a></li><li><a href="global.html#openModal">openModal</a></li><li><a href="global.html#requestOTP">requestOTP</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#toggleComments">toggleComments</a></li><li><a href="global.html#useEffect">useEffect</a></li><li><a href="global.html#verifyOTP">verifyOTP</a></li></ul>
+=======
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#ApplyJob">ApplyJob</a></li><li><a href="global.html#ChatWindow">ChatWindow</a></li><li><a href="global.html#CommentSection">CommentSection</a></li><li><a href="global.html#ConversationListItem">ConversationListItem</a></li><li><a href="global.html#ConversationSearch">ConversationSearch</a></li><li><a href="global.html#CreatePostModal">CreatePostModal</a></li><li><a href="global.html#Filter">Filter</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#JobBoardPage">JobBoardPage</a></li><li><a href="global.html#JobCard">JobCard</a></li><li><a href="global.html#Jobs">Jobs</a></li><li><a href="global.html#MyJobs">MyJobs</a></li><li><a href="global.html#Notification">Notification</a></li><li><a href="global.html#PostMenu">PostMenu</a></li><li><a href="global.html#PostReactions">PostReactions</a></li><li><a href="global.html#closeModal">closeModal</a></li><li><a href="global.html#fetchCompanies">fetchCompanies</a></li><li><a href="global.html#fetchNotifications">fetchNotifications</a></li><li><a href="global.html#fetchUser">fetchUser</a></li><li><a href="global.html#filteredNotifications">filteredNotifications</a></li><li><a href="global.html#getReactionIcon">getReactionIcon</a></li><li><a href="global.html#handleBlockUser">handleBlockUser</a></li><li><a href="global.html#handleClick">handleClick</a></li><li><a href="global.html#handleDeleteNotification">handleDeleteNotification</a></li><li><a href="global.html#handleFilter">handleFilter</a></li><li><a href="global.html#handleJobClick">handleJobClick</a></li><li><a href="global.html#handleLikeClick">handleLikeClick</a></li><li><a href="global.html#handleMainFilterChange">handleMainFilterChange</a></li><li><a href="global.html#handleMessagingClick">handleMessagingClick</a></li><li><a href="global.html#handleMuteDuration">handleMuteDuration</a></li><li><a href="global.html#handleNotificationClick">handleNotificationClick</a></li><li><a href="global.html#handleSave">handleSave</a></li><li><a href="global.html#handleSearch">handleSearch</a></li><li><a href="global.html#handleSendTestNotification">handleSendTestNotification</a></li><li><a href="global.html#handleSubmit">handleSubmit</a></li><li><a href="global.html#openModal">openModal</a></li><li><a href="global.html#requestOTP">requestOTP</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#useEffect">useEffect</a></li><li><a href="global.html#verifyOTP">verifyOTP</a></li></ul>
+>>>>>>> 298a4e887adcb76e5ff0b30368755f329fc82575
+</nav>
+
+<br class="clear">
+
+<footer>
+<<<<<<< HEAD
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun Apr 20 2025 19:24:34 GMT+0200 (Eastern European Standard Time)
+=======
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun Apr 20 2025 18:19:03 GMT+0200 (Eastern European Standard Time)
+>>>>>>> 298a4e887adcb76e5ff0b30368755f329fc82575
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

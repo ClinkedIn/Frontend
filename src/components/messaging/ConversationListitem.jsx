@@ -28,7 +28,7 @@ const ConversationListItem = ({
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null); // Ref for detecting clicks outside the menu
-
+   const defaultAvatar = 'https://via.placeholder.com/150'; // Placeholder for user avatar
 
    // Close menu if clicking outside
    useEffect(() => {
@@ -64,7 +64,7 @@ const ConversationListItem = ({
 
   const lastMessageText = conversation.lastMessage?.text || 'No messages yet';
   const timestamp = conversation.lastUpdatedAt?.toDate();
-  const unreadCount = conversation.unreadCounts?.[currentUser?.uid] || 0;
+  const unreadCount = conversation.unreadCounts?.[currentUser?._id] || 0;
 
   /**
    * Toggles the state of the menu and prevents the click event from propagating.
@@ -100,8 +100,8 @@ const ConversationListItem = ({
     >
       {/* Profile Picture */}
       <img
-        src={otherUserInfo.profilePicture || defaultAvatar}
-        alt={otherUserInfo.fullName}
+        src={otherUserInfo?.profilePicture || defaultAvatar}
+        alt= {otherUserInfo?.fullName || 'User Avatar'}
         className="w-12 h-12 rounded-full mr-3 flex-shrink-0"
         onError={(e) => e.target.src = defaultAvatar}
       />
@@ -110,7 +110,7 @@ const ConversationListItem = ({
          {/* Top row: Name and Timestamp */}
          <div className="flex justify-between items-center mb-1">
              <p className={`font-semibold truncate ${unreadCount > 0 ? 'text-black' : 'text-gray-800'}`}>
-                 {otherUserInfo.fullName}
+                 {otherUserInfo?.fullName || 'Unknown User'}
              </p>
              {timestamp && ( /* timestamp display */
                  <p className={`text-xs flex-shrink-0 ml-2 ${unreadCount > 0 ? 'text-blue-600 font-medium' : 'text-gray-500'}`}>
@@ -121,7 +121,7 @@ const ConversationListItem = ({
          {/* Bottom row: Last message snippet and Unread badge */}
          <div className="flex justify-between items-center">
              <p className={`text-sm text-gray-600 truncate ${unreadCount > 0 ? 'font-medium' : ''}`}>
-                 {conversation.lastMessage?.senderId === currentUser?.uid && 'You: '}
+                 {conversation?.lastMessage?.senderId === currentUser?._id && 'You: '}
                  {lastMessageText}
              </p>
              {unreadCount > 0 && ( /*unread badge*/

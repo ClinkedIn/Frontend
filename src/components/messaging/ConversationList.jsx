@@ -32,7 +32,7 @@ const ConversationList = ({
          * handleMarkReadUnread('conversation123', false); // Marks the conversation as read
          */
         const handleMarkReadUnread = useCallback(async (conversationId, markAsUnread) => {
-            if (!currentUser?.uid || !conversationId) return;
+            if (!currentUser?._id || !conversationId) return;
     
             console.log(`Marking conversation ${conversationId} as ${markAsUnread ? 'UNREAD' : 'READ'}`);
             const conversationDocRef = doc(db, 'conversations', conversationId);
@@ -42,20 +42,21 @@ const ConversationList = ({
             try {
                 await updateDoc(conversationDocRef, {
                     
-                    [`unreadCounts.${currentUser.uid}`]: newUnreadValue
+                    [`unreadCounts.${currentUser._id}`]: newUnreadValue,
+                    ['forceUnread']: markAsUnread ? true : false,
                 });
-                console.log(`Successfully updated unread count for ${currentUser.uid} in ${conversationId}`);
+                console.log(`Successfully updated unread count for ${currentUser._id} in ${conversationId}`);
                 
             } catch (error) {
                 console.error("Error updating unread status:", error);
                 
             }
-        }, [currentUser?.uid]); // Dependency: currentUser.uid
+        }, [currentUser?._id]); // Dependency: currentUser.uid
 
     return (
-        <div className="w-full  md:border-r h-full flex flex-col bg-white">
+        <div className="w-full  md:border-r md:border-gray-400 h-full flex flex-col bg-white">
             {/* Header/Search Area */}
-            <div className="p-4 border-b">
+            <div className="p-4 border-b border-gray-400">
                 <h2 className="text-xl font-bold">Messaging</h2>
 
             </div>
@@ -74,10 +75,16 @@ const ConversationList = ({
                     <div className="p-4 text-center text-gray-500">No conversations yet. Search for a connection to start chatting.</div>
                 )}
 
-                {!loadingConversations && conversations.map(convo => {
-                    const otherUserId = convo.participants.find(id => id !== currentUser.uid);
-                    const otherUserInfo = otherUserId ? connections.find(user => user.userId === otherUserId) : null; 
-                    
+                {!loadingConversations &&  conversations.map(convo => {
+                    const otherUserId = convo.participants.find(id => id !== currentUser._id);
+                    let otherUserInfo = {}; 
+                    if(otherUserId && convo.fullName?.[otherUserId] && convo.profilePicture?.[otherUserId]) {
+                         otherUserInfo = {
+                            _id : otherUserId,
+                            fullName: convo.fullName[otherUserId] ,
+                            profilePicture: convo.profilePicture[otherUserId]
+                        }
+                    }
                     
                     return (
                         <ConversationListItem

@@ -6,6 +6,8 @@ import Header from '../../components/UpperNavBar';
 import { set } from 'date-fns';
 import { db } from '../../../firebase';
 import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
+import axios from 'axios';
+import { BASE_URL } from '../../constants';
 
 // Function to create the composite conversation ID
 const createConversationId = (uid1, uid2) => {
@@ -14,16 +16,6 @@ const createConversationId = (uid1, uid2) => {
 
 
 const MessagingPage = () => {
-    const { id } = useParams();
-    const userId = id?.toString() ; 
-    
-    const [currentUser, setCurrentUser] = useState({
-        uid: userId, 
-        displayName: userId === '123' ? 'Abdo' : userId === '234' ? 'Ali Abdelghani' : userId === '345' ? 'Ibrahim Muhammed' : userId === '456' ? 'Adham Osama' : userId === '567' ? 'Mohamed Samir' : 'Unknown', 
-        photoURL: 'https://picsum.photos/80' 
-    });
-
-   
 
     const [otherUser, setOtherUser] = useState(null);
     const [selectedConversationId, setSelectedConversationId] = useState(null);
@@ -33,33 +25,30 @@ const MessagingPage = () => {
     const [conversations, setConversations] = useState([]);
     const [loadingConversations, setLoadingConversations] = useState(true);
     const [errorConversations, setErrorConversations] = useState(null);
-    /*
-     const [currentUser, setUser] = useState();
-    const fetchUser = async () => {
-        try {
-          const response = await axios.get(`${BASE_URL}/user/me`, {
-        
-            withCredentials:true
-          });
-      
-          setUser(response.data);
-          console.log("User data:", response.data);
-        } catch (error) {
-          console.error("Error fetching user:", error);
-        }
-      };
+    
+    const [currentUser, setUser] = useState();
+
       useEffect(() => {
-        const loginAndFetchData = async () => {
-          //await testLogin(); // Ensure login is completed first
-          fetchUser(); 
+        const fetchUser = async () => {
+          try {
+            const response = await axios.get(`${BASE_URL}/user/me`, {
+          
+              withCredentials:true
+            });
+        
+            setUser(response.data.user);
+            console.log("User data:", response.data.user);
+          } catch (error) {
+            console.error("Error fetching user:", error);
+          }
         };
-      
-        loginAndFetchData();
-      }, []);*/
+        fetchUser(); 
+
+      }, []);
 
     useEffect(() => {
        
-        if (!currentUser?.uid) {
+        if (!currentUser?._id) {
             setLoadingConversations(false);
             setErrorConversations("Not logged in");
             setConversations([]);
@@ -72,7 +61,7 @@ const MessagingPage = () => {
         const conversationsRef = collection(db, 'conversations');
         const q = query(
             conversationsRef,
-            where('participants', 'array-contains', currentUser.uid),
+            where('participants', 'array-contains', currentUser._id),
             orderBy('lastUpdatedAt', 'desc')
         );
 
@@ -93,7 +82,7 @@ const MessagingPage = () => {
         // Cleanup listener on component unmount
         return () => unsubscribe();
 
-    }, [currentUser?.uid]); // Re-run if user changes
+    }, [currentUser?._id]); // Re-run if user changes
 
     // Reset selected chat if user logs out/changes
     useEffect(() => {
@@ -118,7 +107,7 @@ const MessagingPage = () => {
     const handleSelectUserFromSearch = async (selectedUser) => {
         if (!currentUser || !selectedUser) return;
 
-        const currentUid = currentUser.uid;
+        const currentUid = currentUser._id;
         const selectedUid = selectedUser.userId;
         const existingConversation =conversations.find(conv => conv.participants.includes(currentUid) && conv.participants.includes(selectedUid)
         );
@@ -155,16 +144,16 @@ const MessagingPage = () => {
           
           const fetchConnections = async () => {
             try {
-              // const response = await fetch('/api/connections'); // Your API call
-              // if (!response.ok) {
-              //   throw new Error('Failed to fetch connections');
-              // }
-              // const data = await response.json();
-              // setConnections(data);
+              const response = await axios.get(`${BASE_URL}/user/connections`, {
+        
+                withCredentials:true
+              });
+               console.log(response.data.connections)
+               setConnections(response.data.connections);
       
               // Using placeholder data for now
-              await new Promise(resolve => setTimeout(resolve, 500)); 
-              setConnections(fakeConnections);
+              //await new Promise(resolve => setTimeout(resolve, 500)); 
+              //setConnections(fakeConnections);
       
             } catch (err) {
               console.error("Error fetching connections:", err);
@@ -191,7 +180,7 @@ const MessagingPage = () => {
             <Header notifications={notifications} />
             {/* Conversation List (Left Sidebar) */}
              {/* Conditional rendering for mobile: hide list when chat is shown */}
-             <div className="w-2/3 max-[1100px]:w-[90%] max-[600px]:w-full h-full flex flex-row bg-white mt-16 rounded-lg shadow-lg overflow-hidden">
+             <div className="w-2/3 max-[1100px]:w-[90%] max-[600px]:w-full h-full flex flex-row bg-white mt-16 rounded-lg shadow-lg border border-gray-400 overflow-hidden">
             <div className={`
                 ${showChatOnMobile ? 'hidden md:flex' : 'flex'}
                 flex-col flex-grow

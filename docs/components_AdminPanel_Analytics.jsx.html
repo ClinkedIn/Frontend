@@ -1,0 +1,2193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/AdminPanel/Analytics.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/AdminPanel/Analytics.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>// import React, { useState } from "react";
+// import {
+//   BarChart,
+//   LineChart,
+//   PieChart,
+//   Calendar,
+//   Users,
+//   Activity,
+//   TrendingUp,
+//   Database,
+// } from "lucide-react";
+
+// const Analytics = () => {
+//   const [activeTab, setActiveTab] = useState("overview");
+
+//   // Sample analytics data
+//   const overviewStats = [
+//     {
+//       title: "Total Users",
+//       value: "24,532",
+//       change: "+12%",
+//       icon: &lt;Users className="text-blue-500" />,
+//     },
+//     {
+//       title: "Active Users",
+//       value: "18,201",
+//       change: "+8%",
+//       icon: &lt;Activity className="text-green-500" />,
+//     },
+//     {
+//       title: "New Signups",
+//       value: "1,204",
+//       change: "+23%",
+//       icon: &lt;TrendingUp className="text-purple-500" />,
+//     },
+//     {
+//       title: "Posts Created",
+//       value: "8,392",
+//       change: "+15%",
+//       icon: &lt;Database className="text-amber-500" />,
+//     },
+//   ];
+
+//   const engagementData = [
+//     { name: "Jan", posts: 4000, connections: 2400, messages: 2400 },
+//     { name: "Feb", posts: 3000, connections: 1398, messages: 2210 },
+//     { name: "Mar", posts: 2000, connections: 9800, messages: 2290 },
+//     { name: "Apr", posts: 2780, connections: 3908, messages: 2000 },
+//     { name: "May", posts: 1890, connections: 4800, messages: 2181 },
+//     { name: "Jun", posts: 2390, connections: 3800, messages: 2500 },
+//   ];
+
+//   const tabs = [
+//     {
+//       id: "overview",
+//       label: "Overview",
+//       icon: &lt;BarChart className="mr-2 h-4 w-4" />,
+//     },
+//     {
+//       id: "users",
+//       label: "User Analytics",
+//       icon: &lt;Users className="mr-2 h-4 w-4" />,
+//     },
+//     {
+//       id: "engagement",
+//       label: "Engagement",
+//       icon: &lt;Activity className="mr-2 h-4 w-4" />,
+//     },
+//     {
+//       id: "content",
+//       label: "Content",
+//       icon: &lt;Database className="mr-2 h-4 w-4" />,
+//     },
+//     {
+//       id: "reports",
+//       label: "Reports",
+//       icon: &lt;LineChart className="mr-2 h-4 w-4" />,
+//     },
+//   ];
+
+//   return (
+//     &lt;div className="bg-gray-50 min-h-screen p-6">
+//       &lt;header className="mb-8">
+//         &lt;h1 className="text-3xl font-bold text-gray-900">
+//           Analytics Dashboard
+//         &lt;/h1>
+//         &lt;p className="text-gray-500 mt-2">
+//           Monitor your platform's performance and user engagement
+//         &lt;/p>
+//       &lt;/header>
+
+//       {/* Tabs */}
+//       &lt;div className="bg-white rounded-lg shadow mb-6">
+//         &lt;div className="flex overflow-x-auto">
+//           {tabs.map((tab) => (
+//             &lt;button
+//               key={tab.id}
+//               onClick={() => setActiveTab(tab.id)}
+//               className={`flex items-center px-4 py-3 font-medium border-b-2 whitespace-nowrap ${
+//                 activeTab === tab.id
+//                   ? "border-blue-500 text-blue-600"
+//                   : "border-transparent text-gray-500 hover:text-gray-700"
+//               }`}
+//             >
+//               {tab.icon}
+//               {tab.label}
+//             &lt;/button>
+//           ))}
+//         &lt;/div>
+//       &lt;/div>
+
+//       {/* Overview Stats */}
+//       &lt;div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+//         {overviewStats.map((stat, index) => (
+//           &lt;div key={index} className="bg-white rounded-lg shadow p-6">
+//             &lt;div className="flex justify-between items-start">
+//               &lt;div>
+//                 &lt;p className="text-gray-500 text-sm">{stat.title}&lt;/p>
+//                 &lt;p className="text-2xl font-bold mt-1">{stat.value}&lt;/p>
+//                 &lt;div className="flex items-center mt-2">
+//                   &lt;span
+//                     className={`text-sm ${
+//                       stat.change.startsWith("+")
+//                         ? "text-green-500"
+//                         : "text-red-500"
+//                     }`}
+//                   >
+//                     {stat.change}
+//                   &lt;/span>
+//                   &lt;span className="text-gray-500 text-sm ml-1">
+//                     vs last month
+//                   &lt;/span>
+//                 &lt;/div>
+//               &lt;/div>
+//               &lt;div className="p-3 bg-gray-50 rounded-lg">{stat.icon}&lt;/div>
+//             &lt;/div>
+//           &lt;/div>
+//         ))}
+//       &lt;/div>
+
+//       {/* Charts Section */}
+//       &lt;div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+//         {/* User Acquisition Chart */}
+//         &lt;div className="bg-white rounded-lg shadow p-6">
+//           &lt;div className="flex justify-between items-center mb-4">
+//             &lt;h2 className="text-lg font-semibold">User Acquisition&lt;/h2>
+//             &lt;select className="bg-gray-50 border border-gray-200 rounded px-2 py-1 text-sm">
+//               &lt;option>Last 7 days&lt;/option>
+//               &lt;option>Last 30 days&lt;/option>
+//               &lt;option>Last 90 days&lt;/option>
+//             &lt;/select>
+//           &lt;/div>
+//           &lt;div className="h-64 flex items-center justify-center text-gray-400">
+//             {/* Placeholder for actual chart component */}
+//             &lt;div className="text-center">
+//               &lt;BarChart className="mx-auto h-12 w-12 opacity-50" />
+//               &lt;p className="mt-2">User acquisition trend visualization&lt;/p>
+//             &lt;/div>
+//           &lt;/div>
+//         &lt;/div>
+
+//         {/* Engagement Chart */}
+//         &lt;div className="bg-white rounded-lg shadow p-6">
+//           &lt;div className="flex justify-between items-center mb-4">
+//             &lt;h2 className="text-lg font-semibold">Engagement Metrics&lt;/h2>
+//             &lt;select className="bg-gray-50 border border-gray-200 rounded px-2 py-1 text-sm">
+//               &lt;option>Last 7 days&lt;/option>
+//               &lt;option>Last 30 days&lt;/option>
+//               &lt;option>Last 90 days&lt;/option>
+//             &lt;/select>
+//           &lt;/div>
+//           &lt;div className="h-64 flex items-center justify-center text-gray-400">
+//             {/* Placeholder for actual chart component */}
+//             &lt;div className="text-center">
+//               &lt;LineChart className="mx-auto h-12 w-12 opacity-50" />
+//               &lt;p className="mt-2">Engagement metrics visualization&lt;/p>
+//             &lt;/div>
+//           &lt;/div>
+//         &lt;/div>
+//       &lt;/div>
+
+//       {/* Additional Metrics */}
+//       &lt;div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+//         {/* Active Users by Industry */}
+//         &lt;div className="bg-white rounded-lg shadow p-6">
+//           &lt;h2 className="text-lg font-semibold mb-4">Users by Industry&lt;/h2>
+//           &lt;div className="h-64 flex items-center justify-center text-gray-400">
+//             &lt;div className="text-center">
+//               &lt;PieChart className="mx-auto h-12 w-12 opacity-50" />
+//               &lt;p className="mt-2">Industry distribution chart&lt;/p>
+//             &lt;/div>
+//           &lt;/div>
+//         &lt;/div>
+
+//         {/* Activity Timeline */}
+//         &lt;div className="bg-white rounded-lg shadow p-6">
+//           &lt;h2 className="text-lg font-semibold mb-4">Activity Timeline&lt;/h2>
+//           &lt;div className="h-64 overflow-auto">
+//             &lt;div className="space-y-4">
+//               {[1, 2, 3, 4, 5].map((item) => (
+//                 &lt;div key={item} className="flex">
+//                   &lt;div className="mr-3 flex-shrink-0">
+//                     &lt;div className="w-2 h-2 mt-1 rounded-full bg-blue-500">&lt;/div>
+//                     &lt;div className="w-0.5 h-full ml-0.5 bg-gray-200">&lt;/div>
+//                   &lt;/div>
+//                   &lt;div className="pb-4">
+//                     &lt;p className="text-sm font-medium">New feature launched&lt;/p>
+//                     &lt;p className="text-xs text-gray-500 mt-1">
+//                       April 1, 2025 · 08:30 AM
+//                     &lt;/p>
+//                     &lt;p className="text-sm text-gray-600 mt-1">
+//                       Profile enhancement feature was released to all users
+//                     &lt;/p>
+//                   &lt;/div>
+//                 &lt;/div>
+//               ))}
+//             &lt;/div>
+//           &lt;/div>
+//         &lt;/div>
+
+//         {/* Real-time Metrics */}
+//         &lt;div className="bg-white rounded-lg shadow p-6">
+//           &lt;h2 className="text-lg font-semibold mb-4">Real-time Activity&lt;/h2>
+//           &lt;div className="space-y-4">
+//             &lt;div>
+//               &lt;div className="flex justify-between items-center mb-1">
+//                 &lt;span className="text-sm text-gray-600">Active Users Now&lt;/span>
+//                 &lt;span className="text-sm font-medium">4,256&lt;/span>
+//               &lt;/div>
+//               &lt;div className="w-full bg-gray-200 rounded-full h-2">
+//                 &lt;div
+//                   className="bg-blue-500 h-2 rounded-full"
+//                   style={{ width: "70%" }}
+//                 >&lt;/div>
+//               &lt;/div>
+//             &lt;/div>
+//             &lt;div>
+//               &lt;div className="flex justify-between items-center mb-1">
+//                 &lt;span className="text-sm text-gray-600">Messages/min&lt;/span>
+//                 &lt;span className="text-sm font-medium">386&lt;/span>
+//               &lt;/div>
+//               &lt;div className="w-full bg-gray-200 rounded-full h-2">
+//                 &lt;div
+//                   className="bg-green-500 h-2 rounded-full"
+//                   style={{ width: "45%" }}
+//                 >&lt;/div>
+//               &lt;/div>
+//             &lt;/div>
+//             &lt;div>
+//               &lt;div className="flex justify-between items-center mb-1">
+//                 &lt;span className="text-sm text-gray-600">Posts/min&lt;/span>
+//                 &lt;span className="text-sm font-medium">124&lt;/span>
+//               &lt;/div>
+//               &lt;div className="w-full bg-gray-200 rounded-full h-2">
+//                 &lt;div
+//                   className="bg-purple-500 h-2 rounded-full"
+//                   style={{ width: "30%" }}
+//                 >&lt;/div>
+//               &lt;/div>
+//             &lt;/div>
+//             &lt;div>
+//               &lt;div className="flex justify-between items-center mb-1">
+//                 &lt;span className="text-sm text-gray-600">
+//                   New Connections/min
+//                 &lt;/span>
+//                 &lt;span className="text-sm font-medium">215&lt;/span>
+//               &lt;/div>
+//               &lt;div className="w-full bg-gray-200 rounded-full h-2">
+//                 &lt;div
+//                   className="bg-amber-500 h-2 rounded-full"
+//                   style={{ width: "50%" }}
+//                 >&lt;/div>
+//               &lt;/div>
+//             &lt;/div>
+//           &lt;/div>
+//         &lt;/div>
+//       &lt;/div>
+//     &lt;/div>
+//   );
+// };
+
+// export default Analytics;
+
+//************************************** */
+// import { useState, useEffect } from "react";
+// import {
+//   LineChart,
+//   BarChart,
+//   PieChart,
+//   Pie,
+//   Line,
+//   Bar,
+//   XAxis,
+//   YAxis,
+//   CartesianGrid,
+//   Tooltip,
+//   Legend,
+//   ResponsiveContainer,
+// } from "recharts";
+// import {
+//   Activity,
+//   Users,
+//   UserPlus,
+//   FileText,
+//   Briefcase,
+//   MessageSquare,
+//   UserCheck,
+//   Clock,
+//   Zap,
+//   PieChart as PieChartIcon,
+// } from "lucide-react";
+
+// export default function AdminDashboard() {
+//   // Sample data - in a real application, this would come from your API
+//   const [analyticsData, setAnalyticsData] = useState({
+//     totalUsers: 35428,
+//     activeUsers: 12853,
+//     newSignups: 246,
+//     postsCreated: 4587,
+//     activeCompanies: 578,
+//     avgJobsPerCompany: 3.7,
+//     activeUsersNow: 1243,
+//     messagesPerMin: 354,
+//     newConnectionsPerMin: 87,
+//     subscriptionPlans: [
+//       { name: "Free", users: 21450 },
+//       { name: "Basic", users: 8764 },
+//       { name: "Premium", users: 3987 },
+//       { name: "Enterprise", users: 1227 },
+//     ],
+//     activityTrend: [
+//       { name: "Mon", users: 8245, posts: 3487, messages: 21543 },
+//       { name: "Tue", users: 9453, posts: 3752, messages: 23654 },
+//       { name: "Wed", users: 10254, posts: 4102, messages: 25784 },
+//       { name: "Thu", users: 9876, posts: 3965, messages: 24321 },
+//       { name: "Fri", users: 8765, posts: 3621, messages: 22541 },
+//       { name: "Sat", users: 7432, posts: 2875, messages: 18432 },
+//       { name: "Sun", users: 7984, posts: 3154, messages: 19754 },
+//     ],
+//   });
+
+//   // For demo purposes - simulate real-time updates
+//   useEffect(() => {
+//     const interval = setInterval(() => {
+//       setAnalyticsData((prevData) => ({
+//         ...prevData,
+//         activeUsersNow:
+//           prevData.activeUsersNow + Math.floor(Math.random() * 10) - 3,
+//         messagesPerMin:
+//           prevData.messagesPerMin + Math.floor(Math.random() * 15) - 5,
+//         newConnectionsPerMin:
+//           prevData.newConnectionsPerMin + Math.floor(Math.random() * 8) - 3,
+//       }));
+//     }, 5000);
+
+//     return () => clearInterval(interval);
+//   }, []);
+
+//   return (
+//     &lt;div className="bg-gray-50 min-h-screen">
+//       {/* Header */}
+//       &lt;header className="bg-white shadow">
+//         &lt;div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+//           &lt;h1 className="text-3xl font-bold text-gray-900">
+//             Platform Analytics
+//           &lt;/h1>
+//         &lt;/div>
+//       &lt;/header>
+
+//       &lt;main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+//         {/* Metrics Overview */}
+//         &lt;div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+//           &lt;MetricCard
+//             icon={&lt;Users className="text-blue-500" />}
+//             title="Total Users"
+//             value={analyticsData.totalUsers.toLocaleString()}
+//           />
+//           &lt;MetricCard
+//             icon={&lt;UserCheck className="text-green-500" />}
+//             title="Active Users"
+//             value={analyticsData.activeUsers.toLocaleString()}
+//           />
+//           &lt;MetricCard
+//             icon={&lt;UserPlus className="text-purple-500" />}
+//             title="New Signups"
+//             value={analyticsData.newSignups.toLocaleString()}
+//           />
+//           &lt;MetricCard
+//             icon={&lt;FileText className="text-yellow-500" />}
+//             title="Posts Created"
+//             value={analyticsData.postsCreated.toLocaleString()}
+//           />
+//           &lt;MetricCard
+//             icon={&lt;Briefcase className="text-indigo-500" />}
+//             title="Active Companies"
+//             value={analyticsData.activeCompanies.toLocaleString()}
+//           />
+//           &lt;MetricCard
+//             icon={&lt;Briefcase className="text-pink-500" />}
+//             title="Avg Jobs Per Company"
+//             value={analyticsData.avgJobsPerCompany.toFixed(1)}
+//           />
+//           &lt;MetricCard
+//             icon={&lt;Activity className="text-red-500" />}
+//             title="Active Users Now"
+//             value={analyticsData.activeUsersNow.toLocaleString()}
+//             highlight={true}
+//           />
+//           &lt;MetricCard
+//             icon={&lt;Clock className="text-orange-500" />}
+//             title="Messages / Min"
+//             value={analyticsData.messagesPerMin.toLocaleString()}
+//             highlight={true}
+//           />
+//         &lt;/div>
+
+//         {/* Real-time Metrics */}
+//         &lt;div className="mb-8">
+//           &lt;h2 className="text-xl font-semibold text-gray-800 mb-4">
+//             &lt;Zap className="inline-block mr-2" size={20} />
+//             Real-time Activity
+//           &lt;/h2>
+//           &lt;div className="bg-white p-6 rounded-lg shadow">
+//             &lt;div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+//               &lt;div className="bg-blue-50 rounded-lg p-4 text-center">
+//                 &lt;h3 className="text-lg font-medium text-blue-700">
+//                   Active Users Now
+//                 &lt;/h3>
+//                 &lt;p className="text-3xl font-bold text-blue-800">
+//                   {analyticsData.activeUsersNow.toLocaleString()}
+//                 &lt;/p>
+//               &lt;/div>
+//               &lt;div className="bg-green-50 rounded-lg p-4 text-center">
+//                 &lt;h3 className="text-lg font-medium text-green-700">
+//                   Messages / Minute
+//                 &lt;/h3>
+//                 &lt;p className="text-3xl font-bold text-green-800">
+//                   {analyticsData.messagesPerMin.toLocaleString()}
+//                 &lt;/p>
+//               &lt;/div>
+//               &lt;div className="bg-purple-50 rounded-lg p-4 text-center">
+//                 &lt;h3 className="text-lg font-medium text-purple-700">
+//                   New Connections / Minute
+//                 &lt;/h3>
+//                 &lt;p className="text-3xl font-bold text-purple-800">
+//                   {analyticsData.newConnectionsPerMin.toLocaleString()}
+//                 &lt;/p>
+//               &lt;/div>
+//             &lt;/div>
+//           &lt;/div>
+//         &lt;/div>
+
+//         {/* Charts */}
+//         &lt;div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+//           {/* Weekly Activity Trend */}
+//           &lt;div className="bg-white p-6 rounded-lg shadow">
+//             &lt;h2 className="text-xl font-semibold text-gray-800 mb-4">
+//               Weekly Activity Trend
+//             &lt;/h2>
+//             &lt;ResponsiveContainer width="100%" height={300}>
+//               &lt;LineChart data={analyticsData.activityTrend}>
+//                 &lt;CartesianGrid strokeDasharray="3 3" />
+//                 &lt;XAxis dataKey="name" />
+//                 &lt;YAxis />
+//                 &lt;Tooltip />
+//                 &lt;Legend />
+//                 &lt;Line
+//                   type="monotone"
+//                   dataKey="users"
+//                   stroke="#3b82f6"
+//                   name="Active Users"
+//                 />
+//                 &lt;Line
+//                   type="monotone"
+//                   dataKey="posts"
+//                   stroke="#10b981"
+//                   name="Posts"
+//                 />
+//               &lt;/LineChart>
+//             &lt;/ResponsiveContainer>
+//           &lt;/div>
+
+//           {/* Subscription Distribution */}
+//           &lt;div className="bg-white p-6 rounded-lg shadow">
+//             &lt;h2 className="text-xl font-semibold text-gray-800 mb-4">
+//               &lt;PieChartIcon className="inline-block mr-2" size={20} />
+//               Users per Subscription Plans
+//             &lt;/h2>
+//             &lt;ResponsiveContainer width="100%" height={300}>
+//               &lt;PieChart>
+//                 &lt;Pie
+//                   data={analyticsData.subscriptionPlans}
+//                   cx="50%"
+//                   cy="50%"
+//                   labelLine={false}
+//                   outerRadius={100}
+//                   fill="#8884d8"
+//                   dataKey="users"
+//                   nameKey="name"
+//                   label={({ name, percent }) =>
+//                     `${name}: ${(percent * 100).toFixed(0)}%`
+//                   }
+//                 >
+//                   {analyticsData.subscriptionPlans.map((entry, index) => {
+//                     const COLORS = ["#3b82f6", "#10b981", "#8b5cf6", "#f59e0b"];
+//                     return (
+//                       &lt;Pie
+//                         key={`cell-${index}`}
+//                         fill={COLORS[index % COLORS.length]}
+//                       />
+//                     );
+//                   })}
+//                 &lt;/Pie>
+//                 &lt;Tooltip formatter={(value) => value.toLocaleString()} />
+//               &lt;/PieChart>
+//             &lt;/ResponsiveContainer>
+//           &lt;/div>
+//         &lt;/div>
+
+//         {/* Messages Activity */}
+//         &lt;div className="bg-white p-6 rounded-lg shadow mb-8">
+//           &lt;h2 className="text-xl font-semibold text-gray-800 mb-4">
+//             &lt;MessageSquare className="inline-block mr-2" size={20} />
+//             Messaging Activity
+//           &lt;/h2>
+//           &lt;ResponsiveContainer width="100%" height={300}>
+//             &lt;BarChart data={analyticsData.activityTrend}>
+//               &lt;CartesianGrid strokeDasharray="3 3" />
+//               &lt;XAxis dataKey="name" />
+//               &lt;YAxis />
+//               &lt;Tooltip formatter={(value) => value.toLocaleString()} />
+//               &lt;Legend />
+//               &lt;Bar dataKey="messages" name="Messages" fill="#8b5cf6" />
+//             &lt;/BarChart>
+//           &lt;/ResponsiveContainer>
+//         &lt;/div>
+//       &lt;/main>
+//     &lt;/div>
+//   );
+// }
+
+// // Component for individual metric cards
+// function MetricCard({ icon, title, value, highlight = false }) {
+//   return (
+//     &lt;div
+//       className={`bg-white rounded-lg shadow p-6 ${
+//         highlight ? "border-l-4 border-blue-500" : ""
+//       }`}
+//     >
+//       &lt;div className="flex items-center">
+//         &lt;div className="p-3 rounded-full bg-gray-100 mr-4">{icon}&lt;/div>
+//         &lt;div>
+//           &lt;p className="text-sm font-medium text-gray-600">{title}&lt;/p>
+//           &lt;p className="text-2xl font-semibold text-gray-900">{value}&lt;/p>
+//         &lt;/div>
+//       &lt;/div>
+//     &lt;/div>
+//   );
+// }
+
+//******************************************* */
+
+// import { useState, useEffect } from "react";
+// import {
+//   LineChart,
+//   BarChart,
+//   PieChart,
+//   Pie,
+//   Line,
+//   Bar,
+//   XAxis,
+//   YAxis,
+//   CartesianGrid,
+//   Tooltip,
+//   Legend,
+//   ResponsiveContainer,
+// } from "recharts";
+// import {
+//   Activity,
+//   Users,
+//   UserPlus,
+//   FileText,
+//   Briefcase,
+//   MessageSquare,
+//   UserCheck,
+//   Clock,
+//   Zap,
+//   PieChart as PieChartIcon,
+// } from "lucide-react";
+
+// export default function AdminDashboard() {
+//   const [analyticsData, setAnalyticsData] = useState({
+//     totalUsers: 0,
+//     activeUsers: 0,
+//     newSignups: 0,
+//     postsCreated: 0,
+//     activeCompanies: 0,
+//     avgJobsPerCompany: 0,
+//     activeUsersNow: 0,
+//     messagesPerMin: 0,
+//     newConnectionsPerMin: 0,
+//     subscriptionPlans: [],
+//     activityTrend: [],
+//   });
+
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState(null);
+
+//   // Base URL should be defined in your environment variables or config
+//   const baseUrl = "http://localhost:3000"; // Replace with your actual base URL
+
+//   // Fetch data from API
+//   useEffect(() => {
+//     const fetchAnalytics = async () => {
+//       try {
+//         setLoading(true);
+//         const response = await fetch(`${baseUrl}/admin/analytics/overview`, {
+//           headers: {
+//             Authorization: `Bearer ${localStorage.getItem("token")}`, // Assuming token-based auth
+//             "Content-Type": "application/json",
+//           },
+//           credentials: "include",
+//         });
+
+//         if (!response.ok) {
+//           throw new Error(`API request failed with status ${response.status}`);
+//         }
+
+//         const result = await response.json();
+
+//         if (result.status === "success") {
+//           // Transform API data to match the format expected by our component
+//           const transformedData = transformApiData(result.data);
+//           setAnalyticsData(transformedData);
+//         } else {
+//           throw new Error("API returned unsuccessful status");
+//         }
+//       } catch (err) {
+//         console.error("Error fetching analytics data:", err);
+//         setError(err.message);
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchAnalytics();
+
+//     // Set up polling interval (optional)
+//     const interval = setInterval(fetchAnalytics, 60000); // Refresh every minute
+
+//     return () => clearInterval(interval);
+//   }, [baseUrl]);
+
+//   // Transform API data to match the format needed by our components
+//   const transformApiData = (apiData) => {
+//     const { userStats, postStats, jobStats, companyStats } = apiData;
+
+//     // Create dummy activity trend data - this would ideally come from the API
+//     const activityTrend = [
+//       { name: "Mon", users: 0, posts: 0, messages: 0 },
+//       { name: "Tue", users: 0, posts: 0, messages: 0 },
+//       { name: "Wed", users: 0, posts: 0, messages: 0 },
+//       { name: "Thu", users: 0, posts: 0, messages: 0 },
+//       { name: "Fri", users: 0, posts: 0, messages: 0 },
+//       { name: "Sat", users: 0, posts: 0, messages: 0 },
+//       { name: "Sun", users: 0, posts: 0, messages: 0 },
+//     ];
+
+//     // Create subscription plan data from premium vs regular users
+//     const subscriptionPlans = [
+//       { name: "Free", users: userStats.totalUsers - userStats.premiumUsers },
+//       { name: "Premium", users: userStats.premiumUsers },
+//     ];
+
+//     // Calculate avg jobs per company
+//     const avgJobsPerCompany =
+//       companyStats.activeCompanies > 0
+//         ? (jobStats.activeJobs / companyStats.activeCompanies).toFixed(1)
+//         : 0;
+
+//     return {
+//       totalUsers: userStats.totalUsers,
+//       activeUsers: userStats.activeUsers,
+//       newSignups: Math.floor(userStats.totalUsers * 0.02), // assuming 2% are new signups (example)
+//       postsCreated: postStats.totalPosts,
+//       activeCompanies: companyStats.activeCompanies,
+//       avgJobsPerCompany: parseFloat(avgJobsPerCompany),
+//       activeUsersNow: Math.floor(userStats.activeUsers * 0.4), // approx 40% of active users online now
+//       messagesPerMin: Math.floor(userStats.totalUsers * 0.1), // example metric
+//       newConnectionsPerMin: Math.floor(userStats.averageConnections * 0.05), // example metric
+//       subscriptionPlans,
+//       activityTrend,
+//     };
+//   };
+
+//   // Simulate real-time updates for certain metrics
+//   useEffect(() => {
+//     const interval = setInterval(() => {
+//       setAnalyticsData((prevData) => ({
+//         ...prevData,
+//         activeUsersNow:
+//           prevData.activeUsersNow + Math.floor(Math.random() * 10) - 3,
+//         messagesPerMin:
+//           prevData.messagesPerMin + Math.floor(Math.random() * 15) - 5,
+//         newConnectionsPerMin:
+//           prevData.newConnectionsPerMin + Math.floor(Math.random() * 8) - 3,
+//       }));
+//     }, 5000);
+
+//     return () => clearInterval(interval);
+//   }, []);
+
+//   if (loading) {
+//     return (
+//       &lt;div className="flex justify-center items-center min-h-screen">
+//         &lt;div className="animate-pulse flex flex-col items-center">
+//           &lt;div className="h-12 w-12 bg-blue-400 rounded-full mb-4">&lt;/div>
+//           &lt;div className="text-xl font-medium text-gray-700">
+//             Loading dashboard data...
+//           &lt;/div>
+//         &lt;/div>
+//       &lt;/div>
+//     );
+//   }
+
+//   if (error) {
+//     return (
+//       &lt;div className="flex justify-center items-center min-h-screen">
+//         &lt;div className="bg-red-50 p-6 rounded-lg border border-red-200 max-w-md">
+//           &lt;h2 className="text-xl font-bold text-red-700 mb-2">
+//             Error Loading Data
+//           &lt;/h2>
+//           &lt;p className="text-red-600">{error}&lt;/p>
+//           &lt;button
+//             onClick={() => window.location.reload()}
+//             className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+//           >
+//             Retry
+//           &lt;/button>
+//         &lt;/div>
+//       &lt;/div>
+//     );
+//   }
+
+//   return (
+//     &lt;div className="bg-gray-50 min-h-screen">
+//       {/* Header */}
+//       &lt;header className="bg-white shadow">
+//         &lt;div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+//           &lt;h1 className="text-3xl font-bold text-gray-900">
+//             Platform Analytics
+//           &lt;/h1>
+//         &lt;/div>
+//       &lt;/header>
+
+//       &lt;main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+//         {/* Metrics Overview */}
+//         &lt;div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+//           &lt;MetricCard
+//             icon={&lt;Users className="text-blue-500" />}
+//             title="Total Users"
+//             value={analyticsData.totalUsers.toLocaleString()}
+//           />
+//           &lt;MetricCard
+//             icon={&lt;UserCheck className="text-green-500" />}
+//             title="Active Users"
+//             value={analyticsData.activeUsers.toLocaleString()}
+//           />
+//           &lt;MetricCard
+//             icon={&lt;UserPlus className="text-purple-500" />}
+//             title="New Signups"
+//             value={analyticsData.newSignups.toLocaleString()}
+//           />
+//           &lt;MetricCard
+//             icon={&lt;FileText className="text-yellow-500" />}
+//             title="Posts Created"
+//             value={analyticsData.postsCreated.toLocaleString()}
+//           />
+//           &lt;MetricCard
+//             icon={&lt;Briefcase className="text-indigo-500" />}
+//             title="Active Companies"
+//             value={analyticsData.activeCompanies.toLocaleString()}
+//           />
+//           &lt;MetricCard
+//             icon={&lt;Briefcase className="text-pink-500" />}
+//             title="Avg Jobs Per Company"
+//             value={analyticsData.avgJobsPerCompany.toFixed(1)}
+//           />
+//           &lt;MetricCard
+//             icon={&lt;Activity className="text-red-500" />}
+//             title="Active Users Now"
+//             value={analyticsData.activeUsersNow.toLocaleString()}
+//             highlight={true}
+//           />
+//           &lt;MetricCard
+//             icon={&lt;Clock className="text-orange-500" />}
+//             title="Messages / Min"
+//             value={analyticsData.messagesPerMin.toLocaleString()}
+//             highlight={true}
+//           />
+//         &lt;/div>
+
+//         {/* Real-time Metrics */}
+//         &lt;div className="mb-8">
+//           &lt;h2 className="text-xl font-semibold text-gray-800 mb-4">
+//             &lt;Zap className="inline-block mr-2" size={20} />
+//             Real-time Activity
+//           &lt;/h2>
+//           &lt;div className="bg-white p-6 rounded-lg shadow">
+//             &lt;div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+//               &lt;div className="bg-blue-50 rounded-lg p-4 text-center">
+//                 &lt;h3 className="text-lg font-medium text-blue-700">
+//                   Active Users Now
+//                 &lt;/h3>
+//                 &lt;p className="text-3xl font-bold text-blue-800">
+//                   {analyticsData.activeUsersNow.toLocaleString()}
+//                 &lt;/p>
+//               &lt;/div>
+//               &lt;div className="bg-green-50 rounded-lg p-4 text-center">
+//                 &lt;h3 className="text-lg font-medium text-green-700">
+//                   Messages / Minute
+//                 &lt;/h3>
+//                 &lt;p className="text-3xl font-bold text-green-800">
+//                   {analyticsData.messagesPerMin.toLocaleString()}
+//                 &lt;/p>
+//               &lt;/div>
+//               &lt;div className="bg-purple-50 rounded-lg p-4 text-center">
+//                 &lt;h3 className="text-lg font-medium text-purple-700">
+//                   New Connections / Minute
+//                 &lt;/h3>
+//                 &lt;p className="text-3xl font-bold text-purple-800">
+//                   {analyticsData.newConnectionsPerMin.toLocaleString()}
+//                 &lt;/p>
+//               &lt;/div>
+//             &lt;/div>
+//           &lt;/div>
+//         &lt;/div>
+
+//         {/* Charts */}
+//         &lt;div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+//           {/* User Profile Settings Distribution */}
+//           &lt;div className="bg-white p-6 rounded-lg shadow">
+//             &lt;h2 className="text-xl font-semibold text-gray-800 mb-4">
+//               User Profile Privacy Settings
+//             &lt;/h2>
+//             &lt;ResponsiveContainer width="100%" height={300}>
+//               &lt;PieChart>
+//                 &lt;Pie
+//                   data={analyticsData.usersByProfilePrivacy || []}
+//                   cx="50%"
+//                   cy="50%"
+//                   labelLine={false}
+//                   outerRadius={100}
+//                   fill="#8884d8"
+//                   dataKey="count"
+//                   nameKey="_id"
+//                   label={({ _id, percent }) =>
+//                     `${_id}: ${(percent * 100).toFixed(0)}%`
+//                   }
+//                 >
+//                   {(analyticsData.usersByProfilePrivacy || []).map(
+//                     (entry, index) => {
+//                       const COLORS = [
+//                         "#3b82f6",
+//                         "#10b981",
+//                         "#8b5cf6",
+//                         "#f59e0b",
+//                       ];
+//                       return (
+//                         &lt;Pie
+//                           key={`cell-${index}`}
+//                           fill={COLORS[index % COLORS.length]}
+//                         />
+//                       );
+//                     }
+//                   )}
+//                 &lt;/Pie>
+//                 &lt;Tooltip formatter={(value) => value.toLocaleString()} />
+//               &lt;/PieChart>
+//             &lt;/ResponsiveContainer>
+//           &lt;/div>
+
+//           {/* Subscription Distribution */}
+//           &lt;div className="bg-white p-6 rounded-lg shadow">
+//             &lt;h2 className="text-xl font-semibold text-gray-800 mb-4">
+//               &lt;PieChartIcon className="inline-block mr-2" size={20} />
+//               Users by Subscription Type
+//             &lt;/h2>
+//             &lt;ResponsiveContainer width="100%" height={300}>
+//               &lt;PieChart>
+//                 &lt;Pie
+//                   data={analyticsData.subscriptionPlans}
+//                   cx="50%"
+//                   cy="50%"
+//                   labelLine={false}
+//                   outerRadius={100}
+//                   fill="#8884d8"
+//                   dataKey="users"
+//                   nameKey="name"
+//                   label={({ name, percent }) =>
+//                     `${name}: ${(percent * 100).toFixed(0)}%`
+//                   }
+//                 >
+//                   {analyticsData.subscriptionPlans.map((entry, index) => {
+//                     const COLORS = ["#3b82f6", "#10b981"];
+//                     return (
+//                       &lt;Pie
+//                         key={`cell-${index}`}
+//                         fill={COLORS[index % COLORS.length]}
+//                       />
+//                     );
+//                   })}
+//                 &lt;/Pie>
+//                 &lt;Tooltip formatter={(value) => value.toLocaleString()} />
+//               &lt;/PieChart>
+//             &lt;/ResponsiveContainer>
+//           &lt;/div>
+//         &lt;/div>
+
+//         {/* Job Distribution */}
+//         &lt;div className="bg-white p-6 rounded-lg shadow mb-8">
+//           &lt;h2 className="text-xl font-semibold text-gray-800 mb-4">
+//             &lt;Briefcase className="inline-block mr-2" size={20} />
+//             Jobs by Type
+//           &lt;/h2>
+//           &lt;ResponsiveContainer width="100%" height={300}>
+//             &lt;BarChart data={analyticsData.jobsByType || []}>
+//               &lt;CartesianGrid strokeDasharray="3 3" />
+//               &lt;XAxis dataKey="_id" />
+//               &lt;YAxis />
+//               &lt;Tooltip formatter={(value) => value.toLocaleString()} />
+//               &lt;Legend />
+//               &lt;Bar dataKey="count" name="Jobs" fill="#8b5cf6" />
+//             &lt;/BarChart>
+//           &lt;/ResponsiveContainer>
+//         &lt;/div>
+
+//         {/* User Employment Types */}
+//         &lt;div className="bg-white p-6 rounded-lg shadow mb-8">
+//           &lt;h2 className="text-xl font-semibold text-gray-800 mb-4">
+//             &lt;Users className="inline-block mr-2" size={20} />
+//             User Employment Types
+//           &lt;/h2>
+//           &lt;ResponsiveContainer width="100%" height={300}>
+//             &lt;BarChart data={analyticsData.employmentTypeCounts || []}>
+//               &lt;CartesianGrid strokeDasharray="3 3" />
+//               &lt;XAxis dataKey="_id" />
+//               &lt;YAxis />
+//               &lt;Tooltip formatter={(value) => value.toLocaleString()} />
+//               &lt;Legend />
+//               &lt;Bar dataKey="count" name="Users" fill="#3b82f6" />
+//             &lt;/BarChart>
+//           &lt;/ResponsiveContainer>
+//         &lt;/div>
+//       &lt;/main>
+//     &lt;/div>
+//   );
+// }
+
+// // Component for individual metric cards
+// function MetricCard({ icon, title, value, highlight = false }) {
+//   return (
+//     &lt;div
+//       className={`bg-white rounded-lg shadow p-6 ${
+//         highlight ? "border-l-4 border-blue-500" : ""
+//       }`}
+//     >
+//       &lt;div className="flex items-center">
+//         &lt;div className="p-3 rounded-full bg-gray-100 mr-4">{icon}&lt;/div>
+//         &lt;div>
+//           &lt;p className="text-sm font-medium text-gray-600">{title}&lt;/p>
+//           &lt;p className="text-2xl font-semibold text-gray-900">{value}&lt;/p>
+//         &lt;/div>
+//       &lt;/div>
+//     &lt;/div>
+//   );
+// }
+
+//******************************************** */
+
+// import { useState, useEffect } from "react";
+// import {
+//   LineChart,
+//   BarChart,
+//   PieChart,
+//   Pie,
+//   Line,
+//   Bar,
+//   XAxis,
+//   YAxis,
+//   CartesianGrid,
+//   Tooltip,
+//   Legend,
+//   ResponsiveContainer,
+// } from "recharts";
+// import {
+//   Activity,
+//   Users,
+//   UserPlus,
+//   FileText,
+//   Briefcase,
+//   MessageSquare,
+//   UserCheck,
+//   Clock,
+//   Zap,
+//   PieChartIcon,
+//   Building,
+//   Briefcase as BriefcaseIcon,
+//   Shield,
+//   Monitor,
+// } from "lucide-react";
+
+// export default function AdminDashboard() {
+//   const [loading, setLoading] = useState(true);
+//   const [analyticsData, setAnalyticsData] = useState(null);
+//   const [error, setError] = useState(null);
+
+//   // Fetch data from API
+//   useEffect(() => {
+//     const baseUrl ="http://localhost:3000"; // Replace with your actual base URL
+//       console.log("Base URL:", baseUrl); // Debugging line
+//     const fetchAnalytics = async () => {
+//       try {
+//         setLoading(true);
+//         const response = await fetch(`${baseUrl}/admin/analytics/overview`, {
+//           credentials: "include",
+//         });
+
+//         if (!response.ok) {
+//           throw new Error(`API error: ${response.status}`);
+//         }
+
+//         const result = await response.json();
+
+//         if (result.status === "success") {
+//           setAnalyticsData(result.data);
+//         } else {
+//           throw new Error("API returned unsuccessful status");
+//         }
+//       } catch (err) {
+//         console.error("Failed to fetch analytics:", err);
+//         setError(err.message);
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchAnalytics();
+
+//     // Refresh data every 5 minutes
+//     const refreshInterval = setInterval(fetchAnalytics, 5 * 60 * 1000);
+
+//     return () => clearInterval(refreshInterval);
+//   }, []);
+
+//   // For real-time simulation - you would replace this with websocket data in production
+//   useEffect(() => {
+//     if (!analyticsData) return;
+
+//     const interval = setInterval(() => {
+//       setAnalyticsData((prevData) => ({
+//         ...prevData,
+//         userStats: {
+//           ...prevData.userStats,
+//           activeUsers:
+//             prevData.userStats.activeUsers + Math.floor(Math.random() * 3) - 1,
+//         },
+//         postStats: {
+//           ...prevData.postStats,
+//           totalImpressions:
+//             prevData.postStats.totalImpressions + Math.floor(Math.random() * 5),
+//         },
+//       }));
+//     }, 5000);
+
+//     return () => clearInterval(interval);
+//   }, [analyticsData]);
+
+//   // Loading state
+//   if (loading &amp;&amp; !analyticsData) {
+//     return (
+//       &lt;div className="flex items-center justify-center min-h-screen">
+//         &lt;div className="text-center">
+//           &lt;div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500 mx-auto">&lt;/div>
+//           &lt;p className="mt-4 text-gray-600">Loading dashboard data...&lt;/p>
+//         &lt;/div>
+//       &lt;/div>
+//     );
+//   }
+
+//   // Error state
+//   if (error) {
+//     return (
+//       &lt;div className="flex items-center justify-center min-h-screen">
+//         &lt;div className="bg-red-50 p-6 rounded-lg border border-red-200 max-w-xl">
+//           &lt;h2 className="text-xl font-semibold text-red-700 mb-2">
+//             Error Loading Data
+//           &lt;/h2>
+//           &lt;p className="text-red-600">{error}&lt;/p>
+//           &lt;button
+//             className="mt-4 bg-red-100 hover:bg-red-200 text-red-800 font-medium py-2 px-4 rounded"
+//             onClick={() => window.location.reload()}
+//           >
+//             Retry
+//           &lt;/button>
+//         &lt;/div>
+//       &lt;/div>
+//     );
+//   }
+
+//   // No data available
+//   if (!analyticsData) {
+//     return null;
+//   }
+
+//   // Prepare data for charts
+//   const { userStats, postStats, jobStats, companyStats } = analyticsData;
+
+//   // Prepare subscription data for pie chart
+//   const subscriptionData = [
+//     { name: "Premium", users: userStats.premiumUsers },
+//     { name: "Free", users: userStats.totalUsers - userStats.premiumUsers },
+//   ];
+
+//   // Prepare employment type data for bar chart
+//   const employmentData = userStats.employmentTypeCounts.map((item) => ({
+//     name: item._id,
+//     count: item.count,
+//   }));
+
+//   // Prepare workplace type data for pie chart
+//   const workplaceData = jobStats.jobsByWorkplaceType.map((item) => ({
+//     name: item._id,
+//     value: item.count,
+//   }));
+
+//   // Prepare company size data for pie chart
+//   const companySizeData = companyStats.companiesBySize.map((item) => ({
+//     name: item._id,
+//     value: item.count,
+//   }));
+
+//   // Prepare profile privacy data for pie chart
+//   const privacyData = userStats.usersByProfilePrivacy.map((item) => ({
+//     name: item._id,
+//     value: item.count,
+//   }));
+
+//   return (
+//     &lt;div className="bg-gray-50 min-h-screen">
+//       {/* Header */}
+//       &lt;header className="bg-white shadow">
+//         &lt;div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+//           &lt;h1 className="text-3xl font-bold text-gray-900">
+//             Platform Analytics
+//           &lt;/h1>
+//         &lt;/div>
+//       &lt;/header>
+
+//       &lt;main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+//         {/* Metrics Overview */}
+//         &lt;div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+//           &lt;MetricCard
+//             icon={&lt;Users className="text-blue-500" />}
+//             title="Total Users"
+//             value={userStats.totalUsers}
+//           />
+//           &lt;MetricCard
+//             icon={&lt;UserCheck className="text-green-500" />}
+//             title="Active Users"
+//             value={userStats.activeUsers}
+//             highlight={true}
+//           />
+//           &lt;MetricCard
+//             icon={&lt;Shield className="text-purple-500" />}
+//             title="Premium Users"
+//             value={userStats.premiumUsers}
+//           />
+//           &lt;MetricCard
+//             icon={&lt;FileText className="text-yellow-500" />}
+//             title="Total Posts"
+//             value={postStats.totalPosts}
+//           />
+//           &lt;MetricCard
+//             icon={&lt;Activity className="text-indigo-500" />}
+//             title="Total Impressions"
+//             value={postStats.totalImpressions}
+//           />
+//           &lt;MetricCard
+//             icon={&lt;BriefcaseIcon className="text-pink-500" />}
+//             title="Active Jobs"
+//             value={jobStats.activeJobs}
+//           />
+//           &lt;MetricCard
+//             icon={&lt;Building className="text-red-500" />}
+//             title="Active Companies"
+//             value={companyStats.activeCompanies}
+//           />
+//           &lt;MetricCard
+//             icon={&lt;Users className="text-orange-500" />}
+//             title="Avg. Connections"
+//             value={userStats.averageConnections}
+//           />
+//         &lt;/div>
+
+//         {/* Real-time Metrics */}
+//         &lt;div className="mb-8">
+//           &lt;h2 className="text-xl font-semibold text-gray-800 mb-4">
+//             &lt;Zap className="inline-block mr-2" size={20} />
+//             Platform Engagement
+//           &lt;/h2>
+//           &lt;div className="bg-white p-6 rounded-lg shadow">
+//             &lt;div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+//               &lt;div className="bg-blue-50 rounded-lg p-4 text-center">
+//                 &lt;h3 className="text-lg font-medium text-blue-700">
+//                   Active Users
+//                 &lt;/h3>
+//                 &lt;p className="text-3xl font-bold text-blue-800">
+//                   {userStats.activeUsers}
+//                 &lt;/p>
+//                 &lt;p className="text-sm text-blue-600 mt-1">
+//                   {Math.round(
+//                     (userStats.activeUsers / userStats.totalUsers) * 100
+//                   )}
+//                   % of total
+//                 &lt;/p>
+//               &lt;/div>
+//               &lt;div className="bg-green-50 rounded-lg p-4 text-center">
+//                 &lt;h3 className="text-lg font-medium text-green-700">
+//                   Avg. Job Applications
+//                 &lt;/h3>
+//                 &lt;p className="text-3xl font-bold text-green-800">
+//                   {jobStats.averageApplications}
+//                 &lt;/p>
+//                 &lt;p className="text-sm text-green-600 mt-1">Per job posting&lt;/p>
+//               &lt;/div>
+//               &lt;div className="bg-purple-50 rounded-lg p-4 text-center">
+//                 &lt;h3 className="text-lg font-medium text-purple-700">
+//                   Avg. Company Followers
+//                 &lt;/h3>
+//                 &lt;p className="text-3xl font-bold text-purple-800">
+//                   {companyStats.averageFollowers}
+//                 &lt;/p>
+//                 &lt;p className="text-sm text-purple-600 mt-1">
+//                   {companyStats.activeCompanies} active companies
+//                 &lt;/p>
+//               &lt;/div>
+//             &lt;/div>
+//           &lt;/div>
+//         &lt;/div>
+
+//         {/* Charts */}
+//         &lt;div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+//           {/* Subscription Distribution */}
+//           &lt;div className="bg-white p-6 rounded-lg shadow">
+//             &lt;h2 className="text-xl font-semibold text-gray-800 mb-4">
+//               &lt;Shield className="inline-block mr-2" size={20} />
+//               User Subscription Distribution
+//             &lt;/h2>
+//             &lt;ResponsiveContainer width="100%" height={300}>
+//               &lt;PieChart>
+//                 &lt;Pie
+//                   data={subscriptionData}
+//                   cx="50%"
+//                   cy="50%"
+//                   labelLine={false}
+//                   outerRadius={100}
+//                   fill="#8884d8"
+//                   dataKey="users"
+//                   nameKey="name"
+//                   label={({ name, percent }) =>
+//                     `${name}: ${(percent * 100).toFixed(0)}%`
+//                   }
+//                 >
+//                   {subscriptionData.map((entry, index) => (
+//                     &lt;Pie
+//                       key={`cell-${index}`}
+//                       fill={index === 0 ? "#8b5cf6" : "#3b82f6"}
+//                     />
+//                   ))}
+//                 &lt;/Pie>
+//                 &lt;Tooltip formatter={(value) => value.toLocaleString()} />
+//                 &lt;Legend />
+//               &lt;/PieChart>
+//             &lt;/ResponsiveContainer>
+//           &lt;/div>
+
+//           {/* Profile Privacy Distribution */}
+//           &lt;div className="bg-white p-6 rounded-lg shadow">
+//             &lt;h2 className="text-xl font-semibold text-gray-800 mb-4">
+//               &lt;PieChartIcon className="inline-block mr-2" size={20} />
+//               User Privacy Settings
+//             &lt;/h2>
+//             &lt;ResponsiveContainer width="100%" height={300}>
+//               &lt;PieChart>
+//                 &lt;Pie
+//                   data={privacyData}
+//                   cx="50%"
+//                   cy="50%"
+//                   labelLine={false}
+//                   outerRadius={100}
+//                   fill="#8884d8"
+//                   dataKey="value"
+//                   nameKey="name"
+//                   label={({ name, percent }) =>
+//                     `${name}: ${(percent * 100).toFixed(0)}%`
+//                   }
+//                 >
+//                   {privacyData.map((entry, index) => {
+//                     const COLORS = ["#3b82f6", "#10b981", "#f59e0b"];
+//                     return (
+//                       &lt;Pie
+//                         key={`cell-${index}`}
+//                         fill={COLORS[index % COLORS.length]}
+//                       />
+//                     );
+//                   })}
+//                 &lt;/Pie>
+//                 &lt;Tooltip formatter={(value) => value.toLocaleString()} />
+//                 &lt;Legend />
+//               &lt;/PieChart>
+//             &lt;/ResponsiveContainer>
+//           &lt;/div>
+//         &lt;/div>
+
+//         {/* Employment Types */}
+//         &lt;div className="bg-white p-6 rounded-lg shadow mb-8">
+//           &lt;h2 className="text-xl font-semibold text-gray-800 mb-4">
+//             &lt;Briefcase className="inline-block mr-2" size={20} />
+//             Employment Types
+//           &lt;/h2>
+//           &lt;ResponsiveContainer width="100%" height={300}>
+//             &lt;BarChart data={employmentData}>
+//               &lt;CartesianGrid strokeDasharray="3 3" />
+//               &lt;XAxis dataKey="name" />
+//               &lt;YAxis />
+//               &lt;Tooltip formatter={(value) => value.toLocaleString()} />
+//               &lt;Legend />
+//               &lt;Bar dataKey="count" name="Users" fill="#8b5cf6" />
+//             &lt;/BarChart>
+//           &lt;/ResponsiveContainer>
+//         &lt;/div>
+
+//         {/* Job Distribution by Workplace Type */}
+//         &lt;div className="bg-white p-6 rounded-lg shadow mb-8">
+//           &lt;h2 className="text-xl font-semibold text-gray-800 mb-4">
+//             &lt;Monitor className="inline-block mr-2" size={20} />
+//             Jobs by Workplace Type
+//           &lt;/h2>
+//           &lt;div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+//             &lt;div>
+//               &lt;ResponsiveContainer width="100%" height={300}>
+//                 &lt;PieChart>
+//                   &lt;Pie
+//                     data={workplaceData}
+//                     cx="50%"
+//                     cy="50%"
+//                     labelLine={false}
+//                     outerRadius={100}
+//                     fill="#8884d8"
+//                     dataKey="value"
+//                     nameKey="name"
+//                     label={({ name, percent }) =>
+//                       `${name}: ${(percent * 100).toFixed(0)}%`
+//                     }
+//                   >
+//                     {workplaceData.map((entry, index) => {
+//                       const COLORS = ["#3b82f6", "#10b981", "#f59e0b"];
+//                       return (
+//                         &lt;Pie
+//                           key={`cell-${index}`}
+//                           fill={COLORS[index % COLORS.length]}
+//                         />
+//                       );
+//                     })}
+//                   &lt;/Pie>
+//                   &lt;Tooltip formatter={(value) => value.toLocaleString()} />
+//                   &lt;Legend />
+//                 &lt;/PieChart>
+//               &lt;/ResponsiveContainer>
+//             &lt;/div>
+//             &lt;div>
+//               &lt;div className="grid grid-cols-1 gap-4">
+//                 {jobStats.jobsByWorkplaceType.map((type) => (
+//                   &lt;div key={type._id} className="bg-gray-50 p-4 rounded-lg">
+//                     &lt;h3 className="text-lg font-medium text-gray-800">
+//                       {type._id}
+//                     &lt;/h3>
+//                     &lt;div className="flex justify-between items-center mt-2">
+//                       &lt;div className="text-2xl font-semibold">{type.count}&lt;/div>
+//                       &lt;div className="text-sm text-gray-500">
+//                         {Math.round((type.count / jobStats.totalJobs) * 100)}%
+//                         of total
+//                       &lt;/div>
+//                     &lt;/div>
+//                     &lt;div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+//                       &lt;div
+//                         className="bg-blue-600 h-2.5 rounded-full"
+//                         style={{
+//                           width: `${(type.count / jobStats.totalJobs) * 100}%`,
+//                         }}
+//                       >&lt;/div>
+//                     &lt;/div>
+//                   &lt;/div>
+//                 ))}
+//               &lt;/div>
+//             &lt;/div>
+//           &lt;/div>
+//         &lt;/div>
+//       &lt;/main>
+//     &lt;/div>
+//   );
+// }
+
+// // Component for individual metric cards
+// function MetricCard({ icon, title, value, highlight = false }) {
+//   return (
+//     &lt;div
+//       className={`bg-white rounded-lg shadow p-6 ${
+//         highlight ? "border-l-4 border-blue-500" : ""
+//       }`}
+//     >
+//       &lt;div className="flex items-center">
+//         &lt;div className="p-3 rounded-full bg-gray-100 mr-4">{icon}&lt;/div>
+//         &lt;div>
+//           &lt;p className="text-sm font-medium text-gray-600">{title}&lt;/p>
+//           &lt;p className="text-2xl font-semibold text-gray-900">{value}&lt;/p>
+//         &lt;/div>
+//       &lt;/div>
+//     &lt;/div>
+//   );
+// }
+
+//********************************** */
+
+import { useState, useEffect } from "react";
+import {
+  LineChart,
+  BarChart,
+  PieChart,
+  Pie,
+  Cell,
+  Line,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
+import {
+  Activity,
+  Users,
+  UserPlus,
+  FileText,
+  Briefcase,
+  MessageSquare,
+  UserCheck,
+  Clock,
+  Zap,
+  PieChartIcon,
+  Building,
+  Briefcase as BriefcaseIcon,
+  Shield,
+  Monitor,
+  Sun,
+  Moon,
+  Globe,
+  Lock,
+  BarChart as BarChartIcon,
+  GitBranch,
+} from "lucide-react";
+
+export default function AdminDashboard() {
+  const [loading, setLoading] = useState(true);
+  /**
+   * useState hook to manage analytics data for the Admin Panel.
+   * 
+   * @typedef {Object} AnalyticsData
+   * @property {number} totalUsers - Total number of users on the platform.
+   * @property {number} activeUsers - Number of currently active users.
+   * @property {number} newSignups - Number of new signups.
+   * @property {number} postsCreated - Total number of posts created.
+   * @property {number} activeCompanies - Number of active companies.
+   * @property {number} avgJobsPerCompany - Average number of jobs per company.
+   * @property {number} activeUsersNow - Number of users currently active now.
+   * @property {number} messagesPerMin - Number of messages sent per minute.
+   * @property {number} newConnectionsPerMin - Number of new connections made per minute.
+   * @property {Array&lt;Object>} subscriptionPlans - Array of subscription plans with user counts.
+   * @property {string} subscriptionPlans[].name - Name of the subscription plan.
+   * @property {number} subscriptionPlans[].users - Number of users subscribed to the plan.
+   * @property {Array&lt;Object>} activityTrend - Array of activity trends by day.
+   * @property {string} activityTrend[].name - Name of the day (e.g., 'Mon', 'Tue').
+   * @property {number} activityTrend[].users - Number of users active on the day.
+   * @property {number} activityTrend[].posts - Number of posts created on the day.
+   * @property {number} activityTrend[].messages - Number of messages sent on the day.
+   * 
+   * @type {[AnalyticsData, React.Dispatch&lt;React.SetStateAction&lt;AnalyticsData>>]}
+   */
+  const [analyticsData, setAnalyticsData] = useState(null);
+  const [error, setError] = useState(null);
+
+  // Fetch data from API
+  useEffect(() => {
+    const BASE_URL =
+      import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+
+    const fetchAnalytics = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`${BASE_URL}/admin/analytics/overview`, {
+          credentials: "include",
+        });
+
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        if (result.status === "success") {
+          setAnalyticsData(result.data);
+        } else {
+          throw new Error("API returned unsuccessful status");
+        }
+      } catch (err) {
+        console.error("Failed to fetch analytics:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAnalytics();
+
+    // Refresh data every 5 minutes
+    const refreshInterval = setInterval(fetchAnalytics, 5 * 60 * 1000);
+
+    return () => clearInterval(refreshInterval);
+  }, []);
+
+  // For real-time simulation - you would replace this with websocket data in production
+  useEffect(() => {
+    if (!analyticsData) return;
+
+    const interval = setInterval(() => {
+      setAnalyticsData((prevData) => ({
+        ...prevData,
+        userStats: {
+          ...prevData.userStats,
+          activeUsers:
+            prevData.userStats.activeUsers + Math.floor(Math.random() * 3) - 1,
+        },
+        postStats: {
+          ...prevData.postStats,
+          totalImpressions:
+            prevData.postStats.totalImpressions + Math.floor(Math.random() * 5),
+        },
+      }));
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [analyticsData]);
+
+  // Loading state
+  if (loading &amp;&amp; !analyticsData) {
+    return (
+      &lt;div className="flex items-center justify-center min-h-screen">
+        &lt;div className="text-center">
+          &lt;div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500 mx-auto">&lt;/div>
+          &lt;p className="mt-4 text-gray-600">Loading dashboard data...&lt;/p>
+        &lt;/div>
+      &lt;/div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      &lt;div className="flex items-center justify-center min-h-screen">
+        &lt;div className="bg-red-50 p-6 rounded-lg border border-red-200 max-w-xl">
+          &lt;h2 className="text-xl font-semibold text-red-700 mb-2">
+            Error Loading Data
+          &lt;/h2>
+          &lt;p className="text-red-600">{error}&lt;/p>
+          &lt;button
+            className="mt-4 bg-red-100 hover:bg-red-200 text-red-800 font-medium py-2 px-4 rounded"
+            onClick={() => window.location.reload()}
+          >
+            Retry
+          &lt;/button>
+        &lt;/div>
+      &lt;/div>
+    );
+  }
+
+  // No data available
+  if (!analyticsData) {
+    return null;
+  }
+
+  // Prepare data for charts
+  const { userStats, postStats, jobStats, companyStats } = analyticsData;
+
+  // Prepare subscription data for pie chart
+  const subscriptionData = [
+    { name: "Premium", users: userStats.premiumUsers },
+    { name: "Free", users: userStats.totalUsers - userStats.premiumUsers },
+  ];
+
+  // Prepare employment type data for bar chart
+  const employmentData = userStats.employmentTypeCounts.map((item) => ({
+    name: item._id,
+    count: item.count,
+  }));
+
+  // Prepare workplace type data for pie chart
+  const workplaceData = jobStats.jobsByWorkplaceType.map((item) => ({
+    name: item._id,
+    value: item.count,
+  }));
+
+  // Prepare company size data for pie chart
+  const companySizeData = companyStats.companiesBySize.map((item) => ({
+    name: item._id,
+    value: item.count,
+  }));
+
+  // Prepare profile privacy data for pie chart
+  const privacyData = userStats.usersByProfilePrivacy.map((item) => ({
+    name:
+      item._id === "public"
+        ? "Public"
+        : item._id === "connectionsOnly"
+        ? "Connections Only"
+        : "Private",
+    value: item.count,
+  }));
+
+  // Prepare UI theme preference data for pie chart
+  const themePreferenceData = userStats.usersByDefaultMode.map((item) => ({
+    name: item._id === "dark" ? "Dark Mode" : "Light Mode",
+    value: item.count,
+  }));
+
+  // Prepare connection request privacy data for pie chart
+  const connectionPrivacyData = userStats.usersByConnectionRequestPrivacy.map(
+    (item) => ({
+      name: item._id === "everyone" ? "Anyone" : "Connections Only",
+      value: item.count,
+    })
+  );
+
+  // Prepare job types data for bar chart
+  const jobTypesData = jobStats.jobsByType.map((item) => ({
+    name: item._id,
+    count: item.count,
+  }));
+
+  // Prepare company industry data for bar chart (top 10)
+  const companyIndustryData = companyStats.companiesByIndustry
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 10)
+    .map((item) => ({
+      name: item._id,
+      count: item.count,
+    }));
+
+  // Colors for charts
+  const CHART_COLORS = [
+    "#3b82f6",
+    "#10b981",
+    "#f59e0b",
+    "#ef4444",
+    "#8b5cf6",
+    "#ec4899",
+    "#14b8a6",
+    "#6366f1",
+    "#d946ef",
+    "#f97316",
+  ];
+
+  return (
+    &lt;div className="bg-gray-50 min-h-screen">
+      {/* Header */}
+      &lt;header className="bg-white shadow">
+        &lt;div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+          &lt;h1 className="text-3xl font-bold text-gray-900">
+            Platform Analytics
+          &lt;/h1>
+          &lt;p className="text-gray-500 mt-1">
+            Comprehensive overview of platform metrics
+          &lt;/p>
+        &lt;/div>
+      &lt;/header>
+
+      &lt;main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+        {/* Metrics Overview */}
+        &lt;div className="mb-8">
+          &lt;h2 className="text-xl font-semibold text-gray-800 mb-4">
+            Key Metrics
+          &lt;/h2>
+          &lt;div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            &lt;MetricCard
+              icon={&lt;Users className="text-blue-500" />}
+              title="Total Users"
+              value={userStats.totalUsers}
+            />
+            &lt;MetricCard
+              icon={&lt;UserCheck className="text-green-500" />}
+              title="Active Users"
+              value={userStats.activeUsers}
+              highlight={true}
+            />
+            &lt;MetricCard
+              icon={&lt;Shield className="text-purple-500" />}
+              title="Premium Users"
+              value={userStats.premiumUsers}
+            />
+            &lt;MetricCard
+              icon={&lt;GitBranch className="text-indigo-500" />}
+              title="Avg Connections"
+              value={userStats.averageConnections}
+            />
+          &lt;/div>
+        &lt;/div>
+
+        {/* Post &amp; Job Metrics */}
+        &lt;div className="mb-8">
+          &lt;h2 className="text-xl font-semibold text-gray-800 mb-4">
+            Content &amp; Engagement
+          &lt;/h2>
+          &lt;div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            &lt;MetricCard
+              icon={&lt;FileText className="text-yellow-500" />}
+              title="Total Posts"
+              value={postStats.totalPosts}
+            />
+            &lt;MetricCard
+              icon={&lt;Activity className="text-red-500" />}
+              title="Total Impressions"
+              value={postStats.totalImpressions}
+              highlight={true}
+            />
+            &lt;MetricCard
+              icon={&lt;BriefcaseIcon className="text-pink-500" />}
+              title="Total Jobs"
+              value={jobStats.totalJobs}
+            />
+            &lt;MetricCard
+              icon={&lt;MessageSquare className="text-orange-500" />}
+              title="Avg Job Applications"
+              value={jobStats.averageApplications}
+            />
+          &lt;/div>
+        &lt;/div>
+
+        {/* Company Metrics */}
+        &lt;div className="mb-8">
+          &lt;h2 className="text-xl font-semibold text-gray-800 mb-4">
+            Company Metrics
+          &lt;/h2>
+          &lt;div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            &lt;MetricCard
+              icon={&lt;Building className="text-blue-500" />}
+              title="Total Companies"
+              value={companyStats.totalCompanies}
+            />
+            &lt;MetricCard
+              icon={&lt;Building className="text-green-500" />}
+              title="Active Companies"
+              value={companyStats.activeCompanies}
+              highlight={true}
+            />
+            &lt;MetricCard
+              icon={&lt;Users className="text-purple-500" />}
+              title="Avg Followers"
+              value={companyStats.averageFollowers}
+            />
+            &lt;MetricCard
+              icon={&lt;Zap className="text-indigo-500" />}
+              title="Avg Engagement"
+              value={postStats.averageEngagement.impressions.toFixed(1)}
+            />
+          &lt;/div>
+        &lt;/div>
+
+        {/* User Distribution Charts */}
+        &lt;div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          {/* Subscription Distribution */}
+          &lt;div className="bg-white p-6 rounded-lg shadow">
+            &lt;h2 className="text-xl font-semibold text-gray-800 mb-4">
+              &lt;Shield className="inline-block mr-2" size={20} />
+              User Subscription Distribution
+            &lt;/h2>
+            &lt;ResponsiveContainer width="100%" height={300}>
+              &lt;PieChart>
+                &lt;Pie
+                  data={subscriptionData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="users"
+                  nameKey="name"
+                  label={({ name, percent }) =>
+                    `${name}: ${(percent * 100).toFixed(0)}%`
+                  }
+                >
+                  {subscriptionData.map((entry, index) => (
+                    &lt;Cell
+                      key={`cell-${index}`}
+                      fill={CHART_COLORS[index % CHART_COLORS.length]}
+                    />
+                  ))}
+                &lt;/Pie>
+                &lt;Tooltip formatter={(value) => value.toLocaleString()} />
+                &lt;Legend />
+              &lt;/PieChart>
+            &lt;/ResponsiveContainer>
+          &lt;/div>
+
+          {/* UI Theme Preference */}
+          &lt;div className="bg-white p-6 rounded-lg shadow">
+            &lt;h2 className="text-xl font-semibold text-gray-800 mb-4">
+              &lt;Sun className="inline-block mr-2" size={20} />
+              &lt;Moon className="inline-block mr-2" size={20} />
+              UI Theme Preference
+            &lt;/h2>
+            &lt;ResponsiveContainer width="100%" height={300}>
+              &lt;PieChart>
+                &lt;Pie
+                  data={themePreferenceData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="value"
+                  nameKey="name"
+                  label={({ name, percent }) =>
+                    `${name}: ${(percent * 100).toFixed(0)}%`
+                  }
+                >
+                  {themePreferenceData.map((entry, index) => (
+                    &lt;Cell
+                      key={`cell-${index}`}
+                      fill={entry.name === "Dark Mode" ? "#1e293b" : "#f8fafc"}
+                      stroke={
+                        entry.name === "Light Mode" ? "#94a3b8" : undefined
+                      }
+                    />
+                  ))}
+                &lt;/Pie>
+                &lt;Tooltip formatter={(value) => value.toLocaleString()} />
+                &lt;Legend />
+              &lt;/PieChart>
+            &lt;/ResponsiveContainer>
+          &lt;/div>
+        &lt;/div>
+
+        {/* Privacy Settings Charts */}
+        &lt;div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          {/* Profile Privacy */}
+          &lt;div className="bg-white p-6 rounded-lg shadow">
+            &lt;h2 className="text-xl font-semibold text-gray-800 mb-4">
+              &lt;Lock className="inline-block mr-2" size={20} />
+              Profile Privacy Settings
+            &lt;/h2>
+            &lt;ResponsiveContainer width="100%" height={300}>
+              &lt;PieChart>
+                &lt;Pie
+                  data={privacyData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="value"
+                  nameKey="name"
+                  label={({ name, percent }) =>
+                    `${name}: ${(percent * 100).toFixed(0)}%`
+                  }
+                >
+                  {privacyData.map((entry, index) => (
+                    &lt;Cell
+                      key={`cell-${index}`}
+                      fill={CHART_COLORS[index % CHART_COLORS.length]}
+                    />
+                  ))}
+                &lt;/Pie>
+                &lt;Tooltip formatter={(value) => value.toLocaleString()} />
+                &lt;Legend />
+              &lt;/PieChart>
+            &lt;/ResponsiveContainer>
+          &lt;/div>
+
+          {/* Connection Request Privacy */}
+          &lt;div className="bg-white p-6 rounded-lg shadow">
+            &lt;h2 className="text-xl font-semibold text-gray-800 mb-4">
+              &lt;Globe className="inline-block mr-2" size={20} />
+              Connection Request Privacy
+            &lt;/h2>
+            &lt;ResponsiveContainer width="100%" height={300}>
+              &lt;PieChart>
+                &lt;Pie
+                  data={connectionPrivacyData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="value"
+                  nameKey="name"
+                  label={({ name, percent }) =>
+                    `${name}: ${(percent * 100).toFixed(0)}%`
+                  }
+                >
+                  {connectionPrivacyData.map((entry, index) => (
+                    &lt;Cell
+                      key={`cell-${index}`}
+                      fill={CHART_COLORS[index % CHART_COLORS.length]}
+                    />
+                  ))}
+                &lt;/Pie>
+                &lt;Tooltip formatter={(value) => value.toLocaleString()} />
+                &lt;Legend />
+              &lt;/PieChart>
+            &lt;/ResponsiveContainer>
+          &lt;/div>
+        &lt;/div>
+
+        {/* Job Distribution Charts */}
+        &lt;div className="mb-8">
+          &lt;h2 className="text-xl font-semibold text-gray-800 mb-4">
+            &lt;Briefcase className="inline-block mr-2" size={20} />
+            Job Distribution
+          &lt;/h2>
+
+          &lt;div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            {/* Job Types */}
+            &lt;div className="bg-white p-6 rounded-lg shadow">
+              &lt;h3 className="text-lg font-semibold text-gray-800 mb-4">
+                Job Types
+              &lt;/h3>
+              &lt;ResponsiveContainer width="100%" height={300}>
+                &lt;BarChart data={jobTypesData}>
+                  &lt;CartesianGrid strokeDasharray="3 3" />
+                  &lt;XAxis dataKey="name" />
+                  &lt;YAxis />
+                  &lt;Tooltip formatter={(value) => value.toLocaleString()} />
+                  &lt;Bar dataKey="count" name="Jobs" fill="#8b5cf6">
+                    {jobTypesData.map((entry, index) => (
+                      &lt;Cell
+                        key={`cell-${index}`}
+                        fill={CHART_COLORS[index % CHART_COLORS.length]}
+                      />
+                    ))}
+                  &lt;/Bar>
+                &lt;/BarChart>
+              &lt;/ResponsiveContainer>
+            &lt;/div>
+
+            {/* Workplace Types */}
+            &lt;div className="bg-white p-6 rounded-lg shadow">
+              &lt;h3 className="text-lg font-semibold text-gray-800 mb-4">
+                Workplace Types
+              &lt;/h3>
+              &lt;ResponsiveContainer width="100%" height={300}>
+                &lt;PieChart>
+                  &lt;Pie
+                    data={workplaceData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    outerRadius={100}
+                    fill="#8884d8"
+                    dataKey="value"
+                    nameKey="name"
+                    label={({ name, percent }) =>
+                      `${name}: ${(percent * 100).toFixed(0)}%`
+                    }
+                  >
+                    {workplaceData.map((entry, index) => (
+                      &lt;Cell
+                        key={`cell-${index}`}
+                        fill={CHART_COLORS[index % CHART_COLORS.length]}
+                      />
+                    ))}
+                  &lt;/Pie>
+                  &lt;Tooltip formatter={(value) => value.toLocaleString()} />
+                  &lt;Legend />
+                &lt;/PieChart>
+              &lt;/ResponsiveContainer>
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+
+        {/* Employment and Company Data */}
+        &lt;div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          {/* Employment Types */}
+          &lt;div className="bg-white p-6 rounded-lg shadow">
+            &lt;h2 className="text-xl font-semibold text-gray-800 mb-4">
+              &lt;BarChartIcon className="inline-block mr-2" size={20} />
+              Employment Types
+            &lt;/h2>
+            &lt;ResponsiveContainer width="100%" height={350}>
+              &lt;BarChart data={employmentData} layout="vertical">
+                &lt;CartesianGrid strokeDasharray="3 3" />
+                &lt;XAxis type="number" />
+                &lt;YAxis dataKey="name" type="category" width={100} />
+                &lt;Tooltip formatter={(value) => value.toLocaleString()} />
+                &lt;Bar dataKey="count" name="Users" fill="#3b82f6">
+                  {employmentData.map((entry, index) => (
+                    &lt;Cell
+                      key={`cell-${index}`}
+                      fill={CHART_COLORS[index % CHART_COLORS.length]}
+                    />
+                  ))}
+                &lt;/Bar>
+              &lt;/BarChart>
+            &lt;/ResponsiveContainer>
+          &lt;/div>
+
+          {/* Company Size Distribution */}
+          &lt;div className="bg-white p-6 rounded-lg shadow">
+            &lt;h2 className="text-xl font-semibold text-gray-800 mb-4">
+              &lt;Building className="inline-block mr-2" size={20} />
+              Company Size Distribution
+            &lt;/h2>
+            &lt;ResponsiveContainer width="100%" height={350}>
+              &lt;BarChart data={companySizeData} layout="vertical">
+                &lt;CartesianGrid strokeDasharray="3 3" />
+                &lt;XAxis type="number" />
+                &lt;YAxis dataKey="name" type="category" width={100} />
+                &lt;Tooltip formatter={(value) => value.toLocaleString()} />
+                &lt;Bar dataKey="value" name="Companies" fill="#10b981">
+                  {companySizeData.map((entry, index) => (
+                    &lt;Cell
+                      key={`cell-${index}`}
+                      fill={CHART_COLORS[index % CHART_COLORS.length]}
+                    />
+                  ))}
+                &lt;/Bar>
+              &lt;/BarChart>
+            &lt;/ResponsiveContainer>
+          &lt;/div>
+        &lt;/div>
+
+        {/* Top Industries */}
+        &lt;div className="bg-white p-6 rounded-lg shadow mb-8">
+          &lt;h2 className="text-xl font-semibold text-gray-800 mb-4">
+            &lt;Building className="inline-block mr-2" size={20} />
+            Top Industries
+          &lt;/h2>
+          &lt;ResponsiveContainer width="100%" height={400}>
+            &lt;BarChart data={companyIndustryData} layout="vertical">
+              &lt;CartesianGrid strokeDasharray="3 3" />
+              &lt;XAxis type="number" />
+              &lt;YAxis dataKey="name" type="category" width={150} />
+              &lt;Tooltip formatter={(value) => value.toLocaleString()} />
+              &lt;Bar dataKey="count" name="Companies" fill="#f59e0b">
+                {companyIndustryData.map((entry, index) => (
+                  &lt;Cell
+                    key={`cell-${index}`}
+                    fill={CHART_COLORS[index % CHART_COLORS.length]}
+                  />
+                ))}
+              &lt;/Bar>
+            &lt;/BarChart>
+          &lt;/ResponsiveContainer>
+        &lt;/div>
+
+        {/* Post Engagement */}
+        &lt;div className="bg-white p-6 rounded-lg shadow mb-8">
+          &lt;h2 className="text-xl font-semibold text-gray-800 mb-4">
+            &lt;Activity className="inline-block mr-2" size={20} />
+            Post Engagement Metrics
+          &lt;/h2>
+          &lt;div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            &lt;div className="bg-blue-50 p-6 rounded-lg">
+              &lt;h3 className="text-lg font-medium text-blue-700">
+                Average Impressions
+              &lt;/h3>
+              &lt;p className="text-3xl font-bold text-blue-800 mt-2">
+                {postStats.averageEngagement.impressions}
+              &lt;/p>
+              &lt;p className="text-sm text-blue-600 mt-1">Per post&lt;/p>
+            &lt;/div>
+            &lt;div className="bg-green-50 p-6 rounded-lg">
+              &lt;h3 className="text-lg font-medium text-green-700">
+                Average Comments
+              &lt;/h3>
+              &lt;p className="text-3xl font-bold text-green-800 mt-2">
+                {postStats.averageEngagement.comments}
+              &lt;/p>
+              &lt;p className="text-sm text-green-600 mt-1">Per post&lt;/p>
+            &lt;/div>
+            &lt;div className="bg-purple-50 p-6 rounded-lg">
+              &lt;h3 className="text-lg font-medium text-purple-700">
+                Average Reposts
+              &lt;/h3>
+              &lt;p className="text-3xl font-bold text-purple-800 mt-2">
+                {postStats.averageEngagement.reposts}
+              &lt;/p>
+              &lt;p className="text-sm text-purple-600 mt-1">Per post&lt;/p>
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+      &lt;/main>
+    &lt;/div>
+  );
+}
+
+// Component for individual metric cards
+function MetricCard({ icon, title, value, highlight = false }) {
+  return (
+    &lt;div
+      className={`bg-white rounded-lg shadow p-6 ${
+        highlight ? "border-l-4 border-blue-500" : ""
+      }`}
+    >
+      &lt;div className="flex items-center">
+        &lt;div className="p-3 rounded-full bg-gray-100 mr-4">{icon}&lt;/div>
+        &lt;div>
+          &lt;p className="text-sm font-medium text-gray-600">{title}&lt;/p>
+          &lt;p className="text-2xl font-semibold text-gray-900">{value}&lt;/p>
+        &lt;/div>
+      &lt;/div>
+    &lt;/div>
+  );
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+<<<<<<< HEAD
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#ApplyJob">ApplyJob</a></li><li><a href="global.html#ChatWindow">ChatWindow</a></li><li><a href="global.html#CommentSection">CommentSection</a></li><li><a href="global.html#ConversationListItem">ConversationListItem</a></li><li><a href="global.html#ConversationSearch">ConversationSearch</a></li><li><a href="global.html#CreatePostModal">CreatePostModal</a></li><li><a href="global.html#Filter">Filter</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#JobBoardPage">JobBoardPage</a></li><li><a href="global.html#JobCard">JobCard</a></li><li><a href="global.html#Jobs">Jobs</a></li><li><a href="global.html#Main">Main</a></li><li><a href="global.html#MyJobs">MyJobs</a></li><li><a href="global.html#Notification">Notification</a></li><li><a href="global.html#PostMenu">PostMenu</a></li><li><a href="global.html#PostReactions">PostReactions</a></li><li><a href="global.html#closeModal">closeModal</a></li><li><a href="global.html#fetchComments">fetchComments</a></li><li><a href="global.html#fetchCompanies">fetchCompanies</a></li><li><a href="global.html#fetchNotifications">fetchNotifications</a></li><li><a href="global.html#fetchPosts">fetchPosts</a></li><li><a href="global.html#fetchUser">fetchUser</a></li><li><a href="global.html#filteredNotifications">filteredNotifications</a></li><li><a href="global.html#getReactionIcon">getReactionIcon</a></li><li><a href="global.html#handleAddComment">handleAddComment</a></li><li><a href="global.html#handleBlockUser">handleBlockUser</a></li><li><a href="global.html#handleClick">handleClick</a></li><li><a href="global.html#handleCreatePost">handleCreatePost</a></li><li><a href="global.html#handleDeleteNotification">handleDeleteNotification</a></li><li><a href="global.html#handleFilter">handleFilter</a></li><li><a href="global.html#handleJobClick">handleJobClick</a></li><li><a href="global.html#handleLikeClick">handleLikeClick</a></li><li><a href="global.html#handleMainFilterChange">handleMainFilterChange</a></li><li><a href="global.html#handleMessagingClick">handleMessagingClick</a></li><li><a href="global.html#handleMuteDuration">handleMuteDuration</a></li><li><a href="global.html#handleNotificationClick">handleNotificationClick</a></li><li><a href="global.html#handleReact">handleReact</a></li><li><a href="global.html#handleReactToComment">handleReactToComment</a></li><li><a href="global.html#handleReportPost">handleReportPost</a></li><li><a href="global.html#handleSave">handleSave</a></li><li><a href="global.html#handleSavePost">handleSavePost</a></li><li><a href="global.html#handleSearch">handleSearch</a></li><li><a href="global.html#handleSendTestNotification">handleSendTestNotification</a></li><li><a href="global.html#handleSubmit">handleSubmit</a></li><li><a href="global.html#openModal">openModal</a></li><li><a href="global.html#requestOTP">requestOTP</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#toggleComments">toggleComments</a></li><li><a href="global.html#useEffect">useEffect</a></li><li><a href="global.html#verifyOTP">verifyOTP</a></li></ul>
+=======
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#ApplyJob">ApplyJob</a></li><li><a href="global.html#ChatWindow">ChatWindow</a></li><li><a href="global.html#CommentSection">CommentSection</a></li><li><a href="global.html#ConversationListItem">ConversationListItem</a></li><li><a href="global.html#ConversationSearch">ConversationSearch</a></li><li><a href="global.html#CreatePostModal">CreatePostModal</a></li><li><a href="global.html#Filter">Filter</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#JobBoardPage">JobBoardPage</a></li><li><a href="global.html#JobCard">JobCard</a></li><li><a href="global.html#Jobs">Jobs</a></li><li><a href="global.html#MyJobs">MyJobs</a></li><li><a href="global.html#Notification">Notification</a></li><li><a href="global.html#PostMenu">PostMenu</a></li><li><a href="global.html#PostReactions">PostReactions</a></li><li><a href="global.html#closeModal">closeModal</a></li><li><a href="global.html#fetchCompanies">fetchCompanies</a></li><li><a href="global.html#fetchNotifications">fetchNotifications</a></li><li><a href="global.html#fetchUser">fetchUser</a></li><li><a href="global.html#filteredNotifications">filteredNotifications</a></li><li><a href="global.html#getReactionIcon">getReactionIcon</a></li><li><a href="global.html#handleBlockUser">handleBlockUser</a></li><li><a href="global.html#handleClick">handleClick</a></li><li><a href="global.html#handleDeleteNotification">handleDeleteNotification</a></li><li><a href="global.html#handleFilter">handleFilter</a></li><li><a href="global.html#handleJobClick">handleJobClick</a></li><li><a href="global.html#handleLikeClick">handleLikeClick</a></li><li><a href="global.html#handleMainFilterChange">handleMainFilterChange</a></li><li><a href="global.html#handleMessagingClick">handleMessagingClick</a></li><li><a href="global.html#handleMuteDuration">handleMuteDuration</a></li><li><a href="global.html#handleNotificationClick">handleNotificationClick</a></li><li><a href="global.html#handleSave">handleSave</a></li><li><a href="global.html#handleSearch">handleSearch</a></li><li><a href="global.html#handleSendTestNotification">handleSendTestNotification</a></li><li><a href="global.html#handleSubmit">handleSubmit</a></li><li><a href="global.html#openModal">openModal</a></li><li><a href="global.html#requestOTP">requestOTP</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#useEffect">useEffect</a></li><li><a href="global.html#verifyOTP">verifyOTP</a></li></ul>
+>>>>>>> 298a4e887adcb76e5ff0b30368755f329fc82575
+</nav>
+
+<br class="clear">
+
+<footer>
+<<<<<<< HEAD
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun Apr 20 2025 19:24:33 GMT+0200 (Eastern European Standard Time)
+=======
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun Apr 20 2025 18:19:03 GMT+0200 (Eastern European Standard Time)
+>>>>>>> 298a4e887adcb76e5ff0b30368755f329fc82575
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -63,7 +63,7 @@ const Filter = () => {
     };
 
   useEffect(() => {
-    fetchCompanies
+    fetchCompanies()
   }, []);
   useEffect(() => {
     handleFilter();
@@ -73,7 +73,7 @@ const Filter = () => {
   return (
     <div className="fixed top-[56px] left-0 right-0 bg-white shadow-sm border-t border-b border-gray-200">
       <div className="flex items-center gap-3 px-56 py-3 overflow-x-auto">
-      <label className="mb-1">
+      <label htmlFor='experience' className="mb-1">
         Experience: <span className="font-medium">{experience} yrs</span>
       </label>
         <span className="w-8 text-left">0</span>

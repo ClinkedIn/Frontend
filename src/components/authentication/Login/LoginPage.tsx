@@ -10,6 +10,30 @@ import { useAuth } from "../../../context/AuthContext";
 import axios from "axios";
 import { BASE_URL } from "../../../constants";
 
+/**
+ * The `LoginPage` component renders a login form for user authentication.
+ * It includes input fields for email and password, a Google login button,
+ * and a submit button to trigger the login process. The component also
+ * handles form validation, error display, and login mutation using React Query.
+ *
+ * Features:
+ * - Validates user input for email and password fields.
+ * - Displays error messages for invalid inputs.
+ * - Toggles password visibility.
+ * - Handles login requests and manages authentication tokens.
+ * - Redirects the user to the feed page upon successful login.
+ * - Provides a link to the signup page for new users.
+ *
+ * Dependencies:
+ * - React Query for managing the login mutation.
+ * - Axios for making HTTP requests.
+ * - React Router for navigation.
+ * - Framer Motion for animations.
+ * - Toast notifications for success and error messages.
+ *
+ * @component
+ * @returns {JSX.Element} The rendered login page component.
+ */
 const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -18,6 +42,7 @@ const LoginPage = () => {
     username?: string;
     password?: string;
   }>({});
+  const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { setAuthToken } = useAuth();
@@ -94,7 +119,7 @@ const LoginPage = () => {
   >({
     mutationFn: async ({ email, password }) =>
       await axios.post(
-        `${BASE_URL}/user/login`,
+        `${BASE_URL}/api/user/login`,
         { email, password },
         { withCredentials: true }
       ),
@@ -153,26 +178,26 @@ const LoginPage = () => {
       {/* Logo */}
       <img
         className="absolute top-6 left-13 h-7"
-        src="/public/images/login-logo.svg"
+        src="/Images/login-logo.svg"
         alt="LinkedIn"
       />
-
+  
       {/* Login Form */}
       <motion.div className="w-full max-w-sm p-6 bg-white rounded-lg shadow-lg">
         <h2 className="text-3xl font-semibold text-gray-900 text-left mb-4">
           Sign in
         </h2>
-
+  
         {/* Google Login Button */}
         <GoogleLogin className="w-full" />
-
+  
         {/* Separator */}
         <div className="relative flex items-center my-4">
           <div className="w-full border-t border-gray-300"></div>
           <span className="px-3 text-sm text-gray-500 bg-white">or</span>
           <div className="w-full border-t border-gray-300"></div>
         </div>
-
+  
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Email Input */}
@@ -190,7 +215,7 @@ const LoginPage = () => {
               <p className="text-red-500 text-xs mt-1">{errors.username}</p>
             )}
           </div>
-
+  
           {/* Password Input */}
           <div className="relative">
             <input
@@ -213,7 +238,31 @@ const LoginPage = () => {
               <p className="text-red-500 text-xs mt-1">{errors.password}</p>
             )}
           </div>
-
+  
+          {/* Remember Me & Forgot Password Row */}
+          <div className="flex justify-between items-center text-sm">
+            <div className="flex items-center">
+              <input
+                id="remember-me"
+                type="checkbox"
+                checked={rememberMe}
+                onChange={() => setRememberMe(!rememberMe)}
+                className="mr-2 accent-green-700 scale-125"
+              />
+              <label htmlFor="remember-me" className="text-sm text-gray-700">
+                Remember me
+              </label>
+            </div>
+  
+            {/* Forgot Password Link */}
+            <Link
+              to="/forgot-password"
+              className="text-blue-600 hover:underline"
+            >
+              Forgot password?
+            </Link>
+          </div>
+  
           {/* Submit Button */}
           <motion.button
             type="submit"
@@ -229,7 +278,7 @@ const LoginPage = () => {
             )}
           </motion.button>
         </form>
-
+  
         {/* Signup Link */}
         <p className="mt-4 text-center text-sm text-gray-600">
           New to LinkedIn?{" "}
@@ -238,9 +287,11 @@ const LoginPage = () => {
           </Link>
         </p>
       </motion.div>
-
-      {/* Footer */}
-      <Footer />
+  
+      {/* Fixed Footer - Always at bottom of screen */}
+      <footer className="fixed bottom-0 left-0 right-0 z-10 bg-white border-t border-gray-200 py-4">
+        <Footer />
+      </footer>
     </div>
   );
 };

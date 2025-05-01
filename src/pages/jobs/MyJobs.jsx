@@ -2,9 +2,8 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { BsBookmarkFill } from "react-icons/bs";
 import Header from "../../components/UpperNavBar";
-import JobCard from '../../components/jobs/JobCard';
+import JobCard from "../../components/jobs/JobCard";
 import { BASE_URL } from "../../constants";
-
 
 /**
  * * MyJobs component displays either the user's saved/applied jobs
@@ -13,102 +12,108 @@ import { BASE_URL } from "../../constants";
  * @component
  * @returns {JSX.Element} Rendered MyJobs component
  */
-const MyJobs=()=> {
-    const [selectedTab, setSelectedTab] = useState("my-jobs");
-    const [activeFilter, setActiveFilter] = useState("Saved");
-    const [jobs, setJobs] = useState([]);
-    const [user, setUser]=useState()
+const MyJobs = () => {
+  const [selectedTab, setSelectedTab] = useState("my-jobs");
+  const [activeFilter, setActiveFilter] = useState("Saved");
+  const [jobs, setJobs] = useState([]);
+  const [user, setUser] = useState(null);
+  const [company, setCompany] = useState("");
 
   /**
    * Fetches currently logged-in user data and updates state.
-   *
-   * @async
-   * @function
-   * @returns {Promise<void>}
    */
   const fetchUser = async () => {
     try {
       const response = await axios.get(`${BASE_URL}/user/me`, {
-    
-        withCredentials:true
+        withCredentials: true,
       });
-  
-      setUser(response.data);
-      console.log("User data:", response.data);
+      setUser(response.data.user); // important! go into .user
+      console.log("User data:", response.data.user);
     } catch (error) {
       console.error("Error fetching user:", error);
     }
   };
+
   /**
    * Fetches jobs saved by the user.
-   * Updates job list state with the retrieved jobs.
-   *
-   * @async
-   * @function
-   * @returns {Promise<void>}
    */
-    const fetchSavedJobs = async () => {
-      
-        try {
-          const response = await axios.get(`${BASE_URL}/jobs/saved`, {
-            withCredentials: true // Send cookies with request
-          });
-          setJobs(response.data.jobs);
-          console.log("jobs saved:",response.data.jobs)
-        } catch (err) {
-          console.log("error in save jobs")
-          setJobs(staticJobs);
-        }
-       
-    };
+  const fetchSavedJobs = async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}/jobs/saved`, {
+        withCredentials: true,
+      });
+      setJobs(response.data.jobs);
+      console.log("Saved jobs:", response.data.jobs);
+    } catch (error) {
+      console.error("Error fetching saved jobs:", error);
+      setJobs([]);
+    }
+  };
 
-     /**
+  /**
    * Fetches jobs the user has applied to, filtered by status.
-   *
-   * @async
-   * @function
-   * @param {string} status - The application status to filter by (e.g., "Pending", "Accepted")
-   * @returns {Promise<void>}
    */
-     // Function to fetch jobs according to the current filter
   const fetchMyApplications = async (status) => {
     try {
       const response = await axios.get(`${BASE_URL}/jobs/my-applications?status=${status.toLowerCase()}`, {
         withCredentials: true,
       });
       setJobs(response.data.applications);
-      console.log(`Fetched jobs for status: ${status}`, response.data);
+      console.log(`Applications for status ${status}:`, response.data.applications);
     } catch (error) {
-      console.error(`Error fetching jobs with status ${status}:`, error);
+      console.error(`Error fetching applications with status ${status}:`, error);
       setJobs([]);
     }
   };
-/**
-   * Effect to handle login, fetch user and job data when selectedTab or activeFilter changes.
-   */
-    useEffect(() => {
-      // const loginAndFetchData = async () => {
-      //   await testLogin(); // Ensure login is completed first
-        fetchUser()
-        
-    setJobs([]); // Clear jobs before fetching new ones
-        if (selectedTab === "my-jobs" && activeFilter === "Saved") {
-          fetchSavedJobs();
-        } else if (selectedTab === "my-jobs") {
-          fetchMyApplications(activeFilter);
-        }
-      // }
-      // loginAndFetchData();
-    },  [selectedTab, activeFilter]);
-  
 
- /**
-   * List of filters based on the selected tab.
-   * @type {string[]}
+  /**
+   * Fetches jobs posted by companies the user is admin of.
    */
+  const fetchPostedJobs = async () => {
+
+    try {
+      const allCompanyJobs = await Promise.all(
+        user.companies.map(async (companyId) => {
+          const response = await axios.get(`${BASE_URL}/jobs/company/${companyId}`, {
+            withCredentials: true,
+          });
+          return response.data || []; 
+        })
+      );
+
+      // Flatten the array of arrays into one array
+      const mergedJobs = allCompanyJobs.flat();
+      setJobs(mergedJobs);
+      console.log("Posted jobs:", mergedJobs);
+    } catch (error) {
+      console.error("Error fetching posted jobs:", error);
+      setJobs([]);
+    }
+  };
+
+  // Handle loading data when selectedTab or activeFilter changes
+  useEffect(() => {
+    fetchUser();
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+
+    setJobs([]); // Clear jobs first
+    if (selectedTab === "my-jobs") {
+      if (activeFilter === "Saved") {
+        fetchSavedJobs();
+      } else {
+        fetchMyApplications(activeFilter);
+      }
+    } else if (selectedTab === "posted-jobs") {
+      fetchPostedJobs();
+    }
+  }, [selectedTab, activeFilter, user]);
+
   // Determine filter options based on selected tab
   const filterOptions =
-    selectedTab === "posted-jobs" ? ["Drafts", "Posted"] : ["Saved", "Pending", "Viewed", "Accepted", "Rejected"];
+    selectedTab === "posted-jobs" ? ["Posted"] : ["Saved", "Pending", "Viewed", "Accepted", "Rejected"];
 
   return (
     <div className="flex bg-[#F5F3EE] p-6 mt-14">
@@ -136,7 +141,6 @@ const MyJobs=()=> {
             onClick={() => setSelectedTab("my-jobs")}
           >
             <span>My jobs</span>
-
           </li>
         </ul>
       </div>
@@ -146,27 +150,29 @@ const MyJobs=()=> {
         <h2 className="text-2xl mb-4 pl-6">{selectedTab === "posted-jobs" ? "Posted Jobs" : "My Jobs"}</h2>
 
         {/* Dynamic Filter Buttons */}
-        <div className="flex space-x-3 mb-6 pb-1 border-b border-[#e8e8e8] pl-6">
-          {filterOptions.map((filter) => (
-            <button
-              key={filter}
-              onClick={() => setActiveFilter(filter)}
-              className={`px-4 py-2 rounded-full text-sm border ${
-                activeFilter === filter
-                  ? "bg-[#01754f] text-white font-semibold hover:bg-[#004c33]"
-                  : "bg-white text-gray-700 font-semibold border-gray-400 hover:bg-[#f3f3f3] hover:border-2"
-              }`}
-            >
-              {filter}
-            </button>
-          ))}
-        </div>
+        {selectedTab !== "posted-jobs" && (
+          <div className="flex space-x-3 mb-6 pb-1 border-b border-[#e8e8e8] pl-6">
+            {filterOptions.map((filter) => (
+              <button
+                key={filter}
+                onClick={() => setActiveFilter(filter)}
+                className={`px-4 py-2 rounded-full text-sm border ${
+                  activeFilter === filter
+                    ? "bg-[#01754f] text-white font-semibold hover:bg-[#004c33]"
+                    : "bg-white text-gray-700 font-semibold border-gray-400 hover:bg-[#f3f3f3] hover:border-2"
+                }`}
+              >
+                {filter}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Job Listings */}
         <div className="space-y-4 pl-6 pr-6">
           {jobs && jobs.length > 0 ? (
             jobs.map((job, index) => (
-              <JobCard key={index} job={job} state={activeFilter} />
+              <JobCard key={index} job={job} state={selectedTab} user={user} />
             ))
           ) : (
             <p>No jobs available at the moment.</p>
@@ -175,5 +181,6 @@ const MyJobs=()=> {
       </div>
     </div>
   );
-}
+};
+
 export default MyJobs;

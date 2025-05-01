@@ -113,9 +113,12 @@ const Jobs = () => {
             className="flex items-center gap-3 font-semibold w-full text-left py-3 px-6 hover:bg-gray-100">
               <FaBookmark className="font-semibold text-[#3d3d3d]" /> My jobs
             </button>
-            <button className="flex items-center gap-3 w-full font-semibold text-left p-5 text-blue-600 hover:bg-gray-100 rounded-md">
-              <FaPen className="text-blue-600 font-bold" /> Post a free job
-            </button>
+            <button 
+            onClick={() => navigate("/starthiring", { state: user })}
+            className="flex items-center gap-3 w-full font-semibold text-left p-5 text-blue-600 hover:bg-gray-100 rounded-md"
+          >
+            <FaPen className="text-blue-600 font-bold" /> Post a free job
+          </button>
           </div>
         </div>
 

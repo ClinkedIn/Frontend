@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: pages/notifications/Notifications.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: pages/notifications/Notifications.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { useState, useEffect } from "react";
+import Header from "../../components/UpperNavBar";
+import ProfileCard from "../../components/ProfileCard";
+import { useNavigate } from "react-router-dom";
+import NotificationCard from "../../components/Notification/NotificationCard"
+import axios from "axios";
+import FooterLinks from "../../components/FooterLinks";
+import { patchRequest } from "../../services/axios";
+import { toast } from 'react-hot-toast';
+import { Toaster } from 'react-hot-toast';
+import { BASE_URL } from "../../constants";
+
+// import { getMessaging, getToken } from 'firebase/messaging';
+// import { app } from '../../../firebase'; 
+
+
+
+/**
+ * The Notification component is responsible for displaying and managing user notifications.
+ * It supports filtering notifications by category, marking them as read, and sending test notifications.
+ * It fetches notifications and user data from an API and displays them accordingly.
+ * 
+ * @component
+ * @example
+ * // Usage
+ * &lt;Notification />
+ */
+const Notification = () => {
+
+  
+  const navigate = useNavigate();
+  const [notifications, setNotifications] = useState([]);
+  const [selectedFilter, setSelectedFilter] = useState("all");
+  const [isArrowVisible, setIsArrowVisible] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [selectedPostFilter, setSelectedPostFilter] = useState("all");
+  const [user, setUser] = useState();
+
+  // async function requestFCMToken() {
+  //   try {
+  //     const messaging = getMessaging(app);
+  //     {
+  //       const fcmToken = await getToken(messaging, { 
+  //         vapidKey: 'BKQc38HyUXuvI_yz5hPvprjVjmWrcUjTP2H7J_cjGoyMMoBGNBbC0ucVGrzM67rICMclmUuOx-mdt7CXlpnhq9g' // From Firebase Console > Cloud Messaging
+  //       });
+  //       if (fcmToken) {
+  //         console.log('FCM Token:', fcmToken);
+          
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error('Error getting token:', error);
+  //   }
+  // }
+  // useEffect(() => {
+  //   requestFCMToken();
+  // }, []);
+
+
+  /**
+   * Sends a test notification to the backend and shows a toast notification in the app.
+   * 
+   * @async
+   * @function handleSendTestNotification
+   */
+  const handleSendTestNotification = async () => {
+    try {
+      // Send to backend (mock)
+      const response = await axios.post('/api/send-notification', {
+      title: "Test Notification",
+        body: "This is a test notification!",
+      });
+      await fetchNotifications();
+  
+      // Show in-app toast
+      toast.success('New notification received!', {
+        
+        duration: 4000,
+      });
+  
+    } catch (error) {
+      toast.error('Failed to send notification');
+      console.error("Error sending notification:", error);
+    }
+  };
+ /**
+   * Fetches notifications from the backend and updates the state.
+   * 
+   * @async
+   * @function fetchNotifications
+   */
+  const fetchNotifications = async () => {
+    try {
+      const response = await axios.get(
+        `${BASE_URL}/notifications`,
+        {withCredentials:true}
+      );
+      console.log("notifications:",response.data)
+      setNotifications(response.data); // Set fetched notifications
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  };
+/**
+   * Marks a notification as read when clicked.
+   *
+   * @async
+   * @function handleNotificationClick
+   * @param {string} id - The ID of the notification to be marked as read.
+   */
+ //Mark Notification as read
+  const handleNotificationClick = async (id) => {
+    const response = await axios.patch(
+      `${BASE_URL}/notifications/mark-read/${id}`,
+      {},
+      { withCredentials: true }
+    );
+
+    if (response?.status === 200) {
+        console.log('Updated notification');
+        setNotifications(notifications.map(notification =>
+            notification._id === id ? { ...notification, isRead: true } : notification
+        ));
+    } else {
+        console.error('Failed to update notification', response);
+    }
+};
+/**
+ * Fetches the user data from the backend and updates the state.
+ * 
+ * @async
+ * @function fetchUser
+ */
+  const fetchUser = async () => {
+      try {
+        const response = await axios.get(`${BASE_URL}/user/me`, {
+      
+          withCredentials:true
+        });
+    
+        setUser(response.data);
+        console.log("User data:", response.data);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
+    };
+  
+  /**
+   * useEffect hook for executing login, fetching user data, and notifications.
+   * It triggers login and fetch data operations on component mount.
+   * 
+   * @function
+   * @hook
+   */
+  useEffect(() => {
+    // const loginAndFetchData = async () => {
+      // await testLogin(); // Ensure login is completed first
+    fetchUser();
+    fetchNotifications();
+  // }
+  //   loginAndFetchData()
+  }, []);
+ /**
+   * Handles the change in the main notification filter.
+   * Resets post filter and closes dropdown when switching to a different category.
+   * 
+   * @function handleMainFilterChange
+   * @param {string} filter - The selected filter for notifications.
+   */
+  // Reset My Posts label when a different main category is selected
+  const handleMainFilterChange = (filter) => {
+    setSelectedFilter(filter);
+    setIsArrowVisible(false);
+    setIsDropdownOpen(false);
+
+    // Reset My Posts when switching categories
+    if (filter !== "post") {
+      setSelectedPostFilter("all");
+      console.log(notifications)
+    }
+  };
+
+  // Mapping filter names for display
+  const postFilterLabels = {
+    all: "My Posts",
+    comments: "My Posts | Comments",
+    reactions: "My Posts | Reactions",
+    reposts: "My Posts | Reposts",
+  };
+/**
+   * Filters notifications based on the selected main filter and post filter.
+   * 
+   * @function filteredNotifications
+   * @returns {Array} - The filtered notifications based on user selection.
+   */
+  // Filter Notifications
+  const filteredNotifications = notifications.filter((notif) => {
+    if (selectedFilter === "all") return true;
+  
+    if (selectedFilter === "post") {
+      return selectedPostFilter === "all" 
+        ? notif.type === "post"  
+        : notif.subType === selectedPostFilter;
+    }
+  
+    return notif.type === selectedFilter;
+  });
+  return (
+    &lt;div className="bg-[#f4f2ee] min-h-screen ">
+
+
+&lt;Toaster position="top-right"/>
+
+      &lt;Header notifications={notifications}/>
+      &lt;div className="container mx-auto px-4 pt-20 md:pl-[172px] md:pr-[172px]">
+        &lt;div className="flex flex-col lg:flex-row justify-center gap-6 p-2">
+          
+          {/* Left Sidebar */}
+          &lt;div className="w-full lg:w-56 flex flex-col">
+            &lt;div 
+            id="Profile-Card" 
+            className="cursor-pointer"
+            onClick={() => navigate("/profile")}>&lt;ProfileCard user={user}  />&lt;/div>
+            &lt;div className="p-4 bg-white mt-2 w-full lg:w-56 shadow-sm rounded-xl border border-gray-300">
+              &lt;p className="text-sm font-medium text-gray-800">Manage your notifications&lt;/p>
+              &lt;button 
+              id="Notification-Settings" 
+              onClick={()=>navigate("/profile")}
+              className="text-[#0a66c2] text-sm font-medium hover:underline" >  View settings&lt;/button>
+            &lt;/div>
+            &lt;div className="w-full lg:w-72">
+            &lt;button
+              onClick={handleSendTestNotification}
+              className=" mb-4 p-2 bg-[#004c33] text-white rounded-lg hover:bg-[#003825] transition-colors"
+            >
+              Send Test Notification
+            &lt;/button>
+
+          &lt;/div>
+          &lt;/div>
+  
+          {/* Main Content */}
+          &lt;div className="flex-1 max-w-4xl">
+            {/* Filter Section */}
+            &lt;div className="bg-white p-4 shadow-sm rounded-lg border border-gray-300 mb-3 flex flex-wrap space-x-2">
+              {["all", "job", "post", "mention"].map((filter) => (
+                &lt;div 
+                id="Filter-Tabs"
+                key={filter} >
+                  {/*if user clicks post: post-notif are shown then clicked again: menu is shown */}
+                  {filter === "post" ? (
+                    &lt;button
+                    id="Post-Tabs"
+                      onClick={() => {
+                        if (!isArrowVisible) {
+                          setIsArrowVisible(true);
+                        } else {
+                          setIsDropdownOpen(!isDropdownOpen);
+                        }
+                        setSelectedFilter("post");
+                      }}
+                      className={`px-4 py-1 rounded-full text-sm font-medium transition-all border flex items-center gap-1 ${
+                        selectedFilter === "post"
+                          ? "bg-[#004c33] text-white"
+                          : "border-gray-400 text-gray-600 hover:bg-gray-200"
+                      }`}
+                    >
+                      {postFilterLabels[selectedPostFilter]} {isArrowVisible &amp;&amp; "▼"}
+                    &lt;/button>
+                  ) : (
+                    //Other Notification types filtering
+                    &lt;button
+                    id="Other-Tabs"
+                      onClick={() => handleMainFilterChange(filter)}
+                      className={`px-4 py-1 rounded-full text-sm font-medium transition-all border ${
+                        selectedFilter === filter
+                          ? "bg-[#004c33] text-white"
+                          : "border-gray-400 text-gray-600 hover:bg-gray-200"
+                      }`}
+                    >
+                      {filter === "all" ? "All" :
+                        filter === "job" ? "Jobs" :
+                        filter === "post" ? "My Posts" : "Mentions"}
+                    &lt;/button>
+                  )}
+  
+                  {/* Dropdown Menu for My Posts */}
+                  {isDropdownOpen &amp;&amp; filter === "post" &amp;&amp; (
+                    &lt;div className="absolute bg-white shadow-lg rounded-md border border-gray-200 w-40 z-10">
+                      &lt;p className="px-3 py-2 text-sm font-semibold">Filter post activity&lt;/p>
+                      {["all", "comments", "reactions", "reposts"].map((option) => (
+                        &lt;button
+                        id="Post-Types"
+                          key={option}
+                          onClick={() => {
+                            setSelectedPostFilter(option);
+                            setIsDropdownOpen(false);
+                          }}
+                          className={`w-full text-left px-4 py-2 text-sm flex items-center  ${
+                            //Changes My Posts filter to include the selected type
+                            selectedPostFilter === option
+                              ? " text-black  border-l-2 border-[#004c33]"
+                              : "text-gray-700 hover:bg-gray-100"
+                          }`}
+                        >
+                          {option === "all" ? "All" :
+                            option === "comments" ? "Comments" :
+                            option === "reactions" ? "Reactions" : "Reposts"}
+                        &lt;/button>
+                      ))}
+                    &lt;/div>
+                  )}
+                &lt;/div>
+              ))}
+            &lt;/div>
+  
+            {/* Notifications List */}
+            &lt;div className="bg-white shadow-sm rounded-lg border border-gray-300">
+              {/*Displays the filtered notifications */}
+            {filteredNotifications.length > 0 ? (
+                &lt;ul 
+               
+                id="Notification-Card">
+                  {filteredNotifications.map((notif) => (
+                    &lt;NotificationCard key={notif._id} notification={notif} handleNotificationClick={()=>handleNotificationClick(notif._id)} />
+                  ))}
+                &lt;/ul>
+                //Handles if Tab doesnt have any notifications
+              ) : 
+              //Jobs
+              selectedFilter === "job" ? (
+                &lt;div className="flex items-center flex-col">
+                  &lt;img id="No notif img"
+                  src="no new notif.png"
+                  alt="No New Notifications"
+                  className="w-72 h-72 object-cover rounded-md "
+                  />
+                  &lt;p className="font-semibold text-2xl">No new job notifications&lt;/p>
+                  &lt;p>When you receive new job updates, notifications will appear here.&lt;/p>
+                  &lt;button 
+                  id="Explore-Jobs"
+                  className="m-2  mb-4  px-4 py-2 cursor-pointer text-[#0a66c2] border-2 border-[#0a66c2] rounded-3xl hover:bg-[#ebf4fd] hover:border-4" 
+                  onClick={() => navigate("/jobs")}>Explore more jobs&lt;/button>
+                &lt;/div>
+              ) : 
+              //Post
+              selectedFilter === "post" ? (
+                &lt;div className="flex items-center flex-col">
+                  &lt;img
+                  id="No notif img"
+                  src="no new notif.png"
+                  alt="No New Notifications"
+                  className="w-72 h-72 object-cover rounded-md "
+                  />
+                  &lt;p className="font-semibold text-2xl">No new post activities&lt;/p>
+                  &lt;p>View your previous post activity on your profile.&lt;/p>
+                  &lt;button className="m-2 mb-4 px-4 py-2 cursor-pointer text-[#0a66c2] border-2 border-[#0a66c2] rounded-3xl hover:bg-[#ebf4fd] hover:border-4 "
+                  id="View-Activity"
+                  onClick={() => navigate("/profile")}>View previous activity&lt;/button>
+                &lt;/div>
+              ) : 
+              //Mention
+              selectedFilter === "mention" ? (
+                &lt;div className="flex items-center flex-col">
+                  &lt;img
+                  id="No notif img"
+                  src="no new notif.png"
+                  alt="No New Notifications"
+                  className="w-72 h-72 object-cover rounded-md "
+                  />
+                  &lt;p className="font-semibold text-2xl">No new mentions&lt;/p>
+                  &lt;p className="m-4 ">When someone tags you in a post or comment, that notification will appear here.&lt;/p>
+                &lt;/div>
+              ) : (
+                &lt;div className="text-center">
+                  &lt;img src="no new notif.png" alt="No New Notifications" className="w-full h-full object-cover rounded-md" />
+                  &lt;p>No New Notifications&lt;/p>
+                &lt;/div>
+              )}
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+      &lt;/div>
+    &lt;/div>
+  );
+};
+
+export default Notification;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+<<<<<<< HEAD
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#ApplyJob">ApplyJob</a></li><li><a href="global.html#ChatWindow">ChatWindow</a></li><li><a href="global.html#CommentSection">CommentSection</a></li><li><a href="global.html#ConversationListItem">ConversationListItem</a></li><li><a href="global.html#ConversationSearch">ConversationSearch</a></li><li><a href="global.html#CreatePostModal">CreatePostModal</a></li><li><a href="global.html#Filter">Filter</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#JobBoardPage">JobBoardPage</a></li><li><a href="global.html#JobCard">JobCard</a></li><li><a href="global.html#Jobs">Jobs</a></li><li><a href="global.html#Main">Main</a></li><li><a href="global.html#MyJobs">MyJobs</a></li><li><a href="global.html#Notification">Notification</a></li><li><a href="global.html#PostMenu">PostMenu</a></li><li><a href="global.html#PostReactions">PostReactions</a></li><li><a href="global.html#closeModal">closeModal</a></li><li><a href="global.html#fetchComments">fetchComments</a></li><li><a href="global.html#fetchCompanies">fetchCompanies</a></li><li><a href="global.html#fetchNotifications">fetchNotifications</a></li><li><a href="global.html#fetchPosts">fetchPosts</a></li><li><a href="global.html#fetchUser">fetchUser</a></li><li><a href="global.html#filteredNotifications">filteredNotifications</a></li><li><a href="global.html#getReactionIcon">getReactionIcon</a></li><li><a href="global.html#handleAddComment">handleAddComment</a></li><li><a href="global.html#handleBlockUser">handleBlockUser</a></li><li><a href="global.html#handleClick">handleClick</a></li><li><a href="global.html#handleCreatePost">handleCreatePost</a></li><li><a href="global.html#handleDeleteNotification">handleDeleteNotification</a></li><li><a href="global.html#handleFilter">handleFilter</a></li><li><a href="global.html#handleJobClick">handleJobClick</a></li><li><a href="global.html#handleLikeClick">handleLikeClick</a></li><li><a href="global.html#handleMainFilterChange">handleMainFilterChange</a></li><li><a href="global.html#handleMessagingClick">handleMessagingClick</a></li><li><a href="global.html#handleMuteDuration">handleMuteDuration</a></li><li><a href="global.html#handleNotificationClick">handleNotificationClick</a></li><li><a href="global.html#handleReact">handleReact</a></li><li><a href="global.html#handleReactToComment">handleReactToComment</a></li><li><a href="global.html#handleReportPost">handleReportPost</a></li><li><a href="global.html#handleSave">handleSave</a></li><li><a href="global.html#handleSavePost">handleSavePost</a></li><li><a href="global.html#handleSearch">handleSearch</a></li><li><a href="global.html#handleSendTestNotification">handleSendTestNotification</a></li><li><a href="global.html#handleSubmit">handleSubmit</a></li><li><a href="global.html#openModal">openModal</a></li><li><a href="global.html#requestOTP">requestOTP</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#toggleComments">toggleComments</a></li><li><a href="global.html#useEffect">useEffect</a></li><li><a href="global.html#verifyOTP">verifyOTP</a></li></ul>
+=======
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#ApplyJob">ApplyJob</a></li><li><a href="global.html#ChatWindow">ChatWindow</a></li><li><a href="global.html#CommentSection">CommentSection</a></li><li><a href="global.html#ConversationListItem">ConversationListItem</a></li><li><a href="global.html#ConversationSearch">ConversationSearch</a></li><li><a href="global.html#CreatePostModal">CreatePostModal</a></li><li><a href="global.html#Filter">Filter</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#JobBoardPage">JobBoardPage</a></li><li><a href="global.html#JobCard">JobCard</a></li><li><a href="global.html#Jobs">Jobs</a></li><li><a href="global.html#MyJobs">MyJobs</a></li><li><a href="global.html#Notification">Notification</a></li><li><a href="global.html#PostMenu">PostMenu</a></li><li><a href="global.html#PostReactions">PostReactions</a></li><li><a href="global.html#closeModal">closeModal</a></li><li><a href="global.html#fetchCompanies">fetchCompanies</a></li><li><a href="global.html#fetchNotifications">fetchNotifications</a></li><li><a href="global.html#fetchUser">fetchUser</a></li><li><a href="global.html#filteredNotifications">filteredNotifications</a></li><li><a href="global.html#getReactionIcon">getReactionIcon</a></li><li><a href="global.html#handleBlockUser">handleBlockUser</a></li><li><a href="global.html#handleClick">handleClick</a></li><li><a href="global.html#handleDeleteNotification">handleDeleteNotification</a></li><li><a href="global.html#handleFilter">handleFilter</a></li><li><a href="global.html#handleJobClick">handleJobClick</a></li><li><a href="global.html#handleLikeClick">handleLikeClick</a></li><li><a href="global.html#handleMainFilterChange">handleMainFilterChange</a></li><li><a href="global.html#handleMessagingClick">handleMessagingClick</a></li><li><a href="global.html#handleMuteDuration">handleMuteDuration</a></li><li><a href="global.html#handleNotificationClick">handleNotificationClick</a></li><li><a href="global.html#handleSave">handleSave</a></li><li><a href="global.html#handleSearch">handleSearch</a></li><li><a href="global.html#handleSendTestNotification">handleSendTestNotification</a></li><li><a href="global.html#handleSubmit">handleSubmit</a></li><li><a href="global.html#openModal">openModal</a></li><li><a href="global.html#requestOTP">requestOTP</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#useEffect">useEffect</a></li><li><a href="global.html#verifyOTP">verifyOTP</a></li></ul>
+>>>>>>> 298a4e887adcb76e5ff0b30368755f329fc82575
+</nav>
+
+<br class="clear">
+
+<footer>
+<<<<<<< HEAD
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun Apr 20 2025 19:24:34 GMT+0200 (Eastern European Standard Time)
+=======
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun Apr 20 2025 18:19:03 GMT+0200 (Eastern European Standard Time)
+>>>>>>> 298a4e887adcb76e5ff0b30368755f329fc82575
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

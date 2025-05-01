@@ -194,7 +194,7 @@ const ForgotPasswordForm = () => {
           <div className="flex items-center gap-6 m-auto mt-[-65px] mb-1">
             <div className="flex items-center gap-2">
               <img
-                src="../../../public/Images/black-lockedIn-login-logo.png"
+                src="/Images/black-lockedIn-login-logo.png"
                 className="text-black w-20 hover:cursor-pointer"
                 onClick={handleLogoClick}
               />

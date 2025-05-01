@@ -1,5 +1,13 @@
 import React, { useState, useRef } from "react";
 
+/**
+ * Props interface for the ProfilePictureForm component
+ * @interface ProfilePictureFormProps
+ * @property {string} currentImage - URL of the current profile picture
+ * @property {function} onUpload - Callback function when a new image is uploaded
+ * @property {function} onCancel - Callback function to cancel the profile picture update
+ * @property {function} onApply - Callback function to apply the edited image
+ */
 interface ProfilePictureFormProps {
   currentImage: string;
   onUpload: (file: File) => void;
@@ -7,8 +15,19 @@ interface ProfilePictureFormProps {
   onApply: (editedImageUrl: string) => void;
 }
 
+/**
+ * Type definition for the different editor tabs available
+ * @typedef {('crop'|'filters'|'adjust')} EditorTab
+ */
 type EditorTab = "crop" | "filters" | "adjust";
 
+/**
+ * Component for managing profile picture uploads and edits
+ *
+ * @component
+ * @param {ProfilePictureFormProps} props - Component props
+ * @returns {React.ReactElement} Profile picture form component
+ */
 const ProfilePictureForm: React.FC<ProfilePictureFormProps> = ({
   currentImage,
   onUpload,
@@ -22,6 +41,12 @@ const ProfilePictureForm: React.FC<ProfilePictureFormProps> = ({
   const [rotationValue, setRotationValue] = useState<number>(0);
   const [editedImage, setEditedImage] = useState<string>(currentImage);
 
+  /**
+   * Handles file input change events when a new image is selected
+   *
+   * @param {React.ChangeEvent<HTMLInputElement>} e - File input change event
+   * @returns {void}
+   */
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -31,20 +56,46 @@ const ProfilePictureForm: React.FC<ProfilePictureFormProps> = ({
     }
   };
 
+  /**
+   * Sets the editing state to true to open the image editor
+   *
+   * @returns {void}
+   */
   const handleEdit = () => {
     setIsEditing(true);
   };
 
+  /**
+   * Opens the file selection dialog to add a new photo
+   *
+   * @returns {void}
+   */
   const handleAddPhoto = () => {
     fileInputRef.current?.click();
   };
 
+  /**
+   * Handles frame selection functionality (placeholder)
+   *
+   * @returns {void}
+   */
   const handleFrames = () => {};
 
+  /**
+   * Clears the current profile picture
+   *
+   * @returns {void}
+   */
   const handleDelete = () => {
     setEditedImage("");
   };
 
+  /**
+   * Applies the current edits to the profile picture
+   * Creates a canvas with the image and applies rotation and zoom transformations
+   *
+   * @returns {void}
+   */
   const handleApply = () => {
     if (!editedImage) return;
 
@@ -83,17 +134,32 @@ const ProfilePictureForm: React.FC<ProfilePictureFormProps> = ({
     };
   };
 
+  /**
+   * Changes the active tab in the editor
+   *
+   * @param {EditorTab} tab - Tab to activate
+   * @returns {void}
+   */
   const handleTabChange = (tab: EditorTab) => {
     setActiveTab(tab);
   };
 
+  /**
+   * Exits the editor and resets editing values
+   *
+   * @returns {void}
+   */
   const handleExitEditor = () => {
     setIsEditing(false);
     setZoomValue(0);
     setRotationValue(0);
   };
 
-  // Render image editor UI
+  /**
+   * Renders the image editor UI with tabs for different editing functions
+   *
+   * @returns {React.ReactElement} Image editor UI component
+   */
   const renderImageEditor = () => (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg max-w-md w-full">
