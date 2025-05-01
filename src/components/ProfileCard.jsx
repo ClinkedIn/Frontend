@@ -3,7 +3,7 @@ import React from "react";
 const ProfileCard = ({ user={} }) => {
  
   return (
-    <div className="w-56 max-w-xs bg-white shadow-sm rounded-xl border border-gray-300">
+    <div className=" bg-white shadow-sm rounded-xl border border-gray-300">
       <div className="relative w-full h-14">
         {/* Profile Image */}
         <img

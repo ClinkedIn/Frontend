@@ -9,10 +9,10 @@ function PostedJobCard({
     
 }) {
     // Extract details from the job object
-    const jobTitle = job?.title || 'N/A';
-    const companyName = job?.company?.name || company?.name||'company name'; // Assuming company name is nested
-    const companyLocation = job?.jobLocation    || 'N/A';
-    const workplaceType = job?.workplaceType || 'N/A'; 
+    const jobTitle = job?.title || job?.job?.title|| 'N/A';
+    const companyName = job?.company?.name || company?.name ||job?.job?.company?.name||'company name'; // Assuming company name is nested
+    const companyLocation = job?.jobLocation || job?.job?.jobLocation || 'N/A';
+    const workplaceType = job?.workplaceType || job?.job?.workplaceType|| 'N/A'; 
     const status = job?.status || 'N/A';
     const companyLogo = company?.logo || ''; // Assuming company logo is nested
 const navigate = useNavigate(); // Hook for navigation

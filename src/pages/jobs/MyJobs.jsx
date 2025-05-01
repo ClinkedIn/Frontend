@@ -4,6 +4,7 @@ import { BsBookmarkFill } from "react-icons/bs";
 import Header from "../../components/UpperNavBar";
 import JobCard from "../../components/jobs/JobCard";
 import { BASE_URL } from "../../constants";
+import { useLocation } from "react-router-dom";
 
 /**
  * * MyJobs component displays either the user's saved/applied jobs
@@ -18,13 +19,15 @@ const MyJobs = () => {
   const [jobs, setJobs] = useState([]);
   const [user, setUser] = useState(null);
   const [company, setCompany] = useState("");
+const location = useLocation();
+const {allJobs} = location.state || {} // Extract job from location state
 
   /**
    * Fetches currently logged-in user data and updates state.
    */
   const fetchUser = async () => {
     try {
-      const response = await axios.get(`${BASE_URL}/user/me`, {
+      const response = await axios.get(`${BASE_URL}/api/user/me`, {
         withCredentials: true,
       });
       setUser(response.data.user); // important! go into .user
@@ -39,7 +42,7 @@ const MyJobs = () => {
    */
   const fetchSavedJobs = async () => {
     try {
-      const response = await axios.get(`${BASE_URL}/jobs/saved`, {
+      const response = await axios.get(`${BASE_URL}/api/jobs/saved`, {
         withCredentials: true,
       });
       setJobs(response.data.jobs);
@@ -55,7 +58,7 @@ const MyJobs = () => {
    */
   const fetchMyApplications = async (status) => {
     try {
-      const response = await axios.get(`${BASE_URL}/jobs/my-applications?status=${status.toLowerCase()}`, {
+      const response = await axios.get(`${BASE_URL}/api/jobs/my-applications?status=${status.toLowerCase()}`, {
         withCredentials: true,
       });
       setJobs(response.data.applications);
@@ -74,7 +77,7 @@ const MyJobs = () => {
     try {
       const allCompanyJobs = await Promise.all(
         user.companies.map(async (companyId) => {
-          const response = await axios.get(`${BASE_URL}/jobs/company/${companyId}`, {
+          const response = await axios.get(`${BASE_URL}/api/jobs/company/${companyId}`, {
             withCredentials: true,
           });
           return response.data || []; 
@@ -172,7 +175,7 @@ const MyJobs = () => {
         <div className="space-y-4 pl-6 pr-6">
           {jobs && jobs.length > 0 ? (
             jobs.map((job, index) => (
-              <JobCard key={index} job={job} state={selectedTab} user={user} />
+              <JobCard key={index} job={job} state={selectedTab} user={user} jobs={allJobs} />
             ))
           ) : (
             <p>No jobs available at the moment.</p>

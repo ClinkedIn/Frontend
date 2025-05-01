@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { X } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom"; // Add useLocation
 import { BASE_URL } from "../../constants";
+import axios from "axios";
 
 /**
  * The JobCard component displays the details of a job listing.
@@ -12,18 +13,17 @@ import { BASE_URL } from "../../constants";
  * @param {Array} props.jobs - A list of jobs, used for passing job data to the job board page.
  * @param {string} props.state - The current selectedTab ("Saved", "Pending", etc).
  */
-const JobCard = ({ job, jobs, state, user }) => {
+const JobCard = ({ job, jobs, state, user, onDelete,  }) => {
   const [selectedJob, setSelectedJob] = useState();
   const navigate = useNavigate();
   const location = useLocation();
+ 
 
-  console.log("Jobcard state", state);
   /**
    * Handles the click event on the job title. 
    */
   const handleJobClick = (job) => {
     setSelectedJob(job);
-
     // If user is on "posted-jobs" tab, go to /jobdetails
     if ( state === "posted-jobs" ) {
       navigate("/jobdetails", {
@@ -37,6 +37,34 @@ const JobCard = ({ job, jobs, state, user }) => {
           selectedJob: job,
         },
       });
+    }
+  };
+ 
+  const handleDeleteClick = async () => {
+    console.log("❌ Delete button clicked"); // DEBUG
+    try {
+      const jobId =job.jobId?? job.id ?? job.job?.id ?? job._id ?? job.job?._id;
+      console.log("Job ID:", jobId); // DEBUG
+      if (!jobId) {
+        console.warn("Job ID not found");
+        return;
+      }
+  
+      const url =
+        state === "my-jobs"
+          ? `${BASE_URL}/api/jobs/${jobId}/save`
+          : `${BASE_URL}/api/jobs/${jobId}`;
+  
+      await axios.delete(url, { withCredentials: true });
+  
+      console.log("Job deleted or unsaved successfully");
+      // if (typeof onDelete === "function") {
+      //   onDelete(jobId);
+      // }
+  
+    } catch (error) {
+      console.error("Failed to delete or unsave job:", error);
+      alert(error.response.data.message );
     }
   };
 
@@ -63,7 +91,9 @@ const JobCard = ({ job, jobs, state, user }) => {
       </div>
 
       {/* Close Button */}
-      <button className="text-gray-500 hover:text-gray-800">
+      <button 
+      onClick={handleDeleteClick}
+      className="text-gray-500 hover:text-gray-800">
         <X size={18} />
       </button>
     </div>

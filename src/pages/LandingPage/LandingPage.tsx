@@ -166,9 +166,7 @@ const LandingPage = () => {
         </div>
   
         {/* Footer */}
-        <div className="mt-auto">
           <Footer />
-        </div>
       </div>
   
     );

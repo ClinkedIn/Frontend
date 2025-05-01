@@ -56,6 +56,31 @@ const Notification = () => {
   //   requestFCMToken();
   // }, []);
 
+  const testLogin = async () => {
+    try {
+      const response = await axios.post('http://localhost:3000/user/login', {
+        email: "Sidney55@gmail.com",
+        password: "password123"
+      },{
+        withCredentials:true
+      }
+      
+    );
+
+      console.log("Login Response:", response.data);
+    } catch (error) {
+      if (error.response) {
+  
+        console.error("Login Error - Server Response:", error.response.data);
+      } else if (error.request) {
+        // Request made but no response received
+        console.error("Login Error - No Response:", error.request);
+      } else {
+        // Something else happened
+        console.error("Login Error:", error.message);
+      }
+    }
+  };
 
   /**
    * Sends a test notification to the backend and shows a toast notification in the app.
@@ -92,7 +117,7 @@ const Notification = () => {
   const fetchNotifications = async () => {
     try {
       const response = await axios.get(
-        `${BASE_URL}/notifications`,
+        "http://localhost:3000/api/notifications",
         {withCredentials:true}
       );
       console.log("notifications:",response.data)
@@ -111,7 +136,7 @@ const Notification = () => {
  //Mark Notification as read
   const handleNotificationClick = async (id) => {
     const response = await axios.patch(
-      `${BASE_URL}/notifications/mark-read/${id}`,
+      `${BASE_URL}/api/notifications/mark-read/${id}`,
       {},
       { withCredentials: true }
     );
@@ -133,7 +158,7 @@ const Notification = () => {
  */
   const fetchUser = async () => {
       try {
-        const response = await axios.get(`${BASE_URL}/user/me`, {
+        const response = await axios.get(`${BASE_URL}/api/user/me`, {
       
           withCredentials:true
         });
@@ -154,7 +179,7 @@ const Notification = () => {
    */
   useEffect(() => {
     // const loginAndFetchData = async () => {
-      // await testLogin(); // Ensure login is completed first
+    //   await testLogin(); // Ensure login is completed first
     fetchUser();
     fetchNotifications();
   // }
@@ -184,7 +209,7 @@ const Notification = () => {
   const postFilterLabels = {
     all: "My Posts",
     comments: "My Posts | Comments",
-    reactions: "My Posts | Reactions",
+    impressions: "My Posts | impressions",
     reposts: "My Posts | Reposts",
   };
 /**
@@ -199,11 +224,11 @@ const Notification = () => {
   
     if (selectedFilter === "post") {
       return selectedPostFilter === "all" 
-        ? notif.type === "post"  
-        : notif.subType === selectedPostFilter;
+        ? notif.subject === "post"  
+        : notif.subject === selectedPostFilter;
     }
   
-    return notif.type === selectedFilter;
+    return notif.subject === selectedFilter;
   });
   return (
     <div className="bg-[#f4f2ee] min-h-screen ">
@@ -212,7 +237,7 @@ const Notification = () => {
 <Toaster position="top-right"/>
 
       <Header notifications={notifications}/>
-      <div className="container mx-auto px-4 pt-20 md:pl-[172px] md:pr-[172px]">
+      <div className="container px-4 pt-20 ">
         <div className="flex flex-col lg:flex-row justify-center gap-6 p-2">
           
           {/* Left Sidebar */}
@@ -288,7 +313,7 @@ const Notification = () => {
                   {isDropdownOpen && filter === "post" && (
                     <div className="absolute bg-white shadow-lg rounded-md border border-gray-200 w-40 z-10">
                       <p className="px-3 py-2 text-sm font-semibold">Filter post activity</p>
-                      {["all", "comments", "reactions", "reposts"].map((option) => (
+                      {["all", "comments", "impressions", "reposts"].map((option) => (
                         <button
                         id="Post-Types"
                           key={option}
@@ -305,7 +330,7 @@ const Notification = () => {
                         >
                           {option === "all" ? "All" :
                             option === "comments" ? "Comments" :
-                            option === "reactions" ? "Reactions" : "Reposts"}
+                            option === "impressions" ? "Reactions" : "Reposts"}
                         </button>
                       ))}
                     </div>

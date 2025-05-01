@@ -1,6 +1,6 @@
 const Footer = () => {
   return (
-    <footer className="w-full text-xs text-gray-600 text-center px-4 py-6 mt-auto">
+    <footer className="w-full text-xs text-gray-600 text-center px-4 py-6 bg-white">
       © 2025&nbsp;
       <a href="https://about.linkedin.com" target="_blank" rel="noopener noreferrer" className="hover:underline">
         About

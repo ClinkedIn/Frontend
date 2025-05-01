@@ -37,6 +37,34 @@ const Jobs = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [showPreferences, setShowPreferences] = useState(false);
     const [jobs, setJobs]=useState()
+    
+    // useEffect(() => {
+    // const testLogin = async () => {
+    //     try {
+    //       const response = await axios.post('http://localhost:3000/api/user/login', {
+    //         email: "Sidney55@gmail.com",
+    //         password: "password123"
+    //       },{
+    //         withCredentials:true
+    //       }
+          
+    //     );
+    
+    //       console.log("Login Response:", response.data);
+    //     } catch (error) {
+    //       if (error.response) {
+      
+    //         console.error("Login Error - Server Response:", error.response.data);
+    //       } else if (error.request) {
+    //         // Request made but no response received
+    //         console.error("Login Error - No Response:", error.request);
+    //       } else {
+    //         // Something else happened
+    //         console.error("Login Error:", error.message);
+    //       }
+    //     }
+    //   };},[])
+    
  /**
    * Fetches job listings from the backend server
    * @async
@@ -45,7 +73,7 @@ const Jobs = () => {
    */
    const getJobs = async () => {
     try {
-      const response = await axios.get(`${BASE_URL}/jobs`, {
+      const response = await axios.get(`${BASE_URL}/api/jobs`, {
       });
       setJobs(response.data)
       return response.data;
@@ -59,7 +87,6 @@ const Jobs = () => {
       }
     }
   };
-
  /**
    * Fetches current user profile data
    * @async
@@ -67,7 +94,7 @@ const Jobs = () => {
    */
   const fetchUser = async () => {
     try {
-      const response = await axios.get(`${BASE_URL}/user/me`, {
+      const response = await axios.get(`${BASE_URL}/api/user/me`, {
     
         withCredentials:true
       });
@@ -96,12 +123,14 @@ const Jobs = () => {
     setSearchQuery(query);
   };
   return (
-    <div className="container bg-[#f4f2ee] min-h-screen ">
+    <div className="bg-[#f4f2ee] min-h-screen ">
       <Header />
-      <div className="container mx-auto px-4 pt-20 flex flex-col md:flex-row gap-6">
+      <div className="mx-auto px-4 pt-20 flex flex-col md:flex-row gap-6">
         {/* Left Sidebar */}
         <div className="w-full md:w-1/4 p-4">
            <ProfileCard user={user} /> 
+
+      
           <div className="bg-white shadow-md rounded-lg pt-1 space-y-1 mt-2.5">
             <button 
               onClick={() => setShowPreferences(true)}
@@ -109,7 +138,9 @@ const Jobs = () => {
               <FaClipboardList className="font-semibold text-[#3d3d3d]" /> Preferences
             </button>
             <button 
-            onClick={() => navigate("/myjobs")}
+            onClick={() => navigate("/myjobs",{
+              state: {allJobs:jobs }
+          })}
             className="flex items-center gap-3 font-semibold w-full text-left py-3 px-6 hover:bg-gray-100">
               <FaBookmark className="font-semibold text-[#3d3d3d]" /> My jobs
             </button>
@@ -123,14 +154,18 @@ const Jobs = () => {
         </div>
 
         {/*Top picks for you */}
-        <div className="flex-1 bg-white shadow-md rounded-lg p-6 mr-[315px]">
+        <div className="flex flex-col bg-white shadow-md rounded-lg p-6 mr-[315px] w-full lg:w-3/4">
           <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b-2 border-gray-300 pb-2" >
             Job Picks for you
           </h2>
           {jobs && jobs.length > 0 ? (
-            jobs.map((job, index) => (
+            jobs
+            .map((job, index) => (
               <div ><JobCard key={index} 
               job={job} jobs={jobs}
+              onDelete={(jobIdToDelete) => {
+                setJobs(prevJobs => prevJobs.filter(j => j.id !== jobIdToDelete && j._id !== jobIdToDelete));
+              }}
               /></div>
               
             ))
@@ -139,39 +174,7 @@ const Jobs = () => {
           )}
         </div>
       </div>
-      
-      {/* Preferences Modal */}
-      {showPreferences && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 "
-        onClick={() => setShowPreferences(false)}>
-          <div className="bg-white shadow-lg rounded-lg relative "
-            onClick={(e) => e.stopPropagation()}>
-            <button onClick={() => setShowPreferences(false)} className="absolute top-3 right-3 text-gray-600 hover:text-black">
-              <IoMdClose size={24} />
-            </button>
-            <h2 className=" p-6 text-lg font-semibold border-b border-[#eaeaea]">Preferences</h2>
-            
-            {/* My Interests Section */}
-            <div className="p-6 ">
-              <h3 className="text-md font-semibold mb-2">My Interests</h3>
-              <div className='flex flex-col text-left p-3 bg-gray-100 hover:bg-gray-200 rounded-md'>
-              <button className="w-full  flex justify-between items-center ">Open to work  <FaArrowRight />
-              </button>
-              <p className='text-xs text-[#5e5e5e]'> Share job preferences with recuiters or others</p>
-              </div>
-            </div>
-            
-            {/* My Qualifications Section */}
-            <div className='p-6 '>
-              <h3 className="text-md font-semibold mb-2">My Qualifications</h3>
-              <div className='flex flex-col text-left p-3 bg-gray-100 hover:bg-gray-200 rounded-md'>
-              <button className="w-full  flex justify-between items-center ">Resumes and application data  <FaArrowRight />     
-              </button>
-              </div>
-              </div>
-          </div>
-        </div>
-      )}
+
     </div>
   );
 };
