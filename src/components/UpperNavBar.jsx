@@ -114,11 +114,11 @@ const Header = ({ notifications }) => {
 
   return (
     <header className="fixed top-0 left-0 w-full bg-white border-b border-gray-200 z-50">
-      <div className="flex items-center justify-between max-w-6xl mx-auto px-4 py-2">
+      <div className="flex items-center justify-between px-4 py-2">
         <div className="flex">
           {/* Logo */}
           <a href="/feed">
-            <img src="/Images/home-logo.svg" alt="Logo" className="w-8 h-8" />
+            <img src="/Images/home-logo.svg" alt="Logo" className="w-8 h-8 min-w-8" />
           </a>
 
           {/* Conditional Search Bar */}
@@ -134,7 +134,7 @@ const Header = ({ notifications }) => {
                   <input
                     type="text"
                     placeholder="Title, skill or company"
-                    className="text-sm placeholder-[#5f6163] w-64 outline-none bg-transparent py-2"
+                    className="text-sm placeholder-[#5f6163] w-full outline-none bg-transparent py-2"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
@@ -143,14 +143,14 @@ const Header = ({ notifications }) => {
                   <input
                     type="text"
                     placeholder="City, state, or zip code"
-                    className="placeholder-[#5f6163] text-sm w-64 outline-none bg-transparent py-2 pl-3"
+                    className="text-sm placeholder-[#5f6163] w-full outline-none bg-transparent py-2"
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                   />
                 </div>
                 <button
                   type="submit"
-                  className="bg-blue-600 ml-1 text-white px-2 py-2 rounded-lg hover:bg-blue-700"
+                  className="bg-blue-600 ml-1 text-white px-2 py-2 rounded-lg"
                 >
                   Search
                 </button>
@@ -162,7 +162,7 @@ const Header = ({ notifications }) => {
                 <input
                   type="text"
                   placeholder="Search"
-                  className="text-sm placeholder-[#5f6163] w-64 outline-none bg-transparent py-2"
+                  className="text-sm placeholder-[#5f6163] w-full outline-none bg-transparent py-2"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onFocus={() => setShowResults(true)}
@@ -211,25 +211,25 @@ const Header = ({ notifications }) => {
             className="hover:bg-gray-200 p-2 rounded-lg"
             onClick={() => navigate("/feed")}
           >
-            <img src="/Images/nav-home.svg" alt="Home" className="w-6 h-6" />
+            <img src="/Images/nav-home.svg" alt="Home" className="w-6 h-6 min-w-6" />
           </button>
           <button
             className="hover:bg-gray-200 p-2 rounded-lg"
             onClick={() => navigate("/network")}
           >
-            <img src="/Images/nav-network.svg" alt="Network" className="w-6 h-6" />
+            <img src="/Images/nav-network.svg" alt="Network" className="w-6 h-6 min-w-6" />
           </button>
           <button
             className="hover:bg-gray-200 p-2 rounded-lg"
             onClick={handleJobsClick}
           >
-            <img src="/Images/nav-jobs.svg" alt="Jobs" className="w-6 h-6" />
+            <img src="/Images/nav-jobs.svg" alt="Jobs" className="w-6 h-6 min-w-6" />
           </button>
           <button
             className="relative flex flex-col items-center text-xs text-gray-600 hover:text-black p-1"
             onClick={handleMessagingClick}
           >
-            <img src="/Images/nav-messaging.svg" alt="Messaging" className="w-6 h-6" />
+            <img src="/Images/nav-messaging.svg" alt="Messaging" className="w-6 h-6 min-w-6" />
             {unreadCountMessages > 0 && (
               <div className="absolute -top-1 left-1/2 ml-1 bg-[#cb112d] text-white rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-[10px] md:text-xs font-medium">
                 {unreadCountMessages > 10 ? "10+" : unreadCountMessages}
@@ -243,7 +243,7 @@ const Header = ({ notifications }) => {
             <img
               src="/Images/nav-notifications.svg"
               alt="Notifications"
-              className="w-6 h-6"
+              className="w-6 h-6 min-w-6"
             />
             {unreadCount > 0 && (
               <div className="absolute -top-1 -right-1 bg-[#cb112d] text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-medium">
