@@ -11,11 +11,6 @@ const ApplicantDetails = ({ applicant, screeningAnswers }) => { // Added screeni
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     // Ref for the dropdown container to detect clicks outside
     const dropdownRef = useRef(null);
-
-    // State for resume data, loading, and error
-    const [resumeContent, setResumeContent] = useState(null);
-    const [loadingResume, setLoadingResume] = useState(false);
-    const [resumeError, setResumeError] = useState(null);
     const name = applicant ? `${applicant?.applicant.firstName} ${applicant?.applicant.lastName}` : 'N/A';
     const headline = applicant?.headline || 'No Headline';
     const profilePicture = applicant?.applicant.profilePicture;
@@ -28,6 +23,7 @@ const ApplicantDetails = ({ applicant, screeningAnswers }) => { // Added screeni
     console.log("User ID:", userId); // Log the user ID for debugging
     const contactEmail = applicant?.contactEmail; 
     const contactPhone = applicant?.contactPhone; 
+    const resumeUrl = applicant?.applicant.resume;
 
     // Handle clicks outside the dropdown to close it
     useEffect(() => {
@@ -60,40 +56,6 @@ const ApplicantDetails = ({ applicant, screeningAnswers }) => { // Added screeni
         }
         getUser(); // Call the function to fetch user data
     },[userId])
-
-    // useEffect(() => {
-    //     const fetchResume = async () => {
-    //         if (!userId) {
-    //             setResumeContent(null); // Clear resume if no userId
-    //             setLoadingResume(false);
-    //             setResumeError(null);
-    //             return;
-    //         }
-
-    //         setLoadingResume(true);
-    //         setResumeError(null);
-    //         setResumeContent(null); // Clear previous resume data
-
-    //         try {
-    //             // Fetch user data which should contain the resume content
-    //             const response = await axios.get(`http://localhost:3000/user/${userId}`);
-    //             setResumeContent(response.data || "Resume content not available.");
-    //             console.log("Fetched resume content:", response.data);
-    //         } catch (error) {
-    //             console.error("Failed to fetch resume:", error);
-    //             setResumeError("Failed to load resume. Please try again.");
-    //             setResumeContent(null);
-    //         } finally {
-    //             setLoadingResume(false);
-    //         }
-    //     };
-
-    //     fetchResume();
-
-    // }, [userId]); // Re-run effect when userId changes
-
-
-
     
     // Display a message if no application data is provided
     if (!applicant) {
@@ -145,64 +107,84 @@ const ApplicantDetails = ({ applicant, screeningAnswers }) => { // Added screeni
         setIsDropdownOpen(false); // Close dropdown after action
     };
 
-    // Handler for the Download Resume button
-    const handleDownloadResume = () => {
-        console.log("Download Resume clicked for user:", userId);
-        alert("Download functionality not yet implemented."); // Placeholder alert
-         };
 
+    const renderExperience = () => {
+        const workExperience = applicant?.applicant?.workExperience || [];
+        if (workExperience.length === 0) {
+            return <p className="text-gray-600 text-sm italic">No work experience details available.</p>;
+        }
+        return (
+            <div className="space-y-3">
+                {workExperience.map((exp, index) => (
+                    <div key={index} className="flex items-start">
+                        <div className="flex-shrink-0 w-8 h-8 bg-gray-200 rounded-md mr-3 flex items-center justify-center text-gray-600">
+                            💼
+                        </div>
+                        <div className="flex-grow">
+                            <h5 className="font-semibold text-gray-800 text-sm">{exp.jobTitle}</h5>
+                            <p className="text-gray-700 text-xs">{exp.companyName}</p>
+                            <p className="text-gray-500 text-xs">
+                                {new Date(exp.fromDate).toLocaleDateString()} -{' '}
+                                {exp.currentlyWorking ? 'Present' : new Date(exp.toDate).toLocaleDateString()}
+                            </p>
+                            <p className="text-gray-600 text-xs mt-1">{exp.description}</p>
+                            {exp.skills?.length > 0 && (
+                                <div className="mt-1 flex flex-wrap gap-1">
+                                    {exp.skills.map((skill, i) => (
+                                        <span key={i} className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                                            {skill}
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                ))}
+            </div>
+        );
+    };
+    const renderEducation = () => {
+        const education = applicant?.applicant?.education || [];
+        if (education.length === 0) {
+            return <p className="text-gray-600 text-sm italic">No education details available.</p>;
+        }
+        return (
+            <div className="space-y-3">
+                {education.map((edu, index) => (
+                    <div key={index} className="flex items-start">
+                        <div className="flex-shrink-0 w-8 h-8 bg-gray-200 rounded-md mr-3 flex items-center justify-center text-gray-600">
+                            📚
+                        </div>
+                        <div className="flex-grow">
+                            <h5 className="font-semibold text-gray-800 text-sm">{edu.degree} in {edu.fieldOfStudy}</h5>
+                            <p className="text-gray-700 text-xs">{edu.school}</p>
+                            <p className="text-gray-500 text-xs">
+                                {new Date(edu.startDate).toLocaleDateString()} -{' '}
+                                {edu.endDate ? new Date(edu.endDate).toLocaleDateString() : 'Present'}
+                            </p>
+                            {edu.skills?.length > 0 && (
+                                <div className="mt-1 flex flex-wrap gap-1">
+                                    {edu.skills.map((skill, i) => (
+                                        <span key={i} className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                                            {skill}
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                ))}
+            </div>
+        );
+    };
 
-    // --- Rendering functions for Experience and Education using passed props ---
-    // const renderExperience = () => {
-    //      // Use the 'experience' prop instead of mock data
-    //      if (!experience || experience.length === 0) {
-    //          return <p className="text-gray-600 text-sm italic">Experience details not available.</p>;
-    //      }
-    //      return (
-    //          <div className="space-y-3"> {/* Added space-y for spacing between experience items */}
-    //              {experience.map((exp, index) => (
-    //                  <div key={index} className="flex items-start"> {/* Use flex for icon alignment */}
-    //                      {/* Placeholder icon for experience - replace with actual if available */}
-    //                      <div className="flex-shrink-0 w-8 h-8 bg-gray-200 rounded-md mr-3 flex items-center justify-center text-gray-600">
-    //                          {/* You could use an icon here, or a placeholder image */}
-    //                          💼 {/* Example emoji icon */}
-    //                      </div>
-    //                      <div className="flex-grow">
-    //                          <h5 className="font-semibold text-gray-800 text-sm">{exp.title}</h5>
-    //                          <p className="text-gray-700 text-xs">{exp.company}</p>
-    //                           <p className="text-gray-500 text-xs">{exp.years}</p>
-    //                      </div>
-    //                  </div>
-    //              ))}
-    //          </div>
-    //      );
-    //  };
-
-    //  const renderEducation = () => {
-    //       // Use the 'education' prop instead of mock data
-    //       if (!education || education.length === 0) {
-    //           return <p className="text-gray-600 text-sm italic">Education details not available.</p>;
-    //       }
-    //       return (
-    //           <div className="space-y-3"> {/* Added space-y for spacing between education items */}
-    //               {education.map((edu, index) => (
-    //                   <div key={index} className="flex items-start"> {/* Use flex for icon alignment */}
-    //                        {/* Placeholder icon for education - replace with actual if available */}
-    //                        <div className="flex-shrink-0 w-8 h-8 bg-gray-200 rounded-md mr-3 flex items-center justify-center text-gray-600">
-    //                           📚 {/* Example emoji icon */}
-    //                       </div>
-    //                       <div className="flex-grow">
-    //                           <h5 className="font-semibold text-gray-800 text-sm">{edu.degree}</h5>
-    //                           <p className="text-gray-700 text-xs">{edu.institution}</p>
-    //                            <p className="text-gray-500 text-xs">{edu.years}</p>
-    //                       </div>
-    //                   </div>
-    //               ))}
-    //           </div>
-    //       );
-    //   };
-
-      // --- Rendering function for Screening Answers ---
+    const handleViewResume = () => {
+        if (resumeUrl) {
+            window.open(resumeUrl, '_blank');
+        } else {
+            alert("Resume URL not available");
+        }
+    };
       const renderScreeningAnswers = () => {
           if (!screeningAnswers || screeningAnswers.length === 0) {
               return <p className="text-gray-600 text-sm italic">Screening question responses not available.</p>;
@@ -269,10 +251,6 @@ const ApplicantDetails = ({ applicant, screeningAnswers }) => { // Added screeni
           );
       };
 
-
-    // --- End Rendering functions ---
-
-
     return (
         // Main container for applicant details, styled to match the right panel in the image
         <div className="bg-white rounded-lg shadow p-6 space-y-6 h-full overflow-y-auto"> {/* Added h-full and overflow-y-auto */}
@@ -286,14 +264,10 @@ const ApplicantDetails = ({ applicant, screeningAnswers }) => { // Added screeni
 
                    <div className="text-gray-500 text-xs mt-1">{appliedTime}</div>
                 </div>
-                <button className="text-gray-500 hover:text-gray-700 p-1 flex-shrink-0 ml-2" aria-label="View external profile"> {/* Added flex-shrink-0 and ml-2 */}
-                     <BsArrowUpRight size={18} />
-                 </button>
+                
             </div>
             <div className="flex items-center space-x-3">
-                <button className="px-4 py-1.5 border border-blue-600 bg-blue-600 text-white rounded-full text-sm font-semibold hover:bg-blue-700 transition-colors flex items-center"> {/* Updated styling */}
-                    Rate as <span className="ml-1">▾</span> {/* Dropdown indicator */}
-                </button>
+               
                 <button className="px-4 py-1.5 border border-gray-400 text-gray-700 rounded-full text-sm font-semibold hover:bg-gray-100 transition-colors">
                     Message
                 </button>
@@ -356,53 +330,38 @@ const ApplicantDetails = ({ applicant, screeningAnswers }) => { // Added screeni
             </div>
 
                 <div className="space-y-6 mt-6"> {/* Added mt-6 for spacing */}
-                 <h3 className="text-base font-semibold text-gray-800">Insights from profile</h3> {/* Title */}
-
-                 {/* <div className="space-y-2">
+                 <h2 className="text-base font-bold text-gray-800">Insights from profile</h2> {/* Title */}
+                     {/* Resume Section */}
+    <div className="space-y-4 mt-6">
+        <div className="flex justify-between items-center">
+            <h3 className="text-base font-semibold text-gray-800">Resume</h3>
+            {resumeUrl && (
+                <button
+                    onClick={handleViewResume}
+                    className="flex items-center text-blue-700 hover:underline font-semibold text-sm"
+                >
+                    <BsDownload className="mr-1" /> Click to view resume
+                </button>
+            )}
+        </div>
+        {!resumeUrl && (
+            <div className="text-gray-600 text-sm italic">Resume not available.</div>
+        )}
+    </div>
+    <div className="border w-full border-gray-300"></div>
+                 <div className="space-y-2">
                      <h4 className="font-semibold text-gray-800">Experience</h4> 
                       {renderExperience()}
                  </div>
-
+        <div className="border w-full border-gray-300"></div>
                  <div className="space-y-2">
                        <h4 className="font-semibold text-gray-800">Education</h4> 
                         {renderEducation()} 
                    </div>
-                 */}
+                
             </div>
 
-            {/* Resume Section */}
-            {/* Added mt-6 for spacing between Insights and Resume sections */}
-            <div className="space-y-4 mt-6"> {/* Added mt-6 for spacing and space-y-4 for inner spacing */}
-                <div className="flex justify-between items-center">
-                    <h3 className="text-base font-semibold text-gray-800">Resume</h3> {/* Title */}
-                    {/* Download Button */}
-                    {resumeContent && ( // Only show download button if resume content is available
-                         <button
-                             onClick={handleDownloadResume}
-                             className="flex items-center text-blue-700 hover:underline font-semibold text-sm"
-                         >
-                              <BsDownload className="mr-1" /> Download
-                         </button>
-                    )}
-                </div>
-
-                {/* Display Resume Content, Loading, or Error */}
-                {loadingResume && (
-                    <div className="text-gray-600 text-sm italic">Loading resume...</div>
-                )}
-                {resumeError && (
-                    <div className="text-red-600 text-sm italic">{resumeError}</div>
-                )}
-                {resumeContent && !loadingResume && !resumeError && (
-                    // Display resume content, preserving formatting if it's plain text
-                    <div className="bg-gray-100 p-4 rounded-md text-gray-800 text-sm overflow-auto max-h-96"> {/* Added styling and max height with overflow */}
-                        <pre className="whitespace-pre-wrap">{resumeContent}</pre> {/* Use pre-wrap to handle line breaks */}
-                    </div>
-                )}
-                {!resumeContent && !loadingResume && !resumeError && (
-                     <div className="text-gray-600 text-sm italic">Resume not available.</div>
-                )}
-            </div>
+ 
 <div className="flex justify-center pt-4 border-t border-gray-200">
                  <button
                  onClick={handleSeeFullProfile}
