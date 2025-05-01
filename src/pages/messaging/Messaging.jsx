@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams ,useLocation} from 'react-router-dom';
 import ConversationList from '../../components/messaging/ConversationList';
 import ChatWindow from '../../components/messaging/ChatWindow'; 
 import Header from '../../components/UpperNavBar';
@@ -16,18 +16,21 @@ const createConversationId = (uid1, uid2) => {
 
 
 const MessagingPage = () => {
-
-    const [otherUser, setOtherUser] = useState(null);
+    const location = useLocation();
+    const { other } = location.state || {};
+    const [otherUser, setOtherUser] = useState(other);
+    const [currentUser, setUser] = useState();
     const [selectedConversationId, setSelectedConversationId] = useState(null);
-    const [showChatOnMobile, setShowChatOnMobile] = useState(false); // For mobile ui
+    const [showChatOnMobile, setShowChatOnMobile] = useState(!!other); // For mobile ui
     const [notifications, setNotifications] = useState([]);
-
     const [conversations, setConversations] = useState([]);
     const [loadingConversations, setLoadingConversations] = useState(true);
-    const [errorConversations, setErrorConversations] = useState(null);
+    const [errorConversations, setErrorConversations] = useState(other ? createConversationId(currentUser?._id, other.userId) : null);
     
-    const [currentUser, setUser] = useState();
+   
 
+
+    
       useEffect(() => {
         const fetchUser = async () => {
           try {
@@ -50,7 +53,7 @@ const MessagingPage = () => {
        
         if (!currentUser?._id) {
             setLoadingConversations(false);
-            setErrorConversations("Not logged in");
+            setErrorConversations("Loading user data...");
             setConversations([]);
             return;
         };
@@ -91,6 +94,15 @@ const MessagingPage = () => {
             setShowChatOnMobile(false);
         }
     }, [currentUser]);
+    
+    useEffect(() => {
+      if (other && currentUser?._id) {
+          const conversationId = createConversationId(currentUser._id, other.userId);
+          setSelectedConversationId(conversationId);
+          setOtherUser(other);
+          setShowChatOnMobile(true);
+      }
+  }, [currentUser?._id, other]);
 
     const handleSelectConversation = (conversationId,otherUserInfo) => {
         setSelectedConversationId(conversationId);
