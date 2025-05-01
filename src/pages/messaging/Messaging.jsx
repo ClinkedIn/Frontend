@@ -120,7 +120,7 @@ const MessagingPage = () => {
         if (!currentUser || !selectedUser) return;
 
         const currentUid = currentUser._id;
-        const selectedUid = selectedUser.userId;
+        const selectedUid = selectedUser._id;
         const existingConversation =conversations.find(conv => conv.participants.includes(currentUid) && conv.participants.includes(selectedUid)
         );
         if(existingConversation){
@@ -138,13 +138,6 @@ const MessagingPage = () => {
 
  
     };
-     const fakeConnections = [
-        { userId: '123', fullName: 'Abdo', profilePicture: 'https://picsum.photos/80' },
-        { userId: '234', fullName: 'Ali Abdelghani', profilePicture: 'https://picsum.photos/80' },
-        { userId: '345', fullName: 'Ibrahim Muhammed', profilePicture: 'https://picsum.photos/80' },
-        { userId: '456', fullName: 'Adham Osama', profilePicture: 'https://picsum.photos/80' },
-        { userId: '567', fullName: 'Mohamed Samir', profilePicture: 'https://picsum.photos/80' },
-      ];
       const useConnections = () => {
         const [connections, setConnections] = useState([]);
         const [loading, setLoading] = useState(false);
