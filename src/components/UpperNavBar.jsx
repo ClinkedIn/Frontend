@@ -170,7 +170,10 @@ const Header = ({ notifications }) => {
       console.error("Search error:", error);
     }
   };
-
+  let path = false;
+  if (currentPath === "jobs" || currentPath === "job-board"|| currentPath === "myjobs") {
+    path = true;
+  }
   return (
     <header className="fixed top-0 left-0 w-full bg-white border-b border-gray-200 z-50">
       <div className="flex items-center justify-between px-4 py-2">
@@ -186,7 +189,7 @@ const Header = ({ notifications }) => {
             className="relative flex rounded-lg"
           >
             {/* Show Job Search only on /jobs */}
-            {currentPath === "jobs" ? (
+            {path ? (
               <>
                 <div className="flex items-center bg-[#edf3f8] rounded-sm ml-2">
                   <MdSearch color="#5f6163" className="w-4 h-4 mr-2 ml-1" />
@@ -202,7 +205,7 @@ const Header = ({ notifications }) => {
                   <input
                     type="text"
                     placeholder="City, state, or zip code"
-                    className="text-sm placeholder-[#5f6163] w-full outline-none bg-transparent py-2"
+                    className="text-sm placeholder-[#5f6163] w-full outline-none bg-transparent pl-1 py-2 ml-1"
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                   />
