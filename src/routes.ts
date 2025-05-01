@@ -29,6 +29,12 @@ import JobListing from "./components/AdminPanel/JobListing";
 import Analytics from "./components/AdminPanel/Analytics";
 import AdminPanel from "./components/AdminPanel/AdminPanel";
 import UserProfileViewPage from "./pages/myProfile/OtherProfile/UserProfileViewPage";
+import HirePage from "./pages/jobs/HirePage.jsx";
+import JobDescriptionPage from "./pages/jobs/JobDescriptionPage.jsx";
+import JobSettingsPage from "./pages/jobs/JobSettingsPage.jsx";
+import Review from "./pages/jobs/Review.jsx";
+import JobDetails from "./pages/jobs/JobDetails.jsx";
+import ManageJob from "./pages/jobs/ManageJob.jsx";
 import SubscriptionPlans from "./components/SubscriptionBasedPayment/subscriptionPlans.jsx";
 import SubscriptionStatus from './components/SubscriptionBasedPayment/SubscriptionStatus';
 import PaymentSuccess from './components/SubscriptionBasedPayment/PaymentSuccessHandler';
@@ -84,6 +90,29 @@ const routes: RouteObject[] = [
   {
     path: "/jobs",
     element: React.createElement(Jobs),
+  },
+  {
+    path: "/jobdescription",
+    element: React.createElement(JobDescriptionPage),
+  },
+  {
+    path: "/jobsettings",
+    element: React.createElement(JobSettingsPage),
+  },
+  {
+    path: "/jobdetails",
+    element: React.createElement(JobDetails),
+  },
+  {
+    path: "/managejob",
+    element: React.createElement(ManageJob),
+  },
+  {
+    path: "/starthiring",
+    element: React.createElement(HirePage),
+  }, {
+    path: "/review",
+    element: React.createElement(Review),
   },
   {
     path: "/myjobs",

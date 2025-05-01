@@ -562,9 +562,6 @@
 
 // export default SubscriptionPlans;
 
-
-
-
 import React, { useState, useEffect } from "react";
 import { Clock, AlertCircle, CheckCircle, XCircle } from "lucide-react";
 
@@ -575,8 +572,9 @@ const SubscriptionPlans = () => {
   const [currentPlan, setCurrentPlan] = useState("free"); // 'free' or 'premium'
   const [subscriptionData, setSubscriptionData] = useState(null);
   const [activeTab, setActiveTab] = useState("status"); // 'status' or 'plans'
-  
-  const BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://your-api-url.com";
+
+  const BASE_URL =
+    import.meta.env.VITE_API_BASE_URL || "https://your-api-url.com";
 
   useEffect(() => {
     fetchSubscriptionDetails();
@@ -586,7 +584,7 @@ const SubscriptionPlans = () => {
     setLoading(true);
     try {
       // Replace with your actual API endpoint
-      const response = await fetch(`${BASE_URL}/api/user/me`, {
+      const response = await fetch(`${BASE_URL}/user/me`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -598,25 +596,29 @@ const SubscriptionPlans = () => {
       }
 
       const data = await response.json();
-      
+
       // Update premium status
       setIsPremium(data.user.isPremium);
       setCurrentPlan(data.user.isPremium ? "premium" : "free");
-      
+
       // Create subscription data object
       const subData = {
         type: data.user.isPremium ? "premium" : "free",
         status: data.user.subscription?.status || "active", // or 'inactive', 'canceled', 'past_due'
-        currentPeriodEnd: data.user.subscription?.currentPeriodEnd || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        currentPeriodEnd:
+          data.user.subscription?.currentPeriodEnd ||
+          new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         renewalAmount: "$20.00",
         features: [
           "Unlimited job applications",
           "Connect with 500+ people",
           "Message unlimited connections",
         ],
-        expiryDate: data.user.subscription?.expiryDate || data.user.subscription?.currentPeriodEnd,
+        expiryDate:
+          data.user.subscription?.expiryDate ||
+          data.user.subscription?.currentPeriodEnd,
       };
-      
+
       setSubscriptionData(subData);
     } catch (err) {
       setError("Could not load subscription details");
@@ -677,14 +679,17 @@ const SubscriptionPlans = () => {
     setError(null);
 
     try {
-      const response = await fetch(`${BASE_URL}/api/stripe/cancel-subscription`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        credentials: "include",
-      });
+      const response = await fetch(
+        `${BASE_URL}/api/stripe/cancel-subscription`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          credentials: "include",
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -699,9 +704,9 @@ const SubscriptionPlans = () => {
       setSubscriptionData({
         ...subscriptionData,
         type: "free",
-        status: "canceled"
+        status: "canceled",
       });
-      
+
       // Refresh data from server
       fetchSubscriptionDetails();
       alert("Your subscription has been canceled successfully.");
@@ -848,14 +853,19 @@ const SubscriptionPlans = () => {
                   <Clock className="h-4 w-4 text-gray-400 mr-2" />
                   <span>
                     {subscriptionData.status === "canceled"
-                      ? `Access until ${formatDate(subscriptionData.currentPeriodEnd)}`
-                      : `Renews on ${formatDate(subscriptionData.currentPeriodEnd)}`}
+                      ? `Access until ${formatDate(
+                          subscriptionData.currentPeriodEnd
+                        )}`
+                      : `Renews on ${formatDate(
+                          subscriptionData.currentPeriodEnd
+                        )}`}
                   </span>
                 </div>
 
                 {subscriptionData.status === "active" && (
                   <div className="mt-1 text-sm text-gray-500">
-                    You will be charged {subscriptionData.renewalAmount} on renewal
+                    You will be charged {subscriptionData.renewalAmount} on
+                    renewal
                   </div>
                 )}
 
@@ -881,8 +891,8 @@ const SubscriptionPlans = () => {
             {subscriptionData.type === "free" && (
               <div className="mt-4 bg-gray-50 rounded-md p-4">
                 <p className="text-sm text-gray-600">
-                  Upgrade to Premium to unlock all features including unlimited job
-                  applications, 500+ connections, and unlimited messaging.
+                  Upgrade to Premium to unlock all features including unlimited
+                  job applications, 500+ connections, and unlimited messaging.
                 </p>
               </div>
             )}
@@ -893,7 +903,8 @@ const SubscriptionPlans = () => {
               onClick={() => setActiveTab("plans")}
               className="text-sm text-indigo-600 hover:text-indigo-500 font-medium"
             >
-              {subscriptionData.type === "premium" && subscriptionData.status === "active"
+              {subscriptionData.type === "premium" &&
+              subscriptionData.status === "active"
                 ? "Manage subscription"
                 : "View subscription plans"}
             </button>
@@ -1036,7 +1047,8 @@ const SubscriptionPlans = () => {
 
           <div className="mt-10 text-center">
             <p className="text-gray-600">
-              All plans include access to our community forums and customer support.
+              All plans include access to our community forums and customer
+              support.
             </p>
           </div>
         </>
