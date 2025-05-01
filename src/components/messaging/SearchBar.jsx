@@ -80,16 +80,16 @@ const ConversationSearch = ({ onSelectUser,connections,loading,error }) => {
           )}
           {!loading && !error && filteredConnections.map(user => (
             <div
-              key={user._id}
+              key={user?._id}
               onClick={() => handleSelect(user)}
               className="flex items-center p-3 hover:bg-gray-100 cursor-pointer"
             >
               <img
-                src={user.profilePicture || 'https://via.placeholder.com/40'}
-                alt={user.fisrtName}
+                src={user?.profilePicture || 'https://via.placeholder.com/40'}
+                alt={user?.fisrtName}
                 className="w-8 h-8 rounded-full mr-3"
               />
-              <span className="text-sm">{user.firstName + " " + user.lastName}</span>
+              <span className="text-sm">{user?.firstName + " " + user?.lastName}</span>
             </div>
           ))}
         </div>

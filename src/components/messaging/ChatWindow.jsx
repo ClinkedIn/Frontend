@@ -400,7 +400,7 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
   
       try {
         console.log(`Attempting to delete message ${messageId} from conversation ${conversationId}`);
-        const response = await axios.delete(`${BASE_URL}/api/messages/${messageId}`,{
+        const response = await axios.delete(`${BASE_URL}/messages/${messageId}`,{
             withCredentials: true
         });
         console.log("Message deleted successfully:", response.data);
@@ -431,7 +431,7 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
         
   
         try {
-          const response = await axios.patch(`${BASE_URL}/api/messages/${messageId}`,{messageText : newText},{
+          const response = await axios.patch(`${BASE_URL}/messages/${messageId}`,{messageText : newText},{
             withCredentials: true
           });
           console.log("Message updated successfully:", response.data);
@@ -511,7 +511,7 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
              className="w-10 h-10 rounded-full flex-shrink-0" 
            />
            <div className="min-w-0">
-             <p className="font-semibold truncate">{(otherUserInfo?.firstName +"  "+ otherUserInfo?.lastName )  || 'Loading...'}</p>
+             <p className="font-semibold truncate">{(otherUserInfo?.fullName )  || 'Loading...'}</p>
              {isTyping && <p className="text-xs text-blue-600 animate-pulse">Typing...</p>}
              
            </div>

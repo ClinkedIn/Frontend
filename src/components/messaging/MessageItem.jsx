@@ -217,7 +217,7 @@ return (
      >
        
        {!isOwnMessage && senderInfo && (
-          <p className="text-xs font-semibold mb-1 text-gray-700">{senderInfo.firstName + " " + senderInfo.lastName}</p>
+          <p className="text-xs font-semibold mb-1 text-gray-700">{senderInfo.fullName}</p>
         )}
 
        {/* Message Content (Editing or Display) */}
@@ -244,7 +244,7 @@ return (
                {/* Display Media */}
                {renderMedia()}
                {/* Timestamp and Edited Status */}
-               <div className={`text-xs mt-1 flex items-center justify-end gap-1 ${isOwnMessage ? 'text-blue-100' : 'text-gray-500'}`}>
+               <div className={`text-xs mt-1 flex items-center justify-end gap-1 text-gray-500`}>
                    {message.editedAt && <span className="italic text-xs">(edited)</span>}
                    <span>{formatTimestamp(message.timestamp)}</span>
                </div>
