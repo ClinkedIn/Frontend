@@ -4,6 +4,8 @@ import Header from '../../components/UpperNavBar';
 import PostedJobCard from '../../components/jobs/PostedJobCard'; // Assuming this is the correct path
 import { IoBagRemove } from "react-icons/io5";
 import { FiEdit2 } from "react-icons/fi";
+import { BASE_URL } from '../../constants';
+import axios from 'axios';
 
 const ManageJob = () => {
     const location = useLocation();
@@ -13,6 +15,7 @@ const ManageJob = () => {
     const [allCompanies,setAllCompanies]=useState([])
     const [isLoading, setIsLoading]=useState()
     const [error,setError]=useState()
+    const [screeningQuestions, setScreeningQuestions] = useState([]);
     const navigate =useNavigate()
     console.log("job in ManageJob:", job);
     const pageState = "ManageJob"; // Using a more descriptive name than 'state'
@@ -21,8 +24,8 @@ const ManageJob = () => {
         const fetchCompanies = async () => {
           setIsLoading(true);
           try {
-            const { data } = await axios.get('http://localhost:3000/companies');
-            setAllCompanies(data || []);
+            const response = await axios.get(`${BASE_URL}/api/companies`);
+            setAllCompanies(response.data || []);
           } catch (err) {
             console.error('Error fetching companies:', err);
             setError('Failed to load company suggestions.');
@@ -34,6 +37,33 @@ const ManageJob = () => {
     
         fetchCompanies();
       }, []);
+
+      
+    const jobId = job?._id || job?.job?.id;
+    // Fetch screening questions if not available in passed job object
+    useEffect(() => {
+        const loadScreeningQuestions = async () => {
+            const initialQuestions = job?.screeningQuestions || job?.job?.screeningQuestions || [];
+
+            if (initialQuestions.length > 0) {
+                setScreeningQuestions(initialQuestions);
+            } else if (jobId) {
+                try {
+                    const response = await axios.get(`${BASE_URL}/api/jobs/${jobId}`);
+                    const updatedJob = response.data;
+                    console.log("Updated job data:", updatedJob);
+                    if (updatedJob?.screeningQuestions?.length > 0) {
+                        setScreeningQuestions(updatedJob.screeningQuestions);
+                    }
+                } catch (err) {
+                    console.error("Failed to fetch job details for screening questions", err);
+                }
+            }
+        };
+
+        loadScreeningQuestions();
+    }, [jobId, job]);
+
     if (!job) {
         return (
             <>
@@ -45,7 +75,8 @@ const ManageJob = () => {
         );
     }
 
-    const jobDescription = job?.description || 'No job description available.';
+
+    const jobDescription = job?.description || job?.job?.description|| 'No job description available.';
 
     const UpdateJobData = {
         job,
@@ -53,7 +84,7 @@ const ManageJob = () => {
         user,
         allCompanies,
         pageState:"UpdateJob",
-        existingJobData: job // Add this
+        existingJobData: job 
       };
     const handleUpdateJob = () => {
         navigate("/jobdescription",{
@@ -61,9 +92,11 @@ const ManageJob = () => {
         })
     }
     const renderScreeningQuestions = () => {
-        if (!job?.screeningQuestions?.length) return <p>No screening questions</p>;
-        
-        return job.screeningQuestions.map((q, index) => (
+        if (!screeningQuestions || screeningQuestions.length === 0) {
+            return <p>No screening questions</p>;
+        }
+
+        return screeningQuestions.map((q, index) => (
             <div key={index} className="mb-4 p-3 bg-gray-50 rounded">
                 <h4 className="font-semibold">{q.question}</h4>
                 <p className="text-sm">Ideal Answer: {q.idealAnswer}</p>
@@ -109,7 +142,7 @@ const ManageJob = () => {
                                
                                 <h3 className="text-lg font-semibold text-gray-800 mb-2">Job description</h3>
                                 <div className="text-gray-700 text-sm whitespace-pre-line">
-                                    {job?.description}
+                                    {job?.description|| job?.job?.description || 'No job description available.'}
                                 </div>
                                 </div>
                             </div>
@@ -119,11 +152,11 @@ const ManageJob = () => {
                                     <h4 className="text-md font-semibold text-gray-800 mb-1">Industry</h4>
                                 <button onClick={handleUpdateJob}><FiEdit2  /></button>
                                 </div>
-                                <div className="text-gray-700 text-sm">{job?.industry || 'N/A'}</div>
+                                <div className="text-gray-700 text-sm">{job?.industry|| job?.job?.industry || 'N/A'}</div>
 
                                 <div>
                                     <h4 className="text-md font-semibold text-gray-800 mb-1">Employment Type</h4>
-                                    <div className="text-gray-700 text-sm">{job?.jobType || 'N/A'}</div>
+                                    <div className="text-gray-700 text-sm">{job?.jobType||job?.job?.jobType || 'N/A'}</div>
                                 </div>
                                 </div>
 
@@ -131,11 +164,11 @@ const ManageJob = () => {
                         </div>
 
                         <div className="bg-white rounded-lg shadow-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                Screening Questions ({job.screeningQuestions?.length || 0})
-            </h3>
-            {renderScreeningQuestions()}
-        </div>
+                                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                                    Screening Questions ({screeningQuestions.length})
+                                </h3>
+                                {renderScreeningQuestions()}
+                            </div>
 
 
                         </div>
@@ -143,7 +176,9 @@ const ManageJob = () => {
                         <div className="space-y-6">
                         <div className="bg-white rounded-lg shadow-sm p-6 text-center space-y-4">
                             <h4 className="font-semibold text-gray-800">Hiring for more roles?</h4>
-                            <button className="px-4 py-2 border-black border-2 rounded-full text-sm font-semibold hover:bg-gray-400 transition-colors">
+                            <button 
+                            onClick={() => navigate('/starthiring')}
+                            className="px-4 py-2 border-black border-2 rounded-full text-sm font-semibold hover:bg-gray-400 transition-colors">
                             Post new job
                             </button>
                         </div>
