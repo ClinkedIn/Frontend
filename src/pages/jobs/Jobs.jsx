@@ -132,11 +132,7 @@ const Jobs = () => {
 
       
           <div className="bg-white shadow-md rounded-lg pt-1 space-y-1 mt-2.5">
-            <button 
-              onClick={() => setShowPreferences(true)}
-              className="flex items-center font-semibold text-[#3d3d3d] gap-3 w-full text-left py-3 px-6 hover:bg-gray-100">
-              <FaClipboardList className="font-semibold text-[#3d3d3d]" /> Preferences
-            </button>
+            
             <button 
             onClick={() => navigate("/myjobs",{
               state: {allJobs:jobs }
