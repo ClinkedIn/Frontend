@@ -9,6 +9,8 @@ import { BASE_URL } from "../constants";
 // Set axios defaults to include credentials with all requests
 axios.defaults.withCredentials = true;
 
+
+
 /**
  * The `Main` component serves as the primary container for displaying posts, 
  * handling user interactions such as creating posts, reacting to posts, 
@@ -111,7 +113,7 @@ const Main = () => {
   useEffect(() => {
     const fetchAndSetUser = async () => {
       try {
-        const response = await axios.get(`${BASE_URL}/api/user/me`, { withCredentials: true });
+        const response = await axios.get(`${BASE_URL}/user/me`, { withCredentials: true });
         setAuthorInfo(response.data);
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -133,13 +135,14 @@ const Main = () => {
    */
   const fetchUser = async () => {
     try {
-      const response = await axios.get(`${BASE_URL}/api/user/me`, { withCredentials: true });
+      const response = await axios.get(`${BASE_URL}/user/me`, { withCredentials: true });
       console.log("User data:", response.data);
     } catch (error) {
       console.error("Error fetching user data:", error);
     }
   };
 
+  
   /**
    * Fetches notifications from the server.
    * 
@@ -314,7 +317,7 @@ const Main = () => {
    */
   const handleAddComment = async (postId, commentText, attachment = null, taggedUsers = [], parentComment = null, attachmentUrl = null) => {
     try {
-      const endpoint = `${COMMENTS_ENDPOINT}/${postId}/post`;
+      const endpoint = `${COMMENTS_ENDPOINT}`;
       console.log(`Posting comment to ${endpoint}:`, commentText);
       
       // Use FormData to support file uploads

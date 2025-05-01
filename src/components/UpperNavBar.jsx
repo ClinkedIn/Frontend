@@ -42,7 +42,7 @@ const Header = ({ notifications }) => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await axios.get(`${BASE_URL}/api/user/me`, {
+        const response = await axios.get(`${BASE_URL}/user/me`, {
       
           withCredentials:true
         });
