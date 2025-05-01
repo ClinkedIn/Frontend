@@ -6,6 +6,7 @@ import { BiLike, BiDislike } from "react-icons/bi";
 import { HiOutlineLightBulb } from "react-icons/hi";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
+import { BASE_URL } from '../../constants';
 
 export default function Review() {
     const location = useLocation();
@@ -15,7 +16,7 @@ export default function Review() {
     console.log("job settings screenig questions:", screeningQuestions); 
     // Debugging line to check screening questions
 
-    console.log("final data in review:", finalData)
+   
     const renderQuestionDetails = (question) => {
         const details = [];
         if (question.data?.isMustHave) {
@@ -85,7 +86,7 @@ export default function Review() {
     const handleSubmit = async () => {
         try {
             const payload = {
-                companyId: finalData?.company?._id || "",
+                companyId: finalData?.company?._id || finalData?.company?.id|| finalData?.company?.company?.id || "",
                 title: finalData?.jobTitle||"",
                 industry: finalData?.company.industry || "Information Technology", 
                 workplaceType: finalData?.jobSite || "Remote",
@@ -94,28 +95,30 @@ export default function Review() {
                 description: finalData?.description,
                 applicationEmail: emailUpdates || "careers@example.com", 
                 screeningQuestions: screeningQuestions?.map((q) => ({
-                    question: q.questionText || "Custom Question",
+                    question: q.type|| "Custom Question",
                     idealAnswer: q.data?.years || q.data?.answerValue||q.data?.idealAnswer ||"Not specified",
                     mustHave: q.data?.isMustHave || false,
                 })) || [],
                 autoRejectMustHave: rejectionSettings?.enabled || false,
                 rejectPreview: rejectionSettings?.message || "Thank you for your interest, but this position requires experience that matches our needs.",
             };
+            // console.log("payload", payload)
             let response=null
             if(pageState=="UpdateJob"){
-                response = await axios.put(`http://localhost:3000/jobs/${jobId}`, payload);
+                response = await axios.put(`${BASE_URL}/api/jobs/${jobId}`, payload);
                 toast.success(response.data.message || "Job posted successfully!");
                 
             }
             else{
-                response = await axios.post("http://localhost:3000/jobs", payload);
+                response = await axios.post(`${BASE_URL}/api/jobs`, payload);
                 toast.success(response.data.message || "Job posted successfully!");
             }
             
-
+            console.log(response.data)
             
             navigate('/jobdetails', {
-                state: { job: response.data.job, user:finalData.user}
+                state: { job: response.data, user:finalData.user,
+            company: finalData.company}
             });
             
         }  catch (error) {

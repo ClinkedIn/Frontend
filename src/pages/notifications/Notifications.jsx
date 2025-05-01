@@ -117,7 +117,7 @@ const Notification = () => {
   const fetchNotifications = async () => {
     try {
       const response = await axios.get(
-        `${BASE_URL}/notifications`,
+        "http://localhost:3000/api/notifications",
         {withCredentials:true}
       );
       console.log("notifications:",response.data)
@@ -136,7 +136,7 @@ const Notification = () => {
  //Mark Notification as read
   const handleNotificationClick = async (id) => {
     const response = await axios.patch(
-      `${BASE_URL}/notifications/mark-read/${id}`,
+      `${BASE_URL}/api/notifications/mark-read/${id}`,
       {},
       { withCredentials: true }
     );
@@ -158,7 +158,7 @@ const Notification = () => {
  */
   const fetchUser = async () => {
       try {
-        const response = await axios.get(`${BASE_URL}/user/me`, {
+        const response = await axios.get(`${BASE_URL}/api/user/me`, {
       
           withCredentials:true
         });
@@ -178,12 +178,12 @@ const Notification = () => {
    * @hook
    */
   useEffect(() => {
-    const loginAndFetchData = async () => {
-      await testLogin(); // Ensure login is completed first
+    // const loginAndFetchData = async () => {
+    //   await testLogin(); // Ensure login is completed first
     fetchUser();
     fetchNotifications();
-  }
-    loginAndFetchData()
+  // }
+  //   loginAndFetchData()
   }, []);
  /**
    * Handles the change in the main notification filter.

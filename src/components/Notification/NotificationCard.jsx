@@ -50,7 +50,7 @@ const NotificationCard = ({ notification, handleNotificationClick }) => {
    */
   const handleDeleteNotification = async (id) => {
     try {
-      await axios.delete(`${BASE_URL}/notifications/${id}`,{withCredentials:true});
+      await axios.delete(`${BASE_URL}/api/notifications/${id}`,{withCredentials:true});
       setRemovedNotification(notification);
       console.log("Notification deleted");
     } catch (error) {
@@ -75,7 +75,7 @@ const NotificationCard = ({ notification, handleNotificationClick }) => {
 
     try {
       // Restore the notification in the backend
-      await axios.patch(`${BASE_URL}/notifications/restore-notification/${removedNotification._id}`,{},{
+      await axios.patch(`${BASE_URL}/api/notifications/restore-notification/${removedNotification._id}`,{},{
       
         withCredentials:true
       });
@@ -105,7 +105,7 @@ const NotificationCard = ({ notification, handleNotificationClick }) => {
   const handleMuteDuration = async (duration) => {
     try {
      const response= await axios.patch(
-        `${BASE_URL}/notifications/pause-notifications`,
+        `${BASE_URL}/api/notifications/pause-notifications`,
         { duration },
         { withCredentials: true }
       );
@@ -132,7 +132,7 @@ const NotificationCard = ({ notification, handleNotificationClick }) => {
     e.stopPropagation();
     try {
       const response=await axios.patch(
-        `${BASE_URL}/notifications/resume-notifications`,
+        `${BASE_URL}/api/notifications/resume-notifications`,
         {},
         { withCredentials: true }
       );
@@ -271,7 +271,7 @@ console.log("unmute response:", response)
                     if (isRead) {
                       try {
                         await axios.patch(
-                          `${BASE_URL}/notifications/mark-unread/${notification._id}`,
+                          `${BASE_URL}/api/notifications/mark-unread/${notification._id}`,
                           {},
                           { withCredentials: true }
                         );

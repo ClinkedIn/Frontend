@@ -3,6 +3,7 @@ import { BsThreeDots, BsArrowUpRight, BsPerson, BsEnvelope, BsPhone, BsDownload,
 import { formatDistanceToNow } from 'date-fns'; // Assuming date-fns is available for time formatting
 import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
 import axios from "axios"; // Import axios for API calls
+import { BASE_URL } from "../../constants"; // Import base URL for API calls
 const ApplicantDetails = ({ applicant, screeningAnswers }) => { // Added screeningAnswers prop
     const navigate = useNavigate(); // Initialize navigate hook
 
@@ -48,7 +49,7 @@ const ApplicantDetails = ({ applicant, screeningAnswers }) => { // Added screeni
     useEffect(() => {
         const getUser=async () => {
             try{
-                const response = await axios.get(`http://localhost:3000/user/${userId}`,
+                const response = await axios.get(`${BASE_URL}/api/user/${userId}`,
                     {withCredentials: true} // Include credentials for CORS
                 );
                 console.log("Fetched user data:", response.data); // Log the fetched user data

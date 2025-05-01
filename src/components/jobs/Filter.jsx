@@ -29,7 +29,7 @@ const Filter = () => {
    */
   const fetchCompanies= async () => {
     try {
-      const response = await axios.get(`${BASE_URL}/companies`);
+      const response = await axios.get(`${BASE_URL}/api/companies`);
   
       setCompanies(response.data);
     } catch (error) {
@@ -53,7 +53,7 @@ const Filter = () => {
         if(selectedCompany) params.append('companyId', selectedCompany)
         
         const response = await axios.get(
-          `${BASE_URL}/search/jobs?${params}`, 
+          `${BASE_URL}/api/search/jobs?${params}`, 
         );
         console.log("jobs filter", response.data)
         

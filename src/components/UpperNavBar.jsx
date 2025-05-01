@@ -23,7 +23,7 @@ const Header = ({ notifications }) => {
   useEffect(() => {
     const fetchUnreadCount = async () => {
       try {
-        const response = await axios.get(`${BASE_URL}/notifications/unread-count`, {
+        const response = await axios.get(`${BASE_URL}/api/notifications/unread-count`, {
           withCredentials: true,
         });
         setUnreadCount(response.data.unreadCount || 0);
@@ -63,7 +63,7 @@ const Header = ({ notifications }) => {
       try {
         const params = new URLSearchParams();
         if (searchTerm) params.append("query", searchTerm);
-        const response = await axios.get(`${BASE_URL}/user/search`, {
+        const response = await axios.get(`${BASE_URL}/api/user/search`, {
           params,
           withCredentials: true,
         });
@@ -98,7 +98,7 @@ const Header = ({ notifications }) => {
       const params = new URLSearchParams();
       if (searchQuery) params.append("q", searchQuery);
       if (location) params.append("location", location);
-      const response = await axios.get(`${BASE_URL}/search/jobs?${params}`);
+      const response = await axios.get(`${BASE_URL}/api/search/jobs?${params}`);
       navigate("/job-board", {
         state: {
           jobs: response.data.jobs,

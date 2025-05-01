@@ -67,7 +67,7 @@ const ApplyJob = ({ isOpen, onClose, job , jobId}) => {
    */
   const fetchUser = async () => {
     try {
-      const response = await axios.get(`${BASE_URL}/user/me`, {
+      const response = await axios.get(`${BASE_URL}/api/user/me`, {
     
         withCredentials:true
       });
@@ -113,7 +113,7 @@ const ApplyJob = ({ isOpen, onClose, job , jobId}) => {
   
     try {
       const response = await axios.post(
-        `${BASE_URL}/jobs/${id}/apply`,
+        `${BASE_URL}/api/jobs/${id}/apply`,
         applicationData,
         { withCredentials: true }
       );

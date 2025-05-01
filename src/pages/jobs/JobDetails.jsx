@@ -5,6 +5,7 @@ import Header from "../../components/UpperNavBar";
 import PostedJobCard from "../../components/jobs/PostedJobCard"; 
 import ApplicantCard from "../../components/jobs/ApplicantCard"; 
 import ApplicantDetails from "../../components/jobs/ApplicantDetails"; // Import the ApplicantDetails component
+import { BASE_URL } from "../../constants"; // Import the base URL for API requests
 
 const JobDetails = () => {
     const location = useLocation();
@@ -19,7 +20,7 @@ const JobDetails = () => {
     const [applicantError, setApplicantError] = useState(null);
     const [company, setCompany] = useState(null); // State to hold company data
 
-    let companyid=job?.company?.id;
+    let companyid=job?.company?.id || job?.job?.company?.id;
 
     if(!companyid){
         companyid=job?.companyId;
@@ -28,7 +29,7 @@ useEffect(() => {
     const fetchCompany=async () => {
        
         try{
-            const response = await axios.get(`http://localhost:3000/companies/${companyid}`);
+            const response = await axios.get(`${BASE_URL}/api/companies/${companyid}`);
             console.log("Company data:", response.data);
             setCompany(response.data);
         }
@@ -44,6 +45,7 @@ useEffect(() => {
     if(!jobid){
         jobid=job?._id;
     }
+    else if(!jobid){jobid=job?.job?.id}
     useEffect(() => {
        
         const fetchApplicants = async () => {
@@ -58,7 +60,7 @@ useEffect(() => {
        
             try {
                 // Fetch pending applicants for the specific job
-                const response = await axios.get(`http://localhost:3000/jobs/${jobid}/apply`);
+                const response = await axios.get(`${BASE_URL}/api/jobs/${jobid}/apply`);
                 const fetchedApplicants = response?.data.applications;
                 setApplicants(fetchedApplicants);
                 console.log("Fetched applicants:", fetchedApplicants); // Log the fetched applicants
@@ -85,6 +87,7 @@ useEffect(() => {
 
     // If job data is not available initially, display a message
     if (!job) {
+        
         return (
             <>
                 <Header />
