@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react'
+import { BASE_URL } from "../constants";
+import axios from 'axios';
 
 // Dummy user data - replace with real user data from your auth system
 const dummyUser = {
@@ -7,6 +9,11 @@ const dummyUser = {
   headline: 'Software Engineer',
   viewCount: 23,
   impressions: 8,
+};
+
+const getUserInfo = async () => {
+  const response = await axios.get(`${BASE_URL}/user/me`, { withCredentials: true });
+  return response.data;
 };
 
 const Leftside = () => {

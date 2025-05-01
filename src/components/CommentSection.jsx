@@ -263,7 +263,7 @@ const CommentSection = ({
       {/* Comment input */}
       <div className="flex items-start mb-4">
         <img 
-          src={authorInfo.profileImage} 
+          src={authorInfo.profilePicture} 
           alt={authorInfo.name}
           className="w-8 h-8 rounded-full mr-2 mt-1"
         />
