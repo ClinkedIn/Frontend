@@ -104,6 +104,8 @@ const Main = () => {
     { type: 'insightful', emoji: '💡', label: 'Insightful' },
     { type: 'funny', emoji: '😄', label: 'Funny' }
   ];
+
+  
   
   // Author information (normally would come from your auth system)
   /**
@@ -434,7 +436,7 @@ const Main = () => {
   };
 
 
-  
+
   // Handle reacting to a comment
   /**
    * Handles reacting to a comment by sending or removing a reaction.
