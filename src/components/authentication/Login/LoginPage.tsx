@@ -42,6 +42,7 @@ const LoginPage = () => {
     username?: string;
     password?: string;
   }>({});
+  const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { setAuthToken } = useAuth();
@@ -180,23 +181,23 @@ const LoginPage = () => {
         src="/Images/login-logo.svg"
         alt="LinkedIn"
       />
-
+  
       {/* Login Form */}
       <motion.div className="w-full max-w-sm p-6 bg-white rounded-lg shadow-lg">
         <h2 className="text-3xl font-semibold text-gray-900 text-left mb-4">
           Sign in
         </h2>
-
+  
         {/* Google Login Button */}
         <GoogleLogin className="w-full" />
-
+  
         {/* Separator */}
         <div className="relative flex items-center my-4">
           <div className="w-full border-t border-gray-300"></div>
           <span className="px-3 text-sm text-gray-500 bg-white">or</span>
           <div className="w-full border-t border-gray-300"></div>
         </div>
-
+  
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Email Input */}
@@ -214,7 +215,7 @@ const LoginPage = () => {
               <p className="text-red-500 text-xs mt-1">{errors.username}</p>
             )}
           </div>
-
+  
           {/* Password Input */}
           <div className="relative">
             <input
@@ -237,7 +238,31 @@ const LoginPage = () => {
               <p className="text-red-500 text-xs mt-1">{errors.password}</p>
             )}
           </div>
-
+  
+          {/* Remember Me & Forgot Password Row */}
+          <div className="flex justify-between items-center text-sm">
+            <div className="flex items-center">
+              <input
+                id="remember-me"
+                type="checkbox"
+                checked={rememberMe}
+                onChange={() => setRememberMe(!rememberMe)}
+                className="mr-2 accent-green-700 scale-125"
+              />
+              <label htmlFor="remember-me" className="text-sm text-gray-700">
+                Remember me
+              </label>
+            </div>
+  
+            {/* Forgot Password Link */}
+            <Link
+              to="/forgot-password"
+              className="text-blue-600 hover:underline"
+            >
+              Forgot password?
+            </Link>
+          </div>
+  
           {/* Submit Button */}
           <motion.button
             type="submit"
@@ -253,7 +278,7 @@ const LoginPage = () => {
             )}
           </motion.button>
         </form>
-
+  
         {/* Signup Link */}
         <p className="mt-4 text-center text-sm text-gray-600">
           New to LinkedIn?{" "}
@@ -262,9 +287,11 @@ const LoginPage = () => {
           </Link>
         </p>
       </motion.div>
-
-      {/* Footer */}
-      <Footer />
+  
+      {/* Fixed Footer - Always at bottom of screen */}
+      <footer className="fixed bottom-0 left-0 right-0 z-10 bg-white border-t border-gray-200 py-4">
+        <Footer />
+      </footer>
     </div>
   );
 };

@@ -75,10 +75,16 @@ const ConversationList = ({
                     <div className="p-4 text-center text-gray-500">No conversations yet. Search for a connection to start chatting.</div>
                 )}
 
-                {!loadingConversations && conversations.map(convo => {
+                {!loadingConversations &&  conversations.map(convo => {
                     const otherUserId = convo.participants.find(id => id !== currentUser._id);
-                    const otherUserInfo = otherUserId ? connections.find(user => user._id === otherUserId) : null; 
-                    
+                    let otherUserInfo = {}; 
+                    if(otherUserId && convo.fullName?.[otherUserId] && convo.profilePicture?.[otherUserId]) {
+                         otherUserInfo = {
+                            _id : otherUserId,
+                            fullName: convo.fullName[otherUserId] ,
+                            profilePicture: convo.profilePicture[otherUserId]
+                        }
+                    }
                     
                     return (
                         <ConversationListItem

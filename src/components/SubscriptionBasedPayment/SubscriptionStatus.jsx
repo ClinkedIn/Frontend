@@ -13,7 +13,7 @@ const SubscriptionStatus = () => {
     const fetchSubscriptionDetails = async () => {
       try {
         // Replace with your actual API endpoint
-        const response = await fetch(`${BASE_URL}/api/user/me`, {
+        const response = await fetch(`${BASE_URL}/user/me`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
