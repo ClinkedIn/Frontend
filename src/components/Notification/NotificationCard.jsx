@@ -48,7 +48,10 @@ const NotificationCard = ({ notification, handleNotificationClick }) => {
   const handleClick = async () => {
     if (!message) {
       setIsRead(true);
-      // navigate('/notification-post')
+      navigate('/feed',{
+        state:{ resourceId:notification.relatedPostId
+        }
+      })
       console.log("handleClick");
       await handleNotificationClick(notification.id);
     }

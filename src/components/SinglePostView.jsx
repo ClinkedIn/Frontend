@@ -40,7 +40,7 @@ const SinglePostView = ({ postId }) => {
       // Check if the API returns post directly or wrapped in a property
       const postData = response.data.post || response.data;
       setPost(postData);
-      
+      console.log("post ", postData)
       // Set initial user reaction if available
       if (postData.userReaction) {
         setUserReaction(postData.userReaction.type || 'like');

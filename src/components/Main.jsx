@@ -5,6 +5,8 @@ import CreatePostModal from './PostCreation.jsx';
 import PostReactions from './PostReactions.jsx';
 import CommentSection from './CommentSection.jsx';
 import { BASE_URL } from "../constants";
+import { useLocation } from 'react-router-dom';
+import SinglePostView from './SinglePostView.jsx';
 
 // Set axios defaults to include credentials with all requests
 axios.defaults.withCredentials = true;
@@ -124,6 +126,10 @@ const Main = () => {
   const [savedPosts, setSavedPosts] = useState([]);
   const [savedPostsLoading, setSavedPostsLoading] = useState(false);
   
+  const location = useLocation();
+  const resourceId = location.state?.resourceId;
+  console.log('Resource ID from location state:', resourceId);
+
   // Use exact API endpoint as specified
   const API_ENDPOINT = `${BASE_URL}/posts`;
   const COMMENTS_ENDPOINT = `${BASE_URL}/comments`;
@@ -1025,6 +1031,12 @@ const handleShowAllPosts = () => {
             </div>
           </div>
         </div>
+
+        {resourceId && (
+          <SinglePostView 
+            postId={resourceId}
+          />
+        )}
 
         {/* Post List */}
         {posts.map((post) => (
