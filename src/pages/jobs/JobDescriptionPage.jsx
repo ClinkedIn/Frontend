@@ -71,12 +71,13 @@ export default function JobDescriptionPage() {
     console.log("job description data", initialData)
 
     // Extract individual pieces of data from the determined initialData
-    const initialJobTitle = initialData.jobTitle || (initialData.job?.title) || 'Job Title';
-    const initialCompany = initialData.company || { id: null, name: 'Default Company', address: 'Default Address', logo: '' };
-    const initialJobType = initialData.jobType || (initialData.job?.jobType) || "Full Time";
-    const initialJobSite = initialData.jobSite || (initialData.job?.workplaceType) || "Remote";
-    const initialJobLocation = initialData.location || (initialData.job?.jobLocation) || '';
-    const initialJobDescription = initialData.description || (initialData.job?.description) || `The ideal candidate will be responsible for developing high-quality applications. They will also be responsible for designing and implementing testable and scalable code.
+    const initialJobTitle = initialData.jobTitle || (initialData.job?.title) || (initialData.job.job.title)||'Job Title';
+    const initialCompany = initialData.company || initialData?.company?.company|| { id: null, name: 'Default Company', address: 'Default Address', logo: '' };
+    const initialCompanyName = initialCompany.name || initialCompany.company.name|| 'Default Company'; // Fallback to default name if not available
+    const initialJobType = initialData.jobType || (initialData.job?.jobType) || (initialData.job.job.jobType)||"Full Time";
+    const initialJobSite = initialData.jobSite || (initialData.job?.workplaceType) ||(initialData.job.job.workplaceType)|| "Remote";
+    const initialJobLocation = initialData.location || (initialData.job?.jobLocation)||(initialData.job.job.jobLocation) || '';
+    const initialJobDescription = initialData.description || (initialData.job?.description)||(initialData.job.job.description) || `The ideal candidate will be responsible for developing high-quality applications. They will also be responsible for designing and implementing testable and scalable code.
 
 Responsibilities
 • Develop quality software and web applications
@@ -99,8 +100,8 @@ Qualifications
     // Initialize states using the extracted initial data
     const [isEditing, setIsEditing] = useState(false);
     const [currentJobTitle, setCurrentJobTitle] = useState(initialJobTitle);
-    const [selectedCompany, setSelectedCompany] = useState(initialCompany);
-    const [editCompanyInput, setEditCompanyInput] = useState(initialCompany.name); // Initialize company input with selected company name
+    const [selectedCompany, setSelectedCompany] = useState(initialCompanyName);
+    const [editCompanyInput, setEditCompanyInput] = useState(initialCompanyName); // Initialize company input with selected company name
 
     const [companySuggestions, setCompanySuggestions] = useState([]);
     const [showCompanySuggestions, setShowCompanySuggestions] = useState(false);
@@ -149,7 +150,7 @@ Qualifications
         // Reset states to their initial values based on the extracted initial data
         setCurrentJobTitle(initialJobTitle);
         setSelectedCompany(initialCompany);
-        setEditCompanyInput(initialCompany?.name || ''); // Safely reset company input
+        setEditCompanyInput(initialCompanyName); // Safely reset company input
         setCurrentJobType(initialJobType);
         setCurrentJobSite(initialJobSite);
         setCurrentJobLocation(initialJobLocation);
@@ -164,7 +165,7 @@ Qualifications
             setShowCompanySuggestions(false);
             return;
         }
-        const filtered = allCompanies.filter(comp => comp.name?.toLowerCase().includes(value.toLowerCase()));
+        const filtered = allCompanies.filter(comp => comp.company.name?.toLowerCase().includes(value.toLowerCase()));
         setCompanySuggestions(filtered);
         setShowCompanySuggestions(filtered.length > 0);
     }, 300);
@@ -178,8 +179,8 @@ Qualifications
     };
 
     const handleCompanySuggestionClick = (company) => {
-        setSelectedCompany(company);
-        setEditCompanyInput(company.name);
+        setSelectedCompany(company||company.company); 
+        setEditCompanyInput(company.name || company.company.name); 
         // Also update location if company has an address and location is not already set by user
         if (!currentJobLocation || currentJobLocation === (initialCompany?.address || '')) { // Compare with initial company address safely
              setCurrentJobLocation(company.address || '');
@@ -195,8 +196,9 @@ Qualifications
         
         if (isEditing && !selectedCompany?.id && allCompanies.length > 0) {
              // Check if the typed company name exactly matches one in the list
-            const match = allCompanies.find(c => c.name?.toLowerCase() === editCompanyInput.toLowerCase());
-            if (match) {
+            const match = (allCompanies.find(c => c.company.name?.toLowerCase() === editCompanyInput.toLowerCase())) || initialCompanyName;
+
+            if (match ) {
                 setSelectedCompany(match);
             } else {
                 alert('Please select a valid company from suggestions.');
@@ -252,9 +254,9 @@ Qualifications
                             <ul ref={companySuggestionsRef} className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto">
                                 {companySuggestions.map((comp) => (
                                      // Use company id as key if available, fallback to name
-                                    <li key={comp.id || comp.name} onClick={() => handleCompanySuggestionClick(comp)} className="px-3 py-2 text-sm hover:bg-blue-50 cursor-pointer flex items-center">
-                                        <img src={comp.logo || 'https://placehold.co/20x20/EBF4FD/0A66C2?text=L'} alt="" className="w-5 h-5 object-contain rounded-full mr-2" onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/20x20/EBF4FD/0A66C2?text=L'; }} />
-                                        {comp.name}
+                                    <li key={comp.id || comp.name||comp.company.id} onClick={() => handleCompanySuggestionClick(comp)} className="px-3 py-2 text-sm hover:bg-blue-50 cursor-pointer flex items-center">
+                                        <img src={comp.logo||comp.company.logo || 'https://placehold.co/20x20/EBF4FD/0A66C2?text=L'} alt="" className="w-5 h-5 object-contain rounded-full mr-2" onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/20x20/EBF4FD/0A66C2?text=L'; }} />
+                                        {comp.name|| comp.company.name}
                                     </li>
                                 ))}
                             </ul>

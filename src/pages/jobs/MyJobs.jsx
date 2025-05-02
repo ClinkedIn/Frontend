@@ -175,7 +175,7 @@ const {allJobs} = location.state || {} // Extract job from location state
         <div className="space-y-4 pl-6 pr-6">
           {jobs && jobs.length > 0 ? (
             jobs.map((job, index) => (
-              <JobCard key={index} job={job} state={selectedTab} user={user} jobs={allJobs} />
+              <JobCard key={index} job={job} state={selectedTab} user={user} jobs={allJobs} companyId={job.companyId} />
             ))
           ) : (
             <p>No jobs available at the moment.</p>
