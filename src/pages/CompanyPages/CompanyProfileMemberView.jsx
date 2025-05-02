@@ -1,20 +1,25 @@
 import { FaPlus } from "react-icons/fa6";
-import { Outlet, useNavigate,useParams } from "react-router-dom";
+import { Outlet, useNavigate,useParams,useLocation } from "react-router-dom";
 import Header from "../../components/UpperNavBar";
 import { use, useEffect, useState } from "react";
 import InlineTabs from "../../components/CompanyPageSections/InlineTabs"
 import axios from "axios";
 import { BASE_URL } from "../../constants";
+import { set } from "date-fns";
 const CompanyProfileMemberViewPage = () => {
     const navigate = useNavigate();
     const {companyId, section = "Home"} = useParams();
     const [isFollowing, setIsFollowing] = useState(false);
-    const [activeTab, setActiveTab] = useState(section);
     const [notifications, setNotifications] = useState([]);
     const [companyInfo, setCompanyInfo] = useState();
     const [user, setUser] = useState(null);
     const [followers, setFollowers] = useState([]);
     const Tabs =["Home", "Posts", "Jobs"];
+    const location = useLocation();
+    const currentSection = location.pathname.split('/').pop() || 'Home';
+    const [activeTab, setActiveTab] = useState(currentSection);
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [errorFetchCompanyInfo, setErrorFetchCompanyInfo] = useState(false);
 
     const handleTabClick = (tab) => {
         setActiveTab(tab);
@@ -29,7 +34,7 @@ const CompanyProfileMemberViewPage = () => {
               });
           
               setUser(response.data.user);
-              console.log("User data:", response.data);
+              console.log("User data:", response.data.user);
             } catch (error) {
               console.error("Error fetching user:", error);
             }
@@ -40,6 +45,9 @@ const CompanyProfileMemberViewPage = () => {
             console.log(" followers:", user?.following );
             const isUserFollowing = user?.following?.some((follower) => follower?.entity === companyId && follower?.entityType === "Company");
             setIsFollowing(isUserFollowing);
+            const isAdmin = user?.adminInCompanies.some((CompanyId) => CompanyId === companyId );
+            setIsAdmin(isAdmin);
+            console.log("isAdmin:", isAdmin);
         }
 
       }, [user?._id]);
@@ -86,13 +94,21 @@ const CompanyProfileMemberViewPage = () => {
             console.log("Company info:", response.data.company); 
         } catch (error) {
             console.error("Error fetching company info:", error);
+            setErrorFetchCompanyInfo(true);
          }
     }
     useEffect(()=>{
         if(!companyInfo)
              fetchCompanyInfo();
     },[]);
-
+    if(errorFetchCompanyInfo){
+        return(
+            <div className=" bg-[#f4f2ee] min-h-screen  items-center flex flex-col   w-full rounded-lg shadow-lg p-4 ">
+                <Header notifications={notifications} />
+                <h1 className="mt-30 text-2xl  ">Page not found</h1>
+            </div>
+        )
+    }
     return (
         <div className="bg-[#f4f2ee] min-h-screen  items-center flex flex-col">
             <Header  notifications={notifications} />
@@ -120,7 +136,13 @@ const CompanyProfileMemberViewPage = () => {
                                 Follow
                             </button> 
                             )}
+                            {isAdmin && (
+                                <button className="mt-4 flex items-center justify-center gap-2 bg-[#0A66C2] text-white font-semibold py-2 px-8 rounded-full hover:bg-[#004182]" onClick={() => navigate(`/company/${companyId}/admin`)}>
+                                    Show as Admin
+                                </button>
+                            )}
                         </div>
+
                     </div>
                     <hr className="border-gray-300 my-2" />
                     <InlineTabs activeTab={activeTab} Tabs={Tabs} handleTabClick={handleTabClick} />
