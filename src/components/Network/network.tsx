@@ -4,6 +4,7 @@ import axios from 'axios';
 import HiringAd from '../HiringAd'; // Import the HiringAd component
 import Header from '../UpperNavBar'; // Import the Header component
 import { BASE_URL } from "../../constants";
+import { handleAccept, handleIgnore } from './HandleInvitations'; // Import handleAccept and handleIgnore
 
 // Define the related user interface
 interface RelatedUser {
@@ -23,6 +24,7 @@ interface PendingInvitation {
   lastName: string;
   profilePicture: string;
   headline: string;
+  read: boolean; // Track if the invitation has been viewed
 }
 
 // Define the API response interface for pending invitations
@@ -60,7 +62,13 @@ const Network: React.FC = () => {
     try {
       const response = await axios.get(`${BASE_URL}/user/connections/requests`);
       console.log('Pending invitations API response:', response.data);
-      setPendingInvitations(response.data.pendingRequests);
+      // Initialize `read` as false for all invitations
+      setPendingInvitations(
+        response.data.pendingRequests.map((invitation: PendingInvitation) => ({
+          ...invitation,
+          read: false,
+        }))
+      );
     } catch (error) {
       console.error('Error fetching pending invitations:', error);
     }
@@ -69,30 +77,6 @@ const Network: React.FC = () => {
   useEffect(() => {
     fetchPendingInvitations();
   }, []);
-
-  // Handle Accepting an Invitation
-  const handleAccept = async (invitationId: string) => {
-    try {
-      await axios.patch(`${BASE_URL}/user/connections/requests/${invitationId}`, { action: 'accept' });
-      console.log(`Accepted invitation from ${invitationId}`);
-      // Refresh the list of pending invitations
-      fetchPendingInvitations();
-    } catch (error) {
-      console.error('Error accepting invitation:', error);
-    }
-  };
-
-  // Handle Ignoring an Invitation
-  const handleIgnore = async (invitationId: string) => {
-    try {
-      await axios.patch(`${BASE_URL}/user/connections/requests/${invitationId}`, { action: 'ignore' });
-      console.log(`Ignored invitation from ${invitationId}`);
-      // Refresh the list of pending invitations
-      fetchPendingInvitations();
-    } catch (error) {
-      console.error('Error ignoring invitation:', error);
-    }
-  };
 
   return (
     <div className="flex bg-[#F5F3EE] p-6 mt-14">
@@ -149,7 +133,12 @@ const Network: React.FC = () => {
                   </p>
                   <ul className="space-y-4">
                     {pendingInvitations.slice(0, 3).map((invitation) => (
-                      <li key={invitation._id} className="flex items-center space-x-2">
+                      <li
+                        key={invitation._id}
+                        className={`flex items-center space-x-2 ${
+                          invitation.read ? '' : 'bg-[#E8F5FF]'
+                        }`}
+                      >
                         <img
                           src={invitation.profilePicture || "/Images/user.svg"}
                           alt={`${invitation.firstName} ${invitation.lastName}`}
@@ -182,11 +171,21 @@ const Network: React.FC = () => {
               )}
             </div>
 
+            {/* Conditionally Render the "Show all" Button */}
+            {pendingInvitations.length > 3 && (
+              <button
+                className="text-gray-800 font-semibold px-4 py-2 rounded hover:bg-gray-100 transition duration-300 mt-4"
+                onClick={() => navigate("invitation-manager")}
+              >
+                Show all
+              </button>
+            )}
+
             {/* Conditionally Render the "Manage" Button */}
             {pendingInvitations.length === 0 && (
               <button
                 className="text-gray-800 font-semibold px-4 py-2 rounded hover:bg-gray-100 transition duration-300 mt-4"
-                onClick={() => navigate("/manage-invitations")}
+                onClick={() => navigate("invitation-manager")}
               >
                 Manage
               </button>
@@ -230,9 +229,9 @@ const Network: React.FC = () => {
                           {user.lastJobTitle}
                         </p>
                         <p className="text-xs text-gray-500">
-                          You and{' '}
+                          You have {' '}
                           <span className="text-xs font-normal">
-                            {user.commonConnectionsCount} other mutual connections
+                            {user.commonConnectionsCount} mutual connections
                           </span>
                         </p>
                         <button
@@ -263,9 +262,9 @@ const Network: React.FC = () => {
                           {user.lastJobTitle}
                         </p>
                         <p className="text-xs text-gray-500">
-                          You and{' '}
+                          You have {' '}
                           <span className="text-xs font-normal">
-                            {user.commonConnectionsCount} other mutual connections
+                            {user.commonConnectionsCount} mutual connections
                           </span>
                         </p>
                         <button

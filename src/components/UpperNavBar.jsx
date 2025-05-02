@@ -228,7 +228,7 @@ const Header = ({ notifications }) => {
         <div className="flex">
           {/* Logo */}
           <a href="/feed">
-            <img src="/Images/blue-lockedin.png" alt="Logo" className="w-12 h-12" />
+            <img src="/Images/blue-lockedin.png" alt="Logo" className="w-12 h-12 ml-23" />
           </a>
 
           {/* Conditional Search Bar */}
