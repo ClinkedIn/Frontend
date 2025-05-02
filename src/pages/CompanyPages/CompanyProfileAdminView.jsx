@@ -33,6 +33,8 @@ const CompanyProfileAdminViewPage = () => {
     //const [logo, setLogo] = useState<File | null>(null);
     const [companyAddress, setCompanyAddress] = useState("");   
     const [logoPreview, setLogoPreview] = useState(null);
+    const [logo, setLogo] = useState(null);
+    const [location, setCompanyLocation] = useState("");
     const [errors, setErrors] = useState({ });
     const [notifications, setNotifications] = useState([]);
     const Tabs =["Feed","Activity","Analytics"];
@@ -42,19 +44,7 @@ const CompanyProfileAdminViewPage = () => {
        * @async
        * @function
        */
-      const fetchUser = async () => {
-        try {
-          const response = await axios.get(`${BASE_URL}/user/me`, {
-        
-            withCredentials:true
-          });
-      
-          setUser(response.data);
-          console.log("User data:", response.data);
-        } catch (error) {
-          console.error("Error fetching user:", error);
-        }
-      };
+
 
     const isValid = () => {
         let newErrors = {};
@@ -95,6 +85,11 @@ const CompanyProfileAdminViewPage = () => {
         } else {
             newErrors.industry = "";
         }
+        if (!location) {
+            newErrors.companyLocation = "Please enter the company location";
+        } else {
+            newErrors.companyLocation = "";
+        }
     
 
         
@@ -110,25 +105,24 @@ const CompanyProfileAdminViewPage = () => {
     const handleClickCreateButton =() =>{
         console.log("create ")
     }
-    
-    const handleModifyCoverPicture=() =>{
-        console.log("ModifyCoverPicture ")
-    }
+
 
     const fetchCompanyInfo=async()=>{
         try {
             const response = await axios.get(
                 `${BASE_URL}/companies/${companyId}`
             );
-            setCompanyInfo(response.data); 
-            setCompanyName(response.data.name)
-            setCompanyAddress(response.data.address)
-            setWebsite(response.data.website)
-            setIndustry(response.data.industry)
-            setOrganizationSize(response.data.organizationSize)
-            setOrganizationType(response.data.organizationType)
-            setLogoPreview(response.data.logo)
-            setTagline(response.data.tagLine)
+            setCompanyInfo(response.data.company); 
+            setCompanyName(response.data.company.name)
+            setCompanyAddress(response.data.company.address)
+            setWebsite(response.data.company.website)
+            setIndustry(response.data.company.industry)
+            setOrganizationSize(response.data.company.organizationSize)
+            setOrganizationType(response.data.company.organizationType)
+            setLogoPreview(response.data.company.logo)
+            setTagline(response.data.company.tagLine)
+            setCompanyLocation(response.data.company.location)
+            setLogo(response.data.company.logo)
             console.log("company data:", response.data);
             
         } catch (error) {
@@ -136,12 +130,21 @@ const CompanyProfileAdminViewPage = () => {
          }
     }
     useEffect(() => {
-        const loginAndFetchData = async () => {
-         // await testLogin(); // Ensure login is completed first
-          fetchUser(); 
-        };
+        const fetchUser = async () => {
+            try {
+              const response = await axios.get(`${BASE_URL}/user/me`, {
+            
+                withCredentials:true
+              });
+          
+              setUser(response.data);
+              console.log("User data:", response.data);
+            } catch (error) {
+              console.error("Error fetching user:", error);
+            }
+          };
       
-        loginAndFetchData();
+          fetchUser();
       }, []);
       const handleUpdatePage = async (e) => {
         e.preventDefault();
@@ -149,22 +152,39 @@ const CompanyProfileAdminViewPage = () => {
         
         setIsUpdating(true);
         try {
-            const company = {
-                userId: user?.user?._id,
-                name: companyName,
-                address: companyAddress,
-                website: website,
-                industry: industry,
-                organizationSize: organizationSize,
-                organizationType: organizationType,
-                logo: logoPreview,
-                tagLine: tagline
-            };
+            const formData = new FormData();
+        
+            
+            formData.append('name', companyName);
+            formData.append('address', companyAddress);
+            formData.append('website', website);
+            formData.append('industry', industry);
+            formData.append('organizationSize', organizationSize);
+            formData.append('organizationType', organizationType);
+            formData.append('tagLine', tagline);
+            formData.append('location', location);
+            
+            formData.append('file', logo);
     
-            const response = await putRequest(`${BASE_URL}/companies/${companyId}`, company);
+            const response = await axios.patch(`${BASE_URL}/companies/${companyId}`, formData,{
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+                withCredentials: true,
+            });
             
             
-                setCompanyInfo(response.data); 
+                setCompanyInfo(response.data.company); 
+                setCompanyName(response.data.company.name)
+                setCompanyAddress(response.data.company.address)
+                setWebsite(response.data.company.website)
+                setIndustry(response.data.company.industry)
+                setOrganizationSize(response.data.company.organizationSize)
+                setOrganizationType(response.data.company.organizationType)
+                setLogoPreview(response.data.company.logo)
+                setTagline(response.data.company.tagLine)
+                setCompanyLocation(response.data.company.location)
+                setLogo(response.data.company.logo)
                 setShowForm(false);
                 
         } catch (error) {
@@ -177,8 +197,10 @@ const CompanyProfileAdminViewPage = () => {
         }
     }
     useEffect(()=>{
-        if(!companyInfo) fetchCompanyInfo();
-    },[]);
+        if(!companyInfo)
+     fetchCompanyInfo();
+     console.log("companyInfo",companyInfo)
+    },[companyInfo]);
 
     return (
         <div className="   bg-[#f4f2ee] min-h-screen  items-center flex flex-col">
@@ -201,6 +223,7 @@ const CompanyProfileAdminViewPage = () => {
                         website={website} setWebsite={setWebsite}
                         checkbox={checkbox} setCheckbox={setCheckbox}
                         companyAddress={companyAddress} setCompanyAddress={setCompanyAddress}
+                        logo={logo} setLogo={setLogo}
                         logoPreview={logoPreview} setLogoPreview={setLogoPreview}
                     />
                      <Toaster position="top-center" />
@@ -225,17 +248,6 @@ const CompanyProfileAdminViewPage = () => {
             (<div className="lg:w-1/2 lg:h-3/4 md:w-3/4 max-[430px]:w-full ">
                 <div className="bg-white rounded-lg shadow-lg mt-16 relative"> 
                     <img src="/Images/card-bg.svg"  className="w-full h-30 rounded-t-lg" />
-                        <button
-                            className="absolute top-4 right-4 bg-white rounded-full shadow-md hover:cursor-pointer px-3 py-2 m-2"
-                            aria-label="Change cover photo"
-                            onClick={handleModifyCoverPicture}
-                        >
-                            <FontAwesomeIcon
-                                className="text-[#005cb7] hover:text-[#004182]"
-                                size="sm"
-                                icon={faCamera}
-                            />
-                        </button>
                     <div className="flex flex-column justify-between">
                         <img src={ companyInfo.logo ? companyInfo.logo : "/Images/Company-icon.png"  }  className="w-28 h-28 -mt-10 ml-5  " />
                         <button className="rounded-full  hover:bg-gray-100 m-4 p-4" 
@@ -250,9 +262,9 @@ const CompanyProfileAdminViewPage = () => {
                         <h1 className="text-2xl">{companyInfo.name}</h1>
                         <div className="flex gap-2">
                             <p className="text-gray-500 text-sm">{companyInfo.industry}</p>
-                            <p className="text-gray-500 text-sm">{companyInfo.address}</p>
-                            <p className="text-gray-500 text-sm">{companyInfo.followers.length} followers</p>
-                            <p className="text-gray-500 text-sm">{companyInfo.organizationSize} emplyees</p>
+                            <p className="text-gray-500 text-sm">{companyInfo.location}</p>
+                            <p className="text-gray-500 text-sm">{companyInfo.followersCount} followers</p>
+                            <p className="text-gray-500 text-sm">{companyInfo.organizationSize} employees</p>
                         </div>
                         <div className="flex gap-4 max-[430px]:flex-col max-[430px]:gap-0">
                             <button className="    mt-4 flex items-center justify-center gap-2 bg-[#0A66C2] text-white font-semibold py-2 px-8 rounded-full hover:bg-[#004182]" onClick={()=>{handleClickCreateButton()}}>

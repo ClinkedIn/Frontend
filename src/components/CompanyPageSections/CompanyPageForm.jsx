@@ -3,18 +3,19 @@ import { FaPlus,FaUpload } from "react-icons/fa6";
 
 
 
-const CompanyForm = ({ errors,companyName, setCompanyName, tagline, setTagline, industry, setIndustry, organizationType, setOrganizationType, organizationSize, setOrganizationSize, website, setWebsite, checkbox, setCheckbox, companyAddress, setCompanyAddress, logoPreview, setLogoPreview ,children}) =>{
+const CompanyForm = ({ errors,companyName, setCompanyName, tagline, setTagline, industry, setIndustry, organizationType, setOrganizationType, organizationSize, setOrganizationSize, website, setWebsite, checkbox, setCheckbox, companyAddress, setCompanyAddress, logoPreview, setLogoPreview,logo,setLogo,location,setCompanyLocation ,children}) =>{
 
     const handleOnChngeLogo =(e)=>{
         if (e.target.files?.[0]) {
             const file = e.target.files[0];
             setLogoPreview(URL.createObjectURL(file));
-        // setLogo(file);
+            setLogo(file);
         }
     
     }
-    const handleSetLogo =(e)=>{
+    const handleResetLogo =(e)=>{
         e.preventDefault();
+        setLogo(null);
         setLogoPreview(null);
     }
 
@@ -46,9 +47,23 @@ const CompanyForm = ({ errors,companyName, setCompanyName, tagline, setTagline, 
                     value={companyAddress}
                     onChange={(e) => setCompanyAddress(e.target.value)}
                     className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
-                    placeholder="Add your company address"
+                    placeholder="Add unique address"
                 />
                 {errors.companyAddress && <p className="text-red-500 text-sm mt-1">{errors.companyAddress}</p>}
+            </div>
+            <div>
+                <label htmlFor="Location" className="block text-sm font-medium text-gray-700">
+                    Location*
+                </label>
+                <input
+                    type="text"
+                    id="Location"
+                    value={location}
+                    onChange={(e) => setCompanyLocation(e.target.value)}
+                    className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+                    placeholder="Add your company location"
+                />
+                {errors.companyLocation&& <p className="text-red-500 text-sm mt-1">{errors.setCompanyLocation}</p>}
             </div>
             
             <div>
@@ -92,6 +107,7 @@ const CompanyForm = ({ errors,companyName, setCompanyName, tagline, setTagline, 
                         <option value="201-500">201-500 employees</option>
                         <option value="501-1000">501-1000 employees</option>
                         <option value="1001-5000">1001-5000 employees</option>
+                        <option value="5000+">5000+ employees</option>
                 </select>
                 {errors.organizationSize && <p className="text-red-500 text-sm mt-1">{errors.organizationSize}</p>}
             </div>
@@ -136,7 +152,7 @@ const CompanyForm = ({ errors,companyName, setCompanyName, tagline, setTagline, 
                         accept="image/png, image/jpeg, image/jpg"
                         onChange={handleOnChngeLogo}
                     />
-                    <button type="reset"className="cursor-pointer flex items-center justify-center px-4 py-2 bg-[#0A66C2] text-white text-sm font-medium rounded-lg shadow-md hover:bg-blue-700 " onClick={handleSetLogo}>reset </button>
+                    <button type="reset"className="cursor-pointer flex items-center justify-center px-4 py-2 bg-[#0A66C2] text-white text-sm font-medium rounded-lg shadow-md hover:bg-blue-700 " onClick={handleResetLogo}>reset </button>
 
                     <img src={logoPreview || "/Images/CompanyLogo.png"} alt="Logo Preview" className="w-32 h-32  " />
 
@@ -160,7 +176,7 @@ const CompanyForm = ({ errors,companyName, setCompanyName, tagline, setTagline, 
                         }
                     }}
                 ></textarea>
-                <p className="text-sm text-gray-500">Use your tagline to briefly describe what your organization does. This can be changed later. {tagline.length}/{120} </p>
+                <p className="text-sm text-gray-500">Use your tagline to briefly describe what your organization does. This can be changed later. {tagline?.length || 0}/{120} </p>
             </div>
             {children}
         </form>   

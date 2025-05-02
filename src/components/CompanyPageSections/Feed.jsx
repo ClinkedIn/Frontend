@@ -1,7 +1,7 @@
 import { useOutletContext } from "react-router-dom";
 
 
-const CompanyHomePage = () => {
+const CompanyFeedPage = () => {
   const {companyInfo}  = useOutletContext();
   return(
 
@@ -21,4 +21,4 @@ const CompanyHomePage = () => {
   )
 
 }
-export default CompanyHomePage;
+export default CompanyFeedPage;

@@ -22,8 +22,10 @@ const CreateCompanyPage = () => {
     const [organizationSize, setOrganizationSize] = useState("");
     const [website, setWebsite] = useState("");
     const [checkbox, setCheckbox] = useState(false);
-    //const [logo, setLogo] = useState<File | null>(null);
-    const [companyAddress, setCompanyAddress] = useState("");   
+    const [logo, setLogo] = useState(null); 
+    
+    const [companyAddress, setCompanyAddress] = useState(""); 
+    const [location, setCompanyLocation] = useState("");  
     const [logoPreview, setLogoPreview] = useState(null);
     const [errors, setErrors] = useState({ });
     const [notifications, setNotifications] = useState([]);
@@ -92,6 +94,11 @@ const CreateCompanyPage = () => {
         } else {
             newErrors.checkbox = "";
         }
+        if(!location){
+            newErrors.location = "Please enter the company location";
+        }else{
+            newErrors.location = "";
+        }
         
         setErrors(newErrors);
         return Object.keys(newErrors).filter((key) => newErrors[key]).length === 0;
@@ -108,24 +115,30 @@ const CreateCompanyPage = () => {
         e.preventDefault();
         if(isValid()){
             console.log("Page Created")
-            const company ={
-                userId: user.user._id,
-                name: companyName,
-                address:companyAddress,
-                website: website,
-                industry: industry,
-                organizationSize: organizationSize,
-                organizationType: organizationType,
-                logo: logoPreview,
-                tagLine: tagline,
-                
+            const formData = new FormData();
+            formData.append('name', companyName);
+            formData.append('address', companyAddress);
+            formData.append('website', website);
+            formData.append('industry', industry);
+            formData.append('organizationSize', organizationSize);
+            formData.append('organizationType', organizationType);
+            formData.append('tagLine', tagline);
+            formData.append('location', location);
+            
+            if (logo instanceof File) {
+                formData.append('file', logo);
             }
            
            try{
               //const response = await axios.post("http://localhost:3000/companies",company)
-              const response = await postRequest(`${BASE_URL}/companies`,company) 
+              const response = await axios.post(`${BASE_URL}/companies`,formData,{
+                headers: {
+                'Content-Type': 'multipart/form-data',
+                },
+                withCredentials:true,
+              }) 
               console.log(response.data)          
-              navigate(`/company/${response.data._id}/admin`)
+              navigate(`/company/${response.data.id}/admin`)
 
 
            } 
@@ -171,6 +184,8 @@ const CreateCompanyPage = () => {
                         checkbox={checkbox} setCheckbox={setCheckbox}
                         companyAddress={companyAddress} setCompanyAddress={setCompanyAddress}
                         logoPreview={logoPreview} setLogoPreview={setLogoPreview}
+                        logo={logo} setLogo={setLogo}
+                        location={location} setCompanyLocation={setCompanyLocation}
                         children={
                             <div className="flex  gap-2">
                                 <input type="checkbox"  checked={checkbox} onChange={(e) => setCheckbox(e.target.checked)} id="checkbox" className=" size-12 rounded-md border-gray-300  focus:border-green-500 focus:ring-green-500 " />
