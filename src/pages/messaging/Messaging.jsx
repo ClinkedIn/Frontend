@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useParams ,useLocation} from 'react-router-dom';
-import { useParams ,useLocation} from 'react-router-dom';
 import ConversationList from '../../components/messaging/ConversationList';
 import ChatWindow from '../../components/messaging/ChatWindow'; 
 import Header from '../../components/UpperNavBar';
