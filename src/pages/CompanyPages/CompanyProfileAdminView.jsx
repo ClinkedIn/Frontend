@@ -107,7 +107,8 @@ const CompanyProfileAdminViewPage = () => {
       };
 
     const handleClickCreateButton =() =>{
-        console.log("create ")
+        console.log("post job button clicked")
+        navigate(`/starthiring`)
     }
 
 
