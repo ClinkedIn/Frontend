@@ -148,7 +148,7 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
 
 
   useEffect(() => {
-    if (!conversationId || !currentUser?._id) {
+    if (!conversationId || !currentUser?._id || !otherUser._id)  {
       setLoadingMetadata(false);
       setConversationData(null); // Ensure data is null if no ID
       return;
