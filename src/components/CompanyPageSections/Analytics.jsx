@@ -51,6 +51,7 @@ const CompanyAnalyticsPage = () => {
                 }
             );
             setAnalyticsData(response.data.analytics);
+            console.log('Analytics data:', response.data);
             setError(null);
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to fetch analytics');
@@ -99,6 +100,18 @@ const CompanyAnalyticsPage = () => {
                 borderColor: 'rgb(153, 102, 255)',
                 tension: 0.1
             }]
+        }
+    };
+    const chartOptions = {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1,
+                    precision: 0
+                }
+            }
         }
     };
 
@@ -163,11 +176,11 @@ const CompanyAnalyticsPage = () => {
             <div className="grid grid-cols-1 gap-6">
                 <div className="bg-white p-4 rounded-lg shadow">
                     <h3 className="text-lg font-semibold mb-4">Visitor Trends</h3>
-                    <Line data={chartData.visitors} options={{ responsive: true }} />
+                    <Line data={chartData.visitors} options={chartOptions} />
                 </div>
                 <div className="bg-white p-4 rounded-lg shadow">
                     <h3 className="text-lg font-semibold mb-4">Follower Trends</h3>
-                    <Line data={chartData.followers} options={{ responsive: true }} />
+                    <Line data={chartData.followers} options={chartOptions} />
                 </div>
             </div>
         </div>

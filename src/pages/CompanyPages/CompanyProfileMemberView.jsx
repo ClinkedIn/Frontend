@@ -20,6 +20,7 @@ const CompanyProfileMemberViewPage = () => {
     const [activeTab, setActiveTab] = useState(currentSection);
     const [isAdmin, setIsAdmin] = useState(false);
     const [errorFetchCompanyInfo, setErrorFetchCompanyInfo] = useState(false);
+    const [isOwner, setIsOwner] = useState(false);
 
     const handleTabClick = (tab) => {
         setActiveTab(tab);
@@ -91,6 +92,7 @@ const CompanyProfileMemberViewPage = () => {
                 `${BASE_URL}/companies/${companyId}`
             );
             setCompanyInfo(response.data.company);
+            setIsOwner(response.data.userRelationship==='owner');
             console.log("Company info:", response.data.company); 
         } catch (error) {
             console.error("Error fetching company info:", error);
@@ -136,7 +138,7 @@ const CompanyProfileMemberViewPage = () => {
                                 Follow
                             </button> 
                             )}
-                            {isAdmin && (
+                            {(isAdmin || isOwner) && (
                                 <button className="mt-4 flex items-center justify-center gap-2 bg-[#0A66C2] text-white font-semibold py-2 px-8 rounded-full hover:bg-[#004182]" onClick={() => navigate(`/company/${companyId}/admin`)}>
                                     Show as Admin
                                 </button>

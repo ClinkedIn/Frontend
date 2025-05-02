@@ -42,6 +42,7 @@ const CompanyProfileAdminViewPage = () => {
     const [activeTab, setActiveTab] = useState(currentSection);
     const [isAdmin, setIsAdmin] = useState(false);
     const [errorFetchCompanyInfo, setErrorFetchCompanyInfo] = useState(false);
+    const [isOwner, setIsOwner] = useState(false);
 
      /**
        * Fetches current user profile data
@@ -118,6 +119,7 @@ const CompanyProfileAdminViewPage = () => {
                 `${BASE_URL}/companies/${companyId}`
             );
             setCompanyInfo(response.data.company); 
+
             setCompanyName(response.data.company.name)
             setCompanyAddress(response.data.company.address)
             setWebsite(response.data.company.website)
@@ -128,6 +130,7 @@ const CompanyProfileAdminViewPage = () => {
             setTagline(response.data.company.tagLine)
             setCompanyLocation(response.data.company.location)
             setLogo(response.data.company.logo)
+            setIsOwner(response.data.userRelationship ==='owner');
             console.log("company data:", response.data);
             
         } catch (error) {
@@ -145,8 +148,7 @@ const CompanyProfileAdminViewPage = () => {
           
                 setUser(response.data.user);
                 console.log("User data:", response.data.user);
-                const isAdmin = user?.adminInCompanies.some((CompanyId) => CompanyId === companyId );
-                setIsAdmin(isAdmin);
+                
                 console.log("isAdmin:", isAdmin);
             } catch (error) {
               console.error("Error fetching user:", error);
@@ -154,12 +156,18 @@ const CompanyProfileAdminViewPage = () => {
           };
       
           fetchUser();
-      }, []);
-    /*useEffect(() => {
-        if (user?._id && isAdmin === false) {
+      }, [user?._id]);
+      useEffect(() => { 
+        if ( user?._id && companyInfo?.id) {
+            const isAdmin = user?.adminInCompanies.some((CompanyId) => CompanyId === companyId );
+            setIsAdmin(isAdmin);
+        };
+    },[user?._id, companyInfo?.id]);
+    useEffect(() => {
+        if (user?._id && isAdmin === false && isOwner === false) {
             navigate(`/company/${companyId}/Home`);
         }
-    }, [user?._id, isAdmin]);*/
+    }, [user?._id, isAdmin , isOwner]);
       const handleUpdatePage = async (e) => {
         e.preventDefault();
         if (!isValid()) return;
