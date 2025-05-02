@@ -132,10 +132,10 @@ const Header = ({ notifications }) => {
   useEffect(() => {
     if (!currentUser?._id) return;
 
-    const conversationsRef = collection(db, 'conversations');
+    const conversationsRef = collection(db, "conversations");
     const q = query(
       conversationsRef,
-      where('participants', 'array-contains', currentUser._id)
+      where("participants", "array-contains", currentUser._id)
     );
 
     const unsubscribe = onSnapshot(
@@ -144,17 +144,10 @@ const Header = ({ notifications }) => {
         let totalUnread = 0;
         querySnapshot.forEach((doc) => {
           const data = doc.data();
-          const countForUser = data.unreadCounts?.[currentUser.uid] || 0;
+          let countForUser = data.unreadCounts?.[currentUser._id] || 0;
+          if (data.forceUnread) countForUser = countForUser - 1;
           totalUnread += countForUser;
         });
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      let totalUnread = 0;
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        let countForUser = data.unreadCounts?.[currentUser._id] || 0;
-        if (data.forceUnread) countForUser = countForUser - 1;
-        totalUnread += countForUser;
-      });
 
         console.log("Total unread messages from Firestore:", totalUnread);
         setUnreadCountMessages(totalUnread);
@@ -167,11 +160,11 @@ const Header = ({ notifications }) => {
         setUnreadCountMessages(0);
       }
     );
+
     return () => {
       console.log("Cleaning up Firestore listener for unread messages count.");
       unsubscribe();
     };
-  }, [currentUser?.uid]);
   }, [currentUser?._id]);
 
   /**
@@ -250,8 +243,6 @@ const Header = ({ notifications }) => {
       if (location) params.append("location", location);
 
       const response = await axios.get(`${BASE_URL}/search/jobs?${params}`);
-
-      const response = await axios.get(`${BASE_URL}/search/jobs?${params}`);
       navigate("/job-board", {
         state: {
           jobs: response.data.jobs,
@@ -262,6 +253,18 @@ const Header = ({ notifications }) => {
       });
     } catch (error) {
       console.error("Search error:", error);
+    }
+  };
+
+  /**
+   * Handles user logout
+   */
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/login");
+    } catch (error) {
+      console.error("Failed to log out:", error);
     }
   };
 
@@ -445,22 +448,30 @@ const Header = ({ notifications }) => {
               src="/Images/nav-messaging.svg"
               alt="Messaging"
               className="w-6 h-6"
-            />
-            {unreadCountMessages > 0 && (
-              <div className="absolute -top-1 left-1/2 ml-1 bg-[#cb112d] text-white rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-[10px] md:text-xs font-medium">
-                {unreadCountMessages > 10 ? "10+" : unreadCountMessages}
-              </div>
-            )}
+            />{" "}
+          </button>
+
+          {unreadCountMessages > 0 && (
+            <div className="absolute -top-1 left-1/2 ml-1 bg-[#cb112d] text-white rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-[10px] md:text-xs font-medium">
+              {unreadCountMessages > 10 ? "10+" : unreadCountMessages}
+            </div>
+          )}
           {/* Messaging */}
           <button
-            className={`relative flex flex-col items-center hover:bg-gray-200 p-1.5 rounded-lg w-16 ${currentPath === "messaging" ? "text-black" : "text-gray-600"}`}
+            className={`relative flex flex-col items-center hover:bg-gray-200 p-1.5 rounded-lg w-16 ${
+              currentPath === "messaging" ? "text-black" : "text-gray-600"
+            }`}
             onClick={handleMessagingClick}
           >
             <div className="flex flex-col items-center w-full">
               <img
                 src="/Images/nav-messaging.svg"
                 alt="Messaging"
-                className={`w-5 h-5 mb-1 ${currentPath === "messaging" ? "filter-none" : "filter grayscale"}`}
+                className={`w-5 h-5 mb-1 ${
+                  currentPath === "messaging"
+                    ? "filter-none"
+                    : "filter grayscale"
+                }`}
               />
               <span className="text-xs">Messaging</span>
               {currentPath === "messaging" && (
@@ -468,7 +479,7 @@ const Header = ({ notifications }) => {
               )}
               {unreadCountMessages > 0 && (
                 <div className="absolute -top-1 left-1/2 ml-3 bg-[#cb112d] text-white rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-[10px] md:text-xs font-medium">
-                  {unreadCountMessages > 10 ? '10+' : unreadCountMessages}
+                  {unreadCountMessages > 10 ? "10+" : unreadCountMessages}
                 </div>
               )}
             </div>
@@ -510,7 +521,7 @@ const Header = ({ notifications }) => {
               onClick={() => setShowUser(!showUser)}
             >
               <img
-                src={userInfo?.profilePicture }
+                src={userInfo?.profilePicture}
                 alt="User Profile"
                 className="w-8 h-8 rounded-full mr-3"
               />
@@ -528,7 +539,7 @@ const Header = ({ notifications }) => {
                 <div className="px-4 py-2 border-b border-gray-200">
                   <div className="flex items-center">
                     <img
-                      src={userInfo?.profilePicture }
+                      src={userInfo?.profilePicture}
                       alt="User Profile"
                       className="w-8 h-8 rounded-full mr-3"
                     />
