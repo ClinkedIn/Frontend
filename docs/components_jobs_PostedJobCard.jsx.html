@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/jobs/PostedJobCard.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/jobs/PostedJobCard.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * PostedJobCard Component
+ *
+ * Displays a compact card for a job that has been posted by a user or company.
+ * Includes job details, company information, and actions to manage or view applicants.
+ *
+ * @component
+ * @param {Object} props - Props passed to the component
+ * @param {Object} props.job - The job object containing details like title, location, and workplace type
+ * @param {Object} props.company - The company object, optionally containing the logo and name
+ * @param {string} props.state - The current view context (e.g., "ManageJob" or another dashboard tab)
+ * @param {Object} props.user - The current user object, passed when navigating to job management
+ *
+ * @returns {JSX.Element} The rendered posted job card component
+ */
+
+import React from 'react';
+import { BsThreeDots } from "react-icons/bs";
+import { useNavigate } from 'react-router-dom';
+
+function PostedJobCard({ job, company, state, user }) {
+  const navigate = useNavigate();
+
+  // Extract job details with fallback logic
+  const jobTitle = job?.title || job?.job?.title || 'N/A';
+  const companyName = job?.company?.name || company?.name || job?.job?.company?.name || 'company name';
+  const companyLocation = job?.jobLocation || job?.job?.jobLocation || 'N/A';
+  const workplaceType = job?.workplaceType || job?.job?.workplaceType || 'N/A';
+  const status = job?.status || 'N/A';
+  const companyLogo = company?.logo || '';
+
+  /**
+   * Handles navigation when the user clicks the action button.
+   * Navigates either to job details or job management depending on `state`.
+   */
+  const handleContinue = () => {
+    if (state === "ManageJob") {
+      navigate('/jobdetails', {
+        state: { job, company }
+      });
+    } else {
+      navigate('/managejob', {
+        state: { job, company, user }
+      });
+    }
+  };
+
+  return (
+    &lt;div className="bg-white rounded-lg shadow p-4 sm:p-6 flex items-center justify-between">
+      {/* Left: Logo + Info */}
+      &lt;div className="flex items-center flex-grow">
+        &lt;img
+          src={companyLogo || 'https://placehold.co/40x40/EBF4FD/0A66C2?text=L'}
+          alt={`${companyName} logo`}
+          className="w-10 h-10 object-contain rounded-full mr-4 flex-shrink-0"
+        />
+        &lt;div className="flex-grow overflow-hidden">
+          &lt;h3 className="text-base font-semibold text-gray-800 truncate">{jobTitle}&lt;/h3>
+          &lt;p className="text-sm text-gray-600 mt-0.5 truncate">
+            {companyName} • {companyLocation} • ({workplaceType})
+          &lt;/p>
+        &lt;/div>
+      &lt;/div>
+
+      {/* Right: Action Buttons */}
+      &lt;div className="flex items-center space-x-2 flex-shrink-0 ml-4">
+        &lt;button
+          onClick={handleContinue}
+          className="px-4 py-1.5 border border-gray-400 text-gray-700 rounded-full text-sm font-semibold hover:bg-gray-100 transition-colors"
+        >
+          {state === "ManageJob" ? "View Applicants" : "Manage job"}
+        &lt;/button>
+      &lt;/div>
+    &lt;/div>
+  );
+}
+
+export default PostedJobCard;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#ChatWindow">ChatWindow</a></li><li><a href="global.html#CommentSection">CommentSection</a></li><li><a href="global.html#ConversationListItem">ConversationListItem</a></li><li><a href="global.html#ConversationSearch">ConversationSearch</a></li><li><a href="global.html#CreatePostModal">CreatePostModal</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#HirePage">HirePage</a></li><li><a href="global.html#JobBoardPage">JobBoardPage</a></li><li><a href="global.html#JobDetails">JobDetails</a></li><li><a href="global.html#Jobs">Jobs</a></li><li><a href="global.html#Main">Main</a></li><li><a href="global.html#ManageJob">ManageJob</a></li><li><a href="global.html#MyJobs">MyJobs</a></li><li><a href="global.html#Notification">Notification</a></li><li><a href="global.html#NotificationCard">NotificationCard</a></li><li><a href="global.html#PostMenu">PostMenu</a></li><li><a href="global.html#PostReactions">PostReactions</a></li><li><a href="global.html#ScreeningQuestionCard">ScreeningQuestionCard</a></li><li><a href="global.html#debounce">debounce</a></li><li><a href="global.html#fetchComments">fetchComments</a></li><li><a href="global.html#fetchNotifications">fetchNotifications</a></li><li><a href="global.html#fetchPosts">fetchPosts</a></li><li><a href="global.html#fetchUser">fetchUser</a></li><li><a href="global.html#filteredNotifications">filteredNotifications</a></li><li><a href="global.html#getReactionIcon">getReactionIcon</a></li><li><a href="global.html#handleAddComment">handleAddComment</a></li><li><a href="global.html#handleBlockUser">handleBlockUser</a></li><li><a href="global.html#handleClick">handleClick</a></li><li><a href="global.html#handleCreatePost">handleCreatePost</a></li><li><a href="global.html#handleDeleteNotification">handleDeleteNotification</a></li><li><a href="global.html#handleLikeClick">handleLikeClick</a></li><li><a href="global.html#handleMainFilterChange">handleMainFilterChange</a></li><li><a href="global.html#handleMuteDuration">handleMuteDuration</a></li><li><a href="global.html#handleNotificationClick">handleNotificationClick</a></li><li><a href="global.html#handleReact">handleReact</a></li><li><a href="global.html#handleReactToComment">handleReactToComment</a></li><li><a href="global.html#handleReportPost">handleReportPost</a></li><li><a href="global.html#handleSavePost">handleSavePost</a></li><li><a href="global.html#handleSendTestNotification">handleSendTestNotification</a></li><li><a href="global.html#handleSubmit">handleSubmit</a></li><li><a href="global.html#requestOTP">requestOTP</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#toggleComments">toggleComments</a></li><li><a href="global.html#verifyOTP">verifyOTP</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Fri May 02 2025 17:16:34 GMT+0300 (Eastern European Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

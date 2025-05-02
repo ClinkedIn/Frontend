@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: pages/jobs/JobBoardPage.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: pages/jobs/JobBoardPage.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>// JobBoardPage.jsx
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import Header from "../../components/UpperNavBar";
+import { useLocation } from "react-router-dom";
+import JobCard from '../../components/jobs/JobCard';
+import Filter from "../../components/jobs/Filter";
+import ApplyJob from "../../components/jobs/ApplyJob";
+import { BASE_URL } from "../../constants";
+/**
+ * JobBoardPage component displays a job board with job listings, company filters,
+ * and job details with options to save and apply for jobs.
+ *
+ * @component
+ * @example
+ * return (
+ *   &lt;JobBoardPage />
+ * )
+ */
+const JobBoardPage = () => {
+  const [jobs, setJobs] = useState([]); // Stores list of job postings
+  const [companies, setCompanies] = useState([]); // Stores list of companies
+  const [selectedJob, setSelectedJob] = useState(null); // Stores the selected job details
+  const [tab, setTab] = useState(); // Stores the current tab state
+  const location = useLocation(); // Accesses the location object from React Router
+  const [isModalOpen, setIsModalOpen] = useState(false); // Controls modal visibility
+  const [refreshTrigger, setRefreshTrigger] = useState(false); // Used to trigger job list refresh
+
+  const [experience, setExperience] = useState(0); // Filter by minimum experience
+  const [workType, setWorkType] = useState(""); // Filter by work type (e.g., full-time, part-time)
+  const [selectedCompany, setSelectedCompany] = useState(""); // Filter by company
+
+  /**
+   * Opens the job application modal
+   */
+  const openModal = () => setIsModalOpen(true);
+
+  /**
+   * Closes the job application modal
+   */
+  const closeModal = () => setIsModalOpen(false);
+
+  /**
+   * Fetches the list of companies from the server
+   */
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      try {
+        const res = await axios.get(`${BASE_URL}/companies`);
+        setCompanies(res.data);
+      } catch (err) {
+        console.error("Error fetching companies", err);
+      }
+    };
+    fetchCompanies();
+  }, []);
+
+  /**
+   * Fetches job listings based on location state or initial page load
+   */
+  useEffect(() => {
+    if (location.state) {
+      setJobs(location.state.jobs || []);
+      setSelectedJob(location.state.selectedJob || null);
+      setTab(location.state.currentPath || null);
+    }
+  }, [location.state]);
+  console.log("jobs in JobBoardPage:", jobs); // Log the job object
+
+  /**
+   * Filters jobs based on experience, work type, or selected company
+   */
+  useEffect(() => {
+    const shouldFilter = experience || workType || selectedCompany;
+    if (!shouldFilter) return;
+    const fetchFilteredJobs = async () => {
+      try {
+        const params = new URLSearchParams();
+        if (experience) params.append('minExperience', experience);
+        if (workType) params.append('q', workType);
+        if (selectedCompany) params.append('companyId', selectedCompany);
+
+        const res = await axios.get(`${BASE_URL}/search/jobs?${params}`);
+        setJobs(res.data.jobs || []);
+      } catch (err) {
+        console.error("Error filtering jobs", err);
+      }
+    };
+
+    fetchFilteredJobs();
+  }, [experience, workType, selectedCompany, refreshTrigger]);
+
+  /**
+   * Saves or unsaves the selected job
+   */
+  const handleSave = async () => {
+    const jobId = selectedJob?._id || selectedJob?.id || selectedJob?.jobId;
+    if (!jobId) return;
+
+    try {
+      if (!selectedJob.isSaved) {
+        await axios.post(`${BASE_URL}/jobs/${jobId}/save`, {}, { withCredentials: true });
+        setSelectedJob(prev => ({ ...prev, isSaved: true }));
+        alert("Job saved!");
+      } else {
+        await axios.delete(`${BASE_URL}/jobs/${jobId}/save`, { withCredentials: true });
+        setSelectedJob(prev => ({ ...prev, isSaved: false }));
+        alert("Job unsaved!");
+      }
+      setRefreshTrigger(prev => !prev);
+    } catch (error) {
+      console.error("Save error:", error);
+      if (error.response) alert(`Failed: ${error.response.data.message}`);
+    }
+  };
+  console.log("selectedJob", selectedJob);
+  console.log("jobs in JobBoardPage:", jobs); // Log the job object
+  return (
+    &lt;div className={`flex flex-col md:flex-row h-screen ${tab ? "mt-32 md:mt-36" : "mt-16"} md:pl-[172px] md:pr-[172px]`}>
+      &lt;Header />
+      {tab &amp;&amp; (
+        &lt;Filter
+          experience={experience}
+          setExperience={setExperience}
+          workType={workType}
+          setWorkType={setWorkType}
+          selectedCompany={selectedCompany}
+          setSelectedCompany={setSelectedCompany}
+          companies={companies}
+        />
+      )}
+
+      &lt;div className="md:w-1/3 w-full h-1/2 md:h-full overflow-y-auto border-r border-gray-300 bg-gray-50">
+        &lt;div className="pl-2 py-3 text-sm bg-[#0a66c2] text-white w-full">
+          {location.state?.searchQuery || location.state?.location
+            ? `Search Results for ${location.state.searchQuery || location.state.location}`
+            : "Top job picks for you"}
+          &lt;br />
+          {jobs.length || 0} results
+        &lt;/div>
+
+        {jobs.length > 0 ? (
+          jobs.map((job, index) => (
+            &lt;div key={index}>
+              &lt;JobCard job={job} jobs={jobs} />
+            &lt;/div>
+          ))
+        ) : (
+          &lt;p className="text-center text-gray-500 p-4">No jobs available for the selected filters.&lt;/p>
+        )}
+      &lt;/div>
+
+      &lt;div className="md:w-2/3 w-full h-1/2 md:h-full overflow-y-auto p-6 bg-white">
+        {selectedJob ? (
+          &lt;div>
+            &lt;div className="flex flex-row gap-5">
+              &lt;img
+                src={selectedJob?.companyId?.logo || "https://picsum.photos/80?random=1"}
+                alt="Company Logo"
+                className="w-12 h-12 object-contain"
+              />
+              &lt;p>{selectedJob?.companyId?.name || ""}&lt;/p>
+            &lt;/div>
+            &lt;h2 className="text-xl font-semibold mb-2">{selectedJob.title}&lt;/h2>
+            &lt;p className="text-sm text-gray-600 mb-1">{selectedJob.jobLocation}&lt;/p>
+            &lt;span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded mr-2">
+              {selectedJob.jobType || "Full-time"}
+            &lt;/span>
+            &lt;span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
+              {selectedJob.workplaceType || "On-site"}
+            &lt;/span>
+
+            &lt;div className="mt-4">
+              &lt;button onClick={openModal} className="mt-4 mr-4 bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700">
+                Easy Apply
+              &lt;/button>
+              &lt;ApplyJob isOpen={isModalOpen} onClose={closeModal} job={selectedJob} jobId={selectedJob._id} />
+
+              &lt;button onClick={handleSave} className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700">
+                {selectedJob.isSaved ? "Unsave Job" : "Save Job"}
+              &lt;/button>
+
+              &lt;h3 className="font-medium text-sm mb-1 mt-2">About the job&lt;/h3>
+              &lt;p className="text-sm text-gray-700 whitespace-pre-wrap">
+                {selectedJob.description || "No description available."}
+              &lt;/p>
+            &lt;/div>
+          &lt;/div>
+        ) : (
+          &lt;p className="text-center text-gray-500">Select a job to see details&lt;/p>
+        )}
+      &lt;/div>
+    &lt;/div>
+  );
+};
+
+export default JobBoardPage;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#ChatWindow">ChatWindow</a></li><li><a href="global.html#CommentSection">CommentSection</a></li><li><a href="global.html#ConversationListItem">ConversationListItem</a></li><li><a href="global.html#ConversationSearch">ConversationSearch</a></li><li><a href="global.html#CreatePostModal">CreatePostModal</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#HirePage">HirePage</a></li><li><a href="global.html#JobBoardPage">JobBoardPage</a></li><li><a href="global.html#JobDetails">JobDetails</a></li><li><a href="global.html#Jobs">Jobs</a></li><li><a href="global.html#Main">Main</a></li><li><a href="global.html#ManageJob">ManageJob</a></li><li><a href="global.html#MyJobs">MyJobs</a></li><li><a href="global.html#Notification">Notification</a></li><li><a href="global.html#NotificationCard">NotificationCard</a></li><li><a href="global.html#PostMenu">PostMenu</a></li><li><a href="global.html#PostReactions">PostReactions</a></li><li><a href="global.html#ScreeningQuestionCard">ScreeningQuestionCard</a></li><li><a href="global.html#debounce">debounce</a></li><li><a href="global.html#fetchComments">fetchComments</a></li><li><a href="global.html#fetchNotifications">fetchNotifications</a></li><li><a href="global.html#fetchPosts">fetchPosts</a></li><li><a href="global.html#fetchUser">fetchUser</a></li><li><a href="global.html#filteredNotifications">filteredNotifications</a></li><li><a href="global.html#getReactionIcon">getReactionIcon</a></li><li><a href="global.html#handleAddComment">handleAddComment</a></li><li><a href="global.html#handleBlockUser">handleBlockUser</a></li><li><a href="global.html#handleClick">handleClick</a></li><li><a href="global.html#handleCreatePost">handleCreatePost</a></li><li><a href="global.html#handleDeleteNotification">handleDeleteNotification</a></li><li><a href="global.html#handleLikeClick">handleLikeClick</a></li><li><a href="global.html#handleMainFilterChange">handleMainFilterChange</a></li><li><a href="global.html#handleMuteDuration">handleMuteDuration</a></li><li><a href="global.html#handleNotificationClick">handleNotificationClick</a></li><li><a href="global.html#handleReact">handleReact</a></li><li><a href="global.html#handleReactToComment">handleReactToComment</a></li><li><a href="global.html#handleReportPost">handleReportPost</a></li><li><a href="global.html#handleSavePost">handleSavePost</a></li><li><a href="global.html#handleSendTestNotification">handleSendTestNotification</a></li><li><a href="global.html#handleSubmit">handleSubmit</a></li><li><a href="global.html#requestOTP">requestOTP</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#toggleComments">toggleComments</a></li><li><a href="global.html#verifyOTP">verifyOTP</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Fri May 02 2025 17:16:34 GMT+0300 (Eastern European Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

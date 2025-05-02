@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: pages/jobs/Jobs.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: pages/jobs/Jobs.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Jobs Component
+ * 
+ * This component renders a job listing page with user profile information, 
+ * sidebar navigation for job preferences, and a list of job recommendations. 
+ * It also includes a modal for setting job preferences.
+ * 
+ * Features:
+ * - Authenticates a test user and fetches user data
+ * - Fetches a list of job postings from the server
+ * - Displays job postings using the JobCard component
+ * - Sidebar for preferences, my jobs, and posting a job
+ * - Modal for editing user job preferences and qualifications
+ * 
+ * @component
+ * @returns {JSX.Element} The rendered job listing page
+ */
+
+import React, { useEffect, useState } from 'react';
+import Header from '../../components/UpperNavBar';
+import ProfileCard from '../../components/ProfileCard';
+import FooterLinks from '../../components/FooterLinks';
+import axios from "axios";
+import { FaClipboardList, FaBookmark, FaFileAlt, FaPen, FaArrowRight } from 'react-icons/fa';
+import { IoMdClose } from 'react-icons/io';
+import JobCard from '../../components/jobs/JobCard';
+import { useLocation, useNavigate } from "react-router-dom";
+import { BASE_URL } from "../../constants";
+
+/**
+ * Jobs functional component
+ * @returns {JSX.Element}
+ */
+const Jobs = () => {
+    const navigate = useNavigate();
+    const [user, setUser] = useState();
+    const [searchQuery, setSearchQuery] = useState("");
+    const [showPreferences, setShowPreferences] = useState(false);
+    const [jobs, setJobs] = useState();
+    const [refreshTrigger, setRefreshTrigger] = useState(false);
+
+    /**
+     * Fetches job listings from the backend server
+     * @async
+     * @function
+     * @returns {Promise&lt;Object[]>} Array of job objects
+     */
+    const getJobs = async () => {
+        try {
+            const response = await axios.get(`${BASE_URL}/jobs`);
+            setJobs(response.data);
+            console.log("Jobs data:", response.data);
+            return response.data;
+        } catch (error) {
+            if (error.response) {
+                console.error("Error - Server Response:", error.response.data);
+            } else if (error.request) {
+                console.error("Error - No Response:", error.request);
+            } else {
+                console.error("Error:", error.message);
+            }
+        }
+    };
+
+    /**
+     * Fetches current user profile data
+     * @async
+     * @function
+     */
+    const fetchUser = async () => {
+        try {
+            const response = await axios.get(`${BASE_URL}/user/me`, {
+                withCredentials: true
+            });
+            setUser(response.data);
+            console.log("User data:", response.data);
+        } catch (error) {
+            console.error("Error fetching user:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchUser();
+        getJobs();
+    }, [refreshTrigger]);
+
+    /**
+     * Handles change in search query input
+     * @function
+     * @param {string} query - The search input string
+     */
+    const handleSearchChange = (query) => {
+        setSearchQuery(query);
+    };
+
+    /**
+     * Triggers refresh of job listings
+     * @function
+     */
+    const handleJobDelete = () => {
+        setRefreshTrigger(prev => !prev);
+    };
+
+    return (
+        &lt;div className="bg-[#f4f2ee] min-h-screen ">
+            &lt;Header />
+            &lt;div className="mx-auto px-4 pt-20 flex flex-col md:flex-row gap-6">
+                {/* Left Sidebar */}
+                &lt;div className="w-full md:w-1/4 p-4">
+                    &lt;ProfileCard user={user} />
+
+                    &lt;div className="bg-white shadow-md rounded-lg pt-1 space-y-1 mt-2.5">
+                        &lt;button 
+                            onClick={() => navigate("/myjobs", {
+                                state: { allJobs: jobs }
+                            })}
+                            className="flex items-center gap-3 font-semibold w-full text-left py-3 px-6 hover:bg-gray-100">
+                            &lt;FaBookmark className="font-semibold text-[#3d3d3d]" /> My jobs
+                        &lt;/button>
+                        &lt;button 
+                            onClick={() => navigate("/starthiring", { state: user })}
+                            className="flex items-center gap-3 w-full font-semibold text-left p-5 text-blue-600 hover:bg-gray-100 rounded-md"
+                        >
+                            &lt;FaPen className="text-blue-600 font-bold" /> Post a free job
+                        &lt;/button>
+                    &lt;/div>
+                &lt;/div>
+
+                {/* Top picks for you */}
+                &lt;div className="flex flex-col bg-white shadow-md rounded-lg p-6 mr-[315px] w-full lg:w-3/4">
+                    &lt;h2 className="text-xl font-semibold text-gray-800 mb-4 border-b-2 border-gray-300 pb-2" >
+                        Job Picks for you
+                    &lt;/h2>
+                    {jobs &amp;&amp; jobs.length > 0 ? (
+                        jobs.map((job, index) => (
+                            &lt;div key={job.id || job._id || index}>
+                                &lt;JobCard 
+                                    job={job} 
+                                    jobs={jobs}
+                                    onDelete={() => setRefreshTrigger(prev => !prev)}
+                                />
+                            &lt;/div>
+                        ))
+                    ) : (
+                        &lt;p>No jobs available at the moment.&lt;/p>
+                    )}
+                &lt;/div>
+            &lt;/div>
+        &lt;/div>
+    );
+};
+
+export default Jobs;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#ChatWindow">ChatWindow</a></li><li><a href="global.html#CommentSection">CommentSection</a></li><li><a href="global.html#ConversationListItem">ConversationListItem</a></li><li><a href="global.html#ConversationSearch">ConversationSearch</a></li><li><a href="global.html#CreatePostModal">CreatePostModal</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#HirePage">HirePage</a></li><li><a href="global.html#JobBoardPage">JobBoardPage</a></li><li><a href="global.html#JobDetails">JobDetails</a></li><li><a href="global.html#Jobs">Jobs</a></li><li><a href="global.html#Main">Main</a></li><li><a href="global.html#ManageJob">ManageJob</a></li><li><a href="global.html#MyJobs">MyJobs</a></li><li><a href="global.html#Notification">Notification</a></li><li><a href="global.html#NotificationCard">NotificationCard</a></li><li><a href="global.html#PostMenu">PostMenu</a></li><li><a href="global.html#PostReactions">PostReactions</a></li><li><a href="global.html#ScreeningQuestionCard">ScreeningQuestionCard</a></li><li><a href="global.html#debounce">debounce</a></li><li><a href="global.html#fetchComments">fetchComments</a></li><li><a href="global.html#fetchNotifications">fetchNotifications</a></li><li><a href="global.html#fetchPosts">fetchPosts</a></li><li><a href="global.html#fetchUser">fetchUser</a></li><li><a href="global.html#filteredNotifications">filteredNotifications</a></li><li><a href="global.html#getReactionIcon">getReactionIcon</a></li><li><a href="global.html#handleAddComment">handleAddComment</a></li><li><a href="global.html#handleBlockUser">handleBlockUser</a></li><li><a href="global.html#handleClick">handleClick</a></li><li><a href="global.html#handleCreatePost">handleCreatePost</a></li><li><a href="global.html#handleDeleteNotification">handleDeleteNotification</a></li><li><a href="global.html#handleLikeClick">handleLikeClick</a></li><li><a href="global.html#handleMainFilterChange">handleMainFilterChange</a></li><li><a href="global.html#handleMuteDuration">handleMuteDuration</a></li><li><a href="global.html#handleNotificationClick">handleNotificationClick</a></li><li><a href="global.html#handleReact">handleReact</a></li><li><a href="global.html#handleReactToComment">handleReactToComment</a></li><li><a href="global.html#handleReportPost">handleReportPost</a></li><li><a href="global.html#handleSavePost">handleSavePost</a></li><li><a href="global.html#handleSendTestNotification">handleSendTestNotification</a></li><li><a href="global.html#handleSubmit">handleSubmit</a></li><li><a href="global.html#requestOTP">requestOTP</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#toggleComments">toggleComments</a></li><li><a href="global.html#verifyOTP">verifyOTP</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Fri May 02 2025 17:16:34 GMT+0300 (Eastern European Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

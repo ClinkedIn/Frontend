@@ -11,7 +11,7 @@ import UpdateUserNameForm from "./components/authentication/Reset/UpdateUserName
 import ForgotPasswordForm from "./components/authentication/Reset/ForgotPassword/ForgotPasswordForm";
 import Notification from "./pages/notifications/Notifications";
 import Jobs from "./pages/jobs/Jobs";
-import WelcomePage from "../src/pages/WelcomePage/WelcomePage";
+import LandingPage from "./pages/LandingPage/LandingPage.tsx";
 import ReportedPostsAdmin from "./components/AdminPanel/ReportedPostsAdmin";
 import NotificationPost from "./components/Notification/NotificationPost.jsx";
 import ProfilePage from "./pages/myProfile/ProfilePage";
@@ -19,8 +19,8 @@ import CreateCompanyPage from "./pages/CompanyPages/CreateCompanyPage";
 import CompanyProfileMemberViewPage from "./pages/CompanyPages/CompanyProfileMemberView";
 import CompanyProfileAdminViewPage from "./pages/CompanyPages/CompanyProfileAdminView";
 import CompanyHomePage from "./components/CompanyPageSections/Home"
-import CompanyPostsPage from "./components/CompanyPageSections/Posts"
-import CompanyJobsPage from "./components/CompanyPageSections/Jobs"
+import CompanyPostsPage from "./components/CompanyPageSections/Posts.jsx"
+import CompanyJobsPage from "./components/CompanyPageSections/Jobs.jsx"
 import SettingsPage from "./components/Settings/Settings.tsx";
 import MyJobs from "./pages/jobs/MyJobs.jsx";
 import MessagingPage from "./pages/messaging/Messaging.jsx";
@@ -28,10 +28,21 @@ import JobBoardPage from "./pages/jobs/JobBoardPage.jsx";
 import JobListing from "./components/AdminPanel/JobListing";
 import Analytics from "./components/AdminPanel/Analytics";
 import AdminPanel from "./components/AdminPanel/AdminPanel";
-
-
-
 import UserProfileViewPage from "./pages/myProfile/OtherProfile/UserProfileViewPage";
+import HirePage from "./pages/jobs/HirePage.jsx";
+import JobDescriptionPage from "./pages/jobs/JobDescriptionPage.jsx";
+import JobSettingsPage from "./pages/jobs/JobSettingsPage.jsx";
+import Review from "./pages/jobs/Review.jsx";
+import JobDetails from "./pages/jobs/JobDetails.jsx";
+import ManageJob from "./pages/jobs/ManageJob.jsx";
+import SubscriptionPlans from "./components/SubscriptionBasedPayment/subscriptionPlans.jsx";
+import SubscriptionStatus from './components/SubscriptionBasedPayment/SubscriptionStatus';
+import PaymentSuccess from './components/SubscriptionBasedPayment/PaymentSuccessHandler';
+import CompanyFeedPage from "./components/CompanyPageSections/Feed";
+import CompanyAnalyticsPage from "./components/CompanyPageSections/Analytics.jsx";
+import CompanyManageJobsPage from "./components/CompanyPageSections/ManageJobs.jsx";
+
+import Network from "./components/Network/network";
 
 // Define your routes as an array of RouteObject (compatible with React Router v6)
 const routes: RouteObject[] = [
@@ -85,6 +96,29 @@ const routes: RouteObject[] = [
     element: React.createElement(Jobs),
   },
   {
+    path: "/jobdescription",
+    element: React.createElement(JobDescriptionPage),
+  },
+  {
+    path: "/jobsettings",
+    element: React.createElement(JobSettingsPage),
+  },
+  {
+    path: "/jobdetails",
+    element: React.createElement(JobDetails),
+  },
+  {
+    path: "/managejob",
+    element: React.createElement(ManageJob),
+  },
+  {
+    path: "/starthiring",
+    element: React.createElement(HirePage),
+  }, {
+    path: "/review",
+    element: React.createElement(Review),
+  },
+  {
     path: "/myjobs",
     element: React.createElement(MyJobs),
   },
@@ -94,7 +128,11 @@ const routes: RouteObject[] = [
   },
   {
     path: "/",
-    element: React.createElement(WelcomePage),
+    element: React.createElement(LandingPage),
+  },
+  {
+    path: "/network",
+    element: React.createElement(Network),
   },
   {
     path: "/admin",
@@ -152,9 +190,9 @@ const routes: RouteObject[] = [
         index: true,
         element: React.createElement(Navigate, { to: "Feed", replace: true }),
       }, // Default to Home
-      { path: "Feed", element: React.createElement(CompanyHomePage) },
-      { path: "Analytics", element: React.createElement(CompanyPostsPage) },
-      { path: "Edit Page", element: React.createElement(CompanyJobsPage) },
+      { path: "Feed", element: React.createElement(CompanyFeedPage) },
+      { path: "Analytics", element: React.createElement(CompanyAnalyticsPage) },
+      { path: "Jobs", element: React.createElement(CompanyManageJobsPage) },
     ],
   },
     {
@@ -162,7 +200,7 @@ const routes: RouteObject[] = [
     element: React.createElement(SettingsPage),
   },
   {
-    path:"/messaging/:id",
+    path: "/messaging",
     element: React.createElement(MessagingPage),
   }
 
@@ -174,7 +212,20 @@ const routes: RouteObject[] = [
   {
   path: "/user/:userId",
   element: React.createElement(UserProfileViewPage),
-}
+  },
+  {
+    path: "/Subscription-Plans",
+    element: React.createElement(SubscriptionPlans),
+  },
+  {
+    path: "/Subscription-Status",
+    element: React.createElement(SubscriptionStatus),
+  },
+  {
+    path: "/Payment-Success",
+    element: React.createElement(PaymentSuccess),
+  }
+  
 ];
 
 export default routes;

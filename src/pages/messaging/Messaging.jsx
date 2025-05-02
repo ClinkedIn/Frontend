@@ -1,67 +1,60 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams ,useLocation} from 'react-router-dom';
 import ConversationList from '../../components/messaging/ConversationList';
 import ChatWindow from '../../components/messaging/ChatWindow'; 
 import Header from '../../components/UpperNavBar';
 import { set } from 'date-fns';
 import { db } from '../../../firebase';
 import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
+import axios from 'axios';
+import { BASE_URL } from '../../constants';
 
 // Function to create the composite conversation ID
 const createConversationId = (uid1, uid2) => {
-    return uid1 < uid2 ? `${uid1}_${uid2}` : `${uid2}_${uid1}`;
+    return uid1 < uid2 ? `${uid1}_${uid2}` :  `${uid2}_${uid1}`;
 };
 
 
 const MessagingPage = () => {
-    const { id } = useParams();
-    const userId = id?.toString() ; 
-    
-    const [currentUser, setCurrentUser] = useState({
-        uid: userId, 
-        displayName: userId === '123' ? 'Abdo' : userId === '234' ? 'Ali Abdelghani' : userId === '345' ? 'Ibrahim Muhammed' : userId === '456' ? 'Adham Osama' : userId === '567' ? 'Mohamed Samir' : 'Unknown', 
-        photoURL: 'https://picsum.photos/80' 
-    });
-
-   
-
-    const [otherUser, setOtherUser] = useState(null);
+    const location = useLocation();
+    const  jobApplicant = location.state || {};
+    console.log("jobApplicant", jobApplicant); // DEBUG
+    const [otherUser, setOtherUser] = useState(jobApplicant);
+    const [currentUser, setUser] = useState();
     const [selectedConversationId, setSelectedConversationId] = useState(null);
-    const [showChatOnMobile, setShowChatOnMobile] = useState(false); // For mobile ui
+    const [showChatOnMobile, setShowChatOnMobile] = useState(!!jobApplicant); // For mobile ui
     const [notifications, setNotifications] = useState([]);
-
     const [conversations, setConversations] = useState([]);
     const [loadingConversations, setLoadingConversations] = useState(true);
-    const [errorConversations, setErrorConversations] = useState(null);
-    /*
-     const [currentUser, setUser] = useState();
-    const fetchUser = async () => {
-        try {
-          const response = await axios.get(`${BASE_URL}/user/me`, {
-        
-            withCredentials:true
-          });
-      
-          setUser(response.data);
-          console.log("User data:", response.data);
-        } catch (error) {
-          console.error("Error fetching user:", error);
-        }
-      };
+    const [errorConversations, setErrorConversations] = useState(jobApplicant ? createConversationId(currentUser?._id, jobApplicant._id) : null);
+    
+   
+
+
+    
       useEffect(() => {
-        const loginAndFetchData = async () => {
-          //await testLogin(); // Ensure login is completed first
-          fetchUser(); 
+        const fetchUser = async () => {
+          try {
+            const response = await axios.get(`${BASE_URL}/user/me`, {
+          
+              withCredentials:true
+            });
+        
+            setUser(response.data.user);
+            console.log("User data:", response.data.user);
+          } catch (error) {
+            console.error("Error fetching user:", error);
+          }
         };
-      
-        loginAndFetchData();
-      }, []);*/
+        fetchUser(); 
+
+      }, []);
 
     useEffect(() => {
        
-        if (!currentUser?.uid) {
+        if (!currentUser?._id) {
             setLoadingConversations(false);
-            setErrorConversations("Not logged in");
+            setErrorConversations("Loading user data...");
             setConversations([]);
             return;
         };
@@ -72,7 +65,7 @@ const MessagingPage = () => {
         const conversationsRef = collection(db, 'conversations');
         const q = query(
             conversationsRef,
-            where('participants', 'array-contains', currentUser.uid),
+            where('participants', 'array-contains', currentUser._id),
             orderBy('lastUpdatedAt', 'desc')
         );
 
@@ -93,7 +86,7 @@ const MessagingPage = () => {
         // Cleanup listener on component unmount
         return () => unsubscribe();
 
-    }, [currentUser?.uid]); // Re-run if user changes
+    }, [currentUser?._id]); // Re-run if user changes
 
     // Reset selected chat if user logs out/changes
     useEffect(() => {
@@ -102,6 +95,15 @@ const MessagingPage = () => {
             setShowChatOnMobile(false);
         }
     }, [currentUser]);
+
+    useEffect(() => {
+      if (jobApplicant?._id && currentUser?._id) {
+          const conversationId = createConversationId(currentUser._id, jobApplicant._id);
+          setSelectedConversationId(conversationId);
+          setOtherUser(jobApplicant);
+          setShowChatOnMobile(true);
+      }
+  }, [currentUser?._id, jobApplicant?._id]);
 
     const handleSelectConversation = (conversationId,otherUserInfo) => {
         setSelectedConversationId(conversationId);
@@ -118,8 +120,8 @@ const MessagingPage = () => {
     const handleSelectUserFromSearch = async (selectedUser) => {
         if (!currentUser || !selectedUser) return;
 
-        const currentUid = currentUser.uid;
-        const selectedUid = selectedUser.userId;
+        const currentUid = currentUser._id;
+        const selectedUid = selectedUser._id;
         const existingConversation =conversations.find(conv => conv.participants.includes(currentUid) && conv.participants.includes(selectedUid)
         );
         if(existingConversation){
@@ -137,13 +139,6 @@ const MessagingPage = () => {
 
  
     };
-     const fakeConnections = [
-        { userId: '123', fullName: 'Abdo', profilePicture: 'https://picsum.photos/80' },
-        { userId: '234', fullName: 'Ali Abdelghani', profilePicture: 'https://picsum.photos/80' },
-        { userId: '345', fullName: 'Ibrahim Muhammed', profilePicture: 'https://picsum.photos/80' },
-        { userId: '456', fullName: 'Adham Osama', profilePicture: 'https://picsum.photos/80' },
-        { userId: '567', fullName: 'Mohamed Samir', profilePicture: 'https://picsum.photos/80' },
-      ];
       const useConnections = () => {
         const [connections, setConnections] = useState([]);
         const [loading, setLoading] = useState(false);
@@ -155,16 +150,16 @@ const MessagingPage = () => {
           
           const fetchConnections = async () => {
             try {
-              // const response = await fetch('/api/connections'); // Your API call
-              // if (!response.ok) {
-              //   throw new Error('Failed to fetch connections');
-              // }
-              // const data = await response.json();
-              // setConnections(data);
+              const response = await axios.get(`${BASE_URL}/user/connections`, {
+        
+                withCredentials:true
+              });
+               console.log(response.data.connections)
+               setConnections(response.data.connections);
       
               // Using placeholder data for now
-              await new Promise(resolve => setTimeout(resolve, 500)); 
-              setConnections(fakeConnections);
+              //await new Promise(resolve => setTimeout(resolve, 500)); 
+              //setConnections(fakeConnections);
       
             } catch (err) {
               console.error("Error fetching connections:", err);

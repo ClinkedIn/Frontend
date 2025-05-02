@@ -9,6 +9,69 @@ import { BASE_URL } from "../constants";
 // Set axios defaults to include credentials with all requests
 axios.defaults.withCredentials = true;
 
+
+
+/**
+ * The `Main` component serves as the primary container for displaying posts, 
+ * handling user interactions such as creating posts, reacting to posts, 
+ * commenting, and managing post visibility. It integrates with APIs to fetch 
+ * and update data dynamically, ensuring a responsive and interactive user experience.
+ *
+ * @component
+ * @returns {JSX.Element} The rendered `Main` component.
+ *
+ * @example
+ * // Usage in a React application
+ * import Main from './components/Main';
+ * 
+ * function App() {
+ *   return (
+ *     <div>
+ *       <Main />
+ *     </div>
+ *   );
+ * }
+ *
+ * @description
+ * The `Main` component includes the following features:
+ * - Fetching and displaying posts from an API.
+ * - Allowing users to create new posts with text and attachments.
+ * - Reacting to posts with various reaction types (e.g., like, celebrate).
+ * - Commenting on posts, including support for replies and attachments.
+ * - Managing post visibility (e.g., hiding, saving, reporting).
+ * - Displaying and toggling comments for individual posts.
+ * - Handling user authentication and notifications.
+ *
+ * @dependencies
+ * - React hooks: `useState`, `useEffect`
+ * - Axios for API requests
+ * - Custom components: `PostMenu`, `PostReactions`, `CommentSection`, `CreatePostModal`
+ *
+ * @state
+ * - `posts` (Array): List of posts fetched from the API.
+ * - `loading` (boolean): Indicates whether posts are being loaded.
+ * - `error` (string|null): Error message if fetching posts fails.
+ * - `postContent` (string): Content of the post being created.
+ * - `isPostModalOpen` (boolean): Controls the visibility of the post creation modal.
+ * - `userReactions` (Object): Tracks user reactions to posts.
+ * - `expandedComments` (Object): Tracks which posts have their comments expanded.
+ * - `comments` (Object): Stores comments for each post.
+ * - `loadingComments` (Object): Tracks loading state for comments of each post.
+ *
+ * @methods
+ * - `fetchPosts`: Fetches posts from the API and updates the state.
+ * - `fetchComments`: Fetches comments for a specific post.
+ * - `toggleComments`: Toggles the visibility of comments for a post.
+ * - `handleAddComment`: Adds a new comment to a post.
+ * - `handleReact`: Handles reacting to a post (e.g., like, celebrate).
+ * - `handleCreatePost`: Handles creating a new post.
+ * - `handleHidePost`: Hides a post from the feed.
+ * - `handleSavePost`: Saves a post for later viewing.
+ * - `handleReportPost`: Reports a post for inappropriate content.
+ * - `fetchUser`: Fetches user profile data.
+ * - `fetchNotifications`: Fetches user notifications.
+ * - `formatDate`: Formats a date string for display.
+ */
 const Main = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -19,12 +82,26 @@ const Main = () => {
   const [expandedComments, setExpandedComments] = useState({});
   const [comments, setComments] = useState({});
   const [loadingComments, setLoadingComments] = useState({});
+  const [authorInfo, setAuthorInfo] = useState(null);
+  const [expandedReplies, setExpandedReplies] = useState({});
+  const [replies, setReplies] = useState({});
   
   // Use exact API endpoint as specified
   const API_ENDPOINT = `${BASE_URL}/posts`;
   const COMMENTS_ENDPOINT = `${BASE_URL}/comments`;
   
   // Available reaction types
+  /**
+   * An array of reaction types, each represented as an object containing:
+   * - `type`: A string representing the unique identifier for the reaction type.
+   * - `emoji`: A string representing the emoji associated with the reaction.
+   * - `label`: A string representing the human-readable label for the reaction.
+   *
+   * Example usage:
+   * ```javascript
+   * reactionTypes.map(reaction => console.log(reaction.label));
+   * ```
+   */
   const reactionTypes = [
     { type: 'like', emoji: '👍', label: 'Like' },
     { type: 'celebrate', emoji: '👏', label: 'Celebrate' },
@@ -32,25 +109,56 @@ const Main = () => {
     { type: 'insightful', emoji: '💡', label: 'Insightful' },
     { type: 'funny', emoji: '😄', label: 'Funny' }
   ];
+
   
-  // Author information (normally would come from your auth system)
-  const authorInfo = {
-    id: "user456",
-    name: "Hamsa Saber",
-    headline: "Software Engineer at Tech Company",
-    profileImage: "https://picsum.photos/80?random=1",
-  };
+
+  useEffect(() => {
+    const fetchAndSetUser = async () => {
+      try {
+        const response = await axios.get(`${BASE_URL}/user/me`, { withCredentials: true });
+        setAuthorInfo(response.data);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+    fetchAndSetUser();
+  }, []);
 
   // Define fetchUser and fetchNotifications functions
+  /**
+   * Fetches the user profile data from the server.
+   * Sends a GET request to the endpoint 'http://localhost:3000/user/profile' with credentials included.
+   * Logs the user data to the console if the request is successful.
+   * Logs an error message to the console if the request fails.
+   *
+   * @async
+   * @function fetchUser
+   * @returns {Promise<void>} A promise that resolves when the user data is fetched and logged, or rejects if an error occurs.
+   */
   const fetchUser = async () => {
     try {
-      const response = await axios.get(`${BASE_URL}/user/profile`, { withCredentials: true });
+      const response = await axios.get(`${BASE_URL}/user/me`, { withCredentials: true });
       console.log("User data:", response.data);
     } catch (error) {
       console.error("Error fetching user data:", error);
     }
   };
 
+  
+  /**
+   * Fetches notifications from the server.
+   * 
+   * This function sends a GET request to the `/notifications` endpoint
+   * on the server running at `http://localhost:3000`. It includes credentials
+   * in the request for authentication purposes. The fetched notifications
+   * are logged to the console. If an error occurs during the request, it is
+   * caught and logged to the console.
+   * 
+   * @async
+   * @function fetchNotifications
+   * @returns {Promise<void>} A promise that resolves when the notifications
+   * are successfully fetched and logged, or rejects if an error occurs.
+   */
   const fetchNotifications = async () => {
     try {
       const response = await axios.get(`${BASE_URL}/notifications`, { withCredentials: true });
@@ -62,6 +170,20 @@ const Main = () => {
 
   
   // Fetch posts function
+  /**
+   * Fetches posts from the API and updates the state with the retrieved data.
+   * 
+   * This function makes an asynchronous request to fetch posts from the specified API endpoint.
+   * It processes the response to extract posts data and pagination information, updates the
+   * `posts` state with the retrieved posts, and initializes user reactions based on the posts data.
+   * 
+   * In case of an error during the fetch operation, it logs the error and updates the `error` state
+   * with an appropriate message. The `loading` state is set to `false` once the operation is complete.
+   * 
+   * @async
+   * @function fetchPosts
+   * @throws Will log an error and set an error message in the state if the API request fails.
+   */
   const fetchPosts = async () => {
     try {
       console.log("Attempting to fetch posts...");
@@ -102,6 +224,18 @@ const Main = () => {
   };
   
   // Fetch comments for a specific post
+  /**
+   * Fetches comments for a specific post by its ID.
+   *
+   * This function makes an asynchronous request to retrieve comments for a given post.
+   * It updates the loading state and stores the fetched comments in the component's state.
+   * If an error occurs during the request, it logs the error details to the console.
+   *
+   * @async
+   * @function fetchComments
+   * @param {string} postId - The ID of the post for which to fetch comments.
+   * @returns {Promise<void>} A promise that resolves when the comments are fetched and state is updated.
+   */
   const fetchComments = async (postId) => {
     try {
       setLoadingComments(prev => ({ ...prev, [postId]: true }));
@@ -131,6 +265,16 @@ const Main = () => {
   };
   
   // Toggle comments display for a post
+  /**
+   * Toggles the visibility of comments for a specific post.
+   * If the comments are being expanded and have not been fetched yet, 
+   * it fetches the comments for the given post ID.
+   *
+   * @async
+   * @function toggleComments
+   * @param {string} postId - The unique identifier of the post whose comments are being toggled.
+   * @returns {Promise<void>} A promise that resolves when the comments are fetched (if needed).
+   */
   const toggleComments = async (postId) => {
     const isExpanded = expandedComments[postId];
     
@@ -146,9 +290,36 @@ const Main = () => {
   };
   
   // Add a new comment to a post with all API parameters
+  /**
+   * Handles adding a comment to a post, including support for attachments, tagged users, and replies.
+   *
+   * @async
+   * @function handleAddComment
+   * @param {string} postId - The ID of the post to which the comment is being added.
+   * @param {string} commentText - The content of the comment.
+   * @param {File|null} [attachment=null] - An optional file attachment for the comment.
+   * @param {Array<string>} [taggedUsers=[]] - An optional array of user IDs to tag in the comment.
+   * @param {string|null} [parentComment=null] - The ID of the parent comment if this is a reply.
+   * @param {string|null} [attachmentUrl=null] - An optional URL for an attachment.
+   * @returns {Promise<Object>} The response data from the API, including the posted comment.
+   * @throws {Error} Throws an error if the comment could not be posted.
+   *
+   * @example
+   * // Add a top-level comment
+   * await handleAddComment('postId123', 'This is a comment');
+   *
+   * @example
+   * // Add a comment with an attachment
+   * const file = new File(['content'], 'example.txt', { type: 'text/plain' });
+   * await handleAddComment('postId123', 'This is a comment with a file', file);
+   *
+   * @example
+   * // Add a reply to a comment
+   * await handleAddComment('postId123', 'This is a reply', null, [], 'parentCommentId456');
+   */
   const handleAddComment = async (postId, commentText, attachment = null, taggedUsers = [], parentComment = null, attachmentUrl = null) => {
     try {
-      const endpoint = `${COMMENTS_ENDPOINT}/${postId}/post`;
+      const endpoint = `${COMMENTS_ENDPOINT}`;
       console.log(`Posting comment to ${endpoint}:`, commentText);
       
       // Use FormData to support file uploads
@@ -266,8 +437,21 @@ const Main = () => {
   };
 
 
-  
+
+
   // Handle reacting to a comment
+  /**
+   * Handles reacting to a comment by sending or removing a reaction.
+   *
+   * @async
+   * @function handleReactToComment
+   * @param {string} postId - The ID of the post containing the comment.
+   * @param {string} commentId - The ID of the comment to react to.
+   * @param {string} [reactionType='like'] - The type of reaction to send (e.g., 'like', 'dislike').
+   * @param {boolean} [isRemove=false] - Whether to remove the reaction instead of adding it.
+   * @returns {Promise<void>} - A promise that resolves when the reaction is processed.
+   * @throws {Error} - Throws an error if the reaction request fails.
+   */
   const handleReactToComment = async (postId, commentId, reactionType = 'like', isRemove = false) => {
     try {
       const endpoint = `${COMMENTS_ENDPOINT}/${commentId}/${reactionType.toLowerCase()}`;
@@ -316,8 +500,42 @@ const Main = () => {
     
     initializeData();
   }, []);
+
+
+// Fetch replies for a comment
+const fetchReplies = async (commentId) => {
+  try {
+    const endpoint = `${BASE_URL}/comments/${commentId}/replies`;
+    const response = await axios.get(endpoint);
+    setReplies(prev => ({
+      ...prev,
+      [commentId]: response.data.replies || []
+    }));
+  } catch (err) {
+    console.error('Error fetching replies:', err);
+  }
+};
+
   
   // Handle creating a new post
+  /**
+   * Handles the creation of a new post by sending the provided post data to the server.
+   * 
+   * @async
+   * @function handleCreatePost
+   * @param {Object} postData - The data for the post to be created.
+   * @param {string} postData.text - The description or text content of the post (required).
+   * @param {File[]} [postData.files] - An optional array of file attachments for the post.
+   * 
+   * @throws Will display an alert and log errors if the post creation fails.
+   * 
+   * @example
+   * const postData = {
+   *   text: "This is a new post",
+   *   files: [file1, file2]
+   * };
+   * handleCreatePost(postData);
+   */
   const handleCreatePost = async (postData) => {
     try {
       console.log("Creating post with data:", postData);
@@ -375,6 +593,30 @@ const Main = () => {
   };
   
   // Handle reacting to a post - Updated to handle both liking and unliking with reaction types
+  /**
+   * Handles adding or removing a reaction (like, love, etc.) to a post.
+   *
+   * @async
+   * @function handleReact
+   * @param {string|number} postId - The ID of the post to react to.
+   * @param {string} [reactionType='like'] - The type of reaction to add (e.g., 'like', 'love').
+   * @param {boolean} [isRemove=false] - Whether to remove the reaction instead of adding it.
+   * @returns {Promise<void>} - A promise that resolves when the reaction is processed.
+   *
+   * @description
+   * This function sends a reaction to the server using either a POST (to add) or DELETE (to remove) request.
+   * It updates the local state of user reactions and posts based on the server response or local logic.
+   *
+   * @throws {Error} Throws an error if the API request fails.
+   *
+   * @example
+   * // Add a like reaction to a post
+   * handleReact(123, 'like');
+   *
+   * @example
+   * // Remove a like reaction from a post
+   * handleReact(123, 'like', true);
+   */
   const handleReact = async (postId, reactionType = 'like', isRemove = false) => {
     try {
       const postIdToUse = postId.toString();
@@ -461,10 +703,24 @@ const Main = () => {
   };
   
   // Handle PostMenu actions
+  /**
+   * Handles the hiding of a post by removing it from the current list of posts.
+   *
+   * @param {string|number} postId - The unique identifier of the post to be hidden.
+   */
   const handleHidePost = (postId) => {
     setPosts(posts.filter(post => post.id !== postId && post.postId !== postId));
   };
 
+  /**
+   * Handles saving a post by sending a POST request to the API endpoint.
+   *
+   * @async
+   * @function handleSavePost
+   * @param {string} postId - The unique identifier of the post to be saved.
+   * @returns {Promise<void>} - A promise that resolves when the post is successfully saved.
+   * @throws Will display an alert and log an error if the save operation fails.
+   */
   const handleSavePost = async (postId) => {
     try {
       await axios.post(`${API_ENDPOINT}/${postId}/save`);
@@ -476,6 +732,15 @@ const Main = () => {
     }
   };
 
+  /**
+   * Reports a post by sending a request to the server with a specified reason.
+   *
+   * @async
+   * @function handleReportPost
+   * @param {string} postId - The unique identifier of the post to be reported.
+   * @returns {Promise<void>} Resolves when the report request is successfully sent.
+   * @throws Will log an error and display an alert if the report request fails.
+   */
   const handleReportPost = async (postId) => {
     try {
       await axios.post(`${API_ENDPOINT}/${postId}/report`, {
@@ -490,6 +755,17 @@ const Main = () => {
   };
 
   // Format date for display
+  /**
+   * Formats a given date string into a human-readable relative time format.
+   * 
+   * - If the date is less than 60 seconds ago, it returns "Just now".
+   * - If the date is less than an hour ago, it returns the number of minutes followed by "m ago".
+   * - If the date is less than a day ago, it returns the number of hours followed by "h ago".
+   * - Otherwise, it returns the date in the local date format.
+   * 
+   * @param {string} dateString - The date string to format.
+   * @returns {string} A formatted string representing the relative time or the local date.
+   */
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -526,7 +802,7 @@ const Main = () => {
           <div className="flex flex-col text-[#958b7b] mb-2 bg-white">
             <div className="flex items-center p-2 pl-4 pr-4">
               <img
-                src={authorInfo.profileImage}
+                src={authorInfo.user.profilePicture}
                 alt="user"
                 className="w-12 h-12 rounded-full mr-2"
               />

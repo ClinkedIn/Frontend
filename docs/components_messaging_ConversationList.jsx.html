@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/messaging/ConversationList.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/messaging/ConversationList.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>
+import React, { useState, useEffect, useMemo ,useCallback} from 'react';
+import { db } from '../../../firebase';
+import { collection, query, where, orderBy, onSnapshot,doc,updateDoc } from 'firebase/firestore';
+import ConversationSearch from './SearchBar';
+import ConversationListItem from '../../components/messaging/ConversationListitem';
+
+const ConversationList = ({
+    selectedConversationId,
+    onSelectConversation,
+    currentUser,
+    connections,
+    loading,
+    error,
+    conversations,
+    loadingConversations,
+    errorConversations,
+    onSelectUserFromSearch
+}) => {
+        // Handler for Marking Read/Unread
+        /**
+         * Handles marking a conversation as read or unread for the current user.
+         *
+         * @function
+         * @param {string} conversationId - The ID of the conversation to update.
+         * @param {boolean} markAsUnread - A flag indicating whether to mark the conversation as unread (true) or read (false).
+         * @returns {Promise&lt;void>} A promise that resolves when the unread count is successfully updated, or logs an error if the update fails.
+         * @throws Will log an error if the update to the database fails.
+         *
+         * @example
+         * handleMarkReadUnread('conversation123', true); // Marks the conversation as unread
+         * handleMarkReadUnread('conversation123', false); // Marks the conversation as read
+         */
+        const handleMarkReadUnread = useCallback(async (conversationId, markAsUnread) => {
+            if (!currentUser?._id || !conversationId) return;
+    
+            console.log(`Marking conversation ${conversationId} as ${markAsUnread ? 'UNREAD' : 'READ'}`);
+            const conversationDocRef = doc(db, 'conversations', conversationId);
+            // Set count to 1 if marking unread, 0 if marking read
+            const newUnreadValue = markAsUnread ? 1 : 0;
+    
+            try {
+                await updateDoc(conversationDocRef, {
+                    
+                    [`unreadCounts.${currentUser._id}`]: newUnreadValue,
+                    ['forceUnread']: markAsUnread ? true : false,
+                });
+                console.log(`Successfully updated unread count for ${currentUser._id} in ${conversationId}`);
+                
+            } catch (error) {
+                console.error("Error updating unread status:", error);
+                
+            }
+        }, [currentUser?._id]); // Dependency: currentUser.uid
+
+    return (
+        &lt;div className="w-full  md:border-r md:border-gray-400 h-full flex flex-col bg-white">
+            {/* Header/Search Area */}
+            &lt;div className="p-4 border-b border-gray-400">
+                &lt;h2 className="text-xl font-bold">Messaging&lt;/h2>
+
+            &lt;/div>
+            &lt;ConversationSearch 
+            onSelectUser={onSelectUserFromSearch} 
+            connections={connections}
+            loading={loading}
+            error={error}
+            />
+
+            {/* Conversation List Area */}
+            &lt;div className="flex-grow overflow-y-auto">
+                {loadingConversations &amp;&amp; &lt;div className="p-4 text-center text-gray-500">Loading chats...&lt;/div>}
+                {errorConversations &amp;&amp; &lt;div className="p-4 text-center text-gray-500">{errorConversations}&lt;/div>}
+                {!loadingConversations &amp;&amp; conversations.length === 0 &amp;&amp; (
+                    &lt;div className="p-4 text-center text-gray-500">No conversations yet. Search for a connection to start chatting.&lt;/div>
+                )}
+
+                {!loadingConversations &amp;&amp;  conversations.map(convo => {
+                    const otherUserId = convo.participants.find(id => id !== currentUser._id);
+                    let otherUserInfo = {}; 
+                    if(otherUserId &amp;&amp; convo.fullName?.[otherUserId] &amp;&amp; convo.profilePicture?.[otherUserId]) {
+                         otherUserInfo = {
+                            _id : otherUserId,
+                            fullName: convo.fullName[otherUserId] ,
+                            profilePicture: convo.profilePicture[otherUserId]
+                        }
+                    }
+                    
+                    return (
+                        &lt;ConversationListItem
+                            key={convo.id}
+                            conversation={convo}
+                            currentUser={currentUser}
+                            otherUserInfo={otherUserInfo} 
+                            isSelected={convo.id === selectedConversationId}
+                            onClick={() => onSelectConversation(convo.id,otherUserInfo)}
+                            onMarkReadUnread={handleMarkReadUnread}
+                        />
+                    );
+                })}
+                
+                {loading &amp;&amp; conversations.length > 0 &amp;&amp; &lt;div className="p-2 text-center text-xs text-gray-400">Loading user details...&lt;/div>}
+                {error &amp;&amp; &lt;div className="p-2 text-center text-xs text-red-400">Error loading user details.&lt;/div>}
+            &lt;/div>
+        &lt;/div>
+    );
+};
+
+export default ConversationList;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#ChatWindow">ChatWindow</a></li><li><a href="global.html#CommentSection">CommentSection</a></li><li><a href="global.html#ConversationListItem">ConversationListItem</a></li><li><a href="global.html#ConversationSearch">ConversationSearch</a></li><li><a href="global.html#CreatePostModal">CreatePostModal</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#HirePage">HirePage</a></li><li><a href="global.html#JobBoardPage">JobBoardPage</a></li><li><a href="global.html#JobDetails">JobDetails</a></li><li><a href="global.html#Jobs">Jobs</a></li><li><a href="global.html#Main">Main</a></li><li><a href="global.html#ManageJob">ManageJob</a></li><li><a href="global.html#MyJobs">MyJobs</a></li><li><a href="global.html#Notification">Notification</a></li><li><a href="global.html#NotificationCard">NotificationCard</a></li><li><a href="global.html#PostMenu">PostMenu</a></li><li><a href="global.html#PostReactions">PostReactions</a></li><li><a href="global.html#ScreeningQuestionCard">ScreeningQuestionCard</a></li><li><a href="global.html#debounce">debounce</a></li><li><a href="global.html#fetchComments">fetchComments</a></li><li><a href="global.html#fetchNotifications">fetchNotifications</a></li><li><a href="global.html#fetchPosts">fetchPosts</a></li><li><a href="global.html#fetchUser">fetchUser</a></li><li><a href="global.html#filteredNotifications">filteredNotifications</a></li><li><a href="global.html#getReactionIcon">getReactionIcon</a></li><li><a href="global.html#handleAddComment">handleAddComment</a></li><li><a href="global.html#handleBlockUser">handleBlockUser</a></li><li><a href="global.html#handleClick">handleClick</a></li><li><a href="global.html#handleCreatePost">handleCreatePost</a></li><li><a href="global.html#handleDeleteNotification">handleDeleteNotification</a></li><li><a href="global.html#handleLikeClick">handleLikeClick</a></li><li><a href="global.html#handleMainFilterChange">handleMainFilterChange</a></li><li><a href="global.html#handleMuteDuration">handleMuteDuration</a></li><li><a href="global.html#handleNotificationClick">handleNotificationClick</a></li><li><a href="global.html#handleReact">handleReact</a></li><li><a href="global.html#handleReactToComment">handleReactToComment</a></li><li><a href="global.html#handleReportPost">handleReportPost</a></li><li><a href="global.html#handleSavePost">handleSavePost</a></li><li><a href="global.html#handleSendTestNotification">handleSendTestNotification</a></li><li><a href="global.html#handleSubmit">handleSubmit</a></li><li><a href="global.html#requestOTP">requestOTP</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#toggleComments">toggleComments</a></li><li><a href="global.html#verifyOTP">verifyOTP</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Fri May 02 2025 17:16:34 GMT+0300 (Eastern European Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

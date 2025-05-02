@@ -9,13 +9,15 @@ import axios from "axios";
  *                                       It is `null` if the user is not authenticated.
  * @property {string | null} userRole - The role of the current user.
  *                                      It is `null` if the user role is not defined.
+ * @property {boolean} loading - Indicates whether the authentication state is still loading.
  * @property {(token: string | null) => void} setAuthToken - A function to update the authentication token.
  *                                                           Pass `null` to clear the token.
  * @property {() => void} logout - A function to log out the user and clear authentication data.
  */
 interface AuthContextType {
   authToken: string | null;
-  userRole: string | null; // User role
+  userRole: string | null;
+  loading: boolean;
   setAuthToken: (token: string | null) => void;
   logout: () => Promise<void>;
 }
@@ -39,7 +41,9 @@ export const useAuth = () => {
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
-  return context;
+
+  const isAuthenticated = !!context.authToken && context.authToken !== "null";
+  return { ...context, isAuthenticated };
 };
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -72,20 +76,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   // Initialize authToken and userRole from localStorage
-  const [authToken, setAuthToken] = useState<string | null>(() =>
+  const [authToken, setAuthTokenState] = useState<string | null>(() =>
     localStorage.getItem("authToken")
   );
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   // Update localStorage whenever the token changes
   useEffect(() => {
-    if (authToken) {
-      localStorage.setItem("authToken", authToken);
+    const token = localStorage.getItem("authToken");
+
+    if (token && token !== "null" && token !== "") {
+      setAuthTokenState(token);
+    } else {
+      setAuthTokenState(null);
+    }
+
+    setLoading(false);
+  }, []);
+
+  const setAuthToken = (token: string | null) => {
+    if (token) {
+      localStorage.setItem("authToken", token);
     } else {
       localStorage.removeItem("authToken");
-      localStorage.removeItem("refreshToken"); // Optionally remove refreshToken
     }
-  }, [authToken]);
+    setAuthTokenState(token);
+  };
 
   const logout = async () => {
     try {
@@ -102,6 +119,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const contextValue: AuthContextType = {
     authToken,
     userRole,
+    loading,
     setAuthToken,
     logout,
   };

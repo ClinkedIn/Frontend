@@ -7,17 +7,6 @@ interface SignupData {
   firstName?: string;
   lastName?: string;
   location?: string;
-  jobTitle?: string;
-  employmentType?: string;
-  company?: string;
-  isStudent?: boolean;
-  school?: string;
-  startYear?: string;
-  endYear?: string;
-  over16?: boolean;
-  dobDay?: string;
-  dobMonth?: string;
-  dobYear?: string;
 }
 
 interface SignupContextProps {
@@ -34,18 +23,6 @@ export const SignupProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     password: "",
     firstName: "",
     lastName: "",
-    location: "",
-    jobTitle: "",
-    employmentType: "",
-    company: "",
-    isStudent: false,
-    school: "",
-    startYear: "",
-    endYear: "",
-    over16: true,
-    dobDay: "",
-    dobMonth: "",
-    dobYear: "",
   });
 
   return (

@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/UpperNavBar.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/UpperNavBar.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import { useState, useEffect, useRef } from "react";
+import axios from "axios";
+import { useNavigate, useLocation } from "react-router-dom";
+import { MdSearch } from "react-icons/md";
+import { BASE_URL } from "../constants";
+import { db } from "../../firebase";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
+
+/**
+ * Header component that manages the navigation, search, and notifications.
+ * 
+ * @component
+ * @example
+ * // Example usage:
+ * &lt;Header notifications={notifications} />
+ * 
+ * @param {Object} props - The properties passed to the component.
+ * @param {Array} props.notifications - Array of notifications to be passed to the component.
+ * 
+ * @returns {JSX.Element} The Header component.
+ */
+const Header = ({ notifications }) => {
+  /**
+   * State variables:
+   * - `showUser`: Toggles the visibility of the user dropdown.
+   * - `unreadCount`: Stores the count of unread notifications.
+   * - `searchQuery`: The search query for job search.
+   * - `location`: The location filter for job search.
+   * - `searchTerm`: The search term for user search.
+   * - `userResults`: The list of user results based on the search term.
+   * - `showResults`: Boolean flag to show user search results dropdown.
+   * - `unreadCountMessages`: Stores the count of unread messages.
+   * - `conversations`: Stores the user's conversations.
+   * - `loadingConversations`: Boolean flag for loading state of conversations.
+   * - `currentUser`: Stores the current user's data.
+   * - `showWork`: Toggles the visibility of the work dropdown.
+   * 
+   * @type {object}
+   */
+  const [showUser, setShowUser] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [searchQuery, setSearchQuery] = useState(""); // For job search
+  const [location, setLocation] = useState(""); // For job location filter
+  const [searchTerm, setSearchTerm] = useState(""); // For user search
+  const [userResults, setUserResults] = useState([]);
+  const [showResults, setShowResults] = useState(false);
+  const navigate = useNavigate();
+  const locations = useLocation();
+  const currentPath = locations.pathname.split("/")[1];
+  const dropdownRef = useRef(null);
+  const searchRef = useRef(null); // ref for user results dropdown
+  const [unreadCountMessages, setUnreadCountMessages] = useState(0);
+  const [conversations, setConversations] = useState([]);
+  const [loadingConversations, setLoadingConversations] = useState(true);
+  const [currentUser, setUser] = useState();
+  const workDropdownRef = useRef(null);
+  const [showWork, setShowWork] = useState(false);
+
+  /**
+   * Fetches the count of unread notifications and updates the state.
+   */
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        const response = await axios.get(`${BASE_URL}/notifications/unread-count`, {
+          withCredentials: true,
+        });
+        setUnreadCount(response.data.unreadCount || 0);
+      } catch (error) {
+        console.error("Error fetching unread count:", error);
+      }
+    };
+    fetchUnreadCount();
+  }, [notifications]);
+
+  /**
+   * Fetches the current user's data and updates the state.
+   */
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await axios.get(`${BASE_URL}/user/me`, {
+          withCredentials: true,
+        });
+        setUser(response.data.user);
+        console.log("User data:", response.data.user);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
+    };
+    fetchUser();
+  }, []);
+
+  /**
+   * Fetches unread message counts from Firestore and updates the state.
+   */
+  useEffect(() => {
+    if (!currentUser?._id) return;
+
+    const conversationsRef = collection(db, 'conversations');
+    const q = query(
+      conversationsRef,
+      where('participants', 'array-contains', currentUser._id)
+    );
+
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      let totalUnread = 0;
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        let countForUser = data.unreadCounts?.[currentUser._id] || 0;
+        if (data.forceUnread) countForUser = countForUser - 1;
+        totalUnread += countForUser;
+      });
+
+      console.log("Total unread messages from Firestore:", totalUnread);
+      setUnreadCountMessages(totalUnread);
+
+    }, (error) => {
+      console.error("Error fetching unread message count from Firestore:", error);
+      setUnreadCountMessages(0);
+    });
+
+    return () => {
+      console.log("Cleaning up Firestore listener for unread messages count.");
+      unsubscribe();
+    };
+  }, [currentUser?._id]);
+
+  /**
+   * Handles the closing of dropdowns when clicking outside of them.
+   */
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current &amp;&amp; !dropdownRef.current.contains(event.target)) {
+        setShowUser(false);
+      }
+      if (searchRef.current &amp;&amp; !searchRef.current.contains(event.target)) {
+        setShowResults(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  /**
+   * Handles the user search logic with debouncing.
+   */
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      setUserResults([]);
+      setShowResults(false);
+      return;
+    }
+
+    const delayDebounceFn = setTimeout(async () => {
+      try {
+        const params = new URLSearchParams();
+        if (searchTerm) params.append("query", searchTerm);
+        const response = await axios.get(`${BASE_URL}/user/search`, {
+          params,
+          withCredentials: true,
+        });
+        setUserResults(response.data.users || []);
+        setShowResults(true);
+      } catch (error) {
+        console.error("User search error:", error);
+        setUserResults([]);
+      }
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm]);
+
+  /**
+   * Handles the navigation for various actions, such as viewing notifications, job listings, or settings.
+   */
+  const handleNotificationsClick = () => navigate("/notifications");
+  const handleJobsClick = () => navigate("/jobs");
+  const handleProfileClick = () => {
+    navigate("/profile");
+    setShowUser(false);
+  };
+  const handleSettingsClick = () => {
+    navigate("/settings");
+    setShowUser(false);
+  };
+  const handleMessagingClick = () => navigate("/messaging");
+  const handleCreateCompany = () => {
+    navigate("/company/setup/new");
+    setShowWork(false);
+  };
+
+  /**
+   * Handles the job search and navigation to the job board.
+   * @param {Event} e - The form submit event.
+   */
+  const handleJobSearch = async (e) => {
+    e.preventDefault();
+    try {
+      const params = new URLSearchParams();
+      if (searchQuery) params.append("q", searchQuery);
+      if (location) params.append("location", location);
+      const response = await axios.get(`${BASE_URL}/search/jobs?${params}`);
+      navigate("/job-board", {
+        state: {
+          jobs: response.data.jobs,
+          searchQuery,
+          location,
+          currentPath,
+        },
+      });
+    } catch (error) {
+      console.error("Search error:", error);
+    }
+  };
+
+  /**
+   * Determines whether to show the job search bar based on the current path.
+   */
+  let path = false;
+  if (currentPath === "jobs" || currentPath === "job-board" || currentPath === "myjobs") {
+    path = true;
+  }
+  return (
+    &lt;header className="fixed top-0 left-0 w-full bg-white border-b border-gray-200 z-50">
+      &lt;div className="flex items-center justify-between px-4 py-2">
+        &lt;div className="flex">
+          {/* Logo */}
+          &lt;a href="/feed">
+            &lt;img src="/Images/home-logo.svg" alt="Logo" className="w-8 h-8 min-w-8" />
+          &lt;/a>
+
+          {/* Conditional Search Bar */}
+          &lt;form
+            onSubmit={handleJobSearch}
+            className="relative flex rounded-lg"
+          >
+            {/* Show Job Search only on /jobs */}
+            {path ? (
+              &lt;>
+                &lt;div className="flex items-center bg-[#edf3f8] rounded-sm ml-2">
+                  &lt;MdSearch color="#5f6163" className="w-4 h-4 mr-2 ml-1" />
+                  &lt;input
+                    type="text"
+                    placeholder="Title, skill or company"
+                    className="text-sm placeholder-[#5f6163] w-full outline-none bg-transparent py-2"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                &lt;/div>
+                &lt;div className="flex items-center bg-[#edf3f8] rounded-sm ml-2">
+                  &lt;input
+                    type="text"
+                    placeholder="City, state, or zip code"
+                    className="text-sm placeholder-[#5f6163] w-full outline-none bg-transparent pl-1 py-2 ml-1"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                  />
+                &lt;/div>
+                &lt;button
+                  type="submit"
+                  className="bg-blue-600 ml-1 text-white px-2 py-2 rounded-lg"
+                >
+                  Search
+                &lt;/button>
+              &lt;/>
+            ) : (
+              // Show User Search everywhere else
+              &lt;div className="flex items-center bg-[#edf3f8] rounded-sm ml-2">
+                &lt;MdSearch color="#5f6163" className="w-4 h-4 mr-2 ml-1" />
+                &lt;input
+                  type="text"
+                  placeholder="Search"
+                  className="text-sm placeholder-[#5f6163] w-full outline-none bg-transparent py-2"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onFocus={() => setShowResults(true)}
+                />
+              &lt;/div>
+            )}
+          &lt;/form>
+
+          {/* User Results Dropdown */}
+          {showResults &amp;&amp; userResults.length > 0 &amp;&amp; currentPath !== "jobs" &amp;&amp; (
+            &lt;div
+              ref={searchRef}
+              className="absolute top-full mt-12 w-64 bg-white border border-gray-200 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto"
+            >
+              &lt;ul>
+                {userResults.map((user) => (
+                  &lt;li
+                    key={user._id}
+                    className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                    onClick={() => {
+                      setSearchTerm("");
+                      navigate(`/profile/${user._id}`);
+                      setShowResults(false);
+                    }}
+                  >
+                    &lt;img
+                      src={user.profilePicture || "/Images/user.svg"}
+                      alt={`${user.firstName} ${user.lastName}`}
+                      className="w-8 h-8 rounded-full mr-3"
+                    />
+                    &lt;div className="text-sm">
+                      &lt;p className="font-medium">{`${user.firstName} ${user.lastName}`}&lt;/p>
+                      {user.company &amp;&amp; &lt;p className="text-xs text-gray-500">{user.company}&lt;/p>}
+                      &lt;p className="text-xs text-gray-400">{user.industry}&lt;/p>
+                    &lt;/div>
+                  &lt;/li>
+                ))}
+              &lt;/ul>
+            &lt;/div>
+          )}
+        &lt;/div>
+
+        {/* Navigation Icons */}
+        &lt;nav className="flex space-x-6">
+          &lt;button
+            className="hover:bg-gray-200 p-2 rounded-lg"
+            onClick={() => navigate("/feed")}
+          >
+            &lt;img src="/Images/nav-home.svg" alt="Home" className="w-6 h-6 min-w-6" />
+          &lt;/button>
+          &lt;button
+            className="hover:bg-gray-200 p-2 rounded-lg"
+            onClick={() => navigate("/network")}
+          >
+            &lt;img src="/Images/nav-network.svg" alt="Network" className="w-6 h-6 min-w-6" />
+          &lt;/button>
+          &lt;button
+            className="hover:bg-gray-200 p-2 rounded-lg"
+            onClick={handleJobsClick}
+          >
+            &lt;img src="/Images/nav-jobs.svg" alt="Jobs" className="w-6 h-6 min-w-6" />
+          &lt;/button>
+          &lt;button className="relative flex flex-col items-center text-xs text-gray-600 hover:text-black p-1" onClick={handleMessagingClick}>
+            &lt;img src="/Images/nav-messaging.svg" alt="Messaging" className="w-6 h-6" />
+            {unreadCountMessages > 0 &amp;&amp; (
+              &lt;div className="absolute -top-1 left-1/2 ml-1 bg-[#cb112d] text-white rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-[10px] md:text-xs font-medium">
+                {unreadCountMessages > 10 ? '10+' : unreadCountMessages} 
+              &lt;/div>
+            )}
+          &lt;/button>
+          &lt;button
+            className="hover:bg-gray-200 p-2 rounded-lg relative"
+            onClick={handleNotificationsClick}
+          >
+            &lt;img
+              src="/Images/nav-notifications.svg"
+              alt="Notifications"
+              className="w-6 h-6 min-w-6"
+            />
+            {unreadCount > 0 &amp;&amp; (
+              &lt;div className="absolute -top-1 -right-1 bg-[#cb112d] text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-medium">
+                {unreadCount}
+              &lt;/div>
+            )}
+          &lt;/button>
+        &lt;/nav>
+
+        {/* User &amp; Work Dropdowns */}
+        &lt;div className="flex space-x-4 items-center">
+          &lt;div className="relative" ref={dropdownRef}>
+            &lt;button
+              className="flex items-center space-x-2 hover:bg-gray-200 p-2 rounded-lg"
+              onClick={() => setShowUser(!showUser)}
+            >
+              &lt;img
+                src="/Images/user.svg"
+                alt="User"
+                className="w-6 h-6 rounded-full"
+              />
+              &lt;img
+                src="/Images/down-icon.svg"
+                alt="Dropdown"
+                className={`w-4 h-4 transition-transform duration-200 ${
+                  showUser ? "rotate-180" : ""
+                }`}
+              />
+            &lt;/button>
+            {showUser &amp;&amp; (
+              &lt;div className="absolute right-0 mt-1 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200">
+                &lt;div className="px-4 py-2 border-b border-gray-200">
+                  &lt;div className="flex items-center">
+                    &lt;img
+                      src="/Images/user.svg"
+                      alt="User Profile"
+                      className="w-10 h-10 rounded-full mr-3"
+                    />
+                    &lt;div>
+                      &lt;p className="font-medium text-gray-800">John Doe&lt;/p>
+                      &lt;p className="text-xs text-gray-500">Software Developer&lt;/p>
+                    &lt;/div>
+                  &lt;/div>
+                &lt;/div>
+                &lt;button
+                  onClick={handleProfileClick}
+                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  My Profile
+                &lt;/button>
+                &lt;button
+                  onClick={handleSettingsClick}
+                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  Settings
+                &lt;/button>
+              &lt;/div>
+            )}
+          &lt;/div>
+          &lt;div className="relative" ref={workDropdownRef}>
+            &lt;button 
+              className="flex items-center space-x-2 hover:bg-gray-200 p-2 rounded-lg"
+              onClick={() => setShowWork(!showWork)}
+            >
+              &lt;img src="/Images/nav-work.svg" alt="Work" className="w-6 h-6" />
+              &lt;img 
+                src="/Images/down-icon.svg" 
+                alt="Dropdown" 
+                className={`w-4 h-4 transition-transform duration-200 ${
+                  showWork ? "rotate-180" : ""
+                }`}
+              />
+            &lt;/button>
+            {showWork &amp;&amp; (
+              &lt;div className="absolute right-0 mt-1 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200">
+                &lt;button
+                  onClick={handleCreateCompany}
+                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  Create Company Page
+                &lt;/button>
+              &lt;/div>
+            )}
+          &lt;/div>
+        &lt;/div>
+      &lt;/div>
+    &lt;/header>
+  );
+};
+
+export default Header;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#ChatWindow">ChatWindow</a></li><li><a href="global.html#CommentSection">CommentSection</a></li><li><a href="global.html#ConversationListItem">ConversationListItem</a></li><li><a href="global.html#ConversationSearch">ConversationSearch</a></li><li><a href="global.html#CreatePostModal">CreatePostModal</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#HirePage">HirePage</a></li><li><a href="global.html#JobBoardPage">JobBoardPage</a></li><li><a href="global.html#JobDetails">JobDetails</a></li><li><a href="global.html#Jobs">Jobs</a></li><li><a href="global.html#Main">Main</a></li><li><a href="global.html#ManageJob">ManageJob</a></li><li><a href="global.html#MyJobs">MyJobs</a></li><li><a href="global.html#Notification">Notification</a></li><li><a href="global.html#NotificationCard">NotificationCard</a></li><li><a href="global.html#PostMenu">PostMenu</a></li><li><a href="global.html#PostReactions">PostReactions</a></li><li><a href="global.html#ScreeningQuestionCard">ScreeningQuestionCard</a></li><li><a href="global.html#debounce">debounce</a></li><li><a href="global.html#fetchComments">fetchComments</a></li><li><a href="global.html#fetchNotifications">fetchNotifications</a></li><li><a href="global.html#fetchPosts">fetchPosts</a></li><li><a href="global.html#fetchUser">fetchUser</a></li><li><a href="global.html#filteredNotifications">filteredNotifications</a></li><li><a href="global.html#getReactionIcon">getReactionIcon</a></li><li><a href="global.html#handleAddComment">handleAddComment</a></li><li><a href="global.html#handleBlockUser">handleBlockUser</a></li><li><a href="global.html#handleClick">handleClick</a></li><li><a href="global.html#handleCreatePost">handleCreatePost</a></li><li><a href="global.html#handleDeleteNotification">handleDeleteNotification</a></li><li><a href="global.html#handleLikeClick">handleLikeClick</a></li><li><a href="global.html#handleMainFilterChange">handleMainFilterChange</a></li><li><a href="global.html#handleMuteDuration">handleMuteDuration</a></li><li><a href="global.html#handleNotificationClick">handleNotificationClick</a></li><li><a href="global.html#handleReact">handleReact</a></li><li><a href="global.html#handleReactToComment">handleReactToComment</a></li><li><a href="global.html#handleReportPost">handleReportPost</a></li><li><a href="global.html#handleSavePost">handleSavePost</a></li><li><a href="global.html#handleSendTestNotification">handleSendTestNotification</a></li><li><a href="global.html#handleSubmit">handleSubmit</a></li><li><a href="global.html#requestOTP">requestOTP</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#toggleComments">toggleComments</a></li><li><a href="global.html#verifyOTP">verifyOTP</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Fri May 02 2025 17:16:34 GMT+0300 (Eastern European Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
