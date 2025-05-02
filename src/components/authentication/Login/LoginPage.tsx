@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
@@ -9,6 +9,10 @@ import GoogleLogin from "../../GoogleLoginButton";
 import { useAuth } from "../../../context/AuthContext";
 import axios from "axios";
 import { BASE_URL } from "../../../constants";
+import { getMessaging, getToken } from 'firebase/messaging';
+import { app } from '../../../../firebase'; 
+
+
 
 /**
  * The `LoginPage` component renders a login form for user authentication.
@@ -38,6 +42,7 @@ const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [fcmToken, setFcmToken] = useState<string | null>(null); 
   const [errors, setErrors] = useState<{
     username?: string;
     password?: string;
@@ -47,6 +52,26 @@ const LoginPage = () => {
   const queryClient = useQueryClient();
   const { setAuthToken } = useAuth();
 
+
+    async function requestFCMToken() {
+    try {
+      const messaging = getMessaging(app);
+      {
+        const fcmToken = await getToken(messaging, { 
+          vapidKey: 'BKQc38HyUXuvI_yz5hPvprjVjmWrcUjTP2H7J_cjGoyMMoBGNBbC0ucVGrzM67rICMclmUuOx-mdt7CXlpnhq9g' 
+        });
+        if (fcmToken) {
+          console.log('FCM Token:', fcmToken);
+          setFcmToken(fcmToken); 
+        }
+      }
+    } catch (error) {
+      console.error('Error getting token:', error);
+    }
+  }
+  useEffect(() => {
+    requestFCMToken();
+  }, []);
   // Helper function to validate form inputs
   /**
    * Validates the login form by checking if the username and password fields are filled.
@@ -119,8 +144,8 @@ const LoginPage = () => {
   >({
     mutationFn: async ({ email, password }) =>
       await axios.post(
-        `${BASE_URL}/user/login`,
-        { email, password },
+        `${BASE_URL}/api/user/login`,
+        { email, password, fcmToken },
         { withCredentials: true }
       ),
 
