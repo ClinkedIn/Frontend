@@ -83,6 +83,8 @@ const Main = () => {
   const [comments, setComments] = useState({});
   const [loadingComments, setLoadingComments] = useState({});
   const [authorInfo, setAuthorInfo] = useState(null);
+  const [expandedReplies, setExpandedReplies] = useState({});
+  const [replies, setReplies] = useState({});
   
   // Use exact API endpoint as specified
   const API_ENDPOINT = `${BASE_URL}/posts`;
@@ -436,6 +438,7 @@ const Main = () => {
 
 
 
+
   // Handle reacting to a comment
   /**
    * Handles reacting to a comment by sending or removing a reaction.
@@ -497,6 +500,22 @@ const Main = () => {
     
     initializeData();
   }, []);
+
+
+// Fetch replies for a comment
+const fetchReplies = async (commentId) => {
+  try {
+    const endpoint = `${BASE_URL}/comments/${commentId}/replies`;
+    const response = await axios.get(endpoint);
+    setReplies(prev => ({
+      ...prev,
+      [commentId]: response.data.replies || []
+    }));
+  } catch (err) {
+    console.error('Error fetching replies:', err);
+  }
+};
+
   
   // Handle creating a new post
   /**
