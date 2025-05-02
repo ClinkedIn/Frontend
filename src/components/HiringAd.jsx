@@ -1,15 +1,15 @@
 import React from 'react'
 
-const HiringAd = () => {
+const HiringAd = ({ className = "" }) => {
   return (
-    <div className="w-72 shadow-sm rounded-lg border border-gray-300">
-    <img
-      src="/ads.png"
-      alt="Ad Banner"
-      className="w-72 rounded-lg cursor-pointer"
-      onClick={() => navigate("/ads-page")}
-    />
-  </div>
+    <div className={`w-72 shadow-sm rounded-lg border border-gray-300 ${className}`}>
+      <img
+        src="public/images/ads.png"
+        alt="Ad Banner"
+        className="w-72 rounded-lg cursor-pointer"
+        onClick={() => navigate("/ads-page")}
+      />
+    </div>
   )
 }
 

@@ -42,6 +42,7 @@ import CompanyFeedPage from "./components/CompanyPageSections/Feed";
 import CompanyAnalyticsPage from "./components/CompanyPageSections/Analytics.jsx";
 import CompanyManageJobsPage from "./components/CompanyPageSections/ManageJobs.jsx";
 
+import Network from "./components/Network/network";
 
 // Define your routes as an array of RouteObject (compatible with React Router v6)
 const routes: RouteObject[] = [
@@ -128,6 +129,10 @@ const routes: RouteObject[] = [
   {
     path: "/",
     element: React.createElement(LandingPage),
+  },
+  {
+    path: "/network",
+    element: React.createElement(Network),
   },
   {
     path: "/admin",
