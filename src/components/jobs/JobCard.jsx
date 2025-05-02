@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom"; // Add useLocation
 import { BASE_URL } from "../../constants";
@@ -13,12 +13,34 @@ import axios from "axios";
  * @param {Array} props.jobs - A list of jobs, used for passing job data to the job board page.
  * @param {string} props.state - The current selectedTab ("Saved", "Pending", etc).
  */
-const JobCard = ({ job, jobs, state, user, onDelete,  }) => {
+const JobCard = ({ job, jobs, state, user, onDelete, companyId }) => {
   const [selectedJob, setSelectedJob] = useState();
+  const [company, setCompany] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
- 
+ console.log("companyId", companyId); // DEBUG
 
+useEffect(() => {
+  const fetchCompany = async () => {
+  try {
+    
+      if (companyId) {
+        const response = await axios.get(`${BASE_URL}/api/companies/${companyId}`, {
+          withCredentials: true,
+        });
+        setCompany(response.data);
+        console.log("Company data:", response.data);
+      } else {
+        console.warn("No company ID provided");
+      }
+   
+    
+  } catch (error) {
+    console.error("Error in company fetching:", error);
+    
+  }}
+  fetchCompany();
+},[])
   /**
    * Handles the click event on the job title. 
    */
@@ -58,10 +80,11 @@ const JobCard = ({ job, jobs, state, user, onDelete,  }) => {
       await axios.delete(url, { withCredentials: true });
   
       console.log("Job deleted or unsaved successfully");
-      // if (typeof onDelete === "function") {
-      //   onDelete(jobId);
-      // }
-  
+          // Call the parent's refresh function
+    if (onDelete) {
+      onDelete(jobId);
+    }
+
     } catch (error) {
       console.error("Failed to delete or unsave job:", error);
       alert(error.response.data.message );
@@ -86,7 +109,7 @@ const JobCard = ({ job, jobs, state, user, onDelete,  }) => {
           {job.title ?? job.job?.title}
         </p>
         <p className="text-gray-700 text-sm">
-          {(job.company?.name ?? job.job?.company?.name ??  "Unknown Company")} · {job.jobLocation}
+          {(job.company?.name ?? job.job?.company?.name ??company.company?.name?? job.companyId?.name?? " ")} · {job.jobLocation}
         </p>
       </div>
 
