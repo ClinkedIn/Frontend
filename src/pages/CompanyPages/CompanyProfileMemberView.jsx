@@ -12,16 +12,35 @@ const CompanyProfileMemberViewPage = () => {
     const [activeTab, setActiveTab] = useState(section);
     const [notifications, setNotifications] = useState([]);
     const [companyInfo, setCompanyInfo] = useState();
+    const [user, setUser] = useState(null);
     const Tabs =["Home", "Posts", "Jobs"];
 
     const handleTabClick = (tab) => {
         setActiveTab(tab);
         navigate(`/company/${companyId}/${tab}`);
       };
+      useEffect(() => {
+        const fetchUser = async () => {
+            try {
+              const response = await axios.get(`${BASE_URL}/user/me`, {
+            
+                withCredentials:true
+              });
+          
+              setUser(response.data);
+              console.log("User data:", response.data);
+            } catch (error) {
+              console.error("Error fetching user:", error);
+            }
+          };
+      
+          fetchUser();
+      }, []);
 
     const handleClickFollowingButton = async(e) => {
+
         e.preventDefault();
-        const userId ={user_Id :"12345"}
+        const userId = user?._id;
         if(isFollowing) {
             const response = await axios.delete(`${BASE_URL}/companies/${companyId}/unfollow`,{userId});
             console.log(response)
@@ -39,7 +58,8 @@ const CompanyProfileMemberViewPage = () => {
             const response = await axios.get(
                 `${BASE_URL}/companies/${companyId}`
             );
-            setCompanyInfo(response.data); 
+            setCompanyInfo(response.data.company);
+            console.log("Company info:", response.data.company); 
         } catch (error) {
             console.error("Error fetching company info:", error);
          }
@@ -61,17 +81,17 @@ const CompanyProfileMemberViewPage = () => {
                         <h1 className="text-2xl">{companyInfo.name}</h1>
                         <div className="flex gap-2">
                         <p className="text-gray-500 text-sm">{companyInfo.industry} </p>
-                        <p className="text-gray-500 text-sm">{companyInfo.address}   </p>
-                        <p className="text-gray-500 text-sm">{companyInfo.followers.length} followers   </p>
+                        <p className="text-gray-500 text-sm">{companyInfo.location}   </p>
+                        <p className="text-gray-500 text-sm">{companyInfo.followersCount} followers   </p>
                         <p className="text-gray-500 text-sm">{companyInfo.organizationSize}  employees</p>
                         </div>
                         <div className="flex gap-4  max-[430px]:flex-col max-[430px]:gap-0 ">
                             {(isFollowing) ? (
                             
-                            <button className="mt-4 py-1 flex items-center justify-center bg-[#EBF4FD] text-[#0A66C2]  border-2 font-semibold  px-8 rounded-full hover:bg-blue-200 "  onClick={()=>{handleClickFollowingButton()}}>
+                            <button className="mt-4 py-1 flex items-center justify-center bg-[#EBF4FD] text-[#0A66C2]  border-2 font-semibold  px-8 rounded-full hover:bg-blue-200 "  onClick={handleClickFollowingButton}>
                                 Following
                             </button>) : (
-                                <button className="mt-4 flex items-center justify-center gap-2 bg-[#0A66C2] text-white font-semibold py-2 px-8 rounded-full hover:bg-[#004182]" onClick={()=>{handleClickFollowingButton()}}>
+                                <button className="mt-4 flex items-center justify-center gap-2 bg-[#0A66C2] text-white font-semibold py-2 px-8 rounded-full hover:bg-[#004182]" onClick={handleClickFollowingButton}>
                                 <FaPlus className="w-4 h-4"  />
                                 Follow
                             </button> 

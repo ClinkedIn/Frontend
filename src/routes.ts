@@ -38,6 +38,7 @@ import ManageJob from "./pages/jobs/ManageJob.jsx";
 import SubscriptionPlans from "./components/SubscriptionBasedPayment/subscriptionPlans.jsx";
 import SubscriptionStatus from './components/SubscriptionBasedPayment/SubscriptionStatus';
 import PaymentSuccess from './components/SubscriptionBasedPayment/PaymentSuccessHandler';
+import CompanyFeedPage from "./components/CompanyPageSections/Feed";
 
 
 // Define your routes as an array of RouteObject (compatible with React Router v6)
@@ -182,7 +183,7 @@ const routes: RouteObject[] = [
         index: true,
         element: React.createElement(Navigate, { to: "Feed", replace: true }),
       }, // Default to Home
-      { path: "Feed", element: React.createElement(CompanyHomePage) },
+      { path: "Feed", element: React.createElement(CompanyFeedPage) },
       { path: "Analytics", element: React.createElement(CompanyPostsPage) },
       { path: "Edit Page", element: React.createElement(CompanyJobsPage) },
     ],
