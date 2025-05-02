@@ -53,31 +53,6 @@ const Notification = () => {
   //   requestFCMToken();
   // }, []);
 
-  const testLogin = async () => {
-    try {
-      const response = await axios.post('http://localhost:3000/user/login', {
-        email: "Sidney55@gmail.com",
-        password: "password123"
-      },{
-        withCredentials:true
-      }
-      
-    );
-
-      console.log("Login Response:", response.data);
-    } catch (error) {
-      if (error.response) {
-  
-        console.error("Login Error - Server Response:", error.response.data);
-      } else if (error.request) {
-        // Request made but no response received
-        console.error("Login Error - No Response:", error.request);
-      } else {
-        // Something else happened
-        console.error("Login Error:", error.message);
-      }
-    }
-  };
 
   /**
    * Sends a test notification to the backend and shows a toast notification in the app.
@@ -114,7 +89,7 @@ const Notification = () => {
   const fetchNotifications = async () => {
     try {
       const response = await axios.get(
-        `${BASE_URL}/api/notifications`,
+        `${BASE_URL}/notifications`,
         {withCredentials:true}
       );
       console.log("notifications:",response.data)
@@ -133,7 +108,7 @@ const Notification = () => {
  //Mark Notification as read
   const handleNotificationClick = async (id) => {
     const response = await axios.patch(
-      `${BASE_URL}/api/notifications/mark-read/${id}`,
+      `${BASE_URL}/notifications/mark-read/${id}`,
       {},
       { withCredentials: true }
     );
@@ -155,7 +130,7 @@ const Notification = () => {
  */
   const fetchUser = async () => {
       try {
-        const response = await axios.get(`${BASE_URL}/api/user/me`, {
+        const response = await axios.get(`${BASE_URL}/user/me`, {
       
           withCredentials:true
         });

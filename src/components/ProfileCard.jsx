@@ -20,13 +20,12 @@ const ProfileCard = ({ user={} }) => {
 
       {/* User Info */}
       <div className="mt-10 p-4">
-        <h2 className="text-lg font-semibold">{user.user?.firstName
-          || "John "}{"  "} {user.user?.lastName
-            || "Doe "}</h2>
-        <p className="text-gray-500 text-xs">{user.user?.location || "Unknown Location"}</p>
-        <p className="mt-1 gap-1 text-xs font-medium">
-        </p>
-      </div>
+    <h2 className="text-lg font-semibold">
+        {`${user.user?.firstName || "John"} ${user.user?.lastName || "Doe"}`}
+    </h2>
+    <p className="text-gray-500 text-xs">{user.user?.location || "Unknown Location"}</p>
+    <p className="mt-1 gap-1 text-xs font-medium"></p>
+</div>
     </div>
   );
 };

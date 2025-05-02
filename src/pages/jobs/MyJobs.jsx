@@ -19,15 +19,17 @@ const MyJobs = () => {
   const [jobs, setJobs] = useState([]);
   const [user, setUser] = useState(null);
   const [company, setCompany] = useState("");
+    const [refreshTrigger, setRefreshTrigger] = useState(false);
+  
 const location = useLocation();
 const {allJobs} = location.state || {} // Extract job from location state
-
+console.log("allJobs in MyJobs:", allJobs); // Log the job object
   /**
    * Fetches currently logged-in user data and updates state.
    */
   const fetchUser = async () => {
     try {
-      const response = await axios.get(`${BASE_URL}/api/user/me`, {
+      const response = await axios.get(`${BASE_URL}/user/me`, {
         withCredentials: true,
       });
       setUser(response.data.user); // important! go into .user
@@ -42,7 +44,7 @@ const {allJobs} = location.state || {} // Extract job from location state
    */
   const fetchSavedJobs = async () => {
     try {
-      const response = await axios.get(`${BASE_URL}/api/jobs/saved`, {
+      const response = await axios.get(`${BASE_URL}/jobs/saved`, {
         withCredentials: true,
       });
       setJobs(response.data.jobs);
@@ -58,7 +60,7 @@ const {allJobs} = location.state || {} // Extract job from location state
    */
   const fetchMyApplications = async (status) => {
     try {
-      const response = await axios.get(`${BASE_URL}/api/jobs/my-applications?status=${status.toLowerCase()}`, {
+      const response = await axios.get(`${BASE_URL}/jobs/my-applications?status=${status.toLowerCase()}`, {
         withCredentials: true,
       });
       setJobs(response.data.applications);
@@ -77,7 +79,7 @@ const {allJobs} = location.state || {} // Extract job from location state
     try {
       const allCompanyJobs = await Promise.all(
         user.companies.map(async (companyId) => {
-          const response = await axios.get(`${BASE_URL}/api/jobs/company/${companyId}`, {
+          const response = await axios.get(`${BASE_URL}/jobs/company/${companyId}`, {
             withCredentials: true,
           });
           return response.data || []; 
@@ -97,7 +99,7 @@ const {allJobs} = location.state || {} // Extract job from location state
   // Handle loading data when selectedTab or activeFilter changes
   useEffect(() => {
     fetchUser();
-  }, []);
+  }, [refreshTrigger]);
 
   useEffect(() => {
     if (!user) return;
@@ -175,7 +177,7 @@ const {allJobs} = location.state || {} // Extract job from location state
         <div className="space-y-4 pl-6 pr-6">
           {jobs && jobs.length > 0 ? (
             jobs.map((job, index) => (
-              <JobCard key={index} job={job} state={selectedTab} user={user} jobs={allJobs} companyId={job.companyId} />
+              <JobCard key={index} job={job} state={selectedTab} user={user} jobs={allJobs} companyId={job.companyId} onDelete={() => setRefreshTrigger(prev => !prev)} />
             ))
           ) : (
             <p>No jobs available at the moment.</p>

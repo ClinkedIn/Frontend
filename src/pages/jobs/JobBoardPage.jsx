@@ -7,29 +7,46 @@ import JobCard from '../../components/jobs/JobCard';
 import Filter from "../../components/jobs/Filter";
 import ApplyJob from "../../components/jobs/ApplyJob";
 import { BASE_URL } from "../../constants";
-
+/**
+ * JobBoardPage component displays a job board with job listings, company filters,
+ * and job details with options to save and apply for jobs.
+ *
+ * @component
+ * @example
+ * return (
+ *   <JobBoardPage />
+ * )
+ */
 const JobBoardPage = () => {
-  const [jobs, setJobs] = useState([]);
-  const [companies, setCompanies] = useState([]);
-  const [selectedJob, setSelectedJob] = useState(null);
-  const [tab, setTab] = useState();
-  const location = useLocation();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [refreshTrigger, setRefreshTrigger] = useState(false);
+  const [jobs, setJobs] = useState([]); // Stores list of job postings
+  const [companies, setCompanies] = useState([]); // Stores list of companies
+  const [selectedJob, setSelectedJob] = useState(null); // Stores the selected job details
+  const [tab, setTab] = useState(); // Stores the current tab state
+  const location = useLocation(); // Accesses the location object from React Router
+  const [isModalOpen, setIsModalOpen] = useState(false); // Controls modal visibility
+  const [refreshTrigger, setRefreshTrigger] = useState(false); // Used to trigger job list refresh
 
-  // Filter states
-  const [experience, setExperience] = useState(0);
-  const [workType, setWorkType] = useState("");
-  const [selectedCompany, setSelectedCompany] = useState("");
+  const [experience, setExperience] = useState(0); // Filter by minimum experience
+  const [workType, setWorkType] = useState(""); // Filter by work type (e.g., full-time, part-time)
+  const [selectedCompany, setSelectedCompany] = useState(""); // Filter by company
 
+  /**
+   * Opens the job application modal
+   */
   const openModal = () => setIsModalOpen(true);
+
+  /**
+   * Closes the job application modal
+   */
   const closeModal = () => setIsModalOpen(false);
 
-  // Fetch all companies initially
+  /**
+   * Fetches the list of companies from the server
+   */
   useEffect(() => {
     const fetchCompanies = async () => {
       try {
-        const res = await axios.get(`${BASE_URL}/api/companies`);
+        const res = await axios.get(`${BASE_URL}/companies`);
         setCompanies(res.data);
       } catch (err) {
         console.error("Error fetching companies", err);
@@ -38,7 +55,9 @@ const JobBoardPage = () => {
     fetchCompanies();
   }, []);
 
-  // Fetch jobs initially or based on location.state
+  /**
+   * Fetches job listings based on location state or initial page load
+   */
   useEffect(() => {
     if (location.state) {
       setJobs(location.state.jobs || []);
@@ -46,9 +65,14 @@ const JobBoardPage = () => {
       setTab(location.state.currentPath || null);
     }
   }, [location.state]);
+  console.log("jobs in JobBoardPage:", jobs); // Log the job object
 
-  // Filter jobs on any filter change
+  /**
+   * Filters jobs based on experience, work type, or selected company
+   */
   useEffect(() => {
+    const shouldFilter = experience || workType || selectedCompany;
+    if (!shouldFilter) return;
     const fetchFilteredJobs = async () => {
       try {
         const params = new URLSearchParams();
@@ -56,7 +80,7 @@ const JobBoardPage = () => {
         if (workType) params.append('q', workType);
         if (selectedCompany) params.append('companyId', selectedCompany);
 
-        const res = await axios.get(`${BASE_URL}/api/search/jobs?${params}`);
+        const res = await axios.get(`${BASE_URL}/search/jobs?${params}`);
         setJobs(res.data.jobs || []);
       } catch (err) {
         console.error("Error filtering jobs", err);
@@ -64,20 +88,22 @@ const JobBoardPage = () => {
     };
 
     fetchFilteredJobs();
-  }, [experience, workType, selectedCompany,refreshTrigger]);
+  }, [experience, workType, selectedCompany, refreshTrigger]);
 
-  
+  /**
+   * Saves or unsaves the selected job
+   */
   const handleSave = async () => {
     const jobId = selectedJob?._id || selectedJob?.id || selectedJob?.jobId;
     if (!jobId) return;
 
     try {
       if (!selectedJob.isSaved) {
-        await axios.post(`${BASE_URL}/api/jobs/${jobId}/save`, {}, { withCredentials: true });
+        await axios.post(`${BASE_URL}/jobs/${jobId}/save`, {}, { withCredentials: true });
         setSelectedJob(prev => ({ ...prev, isSaved: true }));
         alert("Job saved!");
       } else {
-        await axios.delete(`${BASE_URL}/api/jobs/${jobId}/save`, { withCredentials: true });
+        await axios.delete(`${BASE_URL}/jobs/${jobId}/save`, { withCredentials: true });
         setSelectedJob(prev => ({ ...prev, isSaved: false }));
         alert("Job unsaved!");
       }
@@ -87,10 +113,10 @@ const JobBoardPage = () => {
       if (error.response) alert(`Failed: ${error.response.data.message}`);
     }
   };
-  console.log("Selected job:", selectedJob);
-
+  console.log("selectedJob", selectedJob);
+  console.log("jobs in JobBoardPage:", jobs); // Log the job object
   return (
-    <div className={`flex flex-col md:flex-row h-screen ${tab ? "mt-28" : "mt-16"} md:pl-[172px] md:pr-[172px]`}>
+    <div className={`flex flex-col md:flex-row h-screen ${tab ? "mt-32 md:mt-36" : "mt-16"} md:pl-[172px] md:pr-[172px]`}>
       <Header />
       {tab && (
         <Filter

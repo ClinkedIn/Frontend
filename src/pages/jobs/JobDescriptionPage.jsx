@@ -3,8 +3,12 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Header from '../../components/UpperNavBar';
 import { FiEdit2 } from "react-icons/fi";
 import { BsTypeBold, BsTypeItalic, BsListUl, BsListOl, BsInfoCircleFill } from "react-icons/bs";
-
-// Debounce utility
+  /**
+     * Debounce utility function to limit the rate at which a function is invoked.
+     * @param {Function} func - The function to debounce.
+     * @param {number} delay - The delay (in ms) before calling the function.
+     * @returns {Function} - The debounced function.
+     */
 const debounce = (func, delay) => {
     let timer;
     return (...args) => {
@@ -13,14 +17,28 @@ const debounce = (func, delay) => {
     };
 };
 
+/**
+ * JobDescriptionPage component handles the creation and editing of a job description.
+ * It supports functionality such as formatting text, selecting companies, and navigating between pages.
+ * 
+ * @component
+ * @example
+ * return (
+ *   <JobDescriptionPage />
+ * );
+ */
 export default function JobDescriptionPage() {
-    const location = useLocation(); // Call useLocation only once
+    const location = useLocation()
     const navigate = useNavigate();
 
     // Inside the component
     const textareaRef = useRef(null);
 
-    // Toolbar Button Handlers
+ 
+    /**
+     * Applies the specified formatting to the selected text in the job description textarea.
+     * @param {string} formatType - The type of formatting ('bold', 'italic', 'unordered', 'ordered').
+     */
     const applyFormatting = (formatType) => {
         if (!textareaRef.current) return;
         const textarea = textareaRef.current;
@@ -61,7 +79,6 @@ export default function JobDescriptionPage() {
         }, 0);
     };
 
-    // Access data from location.state, checking for nested objects
     const {
         UpdateJobData, // Data passed from ManageJob
         initialNewJobData, // Data passed from HirePage
@@ -73,11 +90,11 @@ export default function JobDescriptionPage() {
     // Extract individual pieces of data from the determined initialData
     const initialJobTitle = initialData.jobTitle || (initialData.job?.title) || (initialData.job.job.title)||'Job Title';
     const initialCompany = initialData.company || initialData?.company?.company|| { id: null, name: 'Default Company', address: 'Default Address', logo: '' };
-    const initialCompanyName = initialCompany.name || initialCompany.company.name|| 'Default Company'; // Fallback to default name if not available
-    const initialJobType = initialData.jobType || (initialData.job?.jobType) || (initialData.job.job.jobType)||"Full Time";
+    const initialCompanyName = initialCompany.name || initialCompany?.company?.name|| 'Default Company'; 
+    const initialJobType = initialData.jobType || (initialData.job?.jobType) || (initialData?.job?.job?.jobType)||"Full Time";
     const initialJobSite = initialData.jobSite || (initialData.job?.workplaceType) ||(initialData.job.job.workplaceType)|| "Remote";
-    const initialJobLocation = initialData.location || (initialData.job?.jobLocation)||(initialData.job.job.jobLocation) || '';
-    const initialJobDescription = initialData.description || (initialData.job?.description)||(initialData.job.job.description) || `The ideal candidate will be responsible for developing high-quality applications. They will also be responsible for designing and implementing testable and scalable code.
+    const initialJobLocation = initialData.location || (initialData.job?.jobLocation)||(initialData.job?.job?.jobLocation) || '';
+    const initialJobDescription = initialData.description || (initialData.job?.description)||(initialData.job?.job?.description) || `The ideal candidate will be responsible for developing high-quality applications. They will also be responsible for designing and implementing testable and scalable code.
 
 Responsibilities
 • Develop quality software and web applications
@@ -94,14 +111,14 @@ Qualifications
     const pageState = initialData.pageState; 
     let jobId = null;
     if(initialData.job){
-        jobId = initialData.job._id; // Assign value to the outer jobId
+        jobId = initialData.job._id; 
     }
 
     // Initialize states using the extracted initial data
     const [isEditing, setIsEditing] = useState(false);
     const [currentJobTitle, setCurrentJobTitle] = useState(initialJobTitle);
-    const [selectedCompany, setSelectedCompany] = useState(initialCompanyName);
-    const [editCompanyInput, setEditCompanyInput] = useState(initialCompanyName); // Initialize company input with selected company name
+    const [selectedCompany, setSelectedCompany] = useState(initialCompany);
+    const [editCompanyInput, setEditCompanyInput] = useState(initialCompanyName); 
 
     const [companySuggestions, setCompanySuggestions] = useState([]);
     const [showCompanySuggestions, setShowCompanySuggestions] = useState(false);
@@ -113,7 +130,10 @@ Qualifications
 
     const companySuggestionsRef = useRef(null);
 
-    // Handle outside clicks for company suggestions
+   
+    /**
+     * Effect hook that handles clicks outside the company suggestions list to close it.
+     */
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (companySuggestionsRef.current && !companySuggestionsRef.current.contains(e.target)) {
@@ -127,7 +147,9 @@ Qualifications
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [showCompanySuggestions]); // Dependency on showCompanySuggestions
 
-    
+     /**
+     * Effect hook to set the editing state based on the page state ('CreateJob' or 'UpdateJob').
+     */
      useEffect(() => {
          if (pageState === 'CreateJob') { 
              setIsEditing(false);
@@ -158,7 +180,10 @@ Qualifications
         setIsEditing(false);
         setShowCompanySuggestions(false);
     };
-
+    /**
+     * Filters company suggestions based on user input and debounces the function call.
+     * @param {string} value - The input value to filter company names.
+     */
     const filterCompanySuggestions = debounce((value) => {
         if (!value || !Array.isArray(allCompanies)) {
             setCompanySuggestions([]);
@@ -170,6 +195,10 @@ Qualifications
         setShowCompanySuggestions(filtered.length > 0);
     }, 300);
 
+    /**
+     * Handles changes in the company input field and updates suggestions.
+     * @param {Object} e - The change event object.
+     */
     const handleCompanyInputChange = (e) => {
         const value = e.target.value;
         setEditCompanyInput(value);
@@ -177,12 +206,14 @@ Qualifications
         setSelectedCompany({ id: null, name: value, address: '', logo: '' });
         filterCompanySuggestions(value);
     };
-
+    /**
+     * Handles a click on a company suggestion and selects it.
+     * @param {Object} company - The selected company object.
+     */
     const handleCompanySuggestionClick = (company) => {
         setSelectedCompany(company||company.company); 
         setEditCompanyInput(company.name || company.company.name); 
-        // Also update location if company has an address and location is not already set by user
-        if (!currentJobLocation || currentJobLocation === (initialCompany?.address || '')) { // Compare with initial company address safely
+        if (!currentJobLocation || currentJobLocation === (initialCompany?.address || '')) { 
              setCurrentJobLocation(company.address || '');
         }
         setCompanySuggestions([]);
@@ -321,7 +352,7 @@ Qualifications
                          )}
                          {/* Display placeholder if no logo */}
                          {!selectedCompany?.logo && (
-                             <img src={'https://placehold.co/48x48/EBF4FD/0A66C2?text=Logo'} alt="Company Logo" className="w-10 h-10 object-contain rounded-full mr-2" />
+                             <img src={'https://picsum.photos/80?random=1'} alt="Company Logo" className="w-10 h-10 object-contain rounded-full mr-2" />
                          )}
                         <span className="font-medium">{selectedCompany?.name || 'N/A'}</span> {/* Display company name safely */}
                         <span className="mx-1.5">•</span>

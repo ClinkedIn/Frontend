@@ -6,7 +6,37 @@ import { BASE_URL } from "../constants";
 import { db } from "../../firebase";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 
+/**
+ * Header component that manages the navigation, search, and notifications.
+ * 
+ * @component
+ * @example
+ * // Example usage:
+ * <Header notifications={notifications} />
+ * 
+ * @param {Object} props - The properties passed to the component.
+ * @param {Array} props.notifications - Array of notifications to be passed to the component.
+ * 
+ * @returns {JSX.Element} The Header component.
+ */
 const Header = ({ notifications }) => {
+  /**
+   * State variables:
+   * - `showUser`: Toggles the visibility of the user dropdown.
+   * - `unreadCount`: Stores the count of unread notifications.
+   * - `searchQuery`: The search query for job search.
+   * - `location`: The location filter for job search.
+   * - `searchTerm`: The search term for user search.
+   * - `userResults`: The list of user results based on the search term.
+   * - `showResults`: Boolean flag to show user search results dropdown.
+   * - `unreadCountMessages`: Stores the count of unread messages.
+   * - `conversations`: Stores the user's conversations.
+   * - `loadingConversations`: Boolean flag for loading state of conversations.
+   * - `currentUser`: Stores the current user's data.
+   * - `showWork`: Toggles the visibility of the work dropdown.
+   * 
+   * @type {object}
+   */
   const [showUser, setShowUser] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState(""); // For job search
@@ -25,11 +55,14 @@ const Header = ({ notifications }) => {
   const [currentUser, setUser] = useState();
   const workDropdownRef = useRef(null);
   const [showWork, setShowWork] = useState(false);
-  // Fetch unread notification count
+
+  /**
+   * Fetches the count of unread notifications and updates the state.
+   */
   useEffect(() => {
     const fetchUnreadCount = async () => {
       try {
-        const response = await axios.get(`${BASE_URL}/api/notifications/unread-count`, {
+        const response = await axios.get(`${BASE_URL}/notifications/unread-count`, {
           withCredentials: true,
         });
         setUnreadCount(response.data.unreadCount || 0);
@@ -40,14 +73,15 @@ const Header = ({ notifications }) => {
     fetchUnreadCount();
   }, [notifications]);
 
+  /**
+   * Fetches the current user's data and updates the state.
+   */
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const response = await axios.get(`${BASE_URL}/user/me`, {
-      
-          withCredentials:true
+          withCredentials: true,
         });
-    
         setUser(response.data.user);
         console.log("User data:", response.data.user);
       } catch (error) {
@@ -55,12 +89,14 @@ const Header = ({ notifications }) => {
       }
     };
     fetchUser();
-
   }, []);
 
+  /**
+   * Fetches unread message counts from Firestore and updates the state.
+   */
   useEffect(() => {
-    if (!currentUser?._id)
-      return;
+    if (!currentUser?._id) return;
+
     const conversationsRef = collection(db, 'conversations');
     const q = query(
       conversationsRef,
@@ -72,8 +108,7 @@ const Header = ({ notifications }) => {
       querySnapshot.forEach((doc) => {
         const data = doc.data();
         let countForUser = data.unreadCounts?.[currentUser._id] || 0;
-        if (data.forceUnread) 
-          countForUser = countForUser-1 ;
+        if (data.forceUnread) countForUser = countForUser - 1;
         totalUnread += countForUser;
       });
 
@@ -81,22 +116,19 @@ const Header = ({ notifications }) => {
       setUnreadCountMessages(totalUnread);
 
     }, (error) => {
-      
       console.error("Error fetching unread message count from Firestore:", error);
-      setUnreadCountMessages(0); 
+      setUnreadCountMessages(0);
     });
+
     return () => {
       console.log("Cleaning up Firestore listener for unread messages count.");
       unsubscribe();
     };
+  }, [currentUser?._id]);
 
-
-  }
-, [currentUser?._id]);
-
-
-
-  // Close dropdowns when clicking outside
+  /**
+   * Handles the closing of dropdowns when clicking outside of them.
+   */
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -111,7 +143,9 @@ const Header = ({ notifications }) => {
       document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Handle User Search
+  /**
+   * Handles the user search logic with debouncing.
+   */
   useEffect(() => {
     if (!searchTerm.trim()) {
       setUserResults([]);
@@ -123,7 +157,7 @@ const Header = ({ notifications }) => {
       try {
         const params = new URLSearchParams();
         if (searchTerm) params.append("query", searchTerm);
-        const response = await axios.get(`${BASE_URL}/api/user/search`, {
+        const response = await axios.get(`${BASE_URL}/user/search`, {
           params,
           withCredentials: true,
         });
@@ -137,23 +171,10 @@ const Header = ({ notifications }) => {
 
     return () => clearTimeout(delayDebounceFn);
   }, [searchTerm]);
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setShowUser(false);
-      }
-      if (searchRef.current && !searchRef.current.contains(event.target)) {
-        setShowResults(false);
-      }
-      if (workDropdownRef.current && !workDropdownRef.current.contains(event.target)) {
-        setShowWork(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
-  // Handlers
+  /**
+   * Handles the navigation for various actions, such as viewing notifications, job listings, or settings.
+   */
   const handleNotificationsClick = () => navigate("/notifications");
   const handleJobsClick = () => navigate("/jobs");
   const handleProfileClick = () => {
@@ -169,14 +190,18 @@ const Header = ({ notifications }) => {
     navigate("/company/setup/new");
     setShowWork(false);
   };
-  // Submit job search
+
+  /**
+   * Handles the job search and navigation to the job board.
+   * @param {Event} e - The form submit event.
+   */
   const handleJobSearch = async (e) => {
     e.preventDefault();
     try {
       const params = new URLSearchParams();
       if (searchQuery) params.append("q", searchQuery);
       if (location) params.append("location", location);
-      const response = await axios.get(`${BASE_URL}/api/search/jobs?${params}`);
+      const response = await axios.get(`${BASE_URL}/search/jobs?${params}`);
       navigate("/job-board", {
         state: {
           jobs: response.data.jobs,
@@ -189,8 +214,12 @@ const Header = ({ notifications }) => {
       console.error("Search error:", error);
     }
   };
+
+  /**
+   * Determines whether to show the job search bar based on the current path.
+   */
   let path = false;
-  if (currentPath === "jobs" || currentPath === "job-board"|| currentPath === "myjobs") {
+  if (currentPath === "jobs" || currentPath === "job-board" || currentPath === "myjobs") {
     path = true;
   }
   return (

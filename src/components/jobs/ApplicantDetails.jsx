@@ -1,266 +1,290 @@
-import React, { useState, useRef, useEffect } from "react"; // Import useState, useRef, useEffect
-import { BsThreeDots, BsArrowUpRight, BsPerson, BsEnvelope, BsPhone, BsDownload, BsCheckCircleFill, BsXCircleFill } from "react-icons/bs"; // Import necessary icons for dropdown, download, and check/cross
-import { formatDistanceToNow } from 'date-fns'; // Assuming date-fns is available for time formatting
-import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
-import axios from "axios"; // Import axios for API calls
-import { BASE_URL } from "../../constants"; // Import base URL for API calls
-const ApplicantDetails = ({ applicant, screeningAnswers }) => { // Added screeningAnswers prop
-    const navigate = useNavigate(); // Initialize navigate hook
+/**
+ * ApplicantDetails component displays detailed information about a job applicant,
+ * including contact information, resume, work experience, education, and responses
+ * to screening questions.
+ *
+ * @component
+ * @param {Object} props
+ * @param {Object} props.applicant - Applicant data object containing user info, contact, resume, etc.
+ * @param {Array<Object>} props.screeningAnswers - List of screening question responses with criteria info.
+ */
+import React, { useState, useRef, useEffect } from "react";
+import {
+  BsThreeDots, BsArrowUpRight, BsPerson, BsEnvelope, BsPhone, BsDownload,
+  BsCheckCircleFill, BsXCircleFill
+} from "react-icons/bs";
+import { formatDistanceToNow } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
+import axios from "axios";
+import { BASE_URL } from "../../constants";
 
-    // State to control dropdown visibility
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    // Ref for the dropdown container to detect clicks outside
-    const dropdownRef = useRef(null);
-    const name = applicant ? `${applicant?.applicant.firstName} ${applicant?.applicant.lastName}` : 'N/A';
-    const headline = applicant?.headline || 'No Headline';
-    const profilePicture = applicant?.applicant.profilePicture;
-    const appliedTime = applicant?.createdAt
-        ? formatDistanceToNow(new Date(applicant.createdAt), { addSuffix: true })
-        : 'Unknown time';
+const ApplicantDetails = ({ applicant, screeningAnswers }) => {
+  const navigate = useNavigate();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
-    // Extract data needed for the dropdown and resume fetching
-    const userId = applicant?.applicant.userId; 
-    console.log("User ID:", userId); // Log the user ID for debugging
-    const contactEmail = applicant?.contactEmail; 
-    const contactPhone = applicant?.contactPhone; 
-    const resumeUrl = applicant?.applicant.resume;
+  // Extract basic applicant information
+  const name = applicant ? `${applicant?.applicant.firstName} ${applicant?.applicant.lastName}` : 'N/A';
+  const headline = applicant?.headline || 'No Headline';
+  const profilePicture = applicant?.applicant.profilePicture;
+  const appliedTime = applicant?.createdAt
+    ? formatDistanceToNow(new Date(applicant.createdAt), { addSuffix: true })
+    : 'Unknown time';
 
-    // Handle clicks outside the dropdown to close it
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-                setIsDropdownOpen(false);
-            }
-        };
-        // Bind the event listener
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            // Unbind the event listener on clean up
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, [dropdownRef]); // Re-run effect if dropdownRef changes (though it's a static ref)
+  const userId = applicant?.applicant.userId;
+  const contactEmail = applicant?.contactEmail;
+  const contactPhone = applicant?.contactPhone;
+  const resumeUrl = applicant?.applicant.resume;
 
+  /**
+   * Close dropdown menu if clicked outside of it.
+   */
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
+  /**
+   * Fetch additional user data when userId is available.
+   */
+  useEffect(() => {
+    const getUser = async () => {
+      try {
+        const response = await axios.get(`${BASE_URL}/user/${userId}`, {
+          withCredentials: true
+        });
+        console.log("Fetched user data:", response.data);
+      } catch (error) {
+        console.error("Failed to fetch user data:", error);
+      }
+    };
+    if (userId) getUser();
+  }, [userId]);
 
-    useEffect(() => {
-        const getUser=async () => {
-            try{
-                const response = await axios.get(`${BASE_URL}/api/user/${userId}`,
-                    {withCredentials: true} // Include credentials for CORS
-                );
-                console.log("Fetched user data:", response.data); // Log the fetched user data
-            }
-            catch (error) {
-                console.error("Failed to fetch user data:", error); // Log any errors
-            }
-        }
-        getUser(); // Call the function to fetch user data
-    },[userId])
-    
-    // Display a message if no application data is provided
-    if (!applicant) {
-        return (
-            <div className="p-6 text-gray-600 text-center">
-                Select an applicant from the list to view details.
+  if (!applicant) {
+    return (
+      <div className="p-6 text-gray-600 text-center">
+        Select an applicant from the list to view details.
+      </div>
+    );
+  }
+
+  /**
+   * Navigate to the user's full profile.
+   */
+  const handleSeeFullProfile = () => {
+    if (userId) {
+      navigate(`/user/${userId}`);
+    } else {
+      console.warn("User ID not available for navigation.");
+    }
+    setIsDropdownOpen(false);
+  };
+
+  /**
+   * Navigate to the messaging page with the applicant's info.
+   */
+  const handleMessageApplicant = () => {
+    navigate("/messaging", {
+      state: { _id: userId, fullName: name, profilePicture },
+    });
+  };
+
+  /**
+   * Open the default email client to email the applicant.
+   */
+  const handleEmailClick = () => {
+    if (contactEmail) {
+      window.location.href = `mailto:${contactEmail}`;
+    } else {
+      console.warn("Applicant email address not available.");
+    }
+    setIsDropdownOpen(false);
+  };
+
+  /**
+   * Copy the applicant's phone number to clipboard.
+   */
+  const handleCopyPhone = async () => {
+    if (contactPhone) {
+      try {
+        await navigator.clipboard.writeText(contactPhone);
+        alert("Phone number copied to clipboard!");
+      } catch (err) {
+        alert("Failed to copy phone number.");
+      }
+    } else {
+      console.warn("Applicant phone number not available.");
+    }
+    setIsDropdownOpen(false);
+  };
+
+  /**
+   * Open the applicant's resume in a new tab.
+   */
+  const handleViewResume = () => {
+    if (resumeUrl) {
+      window.open(resumeUrl, '_blank');
+    } else {
+      alert("Resume URL not available");
+    }
+  };
+
+  /**
+   * Render the work experience section of the applicant.
+   *
+   * @returns {JSX.Element} Work experience list or fallback message
+   */
+  const renderExperience = () => {
+    const workExperience = applicant?.applicant?.workExperience || [];
+    if (workExperience.length === 0) {
+      return <p className="text-gray-600 text-sm italic">No work experience details available.</p>;
+    }
+    return (
+      <div className="space-y-3">
+        {workExperience.map((exp, index) => (
+          <div key={index} className="flex items-start">
+            <div className="flex-shrink-0 w-8 h-8 bg-gray-200 rounded-md mr-3 flex items-center justify-center text-gray-600">
+              💼
             </div>
-        );
+            <div className="flex-grow">
+              <h5 className="font-semibold text-gray-800 text-sm">{exp.jobTitle}</h5>
+              <p className="text-gray-700 text-xs">{exp.companyName}</p>
+              <p className="text-gray-500 text-xs">
+                {new Date(exp.fromDate).toLocaleDateString()} -{' '}
+                {exp.currentlyWorking ? 'Present' : new Date(exp.toDate).toLocaleDateString()}
+              </p>
+              <p className="text-gray-600 text-xs mt-1">{exp.description}</p>
+              {exp.skills?.length > 0 && (
+                <div className="mt-1 flex flex-wrap gap-1">
+                  {exp.skills.map((skill, i) => (
+                    <span key={i} className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  /**
+   * Render the education section of the applicant.
+   *
+   * @returns {JSX.Element} Education list or fallback message
+   */
+  const renderEducation = () => {
+    const education = applicant?.applicant?.education || [];
+    if (education.length === 0) {
+      return <p className="text-gray-600 text-sm italic">No education details available.</p>;
+    }
+    return (
+      <div className="space-y-3">
+        {education.map((edu, index) => (
+          <div key={index} className="flex items-start">
+            <div className="flex-shrink-0 w-8 h-8 bg-gray-200 rounded-md mr-3 flex items-center justify-center text-gray-600">
+              📚
+            </div>
+            <div className="flex-grow">
+              <h5 className="font-semibold text-gray-800 text-sm">{edu.degree} in {edu.fieldOfStudy}</h5>
+              <p className="text-gray-700 text-xs">{edu.school}</p>
+              <p className="text-gray-500 text-xs">
+                {new Date(edu.startDate).toLocaleDateString()} -{' '}
+                {edu.endDate ? new Date(edu.endDate).toLocaleDateString() : 'Present'}
+              </p>
+              {edu.skills?.length > 0 && (
+                <div className="mt-1 flex flex-wrap gap-1">
+                  {edu.skills.map((skill, i) => (
+                    <span key={i} className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  /**
+   * Render the screening answers with indicators for whether they met the criteria.
+   *
+   * @returns {JSX.Element} Screening answers grouped by criteria
+   */
+  const renderScreeningAnswers = () => {
+    if (!screeningAnswers || screeningAnswers.length === 0) {
+      return <p className="text-gray-600 text-sm italic">Screening question responses not available.</p>;
     }
 
-    // Handler for "See full profile" button
-    const handleSeeFullProfile = () => {
-        if (userId) {
-            navigate(`/user/${userId}`); // Navigate to the user's profile page
-        } else {
-            console.warn("User ID not available for navigation.");
-            // Optionally show a user-friendly message
-        }
-        setIsDropdownOpen(false); // Close dropdown after action
-    };
-    let fullName = name;
-    let _id=userId
-    const handleMessageApplicant = () => {
-        navigate("/messaging", {
-            state: { _id, fullName, profilePicture }, 
-        }
-    )}
+    const metCriteriaAnswers = screeningAnswers.filter(answer => answer.meetsCriteria);
+    const notMetCriteriaAnswers = screeningAnswers.filter(answer => !answer.meetsCriteria);
 
-    const handleEmailClick = () => {
-        if (contactEmail) {
-            window.location.href = `mailto:${contactEmail}`; 
-        } else {
-            console.warn("Applicant email address not available.");
-            // Optionally show a user-friendly message
-        }
-        setIsDropdownOpen(false); // Close dropdown after action
-    };
-
-    // Handler for phone number button (copies to clipboard)
-    const handleCopyPhone = async () => {
-        if (contactPhone) {
-            try {
-                await navigator.clipboard.writeText(contactPhone);
-                console.log("Phone number copied to clipboard:", contactPhone);
-                // Optionally show a success message to the user
-                alert("Phone number copied to clipboard!"); // Using alert as a simple confirmation
-            } catch (err) {
-                console.error("Failed to copy phone number:", err);
-                // Optionally show an error message to the user
-                alert("Failed to copy phone number.");
-            }
-        } else {
-            console.warn("Applicant phone number not available.");
-            // Optionally show a user-friendly message
-        }
-        setIsDropdownOpen(false); // Close dropdown after action
-    };
-
-
-    const renderExperience = () => {
-        const workExperience = applicant?.applicant?.workExperience || [];
-        if (workExperience.length === 0) {
-            return <p className="text-gray-600 text-sm italic">No work experience details available.</p>;
-        }
-        return (
+    return (
+      <div className="space-y-4">
+        {metCriteriaAnswers.length > 0 && (
+          <div>
+            <h4 className="font-semibold text-gray-800 mb-2">
+              Responses Meeting Criteria ({metCriteriaAnswers.length} out of {screeningAnswers.length} met)
+            </h4>
             <div className="space-y-3">
-                {workExperience.map((exp, index) => (
-                    <div key={index} className="flex items-start">
-                        <div className="flex-shrink-0 w-8 h-8 bg-gray-200 rounded-md mr-3 flex items-center justify-center text-gray-600">
-                            💼
-                        </div>
-                        <div className="flex-grow">
-                            <h5 className="font-semibold text-gray-800 text-sm">{exp.jobTitle}</h5>
-                            <p className="text-gray-700 text-xs">{exp.companyName}</p>
-                            <p className="text-gray-500 text-xs">
-                                {new Date(exp.fromDate).toLocaleDateString()} -{' '}
-                                {exp.currentlyWorking ? 'Present' : new Date(exp.toDate).toLocaleDateString()}
-                            </p>
-                            <p className="text-gray-600 text-xs mt-1">{exp.description}</p>
-                            {exp.skills?.length > 0 && (
-                                <div className="mt-1 flex flex-wrap gap-1">
-                                    {exp.skills.map((skill, i) => (
-                                        <span key={i} className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
-                                            {skill}
-                                        </span>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                ))}
+              {metCriteriaAnswers.map((answer, index) => (
+                <div key={index} className="flex items-start">
+                  <BsCheckCircleFill className="flex-shrink-0 w-5 h-5 text-green-600 mr-2 mt-0.5" />
+                  <div className="flex-grow">
+                    <p className="text-gray-800 text-sm font-semibold">{answer.question}</p>
+                    <p className="text-gray-700 text-sm">{answer.answer}</p>
+                  </div>
+                </div>
+              ))}
             </div>
-        );
-    };
-    const renderEducation = () => {
-        const education = applicant?.applicant?.education || [];
-        if (education.length === 0) {
-            return <p className="text-gray-600 text-sm italic">No education details available.</p>;
-        }
-        return (
+          </div>
+        )}
+
+        {notMetCriteriaAnswers.length > 0 && (
+          <div>
+            <h4 className="font-semibold text-gray-800 mb-2">
+              Responses Not Meeting Criteria ({notMetCriteriaAnswers.length} out of {screeningAnswers.length} not met)
+            </h4>
             <div className="space-y-3">
-                {education.map((edu, index) => (
-                    <div key={index} className="flex items-start">
-                        <div className="flex-shrink-0 w-8 h-8 bg-gray-200 rounded-md mr-3 flex items-center justify-center text-gray-600">
-                            📚
-                        </div>
-                        <div className="flex-grow">
-                            <h5 className="font-semibold text-gray-800 text-sm">{edu.degree} in {edu.fieldOfStudy}</h5>
-                            <p className="text-gray-700 text-xs">{edu.school}</p>
-                            <p className="text-gray-500 text-xs">
-                                {new Date(edu.startDate).toLocaleDateString()} -{' '}
-                                {edu.endDate ? new Date(edu.endDate).toLocaleDateString() : 'Present'}
-                            </p>
-                            {edu.skills?.length > 0 && (
-                                <div className="mt-1 flex flex-wrap gap-1">
-                                    {edu.skills.map((skill, i) => (
-                                        <span key={i} className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
-                                            {skill}
-                                        </span>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                ))}
+              {notMetCriteriaAnswers.map((answer, index) => (
+                <div key={index} className="flex items-start">
+                  <BsXCircleFill className="flex-shrink-0 w-5 h-5 text-red-600 mr-2 mt-0.5" />
+                  <div className="flex-grow">
+                    <p className="text-gray-800 text-sm font-semibold">{answer.question}</p>
+                    <p className="text-gray-700 text-sm">{answer.answer}</p>
+                  </div>
+                </div>
+              ))}
             </div>
-        );
-    };
+          </div>
+        )}
 
-    const handleViewResume = () => {
-        if (resumeUrl) {
-            window.open(resumeUrl, '_blank');
-        } else {
-            alert("Resume URL not available");
-        }
-    };
-      const renderScreeningAnswers = () => {
-          if (!screeningAnswers || screeningAnswers.length === 0) {
-              return <p className="text-gray-600 text-sm italic">Screening question responses not available.</p>;
-          }
+        {metCriteriaAnswers.length === screeningAnswers.length && screeningAnswers.length > 0 && (
+          <p className="text-gray-600 text-sm italic">All screening criteria were met.</p>
+        )}
+        {notMetCriteriaAnswers.length === screeningAnswers.length && screeningAnswers.length > 0 && (
+          <p className="text-gray-600 text-sm italic">No screening criteria were met.</p>
+        )}
+      </div>
+    );
+  };
 
-          const metCriteriaAnswers = screeningAnswers.filter(answer => answer.meetsCriteria);
-          const notMetCriteriaAnswers = screeningAnswers.filter(answer => !answer.meetsCriteria);
-
-
-          return (
-              <div className="space-y-4"> {/* Added space-y for spacing between groups */}
-                  {/* Display answers that met criteria */}
-                  {metCriteriaAnswers.length > 0 && (
-                      <div>
-                          {/* Using a generic title as 'Must-have'/'Preferred' info isn't in the data */}
-                          <h4 className="font-semibold text-gray-800 mb-2">Responses Meeting Criteria ({metCriteriaAnswers.length} out of {screeningAnswers.length} met)</h4>
-                          <div className="space-y-3"> {/* Space between individual answers */}
-                              {metCriteriaAnswers.map((answer, index) => (
-                                  <div key={index} className="flex items-start">
-                                      {/* Checkmark icon for met criteria */}
-                                      <BsCheckCircleFill className="flex-shrink-0 w-5 h-5 text-green-600 mr-2 mt-0.5" />
-                                      <div className="flex-grow">
-                                          <p className="text-gray-800 text-sm font-semibold">{answer.question}</p>
-                                          {/* Ideal answer is not in the provided data structure, omitting */}
-                                          {/* <p className="text-gray-600 text-xs italic">Ideal answer: Yes</p> */}
-                                          <p className="text-gray-700 text-sm">{answer.answer}</p>
-                                      </div>
-                                  </div>
-                              ))}
-                          </div>
-                      </div>
-                  )}
-
-                  {/* Display answers that did not meet criteria */}
-                   {notMetCriteriaAnswers.length > 0 && (
-                      <div>
-                           {/* Using a generic title for not met criteria */}
-                          <h4 className="font-semibold text-gray-800 mb-2">Responses Not Meeting Criteria ({notMetCriteriaAnswers.length} out of {screeningAnswers.length} not met)</h4>
-                          <div className="space-y-3"> {/* Space between individual answers */}
-                              {notMetCriteriaAnswers.map((answer, index) => (
-                                  <div key={index} className="flex items-start">
-                                      {/* Cross icon for not met criteria */}
-                                      <BsXCircleFill className="flex-shrink-0 w-5 h-5 text-red-600 mr-2 mt-0.5" />
-                                      <div className="flex-grow">
-                                          <p className="text-gray-800 text-sm font-semibold">{answer.question}</p>
-                                           {/* Ideal answer is not in the provided data structure, omitting */}
-                                          {/* <p className="text-gray-600 text-xs italic">Ideal answer: Yes</p> */}
-                                          <p className="text-gray-700 text-sm">{answer.answer}</p>
-                                      </div>
-                                  </div>
-                              ))}
-                          </div>
-                      </div>
-                  )}
-
-                    {/* Message if all criteria were met or not met */}
-                     {metCriteriaAnswers.length === screeningAnswers.length && screeningAnswers.length > 0 && (
-                         <p className="text-gray-600 text-sm italic">All screening criteria were met.</p>
-                     )}
-                     {notMetCriteriaAnswers.length === screeningAnswers.length && screeningAnswers.length > 0 && (
-                         <p className="text-gray-600 text-sm italic">No screening criteria were met.</p>
-                     )}
-              </div>
-          );
-      };
 
     return (
         // Main container for applicant details, styled to match the right panel in the image
-        <div className="bg-white rounded-lg shadow p-6 space-y-6 h-full overflow-y-auto"> {/* Added h-full and overflow-y-auto */}
+        <div className="bg-white rounded-lg shadow p-6 space-y-6 "> 
            <div className="flex justify-between items-start border-b border-gray-200 pb-4">
                 <div className="flex-grow overflow-hidden"> {/* Added overflow-hidden */}
                     <div className="flex items-center gap-1">
