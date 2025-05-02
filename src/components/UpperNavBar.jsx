@@ -441,7 +441,7 @@ const Header = ({ notifications }) => {
               )}
             </div>
           </button>
-          <button
+          {/* <button
             className="relative flex flex-col items-center text-xs text-gray-600 hover:text-black p-1"
             onClick={handleMessagingClick}
           >
@@ -450,7 +450,7 @@ const Header = ({ notifications }) => {
               alt="Messaging"
               className="w-6 h-6"
             />{" "}
-          </button>
+          </button> */}
 
           {unreadCountMessages > 0 && (
             <div className="absolute -top-1 left-1/2 ml-1 bg-[#cb112d] text-white rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-[10px] md:text-xs font-medium">
