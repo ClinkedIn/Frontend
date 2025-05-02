@@ -511,7 +511,7 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
              className="w-10 h-10 rounded-full flex-shrink-0" 
            />
            <div className="min-w-0">
-             <p className="font-semibold truncate">{(otherUserInfo?.fullName )  || 'Loading...'}</p>
+             <p className="font-semibold truncate">{(otherUserInfo?.fullName ) || (otherUserInfo?.firstName + " " + otherUserInfo?.lastName )   || 'Loading...'}</p>
              {isTyping && <p className="text-xs text-blue-600 animate-pulse">Typing...</p>}
              
            </div>

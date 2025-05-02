@@ -70,7 +70,7 @@ const ConversationList = ({
             {/* Conversation List Area */}
             <div className="flex-grow overflow-y-auto">
                 {loadingConversations && <div className="p-4 text-center text-gray-500">Loading chats...</div>}
-                {errorConversations && <div className="p-4 text-center text-red-500">{errorConversations}</div>}
+                {errorConversations && <div className="p-4 text-center text-gray-500">{errorConversations}</div>}
                 {!loadingConversations && conversations.length === 0 && (
                     <div className="p-4 text-center text-gray-500">No conversations yet. Search for a connection to start chatting.</div>
                 )}

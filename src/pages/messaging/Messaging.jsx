@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams ,useLocation} from 'react-router-dom';
+import { useParams ,useLocation} from 'react-router-dom';
 import ConversationList from '../../components/messaging/ConversationList';
 import ChatWindow from '../../components/messaging/ChatWindow'; 
 import Header from '../../components/UpperNavBar';
@@ -35,7 +36,7 @@ const MessagingPage = () => {
       useEffect(() => {
         const fetchUser = async () => {
           try {
-            const response = await axios.get(`${BASE_URL}/api/user/me`, {
+            const response = await axios.get(`${BASE_URL}/user/me`, {
           
               withCredentials:true
             });
@@ -150,7 +151,7 @@ const MessagingPage = () => {
           
           const fetchConnections = async () => {
             try {
-              const response = await axios.get(`${BASE_URL}/api/user/connections`, {
+              const response = await axios.get(`${BASE_URL}/user/connections`, {
         
                 withCredentials:true
               });
