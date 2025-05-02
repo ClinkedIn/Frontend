@@ -4,6 +4,7 @@ import { useOutletContext } from 'react-router-dom';
 import { useEffect,useState } from 'react';
 import axios from 'axios';
 import { BASE_URL } from '../../constants';
+import Main from '../Main';
 const CompanyPostsPage = ()=> {
     const {companyInfo}  = useOutletContext();
     const [posts, setPosts] = useState([]);
@@ -33,7 +34,7 @@ const CompanyPostsPage = ()=> {
         </div>
     )
    }
-    if(posts.length===0){
+  if(posts.length===0){
      return(
           <div className="mt-4 bg-white flex justify-center   w-full rounded-lg shadow-lg p-4 ">
                 <h1 className="text-2xl  ">No Posts Found</h1>
@@ -42,7 +43,11 @@ const CompanyPostsPage = ()=> {
     }
 
    return(
-    <div className="mt-4 bg-white   w-full rounded-lg shadow-lg p-4 ">
+    <div className="mt-4 bg-white flex flex-col justify-center  w-full rounded-lg shadow-lg p-4 ">
+        <h1 className="text-2xl  ">Posts</h1>
+        <div className=" gap-4 mt-4">
+            <Main/>
+        </div>
 
     </div>
    )

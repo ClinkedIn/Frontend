@@ -1,5 +1,5 @@
 import { FaPlus } from "react-icons/fa6";
-import { Outlet, useNavigate,useParams } from "react-router-dom";
+import { Outlet, useNavigate,useParams,useLocation } from "react-router-dom";
 import Header from "../../components/UpperNavBar";
 import InlineTabs from "../../components/CompanyPageSections/InlineTabs"
 import { useState,useEffect } from "react";
@@ -20,7 +20,6 @@ const CompanyProfileAdminViewPage = () => {
     const [user, setUser] = useState(null);
     const {companyId, section = "Feed"} = useParams();
     const [isUpdating, setIsUpdating] = useState(false);
-    const [activeTab, setActiveTab] = useState(section);
     const [companyInfo, setCompanyInfo] = useState();
     const [showForm, setShowForm] = useState(false);
     const [companyName, setCompanyName] = useState("");
@@ -37,7 +36,13 @@ const CompanyProfileAdminViewPage = () => {
     const [location, setCompanyLocation] = useState("");
     const [errors, setErrors] = useState({ });
     const [notifications, setNotifications] = useState([]);
-    const Tabs =["Feed","Activity","Analytics"];
+    const Tabs =["Feed","Jobs","Analytics"];
+    const locationState = useLocation();
+    const currentSection = locationState.pathname.split('/').pop() || 'Feed';
+    const [activeTab, setActiveTab] = useState(currentSection);
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [errorFetchCompanyInfo, setErrorFetchCompanyInfo] = useState(false);
+    const [isOwner, setIsOwner] = useState(false);
 
      /**
        * Fetches current user profile data
@@ -103,7 +108,8 @@ const CompanyProfileAdminViewPage = () => {
       };
 
     const handleClickCreateButton =() =>{
-        console.log("create ")
+        console.log("post job button clicked")
+        navigate(`/starthiring`)
     }
 
 
@@ -113,6 +119,7 @@ const CompanyProfileAdminViewPage = () => {
                 `${BASE_URL}/companies/${companyId}`
             );
             setCompanyInfo(response.data.company); 
+
             setCompanyName(response.data.company.name)
             setCompanyAddress(response.data.company.address)
             setWebsite(response.data.company.website)
@@ -123,10 +130,12 @@ const CompanyProfileAdminViewPage = () => {
             setTagline(response.data.company.tagLine)
             setCompanyLocation(response.data.company.location)
             setLogo(response.data.company.logo)
+            setIsOwner(response.data.userRelationship ==='owner');
             console.log("company data:", response.data);
             
         } catch (error) {
             console.error("Error fetching company info:", error);
+            setErrorFetchCompanyInfo(true);
          }
     }
     useEffect(() => {
@@ -137,15 +146,28 @@ const CompanyProfileAdminViewPage = () => {
                 withCredentials:true
               });
           
-              setUser(response.data);
-              console.log("User data:", response.data);
+                setUser(response.data.user);
+                console.log("User data:", response.data.user);
+                
+                console.log("isAdmin:", isAdmin);
             } catch (error) {
               console.error("Error fetching user:", error);
             }
           };
       
           fetchUser();
-      }, []);
+      }, [user?._id]);
+      useEffect(() => { 
+        if ( user?._id && companyInfo?.id) {
+            const isAdmin = user?.adminInCompanies.some((CompanyId) => CompanyId === companyId );
+            setIsAdmin(isAdmin);
+        };
+    },[user?._id, companyInfo?.id]);
+    useEffect(() => {
+        if (user?._id && isAdmin === false && isOwner === false) {
+            navigate(`/company/${companyId}/Home`);
+        }
+    }, [user?._id, isAdmin , isOwner]);
       const handleUpdatePage = async (e) => {
         e.preventDefault();
         if (!isValid()) return;
@@ -201,6 +223,14 @@ const CompanyProfileAdminViewPage = () => {
      fetchCompanyInfo();
      console.log("companyInfo",companyInfo)
     },[companyInfo]);
+    if(errorFetchCompanyInfo){
+        return(
+            <div className=" bg-[#f4f2ee] min-h-screen  items-center flex flex-col   w-full rounded-lg shadow-lg p-4 ">
+                <Header notifications={notifications} />
+                <h1 className="mt-30 text-2xl  ">Page not found</h1>
+            </div>
+        )
+    }
 
     return (
         <div className="   bg-[#f4f2ee] min-h-screen  items-center flex flex-col">
@@ -269,7 +299,7 @@ const CompanyProfileAdminViewPage = () => {
                         <div className="flex gap-4 max-[430px]:flex-col max-[430px]:gap-0">
                             <button className="    mt-4 flex items-center justify-center gap-2 bg-[#0A66C2] text-white font-semibold py-2 px-8 rounded-full hover:bg-[#004182]" onClick={()=>{handleClickCreateButton()}}>
                                 <FaPlus className="w-4 h-4"  />
-                                Create 
+                                Post job 
                             </button> 
                             <button className="  mt-4 flex items-center justify-center gap-2 bg-white text-gray-500  border-2 font-semibold py-2 px-8 rounded-full hover:bg-gray-200 "  onClick={()=>{navigate(`/company/${companyId}/`)}}>
                                 <TiEye className="size-6"  />
