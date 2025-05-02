@@ -29,6 +29,7 @@ const JobBoardPage = () => {
   const [experience, setExperience] = useState(0); // Filter by minimum experience
   const [workType, setWorkType] = useState(""); // Filter by work type (e.g., full-time, part-time)
   const [selectedCompany, setSelectedCompany] = useState(""); // Filter by company
+  const [applications, setApplications] = useState([]); // Stores job applications
 
   /**
    * Opens the job application modal
@@ -55,6 +56,33 @@ const JobBoardPage = () => {
     fetchCompanies();
   }, []);
 
+  /**
+ * Fetches all applications by looping through statuses and merging the results.
+ */
+  const fetchMyApplications = async () => {
+    const statuses = ['pending', 'accepted', 'rejected'];
+    try {
+      const responses = await Promise.all(
+        statuses.map((status) =>
+          axios.get(`${BASE_URL}/jobs/my-applications?status=${status}`, {
+            withCredentials: true,
+          })
+        )
+      );
+      const allApplications = responses.flatMap(res => res.data.applications);
+      setApplications(allApplications);
+      setRefreshTrigger(prev => !prev);
+      console.log('All applications:', allApplications);
+    } catch (error) {
+      console.error('Error fetching applications:', error);
+      setApplications([]);
+    }
+  };
+  
+  useEffect(() => {
+    fetchMyApplications();
+  }, []);
+  
   /**
    * Fetches job listings based on location state or initial page load
    */
@@ -171,10 +199,25 @@ const JobBoardPage = () => {
             </span>
 
             <div className="mt-4">
-              <button onClick={openModal} className="mt-4 mr-4 bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700">
-                Easy Apply
-              </button>
-              <ApplyJob isOpen={isModalOpen} onClose={closeModal} job={selectedJob} jobId={selectedJob._id} />
+            {(() => {
+                      const jobId = selectedJob?._id || selectedJob?.id || selectedJob?.jobId;
+                      const hasApplied = applications.some(app => app.job?.jobId === jobId || app.job?._id === jobId);
+
+                      return (
+                        <button
+                          onClick={openModal}
+                          disabled={hasApplied}
+                          className={`mt-4 mr-4 px-4 py-2 rounded-full text-white ${
+                            hasApplied
+                              ? "bg-gray-400 cursor-not-allowed"
+                              : "bg-blue-600 hover:bg-blue-700"
+                          }`}
+                        >
+                          {hasApplied ? "Already Applied!" : "Easy Apply"}
+                        </button>
+                      );
+                    })()}
+              <ApplyJob isOpen={isModalOpen} onClose={closeModal} job={selectedJob} jobId={selectedJob._id} onApplicationSuccess={fetchMyApplications} />
 
               <button onClick={handleSave} className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700">
                 {selectedJob.isSaved ? "Unsave Job" : "Save Job"}
