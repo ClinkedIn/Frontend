@@ -363,13 +363,13 @@ const Header = ({ notifications }) => {
         {/* User & Work Dropdowns */}
         <div className="flex space-x-4 items-center">
           <div className="relative" ref={dropdownRef}>
-            <button
+          <button
               className="flex items-center space-x-2 hover:bg-gray-200 p-2 rounded-lg"
               onClick={() => setShowUser(!showUser)}
             >
               <img
-                src="/Images/user.svg"
-                alt="User"
+                src={currentUser?.profilePicture || "/Images/user.svg"}
+                alt={currentUser?.firstName || "User"}
                 className="w-6 h-6 rounded-full"
               />
               <img
@@ -385,13 +385,17 @@ const Header = ({ notifications }) => {
                 <div className="px-4 py-2 border-b border-gray-200">
                   <div className="flex items-center">
                     <img
-                      src="/Images/user.svg"
-                      alt="User Profile"
+                      src={currentUser?.profilePicture || "/Images/user.svg"}
+                      alt={`${currentUser?.firstName || 'User'} Profile`}
                       className="w-10 h-10 rounded-full mr-3"
                     />
                     <div>
-                      <p className="font-medium text-gray-800">John Doe</p>
-                      <p className="text-xs text-gray-500">Software Developer</p>
+                      <p className="font-medium text-gray-800">
+                        {currentUser ? `${currentUser.firstName || ''} ${currentUser.lastName || ''}` : 'Loading...'}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {currentUser?.headline || currentUser?.title || 'User'}
+                      </p>
                     </div>
                   </div>
                 </div>
