@@ -3,20 +3,34 @@ import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import { MdSearch } from "react-icons/md";
 import { BASE_URL } from "../constants";
-import { db } from "../../firebase";
-import { collection, query, where, onSnapshot } from "firebase/firestore";
-
+import {
+  collection,
+  addDoc,
+  getDoc,
+  setDoc,
+  serverTimestamp,
+  doc,
+  updateDoc,
+  arrayUnion,
+  onSnapshot,
+  orderBy,
+  query,
+  where,
+} from "firebase/firestore";
+import { db } from "../../firebase"; // Adjust the import path as necessary
+import React from "react";
+import { useAuth } from "../context/AuthContext";
 /**
  * Header component that manages the navigation, search, and notifications.
- * 
+ *
  * @component
  * @example
  * // Example usage:
  * <Header notifications={notifications} />
- * 
+ *
  * @param {Object} props - The properties passed to the component.
  * @param {Array} props.notifications - Array of notifications to be passed to the component.
- * 
+ *
  * @returns {JSX.Element} The Header component.
  */
 const Header = ({ notifications }) => {
@@ -34,7 +48,7 @@ const Header = ({ notifications }) => {
    * - `loadingConversations`: Boolean flag for loading state of conversations.
    * - `currentUser`: Stores the current user's data.
    * - `showWork`: Toggles the visibility of the work dropdown.
-   * 
+   *
    * @type {object}
    */
   const [showUser, setShowUser] = useState(false);
@@ -52,19 +66,40 @@ const Header = ({ notifications }) => {
   const [unreadCountMessages, setUnreadCountMessages] = useState(0);
   const [conversations, setConversations] = useState([]);
   const [loadingConversations, setLoadingConversations] = useState(true);
-  const [currentUser, setUser] = useState();
+  const [userInfo, setUserInfo] = useState(null);
+
   const workDropdownRef = useRef(null);
   const [showWork, setShowWork] = useState(false);
 
-  /**
-   * Fetches the count of unread notifications and updates the state.
-   */
+  const currentUser = {
+    uid: "123",
+  };
+  const { logout } = useAuth();
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const response = await axios.get(`${BASE_URL}/user/me`, {
+          withCredentials: true,
+        });
+        setUserInfo(response.data.user);
+      } catch (error) {
+        console.error("Failed to fetch user info:", error);
+      }
+    };
+
+    fetchUserInfo();
+  }, []);
+
   useEffect(() => {
     const fetchUnreadCount = async () => {
       try {
-        const response = await axios.get(`${BASE_URL}/notifications/unread-count`, {
-          withCredentials: true,
-        });
+        const response = await axios.get(
+          `${BASE_URL}/notifications/unread-count`,
+          {
+            withCredentials: true,
+          }
+        );
         setUnreadCount(response.data.unreadCount || 0);
       } catch (error) {
         console.error("Error fetching unread count:", error);
@@ -82,7 +117,7 @@ const Header = ({ notifications }) => {
         const response = await axios.get(`${BASE_URL}/user/me`, {
           withCredentials: true,
         });
-        setUser(response.data.user);
+        setUserInfo(response.data.user);
         console.log("User data:", response.data.user);
       } catch (error) {
         console.error("Error fetching user:", error);
@@ -97,28 +132,34 @@ const Header = ({ notifications }) => {
   useEffect(() => {
     if (!currentUser?._id) return;
 
-    const conversationsRef = collection(db, 'conversations');
+    const conversationsRef = collection(db, "conversations");
     const q = query(
       conversationsRef,
-      where('participants', 'array-contains', currentUser._id)
+      where("participants", "array-contains", currentUser._id)
     );
 
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      let totalUnread = 0;
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        let countForUser = data.unreadCounts?.[currentUser._id] || 0;
-        if (data.forceUnread) countForUser = countForUser - 1;
-        totalUnread += countForUser;
-      });
+    const unsubscribe = onSnapshot(
+      q,
+      (querySnapshot) => {
+        let totalUnread = 0;
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          let countForUser = data.unreadCounts?.[currentUser._id] || 0;
+          if (data.forceUnread) countForUser = countForUser - 1;
+          totalUnread += countForUser;
+        });
 
-      console.log("Total unread messages from Firestore:", totalUnread);
-      setUnreadCountMessages(totalUnread);
-
-    }, (error) => {
-      console.error("Error fetching unread message count from Firestore:", error);
-      setUnreadCountMessages(0);
-    });
+        console.log("Total unread messages from Firestore:", totalUnread);
+        setUnreadCountMessages(totalUnread);
+      },
+      (error) => {
+        console.error(
+          "Error fetching unread message count from Firestore:",
+          error
+        );
+        setUnreadCountMessages(0);
+      }
+    );
 
     return () => {
       console.log("Cleaning up Firestore listener for unread messages count.");
@@ -139,8 +180,7 @@ const Header = ({ notifications }) => {
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () =>
-      document.removeEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   /**
@@ -201,6 +241,7 @@ const Header = ({ notifications }) => {
       const params = new URLSearchParams();
       if (searchQuery) params.append("q", searchQuery);
       if (location) params.append("location", location);
+
       const response = await axios.get(`${BASE_URL}/search/jobs?${params}`);
       console.log("Job search response:", response.data);
       navigate("/job-board", {
@@ -217,10 +258,26 @@ const Header = ({ notifications }) => {
   };
 
   /**
+   * Handles user logout
+   */
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/login");
+    } catch (error) {
+      console.error("Failed to log out:", error);
+    }
+  };
+
+  /**
    * Determines whether to show the job search bar based on the current path.
    */
   let path = false;
-  if (currentPath === "jobs" || currentPath === "job-board" || currentPath === "myjobs") {
+  if (
+    currentPath === "jobs" ||
+    currentPath === "job-board" ||
+    currentPath === "myjobs"
+  ) {
     path = true;
   }
   return (
@@ -229,14 +286,15 @@ const Header = ({ notifications }) => {
         <div className="flex">
           {/* Logo */}
           <a href="/feed">
-            <img src="/Images/blue-lockedin.png" alt="Logo" className="w-12 h-12" />
+            <img
+              src="/Images/blue-lockedin.png"
+              alt="Logo"
+              className="w-12 h-12"
+            />
           </a>
 
           {/* Conditional Search Bar */}
-          <form
-            onSubmit={handleJobSearch}
-            className="relative flex rounded-lg"
-          >
+          <form onSubmit={handleJobSearch} className="relative flex rounded-lg">
             {/* Show Job Search only on /jobs */}
             {path ? (
               <>
@@ -306,7 +364,9 @@ const Header = ({ notifications }) => {
                     />
                     <div className="text-sm">
                       <p className="font-medium">{`${user.firstName} ${user.lastName}`}</p>
-                      {user.company && <p className="text-xs text-gray-500">{user.company}</p>}
+                      {user.company && (
+                        <p className="text-xs text-gray-500">{user.company}</p>
+                      )}
                       <p className="text-xs text-gray-400">{user.industry}</p>
                     </div>
                   </li>
@@ -320,14 +380,18 @@ const Header = ({ notifications }) => {
         <nav className="flex space-x-2">
           {/* Home */}
           <button
-            className={`flex flex-col items-center hover:bg-gray-200 p-1.5 rounded-lg w-16 ${currentPath === "feed" ? "text-black" : "text-gray-600"}`}
+            className={`flex flex-col items-center hover:bg-gray-200 p-1.5 rounded-lg w-16 ${
+              currentPath === "feed" ? "text-black" : "text-gray-600"
+            }`}
             onClick={() => navigate("/feed")}
           >
             <div className="flex flex-col items-center w-full">
               <img
                 src="/Images/nav-home.svg"
                 alt="Home"
-                className={`w-5 h-5 mb-1 ${currentPath === "feed" ? "filter-none" : "filter grayscale"}`}
+                className={`w-5 h-5 mb-1 ${
+                  currentPath === "feed" ? "filter-none" : "filter grayscale"
+                }`}
               />
               <span className="text-xs">Home</span>
               {currentPath === "feed" && (
@@ -337,14 +401,18 @@ const Header = ({ notifications }) => {
           </button>
           {/* Network */}
           <button
-            className={`flex flex-col items-center hover:bg-gray-200 p-1.5 rounded-lg w-16 ${currentPath === "network" ? "text-black" : "text-gray-600"}`}
+            className={`flex flex-col items-center hover:bg-gray-200 p-1.5 rounded-lg w-16 ${
+              currentPath === "network" ? "text-black" : "text-gray-600"
+            }`}
             onClick={() => navigate("/network")}
           >
             <div className="flex flex-col items-center w-full">
               <img
                 src="/Images/nav-network.svg"
                 alt="Network"
-                className={`w-5 h-5 mb-1 ${currentPath === "network" ? "filter-none" : "filter grayscale"}`}
+                className={`w-5 h-5 mb-1 ${
+                  currentPath === "network" ? "filter-none" : "filter grayscale"
+                }`}
               />
               <span className="text-xs">Network</span>
               {currentPath === "network" && (
@@ -354,14 +422,18 @@ const Header = ({ notifications }) => {
           </button>
           {/* Jobs */}
           <button
-            className={`flex flex-col items-center hover:bg-gray-200 p-1.5 rounded-lg w-16 ${currentPath === "jobs" ? "text-black" : "text-gray-600"}`}
+            className={`flex flex-col items-center hover:bg-gray-200 p-1.5 rounded-lg w-16 ${
+              currentPath === "jobs" ? "text-black" : "text-gray-600"
+            }`}
             onClick={handleJobsClick}
           >
             <div className="flex flex-col items-center w-full">
               <img
                 src="/Images/nav-jobs.svg"
                 alt="Jobs"
-                className={`w-5 h-5 mb-1 ${currentPath === "jobs" ? "filter-none" : "filter grayscale"}`}
+                className={`w-5 h-5 mb-1 ${
+                  currentPath === "jobs" ? "filter-none" : "filter grayscale"
+                }`}
               />
               <span className="text-xs">Jobs</span>
               {currentPath === "jobs" && (
@@ -369,16 +441,38 @@ const Header = ({ notifications }) => {
               )}
             </div>
           </button>
+          <button
+            className="relative flex flex-col items-center text-xs text-gray-600 hover:text-black p-1"
+            onClick={handleMessagingClick}
+          >
+            <img
+              src="/Images/nav-messaging.svg"
+              alt="Messaging"
+              className="w-6 h-6"
+            />{" "}
+          </button>
+
+          {unreadCountMessages > 0 && (
+            <div className="absolute -top-1 left-1/2 ml-1 bg-[#cb112d] text-white rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-[10px] md:text-xs font-medium">
+              {unreadCountMessages > 10 ? "10+" : unreadCountMessages}
+            </div>
+          )}
           {/* Messaging */}
           <button
-            className={`relative flex flex-col items-center hover:bg-gray-200 p-1.5 rounded-lg w-16 ${currentPath === "messaging" ? "text-black" : "text-gray-600"}`}
+            className={`relative flex flex-col items-center hover:bg-gray-200 p-1.5 rounded-lg w-16 ${
+              currentPath === "messaging" ? "text-black" : "text-gray-600"
+            }`}
             onClick={handleMessagingClick}
           >
             <div className="flex flex-col items-center w-full">
               <img
                 src="/Images/nav-messaging.svg"
                 alt="Messaging"
-                className={`w-5 h-5 mb-1 ${currentPath === "messaging" ? "filter-none" : "filter grayscale"}`}
+                className={`w-5 h-5 mb-1 ${
+                  currentPath === "messaging"
+                    ? "filter-none"
+                    : "filter grayscale"
+                }`}
               />
               <span className="text-xs">Messaging</span>
               {currentPath === "messaging" && (
@@ -386,21 +480,27 @@ const Header = ({ notifications }) => {
               )}
               {unreadCountMessages > 0 && (
                 <div className="absolute -top-1 left-1/2 ml-3 bg-[#cb112d] text-white rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-[10px] md:text-xs font-medium">
-                  {unreadCountMessages > 10 ? '10+' : unreadCountMessages}
+                  {unreadCountMessages > 10 ? "10+" : unreadCountMessages}
                 </div>
               )}
             </div>
           </button>
           {/* Notifications */}
           <button
-            className={`hover:bg-gray-200 p-1.5 rounded-lg relative flex flex-col items-center w-16 ${currentPath === "notifications" ? "text-black" : "text-gray-600"}`}
+            className={`hover:bg-gray-200 p-1.5 rounded-lg relative flex flex-col items-center w-16 ${
+              currentPath === "notifications" ? "text-black" : "text-gray-600"
+            }`}
             onClick={handleNotificationsClick}
           >
             <div className="flex flex-col items-center w-full">
               <img
                 src="/Images/nav-notifications.svg"
                 alt="Notifications"
-                className={`w-5 h-5 mb-1 ${currentPath === "notifications" ? "filter-none" : "filter grayscale"}`}
+                className={`w-5 h-5 mb-1 ${
+                  currentPath === "notifications"
+                    ? "filter-none"
+                    : "filter grayscale"
+                }`}
               />
               <span className="text-xs">Notifications</span>
               {currentPath === "notifications" && (
@@ -415,17 +515,16 @@ const Header = ({ notifications }) => {
           </button>
         </nav>
 
-        {/* User & Work Dropdowns */}
         <div className="flex space-x-4 items-center">
           <div className="relative" ref={dropdownRef}>
-          <button
+            <button
               className="flex items-center space-x-2 hover:bg-gray-200 p-2 rounded-lg"
               onClick={() => setShowUser(!showUser)}
             >
               <img
-                src={currentUser?.profilePicture || "/Images/user.svg"}
-                alt={currentUser?.firstName || "User"}
-                className="w-6 h-6 rounded-full"
+                src={userInfo?.profilePicture}
+                alt="User Profile"
+                className="w-8 h-8 rounded-full mr-3"
               />
               <img
                 src="/Images/down-icon.svg"
@@ -435,27 +534,24 @@ const Header = ({ notifications }) => {
                 }`}
               />
             </button>
+
             {showUser && (
               <div className="absolute right-0 mt-1 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200">
                 <div className="px-4 py-2 border-b border-gray-200">
                   <div className="flex items-center">
                     <img
-                      src={currentUser?.profilePicture || "/Images/user.svg"}
-                      alt={`${currentUser?.firstName || 'User'} Profile`}
-                      className="w-10 h-10 rounded-full mr-3"
+                      src={userInfo?.profilePicture}
+                      alt="User Profile"
+                      className="w-8 h-8 rounded-full mr-3"
                     />
                     <div>
                       <p className="font-medium text-gray-800">
-                        {currentUser ? `${currentUser.firstName || ''} ${currentUser.lastName || ''}` : 'Loading...'}
+                        {userInfo
+                          ? `${userInfo.firstName} ${userInfo.lastName}`
+                          : "Loading..."}
                       </p>
                       <p className="text-xs text-gray-500">
-                        {currentUser?.headline || currentUser?.title || 'User'}
-                        {currentUser?.firstName && currentUser?.lastName
-                          ? `${currentUser.firstName} ${currentUser.lastName}`
-                          : "User"}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {currentUser?.headline || currentUser?.jobTitle || "Your job title"}
+                        {userInfo?.lastJobTitle || ""}
                       </p>
                     </div>
                   </div>
@@ -472,18 +568,24 @@ const Header = ({ notifications }) => {
                 >
                   Settings
                 </button>
+                <button
+                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 border-t border-gray-200"
+                  onClick={handleLogout}
+                >
+                  Sign Out
+                </button>
               </div>
             )}
           </div>
           <div className="relative" ref={workDropdownRef}>
-            <button 
+            <button
               className="flex items-center space-x-2 hover:bg-gray-200 p-2 rounded-lg"
               onClick={() => setShowWork(!showWork)}
             >
               <img src="/Images/nav-work.svg" alt="Work" className="w-6 h-6" />
-              <img 
-                src="/Images/down-icon.svg" 
-                alt="Dropdown" 
+              <img
+                src="/Images/down-icon.svg"
+                alt="Dropdown"
                 className={`w-4 h-4 transition-transform duration-200 ${
                   showWork ? "rotate-180" : ""
                 }`}
