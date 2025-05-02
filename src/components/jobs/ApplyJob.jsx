@@ -14,6 +14,7 @@
  * @param {Function} props.onClose - Callback to close the modal
  * @param {Object} props.job - The job object to apply to
  * @param {string} props.jobId - The job ID (used if job object is undefined)
+ * @param {Function} props.onApplicationSuccess - Callback for successful application submission
  * @returns {JSX.Element|null} Returns the modal JSX or null if `isOpen` is false
  */
 
@@ -21,7 +22,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { BASE_URL } from "../../constants";
 
-const ApplyJob = ({ isOpen, onClose, job, jobId }) => {
+const ApplyJob = ({ isOpen, onClose, job, jobId, onApplicationSuccess }) => {
   /** @type {[number, Function]} Current step in the multi-step form */
   const [step, setStep] = useState(1);
 
@@ -102,6 +103,7 @@ const ApplyJob = ({ isOpen, onClose, job, jobId }) => {
       );
       console.log("Application Submitted:", response.data);
       alert("Application submitted!");
+      onApplicationSuccess();
       onClose();
     } catch (error) {
       if (error.response) {
