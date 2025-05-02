@@ -101,7 +101,7 @@ const ConversationListItem = ({
       {/* Profile Picture */}
       <img
         src={otherUserInfo?.profilePicture || defaultAvatar}
-        alt= {otherUserInfo?.fullName || 'User Avatar'}
+        alt= {otherUserInfo?.fullName || (otherUserInfo?.firstName + " " + otherUserInfo?.lastName) || 'User Avatar'}
         className="w-12 h-12 rounded-full mr-3 flex-shrink-0"
         onError={(e) => e.target.src = defaultAvatar}
       />
@@ -110,7 +110,7 @@ const ConversationListItem = ({
          {/* Top row: Name and Timestamp */}
          <div className="flex justify-between items-center mb-1">
              <p className={`font-semibold truncate ${unreadCount > 0 ? 'text-black' : 'text-gray-800'}`}>
-                 {otherUserInfo?.fullName || 'Unknown User'}
+                 {otherUserInfo?.fullName || (otherUserInfo?.firstName + " " + otherUserInfo?.lastName) || 'Unknown User'}
              </p>
              {timestamp && ( /* timestamp display */
                  <p className={`text-xs flex-shrink-0 ml-2 ${unreadCount > 0 ? 'text-blue-600 font-medium' : 'text-gray-500'}`}>

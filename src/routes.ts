@@ -19,8 +19,8 @@ import CreateCompanyPage from "./pages/CompanyPages/CreateCompanyPage";
 import CompanyProfileMemberViewPage from "./pages/CompanyPages/CompanyProfileMemberView";
 import CompanyProfileAdminViewPage from "./pages/CompanyPages/CompanyProfileAdminView";
 import CompanyHomePage from "./components/CompanyPageSections/Home"
-import CompanyPostsPage from "./components/CompanyPageSections/Posts"
-import CompanyJobsPage from "./components/CompanyPageSections/Jobs"
+import CompanyPostsPage from "./components/CompanyPageSections/Posts.jsx"
+import CompanyJobsPage from "./components/CompanyPageSections/Jobs.jsx"
 import SettingsPage from "./components/Settings/Settings.tsx";
 import MyJobs from "./pages/jobs/MyJobs.jsx";
 import MessagingPage from "./pages/messaging/Messaging.jsx";
@@ -38,6 +38,8 @@ import ManageJob from "./pages/jobs/ManageJob.jsx";
 import SubscriptionPlans from "./components/SubscriptionBasedPayment/subscriptionPlans.jsx";
 import SubscriptionStatus from './components/SubscriptionBasedPayment/SubscriptionStatus';
 import PaymentSuccess from './components/SubscriptionBasedPayment/PaymentSuccessHandler';
+import CompanyFeedPage from "./components/CompanyPageSections/Feed";
+import CompanyAnalyticsPage from "./components/CompanyPageSections/Analytics.jsx";
 import Network from "./components/Network/network";
 
 // Define your routes as an array of RouteObject (compatible with React Router v6)
@@ -186,8 +188,8 @@ const routes: RouteObject[] = [
         index: true,
         element: React.createElement(Navigate, { to: "Feed", replace: true }),
       }, // Default to Home
-      { path: "Feed", element: React.createElement(CompanyHomePage) },
-      { path: "Analytics", element: React.createElement(CompanyPostsPage) },
+      { path: "Feed", element: React.createElement(CompanyFeedPage) },
+      { path: "Analytics", element: React.createElement(CompanyAnalyticsPage) },
       { path: "Edit Page", element: React.createElement(CompanyJobsPage) },
     ],
   },

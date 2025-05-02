@@ -1,4 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: pages/jobs/HirePage.jsx</title>
 
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: pages/jobs/HirePage.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
@@ -70,7 +98,7 @@ useEffect(() => {
 useEffect(() => {
     const handleClickOutside = (e) => {
         // Check if the click is outside the suggestions dropdown and the input field
-        if (suggestionsRef.current && !suggestionsRef.current.contains(e.target) && e.target.id !== 'company') {
+        if (suggestionsRef.current &amp;&amp; !suggestionsRef.current.contains(e.target) &amp;&amp; e.target.id !== 'company') {
             setShowSuggestions(false);
         }
     };
@@ -105,7 +133,7 @@ const filterSuggestions = React.useCallback(
 
 
 useEffect(() => {
-    if (companyInput && !preselectedCompany) {
+    if (companyInput &amp;&amp; !preselectedCompany) {
         filterSuggestions(companyInput);
     } else {
         setSuggestions([]);
@@ -143,9 +171,9 @@ const handleSuggestionClick = (item) => {
      */
 const handleCompanyFocus = () => {
     // If there is already input, show suggestions (if any were filtered previously)
-    if (companyInput && suggestions.length > 0) {
+    if (companyInput &amp;&amp; suggestions.length > 0) {
         setShowSuggestions(true);
-    } else if (companyInput && suggestions.length === 0 && allCompanies.length > 0) {
+    } else if (companyInput &amp;&amp; suggestions.length === 0 &amp;&amp; allCompanies.length > 0) {
         filterSuggestions(companyInput);
     }
 };
@@ -195,26 +223,26 @@ const handleSubmit = () => {
 };
 
 return (
-    <>
-        <Header />
-        <div className="flex items-center justify-center min-h-screen bg-white">
-            <div className="w-full max-w-lg p-8 space-y-6">
-                <div className="flex justify-center">
-                    <PiStarFourFill size={34} color="#0b6abd" />
-                </div>
-                <h1 className="text-4xl font-bold text-gray-800 text-center">
-                    <span className="bg-gradient-to-r from-[#0b6abd] via-[#0f9f70] to-[#7351c0] bg-clip-text text-transparent">
+    &lt;>
+        &lt;Header />
+        &lt;div className="flex items-center justify-center min-h-screen bg-white">
+            &lt;div className="w-full max-w-lg p-8 space-y-6">
+                &lt;div className="flex justify-center">
+                    &lt;PiStarFourFill size={34} color="#0b6abd" />
+                &lt;/div>
+                &lt;h1 className="text-4xl font-bold text-gray-800 text-center">
+                    &lt;span className="bg-gradient-to-r from-[#0b6abd] via-[#0f9f70] to-[#7351c0] bg-clip-text text-transparent">
                         Hi {user?.user?.firstName || 'there'}, {/* Access user firstName  */}
-                    </span>{' '}
+                    &lt;/span>{' '}
                     find your next great hire
-                </h1>
+                &lt;/h1>
 
                 {/* Job Title */}
-                <div className="mt-4">
-                    <label htmlFor="jobTitle" className="block text-sm font-medium text-gray-700">
+                &lt;div className="mt-4">
+                    &lt;label htmlFor="jobTitle" className="block text-sm font-medium text-gray-700">
                         Job title
-                    </label>
-                    <input
+                    &lt;/label>
+                    &lt;input
                         id="jobTitle"
                         type="text"
                         value={jobTitle}
@@ -223,14 +251,14 @@ return (
                         placeholder="Add the title you are hiring for"
                         required
                     />
-                </div>
+                &lt;/div>
 
                 {/* Company Input */}
-                <div className="mt-4 relative">
-                    <label htmlFor="company" className="block text-sm font-medium text-gray-700">
+                &lt;div className="mt-4 relative">
+                    &lt;label htmlFor="company" className="block text-sm font-medium text-gray-700">
                         Company
-                    </label>
-                    <input
+                    &lt;/label>
+                    &lt;input
                         id="company"
                         type="text"
                         value={companyInput}
@@ -243,59 +271,82 @@ return (
                         required
                     />
                     {/* Loading and Error indicators */}
-                    {isLoading && <div className="absolute right-3 top-10 text-xs text-gray-500">Loading...</div>}
-                    {error && <div className="absolute right-3 top-10 text-xs text-red-500">{error}</div>}
+                    {isLoading &amp;&amp; &lt;div className="absolute right-3 top-10 text-xs text-gray-500">Loading...&lt;/div>}
+                    {error &amp;&amp; &lt;div className="absolute right-3 top-10 text-xs text-red-500">{error}&lt;/div>}
 
                     {/* Suggestions Dropdown */}
-                    {showSuggestions && suggestions.length > 0 && (
-                        <ul
+                    {showSuggestions &amp;&amp; suggestions.length > 0 &amp;&amp; (
+                        &lt;ul
                             ref={suggestionsRef}
                             className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto"
                         >
                             {/* Map over the suggestions and access the nested company name */}
                             {suggestions.map((item) => (
-                                <li
+                                &lt;li
                                     key={item.company?.id || item.company?.name} // Use nested id or name as key
                                     onClick={() => handleSuggestionClick(item)} // Pass the full item object
                                     className="px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 cursor-pointer"
                                 >
                                     {item.company?.name} {/* Display nested company name */}
-                                </li>
+                                &lt;/li>
                             ))}
-                        </ul>
+                        &lt;/ul>
                     )}
                      {/* Display selected company name below the input */}
-                     {selectedCompany && (
-                         <p className="mt-2 text-sm text-gray-600 flex items-center">
+                     {selectedCompany &amp;&amp; (
+                         &lt;p className="mt-2 text-sm text-gray-600 flex items-center">
                              Selected:
-                            <span className="ml-2">{selectedCompany.name}</span> {/* Display nested company name */}
-                         </p>
+                            &lt;span className="ml-2">{selectedCompany.name}&lt;/span> {/* Display nested company name */}
+                         &lt;/p>
                      )}
-                </div>
+                &lt;/div>
 
                 {/* Info box */}
-                <div className="flex items-center bg-blue-50 text-blue-800 text-sm p-2.5 rounded-md border border-blue-200">
-                    <BsInfoCircleFill className="h-4 w-4 mr-2 text-blue-600" />
+                &lt;div className="flex items-center bg-blue-50 text-blue-800 text-sm p-2.5 rounded-md border border-blue-200">
+                    &lt;BsInfoCircleFill className="h-4 w-4 mr-2 text-blue-600" />
                     Your company page helps candidates learn about your organization.
-                </div>
+                &lt;/div>
 
 
                 {/* Submit Button */}
-                <div className="mt-6">
-                    <button
+                &lt;div className="mt-6">
+                    &lt;button
                         type="button"
                         onClick={handleSubmit}
                         className="w-full py-3 font-semibold text-[#0a66c2] border border-[#0a66c2] rounded-full bg-transparent hover:border-[#004182] hover:border-2 hover:bg-[#ebf4fd] focus:ring-2 focus:ring-offset-2 focus:ring-[#004182] transition ease-in-out duration-150"
                     >
                         Continue on my own
-                    </button>
-                </div>
-            </div>
-        </div>
-    </>
+                    &lt;/button>
+                &lt;/div>
+            &lt;/div>
+        &lt;/div>
+    &lt;/>
 );
 
 
 };
 
 export default HirePage;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#ChatWindow">ChatWindow</a></li><li><a href="global.html#CommentSection">CommentSection</a></li><li><a href="global.html#ConversationListItem">ConversationListItem</a></li><li><a href="global.html#ConversationSearch">ConversationSearch</a></li><li><a href="global.html#CreatePostModal">CreatePostModal</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#HirePage">HirePage</a></li><li><a href="global.html#JobBoardPage">JobBoardPage</a></li><li><a href="global.html#JobDetails">JobDetails</a></li><li><a href="global.html#Jobs">Jobs</a></li><li><a href="global.html#Main">Main</a></li><li><a href="global.html#ManageJob">ManageJob</a></li><li><a href="global.html#MyJobs">MyJobs</a></li><li><a href="global.html#Notification">Notification</a></li><li><a href="global.html#NotificationCard">NotificationCard</a></li><li><a href="global.html#PostMenu">PostMenu</a></li><li><a href="global.html#PostReactions">PostReactions</a></li><li><a href="global.html#ScreeningQuestionCard">ScreeningQuestionCard</a></li><li><a href="global.html#debounce">debounce</a></li><li><a href="global.html#fetchComments">fetchComments</a></li><li><a href="global.html#fetchNotifications">fetchNotifications</a></li><li><a href="global.html#fetchPosts">fetchPosts</a></li><li><a href="global.html#fetchUser">fetchUser</a></li><li><a href="global.html#filteredNotifications">filteredNotifications</a></li><li><a href="global.html#getReactionIcon">getReactionIcon</a></li><li><a href="global.html#handleAddComment">handleAddComment</a></li><li><a href="global.html#handleBlockUser">handleBlockUser</a></li><li><a href="global.html#handleClick">handleClick</a></li><li><a href="global.html#handleCreatePost">handleCreatePost</a></li><li><a href="global.html#handleDeleteNotification">handleDeleteNotification</a></li><li><a href="global.html#handleLikeClick">handleLikeClick</a></li><li><a href="global.html#handleMainFilterChange">handleMainFilterChange</a></li><li><a href="global.html#handleMuteDuration">handleMuteDuration</a></li><li><a href="global.html#handleNotificationClick">handleNotificationClick</a></li><li><a href="global.html#handleReact">handleReact</a></li><li><a href="global.html#handleReactToComment">handleReactToComment</a></li><li><a href="global.html#handleReportPost">handleReportPost</a></li><li><a href="global.html#handleSavePost">handleSavePost</a></li><li><a href="global.html#handleSendTestNotification">handleSendTestNotification</a></li><li><a href="global.html#handleSubmit">handleSubmit</a></li><li><a href="global.html#requestOTP">requestOTP</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#toggleComments">toggleComments</a></li><li><a href="global.html#verifyOTP">verifyOTP</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Fri May 02 2025 17:16:34 GMT+0300 (Eastern European Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

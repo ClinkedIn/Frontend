@@ -1,9 +1,29 @@
-import React from "react";
-
-const proficiencyLevels = ["Conversational", "Professional", "Native or Bilingual"];
-const yesNoOptions = ["Yes", "No"];
-
+/**
+ * ScreeningQuestionCard component renders a dynamic form card based on a given screening question type.
+ * 
+ * Depending on the `questionType` prop, it displays appropriate input fields to capture user responses,
+ * such as text inputs, dropdowns, and number fields. It also provides a remove button to delete the question card.
+ * 
+ * @component
+ * 
+ * @param {Object} props - Component props.
+ * @param {string} props.questionType - The type of screening question to render (e.g., "Education", "Language", "Work Experience", etc.).
+ * @param {Object} props.data - An object containing the values for the inputs (e.g., `degree`, `language`, `proficiency`, etc.).
+ * @param {Function} props.onChange - Callback triggered when input fields are updated. Receives the updated data object.
+ * @param {Function} props.onRemove - Callback triggered when the question card is removed.
+ * 
+ * @returns {JSX.Element} A styled card displaying a question and related input fields based on the provided type.
+ */
 const ScreeningQuestionCard = ({ questionType, data, onChange, onRemove }) => {
+
+  /**
+   * Renders the appropriate form fields based on the given question type.
+   * 
+   * This function determines which fields should be rendered based on the `questionType` prop. It handles
+   * rendering text inputs, select options, and other form elements as required for each specific question type.
+   * 
+   * @returns {JSX.Element|null} The form fields or null if no fields are rendered for the given `questionType`.
+   */
   const renderFields = () => {
     switch (questionType) {
       case "Background Check":

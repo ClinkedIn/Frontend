@@ -1,4 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: pages/jobs/JobSettingsPage.jsx</title>
 
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: pages/jobs/JobSettingsPage.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>
 import React, { useState } from 'react';
 import Header from "../../components/UpperNavBar";
 import { FiEdit2 } from "react-icons/fi";
@@ -13,7 +41,7 @@ import ScreeningQuestionCard from '../../components/jobs/ScreeningQuestionCard';
  * @component
  * @example
  * // Example usage of JobSettingsPage
- * <JobSettingsPage />
+ * &lt;JobSettingsPage />
  */
 export default function JobSettingsPage() {
     /**
@@ -47,7 +75,7 @@ const jobId=location.state||""
 const [emailUpdates, setEmailUpdates] = useState(finalData.user?.email);
     /**
      * State for holding job settings data, such as screening questions, rejection settings, and manage applicants settings.
-     * @type {Array<Object>}
+     * @type {Array&lt;Object>}
      */
 const [settings, setSettings] = useState([
 {
@@ -94,7 +122,7 @@ const [showAddQuestions, setShowAddQuestions] = useState(false); // State for sh
 
     /**
      * State for managing screening questions data.
-     * @type {Array<Object>}
+     * @type {Array&lt;Object>}
      */
 const [screeningQuestions, setScreeningQuestions] = useState([
     {
@@ -109,7 +137,7 @@ const [screeningQuestions, setScreeningQuestions] = useState([
 ]);
     /**
      * Options for the types of screening questions that can be added.
-     * @type {Array<Object>}
+     * @type {Array&lt;Object>}
      */
 const questionOptions = [
     { id: "backgroundCheck", label: "Background Check", allowMultiple: false },
@@ -217,7 +245,7 @@ const handleQuestionSelect = (option) => {
 const isQuestionDisabled = (option) => {
     // Check if a question with this original ID (not the unique instance ID) already exists and doesn't allow multiple
     const alreadyAdded = screeningQuestions.find(q => q.id.startsWith(`${option.id}-`) ? false : q.id === option.id); // Adjust check for unique IDs
-    return alreadyAdded && !option.allowMultiple;
+    return alreadyAdded &amp;&amp; !option.allowMultiple;
 };
 
     /**
@@ -235,7 +263,7 @@ const handleCancelManageApplicantsEdit = () => {
 const handleEmailUpdatesChange = (e) => {
     const newSettings = [...settings];
     const manageSetting = newSettings.find(s => s.title === "Manage applicants");
-    if (manageSetting && manageSetting.editableData) {
+    if (manageSetting &amp;&amp; manageSetting.editableData) {
         manageSetting.editableData.emailUpdates = e.target.value;
         setSettings(newSettings);
         setEmailUpdates(e.target.value); 
@@ -250,46 +278,46 @@ const handleEmailUpdatesChange = (e) => {
 
 // Render the editing view for Screening Questions
 const renderScreeningQuestionsEdit = (setting) => (
-    <div className="bg-white rounded-lg shadow p-6 space-y-4 border border-gray-200">
-        <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-gray-800">Screening questions</h3>
-            <button
+    &lt;div className="bg-white rounded-lg shadow p-6 space-y-4 border border-gray-200">
+        &lt;div className="flex justify-between items-center">
+            &lt;h3 className="text-lg font-semibold text-gray-800">Screening questions&lt;/h3>
+            &lt;button
                 onClick={handleCancelScreeningEdit}
                 className="text-gray-500 hover:text-gray-700 text-sm font-medium"
             >
                 Cancel
-            </button>
-        </div>
-        <p className="text-sm text-gray-600">
+            &lt;/button>
+        &lt;/div>
+        &lt;p className="text-sm text-gray-600">
             We recommend adding 3 or more questions. Applicants must answer each question.
-        </p>
+        &lt;/p>
 
          {/* Render added questions */}
          {screeningQuestions.map((question) => (
-             <div key={question.id} className="mt-4">
-                 <ScreeningQuestionCard
+             &lt;div key={question.id} className="mt-4">
+                 &lt;ScreeningQuestionCard
                      questionType={question.type}
                      data={question.data}
                      onChange={(newData) => updateScreeningQuestion(question.id, newData)}
                      onRemove={() => handleRemoveQuestion(question.id)} // Use question.id for remove
                  />
-             </div>
+             &lt;/div>
          ))}
 
         {/* Add Screening Questions Button and Options */}
-        <button
+        &lt;button
             onClick={handleAddQuestionClick}
             className="flex items-center text-blue-700 hover:underline text-sm font-medium mt-4"
         >
-            <span className="text-lg mr-1">{showAddQuestions ? "-" : "+"}</span> Add screening questions
-        </button>
+            &lt;span className="text-lg mr-1">{showAddQuestions ? "-" : "+"}&lt;/span> Add screening questions
+        &lt;/button>
 
-        {showAddQuestions && (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4">
+        {showAddQuestions &amp;&amp; (
+            &lt;div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4">
                 {questionOptions.map(option => {
                     const disabled = isQuestionDisabled(option);
                     return (
-                        <button
+                        &lt;button
                             key={option.id}
                             onClick={() => handleQuestionSelect(option)}
                             disabled={disabled}
@@ -297,14 +325,14 @@ const renderScreeningQuestionsEdit = (setting) => (
                                 ${disabled ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-100'}
                             `}
                         >
-                            {disabled ? <FaCheck className="mr-2 text-green-600" /> : <FaPlus className="mr-2" />}
+                            {disabled ? &lt;FaCheck className="mr-2 text-green-600" /> : &lt;FaPlus className="mr-2" />}
                             {option.label}
-                        </button>
+                        &lt;/button>
                     );
                 })}
-            </div>
+            &lt;/div>
         )}
-    </div>
+    &lt;/div>
 );
     /**
      * Renders the editing view for rejection settings.
@@ -313,19 +341,19 @@ const renderScreeningQuestionsEdit = (setting) => (
      */
 // Render the editing view for Rejection Settings
 const renderRejectionSettingsEdit = (setting) => (
-    <div className="bg-white rounded-lg shadow p-6 space-y-4 border border-gray-200">
-        <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-gray-800">Rejection settings</h3>
-            <button
+    &lt;div className="bg-white rounded-lg shadow p-6 space-y-4 border border-gray-200">
+        &lt;div className="flex justify-between items-center">
+            &lt;h3 className="text-lg font-semibold text-gray-800">Rejection settings&lt;/h3>
+            &lt;button
                 onClick={() => setEditingSettingIndex(null)}
                 className="text-gray-500 hover:text-gray-700 text-sm font-medium"
             >
                 Cancel
-            </button>
-        </div>
+            &lt;/button>
+        &lt;/div>
 
-        <div className="flex items-start space-x-2">
-            <input
+        &lt;div className="flex items-start space-x-2">
+            &lt;input
                 type="checkbox"
                 checked={setting.editableData.enabled}
                 onChange={(e) => {
@@ -335,14 +363,14 @@ const renderRejectionSettingsEdit = (setting) => (
                 }}
                 className="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
             />
-            <label className="text-gray-700 text-sm flex-1">
+            &lt;label className="text-gray-700 text-sm flex-1">
                 Filter out and send rejections to applicants who don’t meet any must-have qualifications.
-            </label>
-        </div>
+            &lt;/label>
+        &lt;/div>
 
-        <div className="space-y-1">
-            <label className="text-gray-700 text-sm font-medium">Preview*</label>
-            <textarea
+        &lt;div className="space-y-1">
+            &lt;label className="text-gray-700 text-sm font-medium">Preview*&lt;/label>
+            &lt;textarea
                 value={setting.editableData.message}
                 onChange={(e) => {
                     const newSettings = [...settings];
@@ -353,11 +381,11 @@ const renderRejectionSettingsEdit = (setting) => (
                 rows={6}
                 maxLength={3000}
             />
-            <div className="text-right text-xs text-gray-500">
+            &lt;div className="text-right text-xs text-gray-500">
                 {setting.editableData.message.length}/3,000
-            </div>
-        </div>
-    </div>
+            &lt;/div>
+        &lt;/div>
+    &lt;/div>
 );
 
 
@@ -368,37 +396,37 @@ const renderRejectionSettingsEdit = (setting) => (
      */
  // Render the editing view for Manage Applicants
  const renderManageApplicantsEdit = (setting) => (
-    <div className="bg-white rounded-lg shadow p-6 space-y-4 border border-gray-200">
-        <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-gray-800 flex items-center"> 
+    &lt;div className="bg-white rounded-lg shadow p-6 space-y-4 border border-gray-200">
+        &lt;div className="flex justify-between items-center">
+            &lt;h3 className="text-lg font-semibold text-gray-800 flex items-center"> 
                 Manage applicants
-                 <BsInfoCircleFill className="ml-2 h-4 w-4 text-gray-400" /> 
-            </h3>
-            <button
+                 &lt;BsInfoCircleFill className="ml-2 h-4 w-4 text-gray-400" /> 
+            &lt;/h3>
+            &lt;button
                 onClick={handleCancelManageApplicantsEdit}
                 className="text-gray-500 hover:text-gray-700 text-sm font-medium"
             >
                 Cancel
-            </button>
-        </div>
+            &lt;/button>
+        &lt;/div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> {/* Use grid for layout */}
+        &lt;div className="grid grid-cols-1 md:grid-cols-2 gap-4"> {/* Use grid for layout */}
             {/* Manage applicants dropdown */}
-            <div>
-                <label htmlFor="manageApplicantsOption" className="block text-sm font-medium text-gray-700 mb-1">Manage applicants</label>
-                <p
+            &lt;div>
+                &lt;label htmlFor="manageApplicantsOption" className="block text-sm font-medium text-gray-700 mb-1">Manage applicants&lt;/label>
+                &lt;p
                     id="manageApplicantsOption"
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 >
                     On LinkedIn
                     
-                </p>
-            </div>
+                &lt;/p>
+            &lt;/div>
 
             {/* Email for applicant updates input */}
-            <div>
-                 <label htmlFor="emailUpdates" className="block text-sm font-medium text-gray-700 mb-1">Email for applicant updates<span className="text-red-500">*</span></label>
-                 <input
+            &lt;div>
+                 &lt;label htmlFor="emailUpdates" className="block text-sm font-medium text-gray-700 mb-1">Email for applicant updates&lt;span className="text-red-500">*&lt;/span>&lt;/label>
+                 &lt;input
                      type="email"
                      id="emailUpdates"
                      value={setting.editableData.emailUpdates}
@@ -406,91 +434,114 @@ const renderRejectionSettingsEdit = (setting) => (
                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                      placeholder="Enter email"
                  />
-            </div>
-        </div>
-    </div>
+            &lt;/div>
+        &lt;/div>
+    &lt;/div>
 );
 
 const renderStaticSetting = (setting, index) => (
-    <div className="flex justify-between items-start gap-4 border-b border-gray-200 pb-6 last:border-none last:pb-0">
-        <div className="min-w-[150px] font-medium text-gray-800">{setting.title}</div>
+    &lt;div className="flex justify-between items-start gap-4 border-b border-gray-200 pb-6 last:border-none last:pb-0">
+        &lt;div className="min-w-[150px] font-medium text-gray-800">{setting.title}&lt;/div>
 
-        <div className="flex-1 space-y-1">
-            <div className="flex items-center gap-2">
-                {setting.avatar && (
-                    <img src={setting.avatar} alt="Avatar" className="w-6 h-6 rounded-full object-cover" />
+        &lt;div className="flex-1 space-y-1">
+            &lt;div className="flex items-center gap-2">
+                {setting.avatar &amp;&amp; (
+                    &lt;img src={setting.avatar} alt="Avatar" className="w-6 h-6 rounded-full object-cover" />
                 )}
-                <p className="text-gray-700">{setting.description}</p>
-            </div>
-            <p className="text-gray-500 text-sm">{setting.sub}</p>
-        </div>
+                &lt;p className="text-gray-700">{setting.description}&lt;/p>
+            &lt;/div>
+            &lt;p className="text-gray-500 text-sm">{setting.sub}&lt;/p>
+        &lt;/div>
 
-        <button
+        &lt;button
             className="text-gray-500 hover:text-gray-700"
             onClick={() => handleEditClick(index)} // Pass the index to the handler
             aria-label={`Edit ${setting.title}`}
         >
-            <FiEdit2 size={18} />
-        </button>
-    </div>
+            &lt;FiEdit2 size={18} />
+        &lt;/button>
+    &lt;/div>
 );
 
 return (
-    <>
-        <Header />
-        <div className="min-h-screen bg-[#f4f2ee] py-12 md:py-20 px-4 sm:px-6 lg:px-8 flex justify-center">
-            <div className="w-full max-w-3xl space-y-6">
+    &lt;>
+        &lt;Header />
+        &lt;div className="min-h-screen bg-[#f4f2ee] py-12 md:py-20 px-4 sm:px-6 lg:px-8 flex justify-center">
+            &lt;div className="w-full max-w-3xl space-y-6">
                 {/* Page Title */}
-                <h1 className="text-2xl md:text-3xl font-semibold text-gray-800">
+                &lt;h1 className="text-2xl md:text-3xl font-semibold text-gray-800">
                     Confirm your screening questions and job settings
-                </h1>
+                &lt;/h1>
 
                 {/* Job Settings Card */}
-                <div className="bg-white rounded-lg shadow p-6 md:p-8 space-y-8">
-                    <div>
-                        <h2 className="text-xl md:text-2xl font-bold text-gray-800">Job settings</h2>
-                        <p className="text-sm text-gray-600 mt-1">
+                &lt;div className="bg-white rounded-lg shadow p-6 md:p-8 space-y-8">
+                    &lt;div>
+                        &lt;h2 className="text-xl md:text-2xl font-bold text-gray-800">Job settings&lt;/h2>
+                        &lt;p className="text-sm text-gray-600 mt-1">
                             Your settings control how you screen and collect applicants.
-                        </p>
-                    </div>
+                        &lt;/p>
+                    &lt;/div>
 
                     {/* Settings List */}
-                    <div className="space-y-6">
+                    &lt;div className="space-y-6">
                         {settings.map((setting, index) => (
-                            <div key={index}> 
+                            &lt;div key={index}> 
                                 
-                                {editingSettingIndex === index && setting.title === "Screening questions" ?
+                                {editingSettingIndex === index &amp;&amp; setting.title === "Screening questions" ?
                                     renderScreeningQuestionsEdit(setting)
-                                    : editingSettingIndex === index && setting.title === "Rejection settings" ?
+                                    : editingSettingIndex === index &amp;&amp; setting.title === "Rejection settings" ?
                                     renderRejectionSettingsEdit(setting)      
-                                    : editingSettingIndex === index && setting.title === "Manage applicants" ?
+                                    : editingSettingIndex === index &amp;&amp; setting.title === "Manage applicants" ?
                                     renderManageApplicantsEdit(setting)
                                     :
                                     renderStaticSetting(setting, index)
                                 }
-                            </div>
+                            &lt;/div>
                         ))}
-                    </div>
+                    &lt;/div>
 
                     {/* Action Buttons */}
-                    <div className="flex justify-between pt-6">
-                        <button
+                    &lt;div className="flex justify-between pt-6">
+                        &lt;button
                             onClick={handleGoBack}
                             className="py-2 px-5 border border-gray-300 rounded-full text-sm font-semibold text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition ease-in-out"
                         >
                             Back
-                        </button>
-                        <button
+                        &lt;/button>
+                        &lt;button
                             onClick={handleContinue}
                             className="py-2 px-6 border border-transparent rounded-full text-sm font-semibold text-white bg-[#0a66c2] hover:bg-[#004182] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#004182] transition ease-in-out"
                         >
                             Continue
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </>
+                        &lt;/button>
+                    &lt;/div>
+                &lt;/div>
+            &lt;/div>
+        &lt;/div>
+    &lt;/>
 );
 
 }
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#ChatWindow">ChatWindow</a></li><li><a href="global.html#CommentSection">CommentSection</a></li><li><a href="global.html#ConversationListItem">ConversationListItem</a></li><li><a href="global.html#ConversationSearch">ConversationSearch</a></li><li><a href="global.html#CreatePostModal">CreatePostModal</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#HirePage">HirePage</a></li><li><a href="global.html#JobBoardPage">JobBoardPage</a></li><li><a href="global.html#JobDetails">JobDetails</a></li><li><a href="global.html#Jobs">Jobs</a></li><li><a href="global.html#Main">Main</a></li><li><a href="global.html#ManageJob">ManageJob</a></li><li><a href="global.html#MyJobs">MyJobs</a></li><li><a href="global.html#Notification">Notification</a></li><li><a href="global.html#NotificationCard">NotificationCard</a></li><li><a href="global.html#PostMenu">PostMenu</a></li><li><a href="global.html#PostReactions">PostReactions</a></li><li><a href="global.html#ScreeningQuestionCard">ScreeningQuestionCard</a></li><li><a href="global.html#debounce">debounce</a></li><li><a href="global.html#fetchComments">fetchComments</a></li><li><a href="global.html#fetchNotifications">fetchNotifications</a></li><li><a href="global.html#fetchPosts">fetchPosts</a></li><li><a href="global.html#fetchUser">fetchUser</a></li><li><a href="global.html#filteredNotifications">filteredNotifications</a></li><li><a href="global.html#getReactionIcon">getReactionIcon</a></li><li><a href="global.html#handleAddComment">handleAddComment</a></li><li><a href="global.html#handleBlockUser">handleBlockUser</a></li><li><a href="global.html#handleClick">handleClick</a></li><li><a href="global.html#handleCreatePost">handleCreatePost</a></li><li><a href="global.html#handleDeleteNotification">handleDeleteNotification</a></li><li><a href="global.html#handleLikeClick">handleLikeClick</a></li><li><a href="global.html#handleMainFilterChange">handleMainFilterChange</a></li><li><a href="global.html#handleMuteDuration">handleMuteDuration</a></li><li><a href="global.html#handleNotificationClick">handleNotificationClick</a></li><li><a href="global.html#handleReact">handleReact</a></li><li><a href="global.html#handleReactToComment">handleReactToComment</a></li><li><a href="global.html#handleReportPost">handleReportPost</a></li><li><a href="global.html#handleSavePost">handleSavePost</a></li><li><a href="global.html#handleSendTestNotification">handleSendTestNotification</a></li><li><a href="global.html#handleSubmit">handleSubmit</a></li><li><a href="global.html#requestOTP">requestOTP</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#toggleComments">toggleComments</a></li><li><a href="global.html#verifyOTP">verifyOTP</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Fri May 02 2025 17:16:34 GMT+0300 (Eastern European Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

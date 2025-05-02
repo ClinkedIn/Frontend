@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams ,useLocation} from 'react-router-dom';
 import ConversationList from '../../components/messaging/ConversationList';
 import ChatWindow from '../../components/messaging/ChatWindow'; 
 import Header from '../../components/UpperNavBar';
@@ -11,23 +11,27 @@ import { BASE_URL } from '../../constants';
 
 // Function to create the composite conversation ID
 const createConversationId = (uid1, uid2) => {
-    return uid1 < uid2 ? `${uid1}_${uid2}` : `${uid2}_${uid1}`;
+    return uid1 < uid2 ? `${uid1}_${uid2}` :  `${uid2}_${uid1}`;
 };
 
 
 const MessagingPage = () => {
-
-    const [otherUser, setOtherUser] = useState(null);
+    const location = useLocation();
+    const  jobApplicant = location.state || {};
+    console.log("jobApplicant", jobApplicant); // DEBUG
+    const [otherUser, setOtherUser] = useState(jobApplicant);
+    const [currentUser, setUser] = useState();
     const [selectedConversationId, setSelectedConversationId] = useState(null);
-    const [showChatOnMobile, setShowChatOnMobile] = useState(false); // For mobile ui
+    const [showChatOnMobile, setShowChatOnMobile] = useState(!!jobApplicant); // For mobile ui
     const [notifications, setNotifications] = useState([]);
-
     const [conversations, setConversations] = useState([]);
     const [loadingConversations, setLoadingConversations] = useState(true);
-    const [errorConversations, setErrorConversations] = useState(null);
+    const [errorConversations, setErrorConversations] = useState(jobApplicant ? createConversationId(currentUser?._id, jobApplicant._id) : null);
     
-    const [currentUser, setUser] = useState();
+   
 
+
+    
       useEffect(() => {
         const fetchUser = async () => {
           try {
@@ -50,7 +54,7 @@ const MessagingPage = () => {
        
         if (!currentUser?._id) {
             setLoadingConversations(false);
-            setErrorConversations("Not logged in");
+            setErrorConversations("Loading user data...");
             setConversations([]);
             return;
         };
@@ -92,6 +96,15 @@ const MessagingPage = () => {
         }
     }, [currentUser]);
 
+    useEffect(() => {
+      if (jobApplicant?._id && currentUser?._id) {
+          const conversationId = createConversationId(currentUser._id, jobApplicant._id);
+          setSelectedConversationId(conversationId);
+          setOtherUser(jobApplicant);
+          setShowChatOnMobile(true);
+      }
+  }, [currentUser?._id, jobApplicant?._id]);
+
     const handleSelectConversation = (conversationId,otherUserInfo) => {
         setSelectedConversationId(conversationId);
         setOtherUser(otherUserInfo); 
@@ -108,7 +121,7 @@ const MessagingPage = () => {
         if (!currentUser || !selectedUser) return;
 
         const currentUid = currentUser._id;
-        const selectedUid = selectedUser.userId;
+        const selectedUid = selectedUser._id;
         const existingConversation =conversations.find(conv => conv.participants.includes(currentUid) && conv.participants.includes(selectedUid)
         );
         if(existingConversation){
@@ -126,13 +139,6 @@ const MessagingPage = () => {
 
  
     };
-     const fakeConnections = [
-        { userId: '123', fullName: 'Abdo', profilePicture: 'https://picsum.photos/80' },
-        { userId: '234', fullName: 'Ali Abdelghani', profilePicture: 'https://picsum.photos/80' },
-        { userId: '345', fullName: 'Ibrahim Muhammed', profilePicture: 'https://picsum.photos/80' },
-        { userId: '456', fullName: 'Adham Osama', profilePicture: 'https://picsum.photos/80' },
-        { userId: '567', fullName: 'Mohamed Samir', profilePicture: 'https://picsum.photos/80' },
-      ];
       const useConnections = () => {
         const [connections, setConnections] = useState([]);
         const [loading, setLoading] = useState(false);

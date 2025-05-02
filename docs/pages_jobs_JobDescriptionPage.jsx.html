@@ -1,4 +1,32 @@
-import React, { useState, useEffect, useRef } from 'react';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: pages/jobs/JobDescriptionPage.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: pages/jobs/JobDescriptionPage.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Header from '../../components/UpperNavBar';
 import { FiEdit2 } from "react-icons/fi";
@@ -24,7 +52,7 @@ const debounce = (func, delay) => {
  * @component
  * @example
  * return (
- *   <JobDescriptionPage />
+ *   &lt;JobDescriptionPage />
  * );
  */
 export default function JobDescriptionPage() {
@@ -136,7 +164,7 @@ Qualifications
      */
     useEffect(() => {
         const handleClickOutside = (e) => {
-            if (companySuggestionsRef.current && !companySuggestionsRef.current.contains(e.target)) {
+            if (companySuggestionsRef.current &amp;&amp; !companySuggestionsRef.current.contains(e.target)) {
                 setShowCompanySuggestions(false);
             }
         };
@@ -225,7 +253,7 @@ Qualifications
 
     const handleContinue = () => {
         
-        if (isEditing && !selectedCompany?.id && allCompanies.length > 0) {
+        if (isEditing &amp;&amp; !selectedCompany?.id &amp;&amp; allCompanies.length > 0) {
              // Check if the typed company name exactly matches one in the list
             const match = (allCompanies.find(c => c.company.name?.toLowerCase() === editCompanyInput.toLowerCase())) || initialCompanyName;
 
@@ -255,62 +283,62 @@ Qualifications
     // Rendering Sections
     const renderTopSection = () => (
         isEditing ? (
-            <div className="space-y-4 border-b pb-4 mb-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            &lt;div className="space-y-4 border-b pb-4 mb-6">
+                &lt;div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Job Title Input */}
-                    <div>
-                        <label htmlFor="editJobTitle" className="block text-sm font-medium text-gray-700 mb-1">Job title</label>
-                        <input
+                    &lt;div>
+                        &lt;label htmlFor="editJobTitle" className="block text-sm font-medium text-gray-700 mb-1">Job title&lt;/label>
+                        &lt;input
                             type="text"
                             id="editJobTitle"
                             value={currentJobTitle}
                             onChange={e => setCurrentJobTitle(e.target.value)}
                             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                         />
-                    </div>
+                    &lt;/div>
                     {/* Company Input with Suggestions */}
-                    <div className="relative">
-                        <label htmlFor="editCompany" className="block text-sm font-medium text-gray-700 mb-1">Company</label>
-                        <input
+                    &lt;div className="relative">
+                        &lt;label htmlFor="editCompany" className="block text-sm font-medium text-gray-700 mb-1">Company&lt;/label>
+                        &lt;input
                             type="text"
                             id="editCompany"
                             value={editCompanyInput}
                             onChange={handleCompanyInputChange}
-                            onFocus={() => editCompanyInput && companySuggestions.length > 0 && setShowCompanySuggestions(true)}
+                            onFocus={() => editCompanyInput &amp;&amp; companySuggestions.length > 0 &amp;&amp; setShowCompanySuggestions(true)}
                             placeholder="Type to search companies..."
                             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                             autoComplete="off"
                         />
-                        {showCompanySuggestions && (
-                            <ul ref={companySuggestionsRef} className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                        {showCompanySuggestions &amp;&amp; (
+                            &lt;ul ref={companySuggestionsRef} className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto">
                                 {companySuggestions.map((comp) => (
                                      // Use company id as key if available, fallback to name
-                                    <li key={comp.id || comp.name||comp.company.id} onClick={() => handleCompanySuggestionClick(comp)} className="px-3 py-2 text-sm hover:bg-blue-50 cursor-pointer flex items-center">
-                                        <img src={comp.logo||comp.company.logo || 'https://placehold.co/20x20/EBF4FD/0A66C2?text=L'} alt="" className="w-5 h-5 object-contain rounded-full mr-2" onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/20x20/EBF4FD/0A66C2?text=L'; }} />
+                                    &lt;li key={comp.id || comp.name||comp.company.id} onClick={() => handleCompanySuggestionClick(comp)} className="px-3 py-2 text-sm hover:bg-blue-50 cursor-pointer flex items-center">
+                                        &lt;img src={comp.logo||comp.company.logo || 'https://placehold.co/20x20/EBF4FD/0A66C2?text=L'} alt="" className="w-5 h-5 object-contain rounded-full mr-2" onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/20x20/EBF4FD/0A66C2?text=L'; }} />
                                         {comp.name|| comp.company.name}
-                                    </li>
+                                    &lt;/li>
                                 ))}
-                            </ul>
+                            &lt;/ul>
                         )}
-                    </div>
+                    &lt;/div>
 
                     {/* Workplace Type */}
-                    <div>
-                        <label htmlFor="editJobSite" className="block text-sm font-medium text-gray-700 mb-1">Workplace type</label>
-                        <select
+                    &lt;div>
+                        &lt;label htmlFor="editJobSite" className="block text-sm font-medium text-gray-700 mb-1">Workplace type&lt;/label>
+                        &lt;select
                             id="editJobSite"
                             value={currentJobSite}
                             onChange={e => setCurrentJobSite(e.target.value)}
                             className="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                         >
-                            {["Onsite", "Remote", "Hybrid"].map(option => <option key={option}>{option}</option>)}
-                        </select>
-                    </div>
+                            {["Onsite", "Remote", "Hybrid"].map(option => &lt;option key={option}>{option}&lt;/option>)}
+                        &lt;/select>
+                    &lt;/div>
 
                     {/* Job Location */}
-                    <div>
-                        <label htmlFor="editJobLocation" className="block text-sm font-medium text-gray-700 mb-1">Job location</label>
-                        <input
+                    &lt;div>
+                        &lt;label htmlFor="editJobLocation" className="block text-sm font-medium text-gray-700 mb-1">Job location&lt;/label>
+                        &lt;input
                             type="text"
                             id="editJobLocation"
                             value={currentJobLocation}
@@ -318,53 +346,53 @@ Qualifications
                             placeholder="e.g., Cairo, Egypt"
                             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                         />
-                    </div>
+                    &lt;/div>
 
                     {/* Job Type */}
-                    <div>
-                        <label htmlFor="editJobType" className="block text-sm font-medium text-gray-700 mb-1">Job type</label>
-                        <select
+                    &lt;div>
+                        &lt;label htmlFor="editJobType" className="block text-sm font-medium text-gray-700 mb-1">Job type&lt;/label>
+                        &lt;select
                             id="editJobType"
                             value={currentJobType}
                             onChange={e => setCurrentJobType(e.target.value)}
                             className="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                         >
-                            {["Full Time", "Part Time", "Contract", "Temporary", "Internship", "Volunteer"].map(option => <option key={option}>{option}</option>)}
-                        </select>
-                    </div>
-                </div>
+                            {["Full Time", "Part Time", "Contract", "Temporary", "Internship", "Volunteer"].map(option => &lt;option key={option}>{option}&lt;/option>)}
+                        &lt;/select>
+                    &lt;/div>
+                &lt;/div>
 
                 {/* Cancel Button */}
-                <div className="flex justify-end">
-                    <button onClick={handleCancelClick} type="button" className="py-1 px-3 border border-gray-400 rounded-md text-sm text-gray-700 hover:bg-gray-100">
+                &lt;div className="flex justify-end">
+                    &lt;button onClick={handleCancelClick} type="button" className="py-1 px-3 border border-gray-400 rounded-md text-sm text-gray-700 hover:bg-gray-100">
                         Cancel
-                    </button>
-                </div>
-            </div>
+                    &lt;/button>
+                &lt;/div>
+            &lt;/div>
         ) : (
-            <div className="flex justify-between items-start border-b pb-4 mb-6">
-                <div>
-                    <h2 className="text-xl font-semibold text-gray-900">{currentJobTitle}</h2>
-                    <p className="flex items-center text-sm text-gray-600 mt-2">
+            &lt;div className="flex justify-between items-start border-b pb-4 mb-6">
+                &lt;div>
+                    &lt;h2 className="text-xl font-semibold text-gray-900">{currentJobTitle}&lt;/h2>
+                    &lt;p className="flex items-center text-sm text-gray-600 mt-2">
                          {/* Display company logo if available */}
-                         {selectedCompany?.logo && (
-                             <img src={selectedCompany.logo} alt="Company Logo" className="w-10 h-10 object-contain rounded-full mr-2" onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/48x48/EBF4FD/0A66C2?text=Logo'; }} />
+                         {selectedCompany?.logo &amp;&amp; (
+                             &lt;img src={selectedCompany.logo} alt="Company Logo" className="w-10 h-10 object-contain rounded-full mr-2" onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/48x48/EBF4FD/0A66C2?text=Logo'; }} />
                          )}
                          {/* Display placeholder if no logo */}
-                         {!selectedCompany?.logo && (
-                             <img src={'https://picsum.photos/80?random=1'} alt="Company Logo" className="w-10 h-10 object-contain rounded-full mr-2" />
+                         {!selectedCompany?.logo &amp;&amp; (
+                             &lt;img src={'https://picsum.photos/80?random=1'} alt="Company Logo" className="w-10 h-10 object-contain rounded-full mr-2" />
                          )}
-                        <span className="font-medium">{selectedCompany?.name || 'N/A'}</span> {/* Display company name safely */}
-                        <span className="mx-1.5">•</span>
+                        &lt;span className="font-medium">{selectedCompany?.name || 'N/A'}&lt;/span> {/* Display company name safely */}
+                        &lt;span className="mx-1.5">•&lt;/span>
                         {currentJobType}
-                        <span className="mx-1.5">•</span>
+                        &lt;span className="mx-1.5">•&lt;/span>
                         {currentJobLocation} ({currentJobSite})
-                    </p>
-                </div>
-                <button onClick={handleEditClick} className="text-gray-500 hover:text-gray-700 p-1 ml-4" aria-label="Edit job details">
-                    <FiEdit2 size={20} />
-                </button>
-            </div>
+                    &lt;/p>
+                &lt;/div>
+                &lt;button onClick={handleEditClick} className="text-gray-500 hover:text-gray-700 p-1 ml-4" aria-label="Edit job details">
+                    &lt;FiEdit2 size={20} />
+                &lt;/button>
+            &lt;/div>
         )
     );
 
@@ -373,65 +401,65 @@ Qualifications
     };
 
     return (
-        <>
-            <Header />
-            <div className="min-h-screen bg-[#f4f2ee] py-12 md:py-20 px-4 sm:px-6 lg:px-8 flex justify-center">
-                <div className="w-full max-w-3xl space-y-6">
+        &lt;>
+            &lt;Header />
+            &lt;div className="min-h-screen bg-[#f4f2ee] py-12 md:py-20 px-4 sm:px-6 lg:px-8 flex justify-center">
+                &lt;div className="w-full max-w-3xl space-y-6">
                     {/* Page Title */}
-                    <h1 className="text-2xl md:text-3xl font-semibold text-gray-800">Enter your job description</h1>
+                    &lt;h1 className="text-2xl md:text-3xl font-semibold text-gray-800">Enter your job description&lt;/h1>
 
-                    <div className="bg-white shadow-md rounded-lg p-6 md:p-8">
+                    &lt;div className="bg-white shadow-md rounded-lg p-6 md:p-8">
                         {renderTopSection()}
 
                         {/* Job description field */}
-                        <div>
-                            <h3 className="text-lg font-semibold text-gray-800 mb-1">Job description</h3>
-                            <p className="text-sm text-gray-500 mb-4">This will be visible to anyone who views your job post.</p>
+                        &lt;div>
+                            &lt;h3 className="text-lg font-semibold text-gray-800 mb-1">Job description&lt;/h3>
+                            &lt;p className="text-sm text-gray-500 mb-4">This will be visible to anyone who views your job post.&lt;/p>
 
                             {/* Toolbar */}
-                            <div className="flex items-center space-x-1 border border-gray-300 bg-gray-50 p-2 rounded-t-md">
-                                <button
+                            &lt;div className="flex items-center space-x-1 border border-gray-300 bg-gray-50 p-2 rounded-t-md">
+                                &lt;button
                                     className="p-1.5 rounded hover:bg-gray-200"
                                     aria-label="Bold"
                                     onClick={() => applyFormatting('bold')}
                                 >
-                                    <BsTypeBold size={18} />
-                                </button>
-                                <button
+                                    &lt;BsTypeBold size={18} />
+                                &lt;/button>
+                                &lt;button
                                     className="p-1.5 rounded hover:bg-gray-200"
                                     aria-label="Italic"
                                     onClick={() => applyFormatting('italic')}
                                 >
-                                    <BsTypeItalic size={18} />
-                                </button>
-                                <div className="h-5 border-l border-gray-300 mx-1"></div>
-                                <button
+                                    &lt;BsTypeItalic size={18} />
+                                &lt;/button>
+                                &lt;div className="h-5 border-l border-gray-300 mx-1">&lt;/div>
+                                &lt;button
                                     className="p-1.5 rounded hover:bg-gray-200"
                                     aria-label="Unordered List"
                                     onClick={() => applyFormatting('unordered')}
                                 >
-                                    <BsListUl size={18} />
-                                </button>
-                                <button
+                                    &lt;BsListUl size={18} />
+                                &lt;/button>
+                                &lt;button
                                     className="p-1.5 rounded hover:bg-gray-200"
                                     aria-label="Ordered List"
                                     onClick={() => applyFormatting('ordered')}
                                 >
-                                    <BsListOl size={18} />
-                                </button>
-                            </div>
+                                    &lt;BsListOl size={18} />
+                                &lt;/button>
+                            &lt;/div>
 
                             {/* Info box */}
-                            <div className="flex items-center justify-between bg-blue-50 text-blue-800 text-sm p-2.5 rounded-md my-3 border border-blue-200">
-                                <div className="flex items-center">
-                                    <BsInfoCircleFill className="h-4 w-4 mr-2 text-blue-600" />
+                            &lt;div className="flex items-center justify-between bg-blue-50 text-blue-800 text-sm p-2.5 rounded-md my-3 border border-blue-200">
+                                &lt;div className="flex items-center">
+                                    &lt;BsInfoCircleFill className="h-4 w-4 mr-2 text-blue-600" />
                                     We added a template to help you.
-                                </div>
-                                <button onClick={() => setJobDescription('')} className="text-blue-700 hover:underline font-medium">Clear</button>
-                            </div>
+                                &lt;/div>
+                                &lt;button onClick={() => setJobDescription('')} className="text-blue-700 hover:underline font-medium">Clear&lt;/button>
+                            &lt;/div>
 
                             {/* Textarea */}
-                            <textarea
+                            &lt;textarea
                                 id="jobDescription"
                                 ref={textareaRef}
                                 value={jobDescription}
@@ -441,14 +469,37 @@ Qualifications
                             />
 
                             {/* Action Buttons */}
-                            <div className="flex justify-between mt-8">
-                                <button onClick={handleGoBack} className="py-2 px-5 border border-gray-300 rounded-full text-sm font-semibold text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition ease-in-out">Back</button>
-                                <button onClick={handleContinue} className="py-2 px-6 border border-transparent rounded-full text-sm font-semibold text-white bg-[#0a66c2] hover:bg-[#004182] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#004182] transition ease-in-out">Continue</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </>
+                            &lt;div className="flex justify-between mt-8">
+                                &lt;button onClick={handleGoBack} className="py-2 px-5 border border-gray-300 rounded-full text-sm font-semibold text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition ease-in-out">Back&lt;/button>
+                                &lt;button onClick={handleContinue} className="py-2 px-6 border border-transparent rounded-full text-sm font-semibold text-white bg-[#0a66c2] hover:bg-[#004182] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#004182] transition ease-in-out">Continue&lt;/button>
+                            &lt;/div>
+                        &lt;/div>
+                    &lt;/div>
+                &lt;/div>
+            &lt;/div>
+        &lt;/>
     );
 }
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#ChatWindow">ChatWindow</a></li><li><a href="global.html#CommentSection">CommentSection</a></li><li><a href="global.html#ConversationListItem">ConversationListItem</a></li><li><a href="global.html#ConversationSearch">ConversationSearch</a></li><li><a href="global.html#CreatePostModal">CreatePostModal</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#HirePage">HirePage</a></li><li><a href="global.html#JobBoardPage">JobBoardPage</a></li><li><a href="global.html#JobDetails">JobDetails</a></li><li><a href="global.html#Jobs">Jobs</a></li><li><a href="global.html#Main">Main</a></li><li><a href="global.html#ManageJob">ManageJob</a></li><li><a href="global.html#MyJobs">MyJobs</a></li><li><a href="global.html#Notification">Notification</a></li><li><a href="global.html#NotificationCard">NotificationCard</a></li><li><a href="global.html#PostMenu">PostMenu</a></li><li><a href="global.html#PostReactions">PostReactions</a></li><li><a href="global.html#ScreeningQuestionCard">ScreeningQuestionCard</a></li><li><a href="global.html#debounce">debounce</a></li><li><a href="global.html#fetchComments">fetchComments</a></li><li><a href="global.html#fetchNotifications">fetchNotifications</a></li><li><a href="global.html#fetchPosts">fetchPosts</a></li><li><a href="global.html#fetchUser">fetchUser</a></li><li><a href="global.html#filteredNotifications">filteredNotifications</a></li><li><a href="global.html#getReactionIcon">getReactionIcon</a></li><li><a href="global.html#handleAddComment">handleAddComment</a></li><li><a href="global.html#handleBlockUser">handleBlockUser</a></li><li><a href="global.html#handleClick">handleClick</a></li><li><a href="global.html#handleCreatePost">handleCreatePost</a></li><li><a href="global.html#handleDeleteNotification">handleDeleteNotification</a></li><li><a href="global.html#handleLikeClick">handleLikeClick</a></li><li><a href="global.html#handleMainFilterChange">handleMainFilterChange</a></li><li><a href="global.html#handleMuteDuration">handleMuteDuration</a></li><li><a href="global.html#handleNotificationClick">handleNotificationClick</a></li><li><a href="global.html#handleReact">handleReact</a></li><li><a href="global.html#handleReactToComment">handleReactToComment</a></li><li><a href="global.html#handleReportPost">handleReportPost</a></li><li><a href="global.html#handleSavePost">handleSavePost</a></li><li><a href="global.html#handleSendTestNotification">handleSendTestNotification</a></li><li><a href="global.html#handleSubmit">handleSubmit</a></li><li><a href="global.html#requestOTP">requestOTP</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#toggleComments">toggleComments</a></li><li><a href="global.html#verifyOTP">verifyOTP</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Fri May 02 2025 17:16:34 GMT+0300 (Eastern European Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

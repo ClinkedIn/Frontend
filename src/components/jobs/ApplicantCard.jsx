@@ -1,5 +1,30 @@
+/**
+ * ApplicantCard Component
+ *
+ * Renders a card displaying an applicant's basic information, including name,
+ * headline, application time, and whether they meet the must-have qualifications.
+ * Supports selection highlighting and an onClick event for selection.
+ *
+ * @component
+ * @param {Object} props - Component props.
+ * @param {Object} props.applicant - The applicant data object.
+ * @param {Object} props.applicant.applicant - The user profile of the applicant.
+ * @param {string} props.applicant.applicant.firstName - Applicant's first name.
+ * @param {string} props.applicant.applicant.lastName - Applicant's last name.
+ * @param {string} [props.applicant.applicant.headline] - Applicant's headline or title.
+ * @param {string} [props.applicant.applicant.profilePicture] - URL of the applicant's profile picture.
+ * @param {string} props.applicant.createdAt - ISO date string indicating when the applicant applied.
+ * @param {Array} [props.applicant.screeningAnswers] - List of screening answer objects.
+ * @param {boolean} props.applicant.screeningAnswers[].meetsCriteria - Indicates if a screening answer meets the required criteria.
+ * @param {Function} props.onSelect - Callback function triggered when the card is clicked.
+ * @param {boolean} props.isSelected - Determines if the card is currently selected.
+ *
+ * @returns {JSX.Element} The rendered applicant card component.
+ */
 import React from "react";
 import { formatDistanceToNow } from 'date-fns'; 
+
+
 const ApplicantCard = ({ applicant, onSelect, isSelected }) => {
     const name = applicant ? `${applicant?.applicant.firstName} ${applicant?.applicant.lastName}` : 'N/A';
     const headline = applicant?.applicant.headline || 'No Headline';

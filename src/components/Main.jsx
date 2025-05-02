@@ -9,6 +9,8 @@ import { BASE_URL } from "../constants";
 // Set axios defaults to include credentials with all requests
 axios.defaults.withCredentials = true;
 
+
+
 /**
  * The `Main` component serves as the primary container for displaying posts, 
  * handling user interactions such as creating posts, reacting to posts, 
@@ -81,6 +83,8 @@ const Main = () => {
   const [comments, setComments] = useState({});
   const [loadingComments, setLoadingComments] = useState({});
   const [authorInfo, setAuthorInfo] = useState(null);
+  const [expandedReplies, setExpandedReplies] = useState({});
+  const [replies, setReplies] = useState({});
   
   // Use exact API endpoint as specified
   const API_ENDPOINT = `${BASE_URL}/posts`;
@@ -111,7 +115,7 @@ const Main = () => {
   useEffect(() => {
     const fetchAndSetUser = async () => {
       try {
-        const response = await axios.get(`${BASE_URL}/api/user/me`, { withCredentials: true });
+        const response = await axios.get(`${BASE_URL}/user/me`, { withCredentials: true });
         setAuthorInfo(response.data);
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -133,13 +137,14 @@ const Main = () => {
    */
   const fetchUser = async () => {
     try {
-      const response = await axios.get(`${BASE_URL}/api/user/me`, { withCredentials: true });
+      const response = await axios.get(`${BASE_URL}/user/me`, { withCredentials: true });
       console.log("User data:", response.data);
     } catch (error) {
       console.error("Error fetching user data:", error);
     }
   };
 
+  
   /**
    * Fetches notifications from the server.
    * 
@@ -314,7 +319,7 @@ const Main = () => {
    */
   const handleAddComment = async (postId, commentText, attachment = null, taggedUsers = [], parentComment = null, attachmentUrl = null) => {
     try {
-      const endpoint = `${COMMENTS_ENDPOINT}/${postId}/post`;
+      const endpoint = `${COMMENTS_ENDPOINT}`;
       console.log(`Posting comment to ${endpoint}:`, commentText);
       
       // Use FormData to support file uploads
@@ -433,6 +438,7 @@ const Main = () => {
 
 
 
+
   // Handle reacting to a comment
   /**
    * Handles reacting to a comment by sending or removing a reaction.
@@ -494,6 +500,22 @@ const Main = () => {
     
     initializeData();
   }, []);
+
+
+// Fetch replies for a comment
+const fetchReplies = async (commentId) => {
+  try {
+    const endpoint = `${BASE_URL}/comments/${commentId}/replies`;
+    const response = await axios.get(endpoint);
+    setReplies(prev => ({
+      ...prev,
+      [commentId]: response.data.replies || []
+    }));
+  } catch (err) {
+    console.error('Error fetching replies:', err);
+  }
+};
+
   
   // Handle creating a new post
   /**

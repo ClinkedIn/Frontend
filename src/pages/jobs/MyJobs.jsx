@@ -4,6 +4,7 @@ import { BsBookmarkFill } from "react-icons/bs";
 import Header from "../../components/UpperNavBar";
 import JobCard from "../../components/jobs/JobCard";
 import { BASE_URL } from "../../constants";
+import { useLocation } from "react-router-dom";
 
 /**
  * * MyJobs component displays either the user's saved/applied jobs
@@ -18,7 +19,11 @@ const MyJobs = () => {
   const [jobs, setJobs] = useState([]);
   const [user, setUser] = useState(null);
   const [company, setCompany] = useState("");
-
+    const [refreshTrigger, setRefreshTrigger] = useState(false);
+  
+const location = useLocation();
+const {allJobs} = location.state || {} // Extract job from location state
+console.log("allJobs in MyJobs:", allJobs); // Log the job object
   /**
    * Fetches currently logged-in user data and updates state.
    */
@@ -94,7 +99,7 @@ const MyJobs = () => {
   // Handle loading data when selectedTab or activeFilter changes
   useEffect(() => {
     fetchUser();
-  }, []);
+  }, [refreshTrigger]);
 
   useEffect(() => {
     if (!user) return;
@@ -172,7 +177,7 @@ const MyJobs = () => {
         <div className="space-y-4 pl-6 pr-6">
           {jobs && jobs.length > 0 ? (
             jobs.map((job, index) => (
-              <JobCard key={index} job={job} state={selectedTab} user={user} />
+              <JobCard key={index} job={job} state={selectedTab} user={user} jobs={allJobs} companyId={job.companyId} onDelete={() => setRefreshTrigger(prev => !prev)} />
             ))
           ) : (
             <p>No jobs available at the moment.</p>

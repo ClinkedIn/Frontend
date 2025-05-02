@@ -35,7 +35,26 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { BASE_URL } from "../../constants";
 
-
+/**
+ * NotificationCard component that displays a notification with options to mark as read, mute, delete, or restore.
+ *
+ * @component
+ * @example
+ * const notification = {
+ *   id: '123',
+ *   isRead: false,
+ *   isMuted: false,
+ *   sendingUser: { profilePicture: 'path/to/image.jpg' },
+ *   content: 'Sample notification content'
+ * };
+ * &lt;NotificationCard notification={notification} handleNotificationClick={handleClick} />
+ *
+ * @param {Object} props - Component props.
+ * @param {Object} props.notification - The notification object containing details such as content, read status, and user details.
+ * @param {Function} props.handleNotificationClick - Function to be triggered when the notification is clicked.
+ *
+ * @returns {JSX.Element} The rendered notification card.
+ */
 const NotificationCard = ({ notification, handleNotificationClick }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [isRead, setIsRead] = useState(notification.isRead || false);
@@ -63,7 +82,6 @@ const NotificationCard = ({ notification, handleNotificationClick }) => {
     }
   };
 
-  // Delete Notification
   /**
    * Deletes a notification by its ID.
    *
@@ -87,7 +105,6 @@ const NotificationCard = ({ notification, handleNotificationClick }) => {
     }
   };
 
-  // Undo delete
   /**
    * Handles the undo action for a removed notification.
    * 
@@ -104,7 +121,6 @@ const NotificationCard = ({ notification, handleNotificationClick }) => {
     try {
       // Restore the notification in the backend
       await axios.patch(`${BASE_URL}/notifications/restore-notification/${removedNotification._id}`,{},{
-      
         withCredentials:true
       });
 
@@ -164,7 +180,7 @@ const NotificationCard = ({ notification, handleNotificationClick }) => {
         {},
         { withCredentials: true }
       );
-console.log("unmute response:", response)
+      console.log("unmute response:", response)
       setIsMuted(false);
       setShowMenu(false);
     } catch (error) {
@@ -177,13 +193,10 @@ console.log("unmute response:", response)
       &lt;div
         onClick={handleClick}
         id="Mark-Read"
-        className={`flex items-center justify-between p-3 cursor-pointer transition-all ${
-          isRead ? "bg-white hover:bg-gray-300" : "bg-blue-100 hover:bg-blue-200"
-        }`}
+        className={`flex items-center justify-between p-3 cursor-pointer transition-all ${isRead ? "bg-white hover:bg-gray-300" : "bg-blue-100 hover:bg-blue-200"}`}
       >
         {message ? (
           &lt;div className="w-full flex justify-between items-center">
-            {/* Displays the action message (delete or show less) */}
             &lt;p className="text-sm text-gray-800">{message}&lt;/p>
             &lt;button
               id="Undo"
@@ -196,10 +209,7 @@ console.log("unmute response:", response)
         ) : (
           &lt;>
             &lt;div id="Notification-Click" className="flex items-start space-x-3 cursor-pointer max-w-md">
-              {/* Blue dot is removed if notification is read */}
               {!isRead &amp;&amp; &lt;div className="w-2 h-2 bg-blue-600 rounded-full mt-2">&lt;/div>}
-
-              {/* Displaying notification content */}
               &lt;div className="relative w-10 h-10 bg-gray-200 flex items-center justify-center">
                 &lt;img
                   id="Notification-Img"
@@ -230,7 +240,6 @@ console.log("unmute response:", response)
 
             {showMenu &amp;&amp; (
               &lt;div className="absolute right-0 mt-2 w-72 bg-white shadow-md rounded-md p-2 z-50">
-                {/* Mute/Unmute Button */}
                 {isMuted ? (
                   &lt;button
                     id="Unmute-Button"
@@ -273,7 +282,6 @@ console.log("unmute response:", response)
                   &lt;/div>
                 )}
 
-                {/* Delete button */}
                 &lt;button
                   id="Delete-Button"
                   className="flex items-center w-full p-2 hover:bg-gray-100 rounded-md"
@@ -288,7 +296,6 @@ console.log("unmute response:", response)
                   Delete notification
                 &lt;/button>
 
-               {/* Mark as Unread button */}
                 &lt;button
                   id="Show-Less-Button"
                   className="flex items-center w-full p-2 hover:bg-gray-100 rounded-md"
@@ -335,21 +342,13 @@ export default NotificationCard;
 </div>
 
 <nav>
-<<<<<<< HEAD
-    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#ApplyJob">ApplyJob</a></li><li><a href="global.html#ChatWindow">ChatWindow</a></li><li><a href="global.html#CommentSection">CommentSection</a></li><li><a href="global.html#ConversationListItem">ConversationListItem</a></li><li><a href="global.html#ConversationSearch">ConversationSearch</a></li><li><a href="global.html#CreatePostModal">CreatePostModal</a></li><li><a href="global.html#Filter">Filter</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#JobBoardPage">JobBoardPage</a></li><li><a href="global.html#JobCard">JobCard</a></li><li><a href="global.html#Jobs">Jobs</a></li><li><a href="global.html#Main">Main</a></li><li><a href="global.html#MyJobs">MyJobs</a></li><li><a href="global.html#Notification">Notification</a></li><li><a href="global.html#PostMenu">PostMenu</a></li><li><a href="global.html#PostReactions">PostReactions</a></li><li><a href="global.html#closeModal">closeModal</a></li><li><a href="global.html#fetchComments">fetchComments</a></li><li><a href="global.html#fetchCompanies">fetchCompanies</a></li><li><a href="global.html#fetchNotifications">fetchNotifications</a></li><li><a href="global.html#fetchPosts">fetchPosts</a></li><li><a href="global.html#fetchUser">fetchUser</a></li><li><a href="global.html#filteredNotifications">filteredNotifications</a></li><li><a href="global.html#getReactionIcon">getReactionIcon</a></li><li><a href="global.html#handleAddComment">handleAddComment</a></li><li><a href="global.html#handleBlockUser">handleBlockUser</a></li><li><a href="global.html#handleClick">handleClick</a></li><li><a href="global.html#handleCreatePost">handleCreatePost</a></li><li><a href="global.html#handleDeleteNotification">handleDeleteNotification</a></li><li><a href="global.html#handleFilter">handleFilter</a></li><li><a href="global.html#handleJobClick">handleJobClick</a></li><li><a href="global.html#handleLikeClick">handleLikeClick</a></li><li><a href="global.html#handleMainFilterChange">handleMainFilterChange</a></li><li><a href="global.html#handleMessagingClick">handleMessagingClick</a></li><li><a href="global.html#handleMuteDuration">handleMuteDuration</a></li><li><a href="global.html#handleNotificationClick">handleNotificationClick</a></li><li><a href="global.html#handleReact">handleReact</a></li><li><a href="global.html#handleReactToComment">handleReactToComment</a></li><li><a href="global.html#handleReportPost">handleReportPost</a></li><li><a href="global.html#handleSave">handleSave</a></li><li><a href="global.html#handleSavePost">handleSavePost</a></li><li><a href="global.html#handleSearch">handleSearch</a></li><li><a href="global.html#handleSendTestNotification">handleSendTestNotification</a></li><li><a href="global.html#handleSubmit">handleSubmit</a></li><li><a href="global.html#openModal">openModal</a></li><li><a href="global.html#requestOTP">requestOTP</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#toggleComments">toggleComments</a></li><li><a href="global.html#useEffect">useEffect</a></li><li><a href="global.html#verifyOTP">verifyOTP</a></li></ul>
-=======
-    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#ApplyJob">ApplyJob</a></li><li><a href="global.html#ChatWindow">ChatWindow</a></li><li><a href="global.html#CommentSection">CommentSection</a></li><li><a href="global.html#ConversationListItem">ConversationListItem</a></li><li><a href="global.html#ConversationSearch">ConversationSearch</a></li><li><a href="global.html#CreatePostModal">CreatePostModal</a></li><li><a href="global.html#Filter">Filter</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#JobBoardPage">JobBoardPage</a></li><li><a href="global.html#JobCard">JobCard</a></li><li><a href="global.html#Jobs">Jobs</a></li><li><a href="global.html#MyJobs">MyJobs</a></li><li><a href="global.html#Notification">Notification</a></li><li><a href="global.html#PostMenu">PostMenu</a></li><li><a href="global.html#PostReactions">PostReactions</a></li><li><a href="global.html#closeModal">closeModal</a></li><li><a href="global.html#fetchCompanies">fetchCompanies</a></li><li><a href="global.html#fetchNotifications">fetchNotifications</a></li><li><a href="global.html#fetchUser">fetchUser</a></li><li><a href="global.html#filteredNotifications">filteredNotifications</a></li><li><a href="global.html#getReactionIcon">getReactionIcon</a></li><li><a href="global.html#handleBlockUser">handleBlockUser</a></li><li><a href="global.html#handleClick">handleClick</a></li><li><a href="global.html#handleDeleteNotification">handleDeleteNotification</a></li><li><a href="global.html#handleFilter">handleFilter</a></li><li><a href="global.html#handleJobClick">handleJobClick</a></li><li><a href="global.html#handleLikeClick">handleLikeClick</a></li><li><a href="global.html#handleMainFilterChange">handleMainFilterChange</a></li><li><a href="global.html#handleMessagingClick">handleMessagingClick</a></li><li><a href="global.html#handleMuteDuration">handleMuteDuration</a></li><li><a href="global.html#handleNotificationClick">handleNotificationClick</a></li><li><a href="global.html#handleSave">handleSave</a></li><li><a href="global.html#handleSearch">handleSearch</a></li><li><a href="global.html#handleSendTestNotification">handleSendTestNotification</a></li><li><a href="global.html#handleSubmit">handleSubmit</a></li><li><a href="global.html#openModal">openModal</a></li><li><a href="global.html#requestOTP">requestOTP</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#useEffect">useEffect</a></li><li><a href="global.html#verifyOTP">verifyOTP</a></li></ul>
->>>>>>> 298a4e887adcb76e5ff0b30368755f329fc82575
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#ChatWindow">ChatWindow</a></li><li><a href="global.html#CommentSection">CommentSection</a></li><li><a href="global.html#ConversationListItem">ConversationListItem</a></li><li><a href="global.html#ConversationSearch">ConversationSearch</a></li><li><a href="global.html#CreatePostModal">CreatePostModal</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#HirePage">HirePage</a></li><li><a href="global.html#JobBoardPage">JobBoardPage</a></li><li><a href="global.html#JobDetails">JobDetails</a></li><li><a href="global.html#Jobs">Jobs</a></li><li><a href="global.html#Main">Main</a></li><li><a href="global.html#ManageJob">ManageJob</a></li><li><a href="global.html#MyJobs">MyJobs</a></li><li><a href="global.html#Notification">Notification</a></li><li><a href="global.html#NotificationCard">NotificationCard</a></li><li><a href="global.html#PostMenu">PostMenu</a></li><li><a href="global.html#PostReactions">PostReactions</a></li><li><a href="global.html#ScreeningQuestionCard">ScreeningQuestionCard</a></li><li><a href="global.html#debounce">debounce</a></li><li><a href="global.html#fetchComments">fetchComments</a></li><li><a href="global.html#fetchNotifications">fetchNotifications</a></li><li><a href="global.html#fetchPosts">fetchPosts</a></li><li><a href="global.html#fetchUser">fetchUser</a></li><li><a href="global.html#filteredNotifications">filteredNotifications</a></li><li><a href="global.html#getReactionIcon">getReactionIcon</a></li><li><a href="global.html#handleAddComment">handleAddComment</a></li><li><a href="global.html#handleBlockUser">handleBlockUser</a></li><li><a href="global.html#handleClick">handleClick</a></li><li><a href="global.html#handleCreatePost">handleCreatePost</a></li><li><a href="global.html#handleDeleteNotification">handleDeleteNotification</a></li><li><a href="global.html#handleLikeClick">handleLikeClick</a></li><li><a href="global.html#handleMainFilterChange">handleMainFilterChange</a></li><li><a href="global.html#handleMuteDuration">handleMuteDuration</a></li><li><a href="global.html#handleNotificationClick">handleNotificationClick</a></li><li><a href="global.html#handleReact">handleReact</a></li><li><a href="global.html#handleReactToComment">handleReactToComment</a></li><li><a href="global.html#handleReportPost">handleReportPost</a></li><li><a href="global.html#handleSavePost">handleSavePost</a></li><li><a href="global.html#handleSendTestNotification">handleSendTestNotification</a></li><li><a href="global.html#handleSubmit">handleSubmit</a></li><li><a href="global.html#requestOTP">requestOTP</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#toggleComments">toggleComments</a></li><li><a href="global.html#verifyOTP">verifyOTP</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-<<<<<<< HEAD
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun Apr 20 2025 19:24:34 GMT+0200 (Eastern European Standard Time)
-=======
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun Apr 20 2025 18:19:03 GMT+0200 (Eastern European Standard Time)
->>>>>>> 298a4e887adcb76e5ff0b30368755f329fc82575
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Fri May 02 2025 17:16:34 GMT+0300 (Eastern European Summer Time)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -1,10 +1,9 @@
 import { useOutletContext } from "react-router-dom";
 
 
-const CompanyHomePage = () => {
+const CompanyFeedPage = () => {
   const {companyInfo}  = useOutletContext();
   return(
-
 
     <div className="mt-4 bg-white   w-full rounded-lg shadow-lg p-4 ">
         <h1 className="text-2xl ">Overview</h1>
@@ -20,4 +19,4 @@ const CompanyHomePage = () => {
   )
 
 }
-export default CompanyHomePage;
+export default CompanyFeedPage;

@@ -1,3 +1,12 @@
+/**
+ * Review component to display job settings, screening questions, rejection settings, and allow users to review and submit job details.
+ * 
+ * @component
+ * @example
+ * return (
+ *   <Review />
+ * )
+ */
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Header from "../../components/UpperNavBar";
@@ -6,16 +15,25 @@ import { BiLike, BiDislike } from "react-icons/bi";
 import { HiOutlineLightBulb } from "react-icons/hi";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
+import { BASE_URL } from '../../constants';
 
+/**
+ * Review function that handles the display and submission of job details, including screening questions and rejection settings.
+ * It fetches the necessary data passed from the previous route, renders it, and allows for updates.
+ * 
+ * @returns {JSX.Element} The rendered component containing job settings, screening questions, and rejection settings.
+ */
 export default function Review() {
     const location = useLocation();
     const navigate = useNavigate();
-    const { finalData, emailUpdates,screeningQuestions, rejectionSettings,pageState, jobId } = location.state || {}; 
+    const { finalData, emailUpdates, screeningQuestions, rejectionSettings, pageState, jobId } = location.state || {}; 
 
-    console.log("job settings screenig questions:", screeningQuestions); 
-    // Debugging line to check screening questions
-
-    console.log("final data in review:", finalData)
+    /**
+     * Renders the details of each screening question including its ideal answer.
+     * 
+     * @param {Object} question - The screening question object to render.
+     * @returns {JSX.Element} The rendered details of the screening question.
+     */
     const renderQuestionDetails = (question) => {
         const details = [];
         if (question.data?.isMustHave) {
@@ -63,6 +81,11 @@ export default function Review() {
         return details.length > 0 ? details : <span>No details available.</span>;
     };
 
+    /**
+     * Renders the final job data including title, company name, description, location, and job type.
+     * 
+     * @returns {JSX.Element} The rendered final job data.
+     */
     const renderFinalData = () => {
         if (!finalData) return <p className="text-gray-600 text-sm italic">No job data available.</p>;
 
@@ -82,11 +105,20 @@ export default function Review() {
             </div>
         );
     };
+
+    /**
+     * Handles the form submission for job details, sending a POST or PUT request to the backend based on the current page state.
+     * Displays appropriate success or error messages based on the response.
+     * 
+     * @async
+     * @function
+     * @throws {Error} If the request fails, an error message is displayed.
+     */
     const handleSubmit = async () => {
         try {
             const payload = {
-                companyId: finalData?.company?._id || "",
-                title: finalData?.jobTitle||"",
+                companyId: finalData?.company?._id || finalData?.company?.id || finalData?.company?.company?.id || "",
+                title: finalData?.jobTitle || "",
                 industry: finalData?.company.industry || "Information Technology", 
                 workplaceType: finalData?.jobSite || "Remote",
                 jobLocation: finalData?.location,
@@ -94,31 +126,27 @@ export default function Review() {
                 description: finalData?.description,
                 applicationEmail: emailUpdates || "careers@example.com", 
                 screeningQuestions: screeningQuestions?.map((q) => ({
-                    question: q.questionText || "Custom Question",
-                    idealAnswer: q.data?.years || q.data?.answerValue||q.data?.idealAnswer ||"Not specified",
+                    question: q.type || "Custom Question",
+                    idealAnswer: q.data?.years || q.data?.answerValue || q.data?.idealAnswer || "Not specified",
                     mustHave: q.data?.isMustHave || false,
                 })) || [],
                 autoRejectMustHave: rejectionSettings?.enabled || false,
                 rejectPreview: rejectionSettings?.message || "Thank you for your interest, but this position requires experience that matches our needs.",
             };
-            let response=null
-            if(pageState=="UpdateJob"){
-                response = await axios.put(`http://localhost:3000/jobs/${jobId}`, payload);
-                toast.success(response.data.message || "Job posted successfully!");
-                
-            }
-            else{
-                response = await axios.post("http://localhost:3000/jobs", payload);
-                toast.success(response.data.message || "Job posted successfully!");
-            }
-            
 
-            
+            let response = null;
+            if (pageState === "UpdateJob") {
+                response = await axios.put(`${BASE_URL}/jobs/${jobId}`, payload);
+                toast.success(response.data.message || "Job posted successfully!");
+            } else {
+                response = await axios.post(`${BASE_URL}/jobs`, payload);
+                toast.success(response.data.message || "Job posted successfully!");
+            }
+
             navigate('/jobdetails', {
-                state: { job: response.data.job, user:finalData.user}
+                state: { job: response.data, user: finalData.user, company: finalData.company }
             });
-            
-        }  catch (error) {
+        } catch (error) {
             console.error(error);
             toast.error(error.response?.data?.message || "Failed to post the job.");
         }
@@ -130,16 +158,11 @@ export default function Review() {
             <Toaster />
             <div className="min-h-screen bg-[#f4f2ee] py-12 md:py-20 px-4 sm:px-6 lg:px-8 flex justify-center">
                 <div className="w-full max-w-3xl space-y-6">
-                    <h1 className="text-2xl md:text-3xl font-semibold text-gray-800">
-                        Review your job settings
-                    </h1>
-
+                    <h1 className="text-2xl md:text-3xl font-semibold text-gray-800">Review your job settings</h1>
                     <div className="bg-white rounded-lg shadow p-6 md:p-8 space-y-8">
                         {/* Final Data Section */}
                         <div>
-                            <h2 className="text-xl md:text-2xl font-bold text-gray-800">
-                                Job Information
-                            </h2>
+                            <h2 className="text-xl md:text-2xl font-bold text-gray-800">Job Information</h2>
                             <div className="border border-gray-300 rounded-md p-4 bg-gray-50 mt-4">
                                 {renderFinalData()}
                             </div>

@@ -32,9 +32,12 @@ import PostMenu from './PostMenu.jsx';
 import CreatePostModal from './PostCreation.jsx';
 import PostReactions from './PostReactions.jsx';
 import CommentSection from './CommentSection.jsx';
+import { BASE_URL } from "../constants";
 
 // Set axios defaults to include credentials with all requests
 axios.defaults.withCredentials = true;
+
+
 
 /**
  * The `Main` component serves as the primary container for displaying posts, 
@@ -107,10 +110,11 @@ const Main = () => {
   const [expandedComments, setExpandedComments] = useState({});
   const [comments, setComments] = useState({});
   const [loadingComments, setLoadingComments] = useState({});
+  const [authorInfo, setAuthorInfo] = useState(null);
   
   // Use exact API endpoint as specified
-  const API_ENDPOINT = 'http://localhost:3000/posts';
-  const COMMENTS_ENDPOINT = 'http://localhost:3000/comments';
+  const API_ENDPOINT = `${BASE_URL}/posts`;
+  const COMMENTS_ENDPOINT = `${BASE_URL}/comments`;
   
   // Available reaction types
   /**
@@ -131,23 +135,20 @@ const Main = () => {
     { type: 'insightful', emoji: '💡', label: 'Insightful' },
     { type: 'funny', emoji: '😄', label: 'Funny' }
   ];
+
   
-  // Author information (normally would come from your auth system)
-  /**
-   * Object representing the author's information.
-   * 
-   * @typedef {Object} AuthorInfo
-   * @property {string} id - The unique identifier for the author.
-   * @property {string} name - The name of the author.
-   * @property {string} headline - The professional headline or title of the author.
-   * @property {string} profileImage - The URL of the author's profile image.
-   */
-  const authorInfo = {
-    id: "user456",
-    name: "Hamsa Saber",
-    headline: "Software Engineer at Tech Company",
-    profileImage: "https://picsum.photos/80?random=1",
-  };
+
+  useEffect(() => {
+    const fetchAndSetUser = async () => {
+      try {
+        const response = await axios.get(`${BASE_URL}/user/me`, { withCredentials: true });
+        setAuthorInfo(response.data);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+    fetchAndSetUser();
+  }, []);
 
   // Define fetchUser and fetchNotifications functions
   /**
@@ -162,13 +163,14 @@ const Main = () => {
    */
   const fetchUser = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/user/profile', { withCredentials: true });
+      const response = await axios.get(`${BASE_URL}/user/me`, { withCredentials: true });
       console.log("User data:", response.data);
     } catch (error) {
       console.error("Error fetching user data:", error);
     }
   };
 
+  
   /**
    * Fetches notifications from the server.
    * 
@@ -185,7 +187,7 @@ const Main = () => {
    */
   const fetchNotifications = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/notifications', { withCredentials: true });
+      const response = await axios.get(`${BASE_URL}/notifications`, { withCredentials: true });
       console.log("Notifications:", response.data);
     } catch (error) {
       console.error("Error fetching notifications:", error);
@@ -343,7 +345,7 @@ const Main = () => {
    */
   const handleAddComment = async (postId, commentText, attachment = null, taggedUsers = [], parentComment = null, attachmentUrl = null) => {
     try {
-      const endpoint = `${COMMENTS_ENDPOINT}/${postId}/post`;
+      const endpoint = `${COMMENTS_ENDPOINT}`;
       console.log(`Posting comment to ${endpoint}:`, commentText);
       
       // Use FormData to support file uploads
@@ -461,7 +463,7 @@ const Main = () => {
   };
 
 
-  
+
   // Handle reacting to a comment
   /**
    * Handles reacting to a comment by sending or removing a reaction.
@@ -809,7 +811,7 @@ const Main = () => {
           &lt;div className="flex flex-col text-[#958b7b] mb-2 bg-white">
             &lt;div className="flex items-center p-2 pl-4 pr-4">
               &lt;img
-                src={authorInfo.profileImage}
+                src={authorInfo.user.profilePicture}
                 alt="user"
                 className="w-12 h-12 rounded-full mr-2"
               />
@@ -1042,13 +1044,13 @@ export default Main;</code></pre>
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#ApplyJob">ApplyJob</a></li><li><a href="global.html#ChatWindow">ChatWindow</a></li><li><a href="global.html#CommentSection">CommentSection</a></li><li><a href="global.html#ConversationListItem">ConversationListItem</a></li><li><a href="global.html#ConversationSearch">ConversationSearch</a></li><li><a href="global.html#CreatePostModal">CreatePostModal</a></li><li><a href="global.html#Filter">Filter</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#JobBoardPage">JobBoardPage</a></li><li><a href="global.html#JobCard">JobCard</a></li><li><a href="global.html#Jobs">Jobs</a></li><li><a href="global.html#Main">Main</a></li><li><a href="global.html#MyJobs">MyJobs</a></li><li><a href="global.html#Notification">Notification</a></li><li><a href="global.html#PostMenu">PostMenu</a></li><li><a href="global.html#PostReactions">PostReactions</a></li><li><a href="global.html#closeModal">closeModal</a></li><li><a href="global.html#fetchComments">fetchComments</a></li><li><a href="global.html#fetchCompanies">fetchCompanies</a></li><li><a href="global.html#fetchNotifications">fetchNotifications</a></li><li><a href="global.html#fetchPosts">fetchPosts</a></li><li><a href="global.html#fetchUser">fetchUser</a></li><li><a href="global.html#filteredNotifications">filteredNotifications</a></li><li><a href="global.html#getReactionIcon">getReactionIcon</a></li><li><a href="global.html#handleAddComment">handleAddComment</a></li><li><a href="global.html#handleBlockUser">handleBlockUser</a></li><li><a href="global.html#handleClick">handleClick</a></li><li><a href="global.html#handleCreatePost">handleCreatePost</a></li><li><a href="global.html#handleDeleteNotification">handleDeleteNotification</a></li><li><a href="global.html#handleFilter">handleFilter</a></li><li><a href="global.html#handleJobClick">handleJobClick</a></li><li><a href="global.html#handleLikeClick">handleLikeClick</a></li><li><a href="global.html#handleMainFilterChange">handleMainFilterChange</a></li><li><a href="global.html#handleMessagingClick">handleMessagingClick</a></li><li><a href="global.html#handleMuteDuration">handleMuteDuration</a></li><li><a href="global.html#handleNotificationClick">handleNotificationClick</a></li><li><a href="global.html#handleReact">handleReact</a></li><li><a href="global.html#handleReactToComment">handleReactToComment</a></li><li><a href="global.html#handleReportPost">handleReportPost</a></li><li><a href="global.html#handleSave">handleSave</a></li><li><a href="global.html#handleSavePost">handleSavePost</a></li><li><a href="global.html#handleSearch">handleSearch</a></li><li><a href="global.html#handleSendTestNotification">handleSendTestNotification</a></li><li><a href="global.html#handleSubmit">handleSubmit</a></li><li><a href="global.html#openModal">openModal</a></li><li><a href="global.html#requestOTP">requestOTP</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#toggleComments">toggleComments</a></li><li><a href="global.html#useEffect">useEffect</a></li><li><a href="global.html#verifyOTP">verifyOTP</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#ChatWindow">ChatWindow</a></li><li><a href="global.html#CommentSection">CommentSection</a></li><li><a href="global.html#ConversationListItem">ConversationListItem</a></li><li><a href="global.html#ConversationSearch">ConversationSearch</a></li><li><a href="global.html#CreatePostModal">CreatePostModal</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#HirePage">HirePage</a></li><li><a href="global.html#JobBoardPage">JobBoardPage</a></li><li><a href="global.html#JobDetails">JobDetails</a></li><li><a href="global.html#Jobs">Jobs</a></li><li><a href="global.html#Main">Main</a></li><li><a href="global.html#ManageJob">ManageJob</a></li><li><a href="global.html#MyJobs">MyJobs</a></li><li><a href="global.html#Notification">Notification</a></li><li><a href="global.html#NotificationCard">NotificationCard</a></li><li><a href="global.html#PostMenu">PostMenu</a></li><li><a href="global.html#PostReactions">PostReactions</a></li><li><a href="global.html#ScreeningQuestionCard">ScreeningQuestionCard</a></li><li><a href="global.html#debounce">debounce</a></li><li><a href="global.html#fetchComments">fetchComments</a></li><li><a href="global.html#fetchNotifications">fetchNotifications</a></li><li><a href="global.html#fetchPosts">fetchPosts</a></li><li><a href="global.html#fetchUser">fetchUser</a></li><li><a href="global.html#filteredNotifications">filteredNotifications</a></li><li><a href="global.html#getReactionIcon">getReactionIcon</a></li><li><a href="global.html#handleAddComment">handleAddComment</a></li><li><a href="global.html#handleBlockUser">handleBlockUser</a></li><li><a href="global.html#handleClick">handleClick</a></li><li><a href="global.html#handleCreatePost">handleCreatePost</a></li><li><a href="global.html#handleDeleteNotification">handleDeleteNotification</a></li><li><a href="global.html#handleLikeClick">handleLikeClick</a></li><li><a href="global.html#handleMainFilterChange">handleMainFilterChange</a></li><li><a href="global.html#handleMuteDuration">handleMuteDuration</a></li><li><a href="global.html#handleNotificationClick">handleNotificationClick</a></li><li><a href="global.html#handleReact">handleReact</a></li><li><a href="global.html#handleReactToComment">handleReactToComment</a></li><li><a href="global.html#handleReportPost">handleReportPost</a></li><li><a href="global.html#handleSavePost">handleSavePost</a></li><li><a href="global.html#handleSendTestNotification">handleSendTestNotification</a></li><li><a href="global.html#handleSubmit">handleSubmit</a></li><li><a href="global.html#requestOTP">requestOTP</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#toggleComments">toggleComments</a></li><li><a href="global.html#verifyOTP">verifyOTP</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun Apr 20 2025 19:24:33 GMT+0200 (Eastern European Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Fri May 02 2025 17:16:34 GMT+0300 (Eastern European Summer Time)
 </footer>
 
 <script> prettyPrint(); </script>

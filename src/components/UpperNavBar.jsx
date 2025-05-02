@@ -6,7 +6,37 @@ import { BASE_URL } from "../constants";
 import { db } from "../../firebase";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 
+/**
+ * Header component that manages the navigation, search, and notifications.
+ * 
+ * @component
+ * @example
+ * // Example usage:
+ * <Header notifications={notifications} />
+ * 
+ * @param {Object} props - The properties passed to the component.
+ * @param {Array} props.notifications - Array of notifications to be passed to the component.
+ * 
+ * @returns {JSX.Element} The Header component.
+ */
 const Header = ({ notifications }) => {
+  /**
+   * State variables:
+   * - `showUser`: Toggles the visibility of the user dropdown.
+   * - `unreadCount`: Stores the count of unread notifications.
+   * - `searchQuery`: The search query for job search.
+   * - `location`: The location filter for job search.
+   * - `searchTerm`: The search term for user search.
+   * - `userResults`: The list of user results based on the search term.
+   * - `showResults`: Boolean flag to show user search results dropdown.
+   * - `unreadCountMessages`: Stores the count of unread messages.
+   * - `conversations`: Stores the user's conversations.
+   * - `loadingConversations`: Boolean flag for loading state of conversations.
+   * - `currentUser`: Stores the current user's data.
+   * - `showWork`: Toggles the visibility of the work dropdown.
+   * 
+   * @type {object}
+   */
   const [showUser, setShowUser] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState(""); // For job search
@@ -23,8 +53,12 @@ const Header = ({ notifications }) => {
   const [conversations, setConversations] = useState([]);
   const [loadingConversations, setLoadingConversations] = useState(true);
   const [currentUser, setUser] = useState();
+  const workDropdownRef = useRef(null);
+  const [showWork, setShowWork] = useState(false);
 
-  // Fetch unread notification count
+  /**
+   * Fetches the count of unread notifications and updates the state.
+   */
   useEffect(() => {
     const fetchUnreadCount = async () => {
       try {
@@ -39,6 +73,9 @@ const Header = ({ notifications }) => {
     fetchUnreadCount();
   }, [notifications]);
 
+  /**
+   * Fetches the current user's data and updates the state.
+   */
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -54,9 +91,12 @@ const Header = ({ notifications }) => {
     fetchUser();
   }, []);
 
+  /**
+   * Fetches unread message counts from Firestore and updates the state.
+   */
   useEffect(() => {
-    if (!currentUser?._id)
-      return;
+    if (!currentUser?._id) return;
+
     const conversationsRef = collection(db, 'conversations');
     const q = query(
       conversationsRef,
@@ -68,8 +108,7 @@ const Header = ({ notifications }) => {
       querySnapshot.forEach((doc) => {
         const data = doc.data();
         let countForUser = data.unreadCounts?.[currentUser._id] || 0;
-        if (data.forceUnread) 
-          countForUser = countForUser-1 ;
+        if (data.forceUnread) countForUser = countForUser - 1;
         totalUnread += countForUser;
       });
 
@@ -77,22 +116,19 @@ const Header = ({ notifications }) => {
       setUnreadCountMessages(totalUnread);
 
     }, (error) => {
-      
       console.error("Error fetching unread message count from Firestore:", error);
-      setUnreadCountMessages(0); 
+      setUnreadCountMessages(0);
     });
+
     return () => {
       console.log("Cleaning up Firestore listener for unread messages count.");
       unsubscribe();
     };
+  }, [currentUser?._id]);
 
-
-  }
-, [currentUser?._id]);
-
-
-
-  // Close dropdowns when clicking outside
+  /**
+   * Handles the closing of dropdowns when clicking outside of them.
+   */
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -107,7 +143,9 @@ const Header = ({ notifications }) => {
       document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Handle User Search
+  /**
+   * Handles the user search logic with debouncing.
+   */
   useEffect(() => {
     if (!searchTerm.trim()) {
       setUserResults([]);
@@ -134,7 +172,9 @@ const Header = ({ notifications }) => {
     return () => clearTimeout(delayDebounceFn);
   }, [searchTerm]);
 
-  // Handlers
+  /**
+   * Handles the navigation for various actions, such as viewing notifications, job listings, or settings.
+   */
   const handleNotificationsClick = () => navigate("/notifications");
   const handleJobsClick = () => navigate("/jobs");
   const handleProfileClick = () => {
@@ -146,8 +186,15 @@ const Header = ({ notifications }) => {
     setShowUser(false);
   };
   const handleMessagingClick = () => navigate("/messaging");
+  const handleCreateCompany = () => {
+    navigate("/company/setup/new");
+    setShowWork(false);
+  };
 
-  // Submit job search
+  /**
+   * Handles the job search and navigation to the job board.
+   * @param {Event} e - The form submit event.
+   */
   const handleJobSearch = async (e) => {
     e.preventDefault();
     try {
@@ -168,9 +215,16 @@ const Header = ({ notifications }) => {
     }
   };
 
+  /**
+   * Determines whether to show the job search bar based on the current path.
+   */
+  let path = false;
+  if (currentPath === "jobs" || currentPath === "job-board" || currentPath === "myjobs") {
+    path = true;
+  }
   return (
     <header className="fixed top-0 left-0 w-full bg-white border-b border-gray-200 z-50">
-      <div className="flex items-center justify-between max-w-6xl mx-auto px-4 py-2">
+      <div className="flex items-center justify-between px-4 py-2">
         <div className="flex">
           {/* Logo */}
           <a href="/feed">
@@ -183,14 +237,14 @@ const Header = ({ notifications }) => {
             className="relative flex rounded-lg"
           >
             {/* Show Job Search only on /jobs */}
-            {currentPath === "jobs" ? (
+            {path ? (
               <>
                 <div className="flex items-center bg-[#edf3f8] rounded-sm ml-2">
                   <MdSearch color="#5f6163" className="w-4 h-4 mr-2 ml-1" />
                   <input
                     type="text"
                     placeholder="Title, skill or company"
-                    className="text-sm placeholder-[#5f6163] w-64 outline-none bg-transparent py-2"
+                    className="text-sm placeholder-[#5f6163] w-full outline-none bg-transparent py-2"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
@@ -199,14 +253,14 @@ const Header = ({ notifications }) => {
                   <input
                     type="text"
                     placeholder="City, state, or zip code"
-                    className="placeholder-[#5f6163] text-sm w-64 outline-none bg-transparent py-2 pl-3"
+                    className="text-sm placeholder-[#5f6163] w-full outline-none bg-transparent pl-1 py-2 ml-1"
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                   />
                 </div>
                 <button
                   type="submit"
-                  className="bg-blue-600 ml-1 text-white px-2 py-2 rounded-lg hover:bg-blue-700"
+                  className="bg-blue-600 ml-1 text-white px-2 py-2 rounded-lg"
                 >
                   Search
                 </button>
@@ -218,7 +272,7 @@ const Header = ({ notifications }) => {
                 <input
                   type="text"
                   placeholder="Search"
-                  className="text-sm placeholder-[#5f6163] w-64 outline-none bg-transparent py-2"
+                  className="text-sm placeholder-[#5f6163] w-full outline-none bg-transparent py-2"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onFocus={() => setShowResults(true)}
@@ -416,10 +470,31 @@ const Header = ({ notifications }) => {
               </div>
             )}
           </div>
-          <button className="flex items-center space-x-2 hover:bg-gray-200 p-2 rounded-lg">
-            <img src="/Images/nav-work.svg" alt="Work" className="w-6 h-6" />
-            <img src="/Images/down-icon.svg" alt="Dropdown" className="w-4 h-4" />
-          </button>
+          <div className="relative" ref={workDropdownRef}>
+            <button 
+              className="flex items-center space-x-2 hover:bg-gray-200 p-2 rounded-lg"
+              onClick={() => setShowWork(!showWork)}
+            >
+              <img src="/Images/nav-work.svg" alt="Work" className="w-6 h-6" />
+              <img 
+                src="/Images/down-icon.svg" 
+                alt="Dropdown" 
+                className={`w-4 h-4 transition-transform duration-200 ${
+                  showWork ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+            {showWork && (
+              <div className="absolute right-0 mt-1 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200">
+                <button
+                  onClick={handleCreateCompany}
+                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  Create Company Page
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>
