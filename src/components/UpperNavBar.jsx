@@ -445,19 +445,12 @@ const Header = ({ notifications }) => {
                     />
                     <div>
                       <p className="font-medium text-gray-800">
-<<<<<<< HEAD
-                        {currentUser ? `${currentUser.firstName || ''} ${currentUser.lastName || ''}` : 'Loading...'}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {currentUser?.headline || currentUser?.title || 'User'}
-=======
                         {currentUser?.firstName && currentUser?.lastName
                           ? `${currentUser.firstName} ${currentUser.lastName}`
                           : "User"}
                       </p>
                       <p className="text-xs text-gray-500">
                         {currentUser?.headline || currentUser?.jobTitle || "Your job title"}
->>>>>>> cdd22b978bda646db4f790c7b5fadcc09cd7b536
                       </p>
                     </div>
                   </div>
