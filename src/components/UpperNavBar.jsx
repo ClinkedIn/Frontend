@@ -117,7 +117,7 @@ const Header = ({ notifications }) => {
         const response = await axios.get(`${BASE_URL}/user/me`, {
           withCredentials: true,
         });
-        setUser(response.data.user);
+        setUserInfo(response.data.user);
         console.log("User data:", response.data.user);
       } catch (error) {
         console.error("Error fetching user:", error);
