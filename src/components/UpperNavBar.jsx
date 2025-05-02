@@ -23,7 +23,8 @@ const Header = ({ notifications }) => {
   const [conversations, setConversations] = useState([]);
   const [loadingConversations, setLoadingConversations] = useState(true);
   const [currentUser, setUser] = useState();
-
+  const workDropdownRef = useRef(null);
+  const [showWork, setShowWork] = useState(false);
   // Fetch unread notification count
   useEffect(() => {
     const fetchUnreadCount = async () => {
@@ -136,6 +137,21 @@ const Header = ({ notifications }) => {
 
     return () => clearTimeout(delayDebounceFn);
   }, [searchTerm]);
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowUser(false);
+      }
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowResults(false);
+      }
+      if (workDropdownRef.current && !workDropdownRef.current.contains(event.target)) {
+        setShowWork(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // Handlers
   const handleNotificationsClick = () => navigate("/notifications");
@@ -149,7 +165,10 @@ const Header = ({ notifications }) => {
     setShowUser(false);
   };
   const handleMessagingClick = () => navigate("/messaging");
-
+  const handleCreateCompany = () => {
+    navigate("/company/setup/new");
+    setShowWork(false);
+  };
   // Submit job search
   const handleJobSearch = async (e) => {
     e.preventDefault();
@@ -362,10 +381,31 @@ const Header = ({ notifications }) => {
               </div>
             )}
           </div>
-          <button className="flex items-center space-x-2 hover:bg-gray-200 p-2 rounded-lg">
-            <img src="/Images/nav-work.svg" alt="Work" className="w-6 h-6" />
-            <img src="/Images/down-icon.svg" alt="Dropdown" className="w-4 h-4" />
-          </button>
+          <div className="relative" ref={workDropdownRef}>
+            <button 
+              className="flex items-center space-x-2 hover:bg-gray-200 p-2 rounded-lg"
+              onClick={() => setShowWork(!showWork)}
+            >
+              <img src="/Images/nav-work.svg" alt="Work" className="w-6 h-6" />
+              <img 
+                src="/Images/down-icon.svg" 
+                alt="Dropdown" 
+                className={`w-4 h-4 transition-transform duration-200 ${
+                  showWork ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+            {showWork && (
+              <div className="absolute right-0 mt-1 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200">
+                <button
+                  onClick={handleCreateCompany}
+                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  Create Company Page
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>
