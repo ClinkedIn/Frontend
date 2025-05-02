@@ -144,9 +144,9 @@ const JobBoardPage = () => {
   console.log("selectedJob", selectedJob);
   console.log("jobs in JobBoardPage:", jobs); // Log the job object
   return (
-    <div className={`flex flex-col md:flex-row h-screen ${tab ? "mt-32 md:mt-36" : "mt-16"} md:pl-[172px] md:pr-[172px]`}>
+    <div className={`flex flex-col md:flex-row h-screen  mt-32 md:mt-36  md:pl-[172px] md:pr-[172px]`}>
       <Header />
-      {tab && (
+      
         <Filter
           experience={experience}
           setExperience={setExperience}
@@ -156,7 +156,6 @@ const JobBoardPage = () => {
           setSelectedCompany={setSelectedCompany}
           companies={companies}
         />
-      )}
 
       <div className="md:w-1/3 w-full h-1/2 md:h-full overflow-y-auto border-r border-gray-300 bg-gray-50">
         <div className="pl-2 py-3 text-sm bg-[#0a66c2] text-white w-full">
