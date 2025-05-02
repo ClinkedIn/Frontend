@@ -185,7 +185,7 @@ const NotificationCard = ({ notification, handleNotificationClick }) => {
               <div className="relative w-10 h-10 bg-gray-200 flex items-center justify-center">
                 <img
                   id="Notification-Img"
-                  src={notification.sendingUser?.profilePicture??""}
+                  src={notification.sendingUser?.profilePicture??"https://picsum.photos/80?random=1"}
                   alt="image"
                   className="w-10 h-10 rounded-md"
                 />
