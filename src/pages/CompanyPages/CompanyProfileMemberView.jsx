@@ -1,19 +1,26 @@
 import { FaPlus } from "react-icons/fa6";
-import { Outlet, useNavigate,useParams } from "react-router-dom";
+import { Outlet, useNavigate,useParams,useLocation } from "react-router-dom";
 import Header from "../../components/UpperNavBar";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import InlineTabs from "../../components/CompanyPageSections/InlineTabs"
 import axios from "axios";
 import { BASE_URL } from "../../constants";
+import { set } from "date-fns";
 const CompanyProfileMemberViewPage = () => {
     const navigate = useNavigate();
     const {companyId, section = "Home"} = useParams();
     const [isFollowing, setIsFollowing] = useState(false);
-    const [activeTab, setActiveTab] = useState(section);
     const [notifications, setNotifications] = useState([]);
     const [companyInfo, setCompanyInfo] = useState();
     const [user, setUser] = useState(null);
+    const [followers, setFollowers] = useState([]);
     const Tabs =["Home", "Posts", "Jobs"];
+    const location = useLocation();
+    const currentSection = location.pathname.split('/').pop() || 'Home';
+    const [activeTab, setActiveTab] = useState(currentSection);
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [errorFetchCompanyInfo, setErrorFetchCompanyInfo] = useState(false);
+    const [isOwner, setIsOwner] = useState(false);
 
     const handleTabClick = (tab) => {
         setActiveTab(tab);
@@ -27,22 +34,48 @@ const CompanyProfileMemberViewPage = () => {
                 withCredentials:true
               });
           
-              setUser(response.data);
-              console.log("User data:", response.data);
+              setUser(response.data.user);
+              console.log("User data:", response.data.user);
             } catch (error) {
               console.error("Error fetching user:", error);
             }
           };
       
           fetchUser();
-      }, []);
+          if ( user?._id) {("userId:", user?._id);
+            console.log(" followers:", user?.following );
+            const isUserFollowing = user?.following?.some((follower) => follower?.entity === companyId && follower?.entityType === "Company");
+            setIsFollowing(isUserFollowing);
+            const isAdmin = user?.adminInCompanies.some((CompanyId) => CompanyId === companyId );
+            setIsAdmin(isAdmin);
+            console.log("isAdmin:", isAdmin);
+        }
+
+      }, [user?._id]);
+    useEffect(() => {
+          const fetchFollowers = async() =>{
+            try {
+                const response = await axios.get(`${BASE_URL}/companies/${companyId}/follow`);
+                setFollowers(response.data.followers);
+                setCompanyInfo((prev) => ({ ...prev, followers: response.data.followers }));
+                console.log("Followers data:", response.data.followers);
+            } catch (error) {
+                console.error("Error fetching followers:", error);
+            }
+             
+
+          }
+            fetchFollowers();
+
+    }, 
+    [user?._id,]);
 
     const handleClickFollowingButton = async(e) => {
 
         e.preventDefault();
         const userId = user?._id;
         if(isFollowing) {
-            const response = await axios.delete(`${BASE_URL}/companies/${companyId}/unfollow`,{userId});
+            const response = await axios.delete(`${BASE_URL}/companies/${companyId}/follow`,{userId});
             console.log(response)
             setIsFollowing(false);
 
@@ -59,16 +92,25 @@ const CompanyProfileMemberViewPage = () => {
                 `${BASE_URL}/companies/${companyId}`
             );
             setCompanyInfo(response.data.company);
+            setIsOwner(response.data.userRelationship==='owner');
             console.log("Company info:", response.data.company); 
         } catch (error) {
             console.error("Error fetching company info:", error);
+            setErrorFetchCompanyInfo(true);
          }
     }
     useEffect(()=>{
         if(!companyInfo)
              fetchCompanyInfo();
     },[]);
-
+    if(errorFetchCompanyInfo){
+        return(
+            <div className=" bg-[#f4f2ee] min-h-screen  items-center flex flex-col   w-full rounded-lg shadow-lg p-4 ">
+                <Header notifications={notifications} />
+                <h1 className="mt-30 text-2xl  ">Page not found</h1>
+            </div>
+        )
+    }
     return (
         <div className="bg-[#f4f2ee] min-h-screen  items-center flex flex-col">
             <Header  notifications={notifications} />
@@ -76,7 +118,7 @@ const CompanyProfileMemberViewPage = () => {
             <div className="lg:w-1/2 lg:h-3/4 md:w-3/4 max-[430px]:w-full">
                 <div className="bg-white  rounded-lg shadow-lg mt-16  ">
                     <img src="/Images/card-bg.svg"  className="w-full h-30 rounded-t-lg " />
-                    <img src={companyInfo.logo ? companyInfo.logo : "/Images/Company-icon.png" } alt="profile" className="w-28 h-28 -mt-10 ml-5  " />
+                    <img src={companyInfo.logo !==null ? companyInfo.logo : "/Images/CompanyLogo.png" } alt="profile" className="w-28 h-28 -mt-10 ml-5  " />
                     <div className="px-5 pt-5">
                         <h1 className="text-2xl">{companyInfo.name}</h1>
                         <div className="flex gap-2">
@@ -96,7 +138,13 @@ const CompanyProfileMemberViewPage = () => {
                                 Follow
                             </button> 
                             )}
+                            {(isAdmin || isOwner) && (
+                                <button className="mt-4 flex items-center justify-center gap-2 bg-[#0A66C2] text-white font-semibold py-2 px-8 rounded-full hover:bg-[#004182]" onClick={() => navigate(`/company/${companyId}/admin`)}>
+                                    Show as Admin
+                                </button>
+                            )}
                         </div>
+
                     </div>
                     <hr className="border-gray-300 my-2" />
                     <InlineTabs activeTab={activeTab} Tabs={Tabs} handleTabClick={handleTabClick} />

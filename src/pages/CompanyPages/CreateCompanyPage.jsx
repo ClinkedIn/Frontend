@@ -43,8 +43,8 @@ const CreateCompanyPage = () => {
             withCredentials:true
           });
       
-          setUser(response.data);
-          console.log("User data:", response.data);
+          setUser(response.data.user);
+          console.log("User data:", response.data.user);
         } catch (error) {
           console.error("Error fetching user:", error);
         }

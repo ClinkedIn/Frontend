@@ -228,7 +228,7 @@ const Header = ({ notifications }) => {
         <div className="flex">
           {/* Logo */}
           <a href="/feed">
-            <img src="/Images/home-logo.svg" alt="Logo" className="w-8 h-8 min-w-8" />
+            <img src="/Images/blue-lockedin.png" alt="Logo" className="w-12 h-12" />
           </a>
 
           {/* Conditional Search Bar */}
@@ -316,47 +316,101 @@ const Header = ({ notifications }) => {
         </div>
 
         {/* Navigation Icons */}
-        <nav className="flex space-x-6">
+        <nav className="flex space-x-2">
+          {/* Home */}
           <button
-            className="hover:bg-gray-200 p-2 rounded-lg"
+            className={`flex flex-col items-center hover:bg-gray-200 p-1.5 rounded-lg w-16 ${currentPath === "feed" ? "text-black" : "text-gray-600"}`}
             onClick={() => navigate("/feed")}
           >
-            <img src="/Images/nav-home.svg" alt="Home" className="w-6 h-6 min-w-6" />
+            <div className="flex flex-col items-center w-full">
+              <img
+                src="/Images/nav-home.svg"
+                alt="Home"
+                className={`w-5 h-5 mb-1 ${currentPath === "feed" ? "filter-none" : "filter grayscale"}`}
+              />
+              <span className="text-xs">Home</span>
+              {currentPath === "feed" && (
+                <div className="w-8 h-0.5 bg-black rounded-full mt-1" />
+              )}
+            </div>
           </button>
+          {/* Network */}
           <button
-            className="hover:bg-gray-200 p-2 rounded-lg"
+            className={`flex flex-col items-center hover:bg-gray-200 p-1.5 rounded-lg w-16 ${currentPath === "network" ? "text-black" : "text-gray-600"}`}
             onClick={() => navigate("/network")}
           >
-            <img src="/Images/nav-network.svg" alt="Network" className="w-6 h-6 min-w-6" />
+            <div className="flex flex-col items-center w-full">
+              <img
+                src="/Images/nav-network.svg"
+                alt="Network"
+                className={`w-5 h-5 mb-1 ${currentPath === "network" ? "filter-none" : "filter grayscale"}`}
+              />
+              <span className="text-xs">Network</span>
+              {currentPath === "network" && (
+                <div className="w-8 h-0.5 bg-black rounded-full mt-1" />
+              )}
+            </div>
           </button>
+          {/* Jobs */}
           <button
-            className="hover:bg-gray-200 p-2 rounded-lg"
+            className={`flex flex-col items-center hover:bg-gray-200 p-1.5 rounded-lg w-16 ${currentPath === "jobs" ? "text-black" : "text-gray-600"}`}
             onClick={handleJobsClick}
           >
-            <img src="/Images/nav-jobs.svg" alt="Jobs" className="w-6 h-6 min-w-6" />
+            <div className="flex flex-col items-center w-full">
+              <img
+                src="/Images/nav-jobs.svg"
+                alt="Jobs"
+                className={`w-5 h-5 mb-1 ${currentPath === "jobs" ? "filter-none" : "filter grayscale"}`}
+              />
+              <span className="text-xs">Jobs</span>
+              {currentPath === "jobs" && (
+                <div className="w-8 h-0.5 bg-black rounded-full mt-1" />
+              )}
+            </div>
           </button>
-          <button className="relative flex flex-col items-center text-xs text-gray-600 hover:text-black p-1" onClick={handleMessagingClick}>
-            <img src="/Images/nav-messaging.svg" alt="Messaging" className="w-6 h-6" />
-            {unreadCountMessages > 0 && (
-              <div className="absolute -top-1 left-1/2 ml-1 bg-[#cb112d] text-white rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-[10px] md:text-xs font-medium">
-                {unreadCountMessages > 10 ? '10+' : unreadCountMessages} 
-              </div>
-            )}
-          </button>
+          {/* Messaging */}
           <button
-            className="hover:bg-gray-200 p-2 rounded-lg relative"
+            className={`relative flex flex-col items-center hover:bg-gray-200 p-1.5 rounded-lg w-16 ${currentPath === "messaging" ? "text-black" : "text-gray-600"}`}
+            onClick={handleMessagingClick}
+          >
+            <div className="flex flex-col items-center w-full">
+              <img
+                src="/Images/nav-messaging.svg"
+                alt="Messaging"
+                className={`w-5 h-5 mb-1 ${currentPath === "messaging" ? "filter-none" : "filter grayscale"}`}
+              />
+              <span className="text-xs">Messaging</span>
+              {currentPath === "messaging" && (
+                <div className="w-8 h-0.5 bg-black rounded-full mt-1" />
+              )}
+              {unreadCountMessages > 0 && (
+                <div className="absolute -top-1 left-1/2 ml-3 bg-[#cb112d] text-white rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-[10px] md:text-xs font-medium">
+                  {unreadCountMessages > 10 ? '10+' : unreadCountMessages}
+                </div>
+              )}
+            </div>
+          </button>
+          {/* Notifications */}
+          <button
+            className={`hover:bg-gray-200 p-1.5 rounded-lg relative flex flex-col items-center w-16 ${currentPath === "notifications" ? "text-black" : "text-gray-600"}`}
             onClick={handleNotificationsClick}
           >
-            <img
-              src="/Images/nav-notifications.svg"
-              alt="Notifications"
-              className="w-6 h-6 min-w-6"
-            />
-            {unreadCount > 0 && (
-              <div className="absolute -top-1 -right-1 bg-[#cb112d] text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-medium">
-                {unreadCount}
-              </div>
-            )}
+            <div className="flex flex-col items-center w-full">
+              <img
+                src="/Images/nav-notifications.svg"
+                alt="Notifications"
+                className={`w-5 h-5 mb-1 ${currentPath === "notifications" ? "filter-none" : "filter grayscale"}`}
+              />
+              <span className="text-xs">Notifications</span>
+              {currentPath === "notifications" && (
+                <div className="w-8 h-0.5 bg-black rounded-full mt-1" />
+              )}
+              {unreadCount > 0 && (
+                <div className="absolute -top-1 -right-1 bg-[#cb112d] text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-medium">
+                  {unreadCount}
+                </div>
+              )}
+            </div>
           </button>
         </nav>
 
@@ -375,7 +429,7 @@ const Header = ({ notifications }) => {
               <img
                 src="/Images/down-icon.svg"
                 alt="Dropdown"
-                className={`w-4 h-4 transition-transform duration-200 ${
+                className={`w-5 h-5 transition-transform duration-200 ${
                   showUser ? "rotate-180" : ""
                 }`}
               />
@@ -391,10 +445,19 @@ const Header = ({ notifications }) => {
                     />
                     <div>
                       <p className="font-medium text-gray-800">
+<<<<<<< HEAD
                         {currentUser ? `${currentUser.firstName || ''} ${currentUser.lastName || ''}` : 'Loading...'}
                       </p>
                       <p className="text-xs text-gray-500">
                         {currentUser?.headline || currentUser?.title || 'User'}
+=======
+                        {currentUser?.firstName && currentUser?.lastName
+                          ? `${currentUser.firstName} ${currentUser.lastName}`
+                          : "User"}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {currentUser?.headline || currentUser?.jobTitle || "Your job title"}
+>>>>>>> cdd22b978bda646db4f790c7b5fadcc09cd7b536
                       </p>
                     </div>
                   </div>

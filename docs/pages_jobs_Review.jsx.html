@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: pages/jobs/Review.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: pages/jobs/Review.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Review component to display job settings, screening questions, rejection settings, and allow users to review and submit job details.
+ * 
+ * @component
+ * @example
+ * return (
+ *   &lt;Review />
+ * )
+ */
+import React from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import Header from "../../components/UpperNavBar";
+import { BsEyeFill } from "react-icons/bs";
+import { BiLike, BiDislike } from "react-icons/bi";
+import { HiOutlineLightBulb } from "react-icons/hi";
+import axios from "axios";
+import toast, { Toaster } from "react-hot-toast";
+import { BASE_URL } from '../../constants';
+
+/**
+ * Review function that handles the display and submission of job details, including screening questions and rejection settings.
+ * It fetches the necessary data passed from the previous route, renders it, and allows for updates.
+ * 
+ * @returns {JSX.Element} The rendered component containing job settings, screening questions, and rejection settings.
+ */
+export default function Review() {
+    const location = useLocation();
+    const navigate = useNavigate();
+    const { finalData, emailUpdates, screeningQuestions, rejectionSettings, pageState, jobId } = location.state || {}; 
+
+    /**
+     * Renders the details of each screening question including its ideal answer.
+     * 
+     * @param {Object} question - The screening question object to render.
+     * @returns {JSX.Element} The rendered details of the screening question.
+     */
+    const renderQuestionDetails = (question) => {
+        const details = [];
+        if (question.data?.isMustHave) {
+            details.push(&lt;span key="mustHave" className="text-green-600 font-semibold mr-3">Must-have&lt;/span>);
+        }
+
+        let idealAnswerText = "N/A";
+
+        switch (question.type) {
+            case "Background Check":
+            case "Driver's License":
+            case "Drug Test":
+            case "Hybrid Work":
+            case "Location":
+            case "Onsite Work":
+            case "Remote Work":
+            case "Urgent Hiring Need":
+            case "Visa Status":
+            case "Work Authorization":
+                idealAnswerText = "Yes";
+                break;
+            case "Education":
+                idealAnswerText = question.data?.degree || "Not specified";
+                break;
+            case "Expertise with Skill":
+            case "Industry Experience":
+            case "Work Experience":
+                idealAnswerText = question.data?.years ? `${question.data.years}` : "Not specified";
+                break;
+            case "Language":
+                idealAnswerText = (question.data?.language || question.data?.proficiency) ? `${question.data.proficiency || 'any level'} in ${question.data.language || 'specified language'}` : "Not specified";
+                break;
+            case "Custom Question":
+                if (question.data?.answerType === 'yesno' || question.data?.answerType === 'number') {
+                    idealAnswerText = question.data?.answerValue ?? "Not specified";
+                }
+                break;
+            default:
+                idealAnswerText = question.data?.answerValue ?? "Not specified";
+                break;
+        }
+
+        details.push(&lt;span key="idealAnswer">Ideal Answer: &lt;span className="font-normal">{idealAnswerText}&lt;/span>&lt;/span>);
+
+        return details.length > 0 ? details : &lt;span>No details available.&lt;/span>;
+    };
+
+    /**
+     * Renders the final job data including title, company name, description, location, and job type.
+     * 
+     * @returns {JSX.Element} The rendered final job data.
+     */
+    const renderFinalData = () => {
+        if (!finalData) return &lt;p className="text-gray-600 text-sm italic">No job data available.&lt;/p>;
+
+        return (
+            &lt;div className="space-y-2 text-sm text-gray-700">
+                {finalData.jobTitle &amp;&amp; &lt;p>&lt;strong>Title:&lt;/strong> {finalData.jobTitle}&lt;/p>}
+                {finalData.company?.name &amp;&amp; &lt;p>&lt;strong>Company:&lt;/strong> {finalData.company.name}&lt;/p>}
+                {finalData.description &amp;&amp; (
+                    &lt;div>
+                        &lt;strong>Description:&lt;/strong>
+                        &lt;p className="whitespace-pre-wrap text-gray-600 mt-1">{finalData.description}&lt;/p>
+                    &lt;/div>
+                )}
+                {finalData.location &amp;&amp; &lt;p>&lt;strong>Location:&lt;/strong> {finalData.location}&lt;/p>}
+                {finalData.jobType &amp;&amp; &lt;p>&lt;strong>Job Type:&lt;/strong> {finalData.jobType}&lt;/p>}
+                {finalData.jobSite &amp;&amp; &lt;p>&lt;strong>Job Site:&lt;/strong> {finalData.jobSite}&lt;/p>}
+            &lt;/div>
+        );
+    };
+
+    /**
+     * Handles the form submission for job details, sending a POST or PUT request to the backend based on the current page state.
+     * Displays appropriate success or error messages based on the response.
+     * 
+     * @async
+     * @function
+     * @throws {Error} If the request fails, an error message is displayed.
+     */
+    const handleSubmit = async () => {
+        try {
+            const payload = {
+                companyId: finalData?.company?._id || finalData?.company?.id || finalData?.company?.company?.id || "",
+                title: finalData?.jobTitle || "",
+                industry: finalData?.company.industry || "Information Technology", 
+                workplaceType: finalData?.jobSite || "Remote",
+                jobLocation: finalData?.location,
+                jobType: finalData?.jobType,
+                description: finalData?.description,
+                applicationEmail: emailUpdates || "careers@example.com", 
+                screeningQuestions: screeningQuestions?.map((q) => ({
+                    question: q.type || "Custom Question",
+                    idealAnswer: q.data?.years || q.data?.answerValue || q.data?.idealAnswer || "Not specified",
+                    mustHave: q.data?.isMustHave || false,
+                })) || [],
+                autoRejectMustHave: rejectionSettings?.enabled || false,
+                rejectPreview: rejectionSettings?.message || "Thank you for your interest, but this position requires experience that matches our needs.",
+            };
+
+            let response = null;
+            if (pageState === "UpdateJob") {
+                response = await axios.put(`${BASE_URL}/jobs/${jobId}`, payload);
+                toast.success(response.data.message || "Job posted successfully!");
+            } else {
+                response = await axios.post(`${BASE_URL}/jobs`, payload);
+                toast.success(response.data.message || "Job posted successfully!");
+            }
+
+            navigate('/jobdetails', {
+                state: { job: response.data, user: finalData.user, company: finalData.company }
+            });
+        } catch (error) {
+            console.error(error);
+            toast.error(error.response?.data?.message || "Failed to post the job.");
+        }
+    };
+
+    return (
+        &lt;>
+            &lt;Header />
+            &lt;Toaster />
+            &lt;div className="min-h-screen bg-[#f4f2ee] py-12 md:py-20 px-4 sm:px-6 lg:px-8 flex justify-center">
+                &lt;div className="w-full max-w-3xl space-y-6">
+                    &lt;h1 className="text-2xl md:text-3xl font-semibold text-gray-800">Review your job settings&lt;/h1>
+                    &lt;div className="bg-white rounded-lg shadow p-6 md:p-8 space-y-8">
+                        {/* Final Data Section */}
+                        &lt;div>
+                            &lt;h2 className="text-xl md:text-2xl font-bold text-gray-800">Job Information&lt;/h2>
+                            &lt;div className="border border-gray-300 rounded-md p-4 bg-gray-50 mt-4">
+                                {renderFinalData()}
+                            &lt;/div>
+                        &lt;/div>
+
+                        {/* Screening Questions Section */}
+                        &lt;div className="space-y-4">
+                            &lt;h3 className="text-lg font-semibold text-gray-800">Screening Questions&lt;/h3>
+                            &lt;p className="text-sm text-gray-600">The questions applicants will be required to answer.&lt;/p>
+                            &lt;div className="border border-gray-300 rounded-md p-4 bg-gray-50 space-y-3">
+                                {screeningQuestions?.length > 0 ? (
+                                    screeningQuestions.map((q, idx) => (
+                                        &lt;div key={q.id || idx} className="pb-3 last:pb-0 border-b last:border-none border-gray-200 text-sm text-gray-700">
+                                            &lt;p className="font-medium mb-1">{q.type}&lt;/p>
+                                            &lt;div className="text-xs text-gray-600 flex flex-wrap gap-x-3">
+                                                {renderQuestionDetails(q)}
+                                            &lt;/div>
+                                        &lt;/div>
+                                    ))
+                                ) : (
+                                    &lt;p className="text-gray-600 text-sm italic">No screening questions added.&lt;/p>
+                                )}
+                            &lt;/div>
+                        &lt;/div>
+
+                        {/* Rejection Settings Section */}
+                        &lt;div className="space-y-4">
+                            &lt;h3 className="text-lg font-semibold text-gray-800">Rejection Settings&lt;/h3>
+                            &lt;p className="text-sm text-gray-600">Settings for automatically managing rejected applicants.&lt;/p>
+                            &lt;div className="border border-gray-300 rounded-md p-4 bg-gray-50 space-y-3 text-sm text-gray-700">
+                                {rejectionSettings ? (
+                                    &lt;>
+                                        &lt;p>&lt;strong>Enabled:&lt;/strong> {rejectionSettings.enabled ? "Yes" : "No"}&lt;/p>
+                                        &lt;div>
+                                            &lt;strong>Rejection Message:&lt;/strong>
+                                            &lt;p className="whitespace-pre-wrap text-gray-600 mt-1">{rejectionSettings.message}&lt;/p>
+                                        &lt;/div>
+                                    &lt;/>
+                                ) : (
+                                    &lt;p className="text-gray-600 text-sm italic">No rejection settings configured.&lt;/p>
+                                )}
+                            &lt;/div>
+                        &lt;/div>
+
+                        {/* Action Buttons */}
+                        &lt;div className="flex justify-between pt-6">
+                            &lt;button
+                                onClick={() => navigate(-1)}
+                                className="py-2 px-5 border border-gray-300 rounded-full text-sm font-semibold text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition ease-in-out"
+                            >
+                                Back
+                            &lt;/button>
+                            &lt;button
+                                onClick={handleSubmit}
+                                className="py-2 px-6 border border-transparent rounded-full text-sm font-semibold text-white bg-[#0a66c2] hover:bg-[#004182] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#004182] transition ease-in-out"
+                            >
+                                Continue
+                            &lt;/button>
+                        &lt;/div>
+                    &lt;/div>
+                &lt;/div>
+            &lt;/div>
+        &lt;/>
+    );
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#ChatWindow">ChatWindow</a></li><li><a href="global.html#CommentSection">CommentSection</a></li><li><a href="global.html#ConversationListItem">ConversationListItem</a></li><li><a href="global.html#ConversationSearch">ConversationSearch</a></li><li><a href="global.html#CreatePostModal">CreatePostModal</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#HirePage">HirePage</a></li><li><a href="global.html#JobBoardPage">JobBoardPage</a></li><li><a href="global.html#JobDetails">JobDetails</a></li><li><a href="global.html#Jobs">Jobs</a></li><li><a href="global.html#Main">Main</a></li><li><a href="global.html#ManageJob">ManageJob</a></li><li><a href="global.html#MyJobs">MyJobs</a></li><li><a href="global.html#Notification">Notification</a></li><li><a href="global.html#NotificationCard">NotificationCard</a></li><li><a href="global.html#PostMenu">PostMenu</a></li><li><a href="global.html#PostReactions">PostReactions</a></li><li><a href="global.html#ScreeningQuestionCard">ScreeningQuestionCard</a></li><li><a href="global.html#debounce">debounce</a></li><li><a href="global.html#fetchComments">fetchComments</a></li><li><a href="global.html#fetchNotifications">fetchNotifications</a></li><li><a href="global.html#fetchPosts">fetchPosts</a></li><li><a href="global.html#fetchUser">fetchUser</a></li><li><a href="global.html#filteredNotifications">filteredNotifications</a></li><li><a href="global.html#getReactionIcon">getReactionIcon</a></li><li><a href="global.html#handleAddComment">handleAddComment</a></li><li><a href="global.html#handleBlockUser">handleBlockUser</a></li><li><a href="global.html#handleClick">handleClick</a></li><li><a href="global.html#handleCreatePost">handleCreatePost</a></li><li><a href="global.html#handleDeleteNotification">handleDeleteNotification</a></li><li><a href="global.html#handleLikeClick">handleLikeClick</a></li><li><a href="global.html#handleMainFilterChange">handleMainFilterChange</a></li><li><a href="global.html#handleMuteDuration">handleMuteDuration</a></li><li><a href="global.html#handleNotificationClick">handleNotificationClick</a></li><li><a href="global.html#handleReact">handleReact</a></li><li><a href="global.html#handleReactToComment">handleReactToComment</a></li><li><a href="global.html#handleReportPost">handleReportPost</a></li><li><a href="global.html#handleSavePost">handleSavePost</a></li><li><a href="global.html#handleSendTestNotification">handleSendTestNotification</a></li><li><a href="global.html#handleSubmit">handleSubmit</a></li><li><a href="global.html#requestOTP">requestOTP</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#toggleComments">toggleComments</a></li><li><a href="global.html#verifyOTP">verifyOTP</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Fri May 02 2025 17:16:34 GMT+0300 (Eastern European Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

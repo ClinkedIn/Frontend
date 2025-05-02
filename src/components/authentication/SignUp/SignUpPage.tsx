@@ -8,6 +8,8 @@ import Footer from "../../Footer/Footer";
 import { useSignup } from "../../../context/SignUpContext";
 import { useAuth } from "../../../context/AuthContext";
 import { auth, provider, signInWithPopup } from "../../../../firebase";
+import { getMessaging, getToken } from "firebase/messaging";
+import axios from "axios";
 
 /**
  * The `SignupPage` component renders a user interface for signing up to the application.
@@ -287,13 +289,37 @@ const SignupPage = () => {
    * @returns {Promise<void>} A promise that resolves when the sign-up process is complete.
    */
   const handleGoogleSignUp = async () => {
-    try {
-      await signInWithPopup(auth, provider);
-      navigate("/verify-email");
-    } catch {
-      toast.error("Google signup failed.");
-    }
-  };
+  try {
+    // Step 1: Sign in with Google using Firebase
+    await signInWithPopup(auth, provider);
+
+    // Step 2: Get FCM token (if supported and permission granted)
+    const messaging = getMessaging();
+    const fcmToken = await getToken(messaging, {
+      vapidKey: import.meta.env.VITE_VAPID_PUBLIC_KEY, // Store this in .env
+    });
+
+    // Step 3: Send FCM token to your backend
+    const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+    await axios.post(
+      `${BASE_URL}/user/auth/google`,
+      { fcmToken },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      }
+    );
+
+    // Step 4: Navigate to verify email
+    navigate("/verify-email");
+
+  } catch (error) {
+    console.error("Google sign-up failed:", error);
+    toast.error("Google signup failed.");
+  }
+};
 
   return (
     <div className="relative min-h-screen">
