@@ -17,7 +17,7 @@ const createConversationId = (uid1, uid2) => {
 
 const MessagingPage = () => {
     const location = useLocation();
-    const { jobApplicant } = location.state || {};
+    const jobApplicant  = location.state || {};
     const [otherUser, setOtherUser] = useState(jobApplicant);
     const [currentUser, setUser] = useState();
     const [selectedConversationId, setSelectedConversationId] = useState(null);
