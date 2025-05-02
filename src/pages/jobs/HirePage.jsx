@@ -16,21 +16,23 @@ const debounce = (func, delay) => {
 };
 
 const HirePage = () => {
+ 
+
+    const location = useLocation(); // Get location object
+    const navigate = useNavigate();
+    const user = location.state; // Assuming user data is passed in location state
+    const preselectedCompany = location.state?.selectedCompany || null;
+
+    const suggestionsRef = useRef(null); // Ref for the suggestions dropdown
+
     const [jobTitle, setJobTitle] = useState('');
-    const [companyInput, setCompanyInput] = useState('');
-    const [selectedCompany, setSelectedCompany] = useState(null); // Stores the selected company object (the nested 'company' object)
+    const [companyInput, setCompanyInput] = useState(preselectedCompany?.name || '');
+    const [selectedCompany, setSelectedCompany] = useState(preselectedCompany); // Stores the selected company object (the nested 'company' object)
     const [allCompanies, setAllCompanies] = useState([]); // Stores the list of objects with nested 'company'
     const [suggestions, setSuggestions] = useState([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
-
-    const location = useLocation(); // Get location object
-    const navigate = useNavigate();
-    const user = location.state; // Assuming user data is passed in location state
-
-    const suggestionsRef = useRef(null); // Ref for the suggestions dropdown
-
     // Fetch companies on mount
     useEffect(() => {
         console.log('Fetching companies...');
@@ -89,18 +91,14 @@ const HirePage = () => {
     );
 
 
-    // Trigger suggestion filtering when input changes
     useEffect(() => {
-        // Only trigger filtering if there is input
-        if (companyInput) {
+        if (companyInput && !preselectedCompany) {
             filterSuggestions(companyInput);
         } else {
-            // Clear suggestions and hide dropdown when input is empty
             setSuggestions([]);
             setShowSuggestions(false);
         }
-    }, [companyInput, filterSuggestions]); // Dependencies on companyInput and the memoized filterSuggestions
-
+    }, [companyInput, filterSuggestions, preselectedCompany]);
 
     const handleJobTitleChange = (e) => setJobTitle(e.target.value);
 
@@ -125,9 +123,7 @@ const HirePage = () => {
         if (companyInput && suggestions.length > 0) {
             setShowSuggestions(true);
         } else if (companyInput && suggestions.length === 0 && allCompanies.length > 0) {
-             // If there's input but no suggestions (e.g., after a previous search),
-             // re-filter to show suggestions matching the current input.
-             filterSuggestions(companyInput);
+            filterSuggestions(companyInput);
         }
     };
 
@@ -138,11 +134,14 @@ const HirePage = () => {
             alert('Please fill in the Job Title field!');
             return;
         }
-        if (!selectedCompany) {
+        let finalCompany = selectedCompany;
+
+        if (!finalCompany) {
             // If no company is selected from suggestions, check if the typed input matches an existing company name
             const matchedItem = allCompanies.find(item => item.company?.name?.toLowerCase() === companyInput.trim().toLowerCase());
             if (matchedItem) {
-                setSelectedCompany(matchedItem.company); // Select the nested company object
+                finalCompany = matchedItem.company;
+                setSelectedCompany(finalCompany); // Select the nested company object
             } else {
                 alert('Please select a valid company from the suggestions list!');
                 return; // Prevent navigation if no valid company is selected
@@ -152,16 +151,14 @@ const HirePage = () => {
         // Gather the initial data for the new job
         const initialNewJobData = {
             jobTitle: jobTitle,
-            company: selectedCompany, // Pass the selected company object (the nested one)
+            company: finalCompany, // Pass the selected company object (the nested one)
             user: user,
             allCompanies: allCompanies, // Pass the list of all companies (with nested structure)
             pageState: "CreateJob", // Indicate that this is a new job creation flow
-            // Include any other initial data needed for the JobDescriptionPage
-            // For a new job, description, jobType, jobSite, location might be empty or default
             description: '',
             jobType: 'Full Time', // Example default
             jobSite: 'Onsite', // Example default
-            location: selectedCompany?.address || '', // Use selected company address as default location if available
+            location: finalCompany?.address || '', // Use selected company address as default location if available
         };
 
         console.log('Navigating to /jobdescription with data:', initialNewJobData);
@@ -215,7 +212,8 @@ const HirePage = () => {
                             type="text"
                             value={companyInput}
                             onChange={handleCompanyChange}
-                            onFocus={handleCompanyFocus} // Use the dedicated focus handler
+                            onFocus={handleCompanyFocus} 
+                            disabled={!!preselectedCompany}
                             className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             placeholder="Type and select your company name"
                             autoComplete="off"
