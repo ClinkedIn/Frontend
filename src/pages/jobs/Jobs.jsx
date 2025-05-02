@@ -37,6 +37,8 @@ const Jobs = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [showPreferences, setShowPreferences] = useState(false);
     const [jobs, setJobs]=useState()
+     const [refreshTrigger, setRefreshTrigger] = useState(false);
+    
     
     // useEffect(() => {
     // const testLogin = async () => {
@@ -71,11 +73,13 @@ const Jobs = () => {
    * @function
    * @returns {Promise<Object[]>} Array of job objects
    */
+
    const getJobs = async () => {
     try {
       const response = await axios.get(`${BASE_URL}/api/jobs`, {
       });
       setJobs(response.data)
+      console.log("Jobs data:", response.data);
       return response.data;
     } catch (error) {
       if (error.response) {
@@ -113,7 +117,7 @@ const Jobs = () => {
     // };
   
     // loginAndFetchData();
-  }, []);
+  }, [refreshTrigger]);
  /**
    * Handles change in search query input
    * @function
@@ -121,6 +125,9 @@ const Jobs = () => {
    */
   const handleSearchChange = (query) => {
     setSearchQuery(query);
+  };
+  const handleJobDelete = () => {
+    setRefreshTrigger(prev => !prev);
   };
   return (
     <div className="bg-[#f4f2ee] min-h-screen ">
@@ -157,10 +164,10 @@ const Jobs = () => {
           {jobs && jobs.length > 0 ? (
             jobs
             .map((job, index) => (
-              <div ><JobCard key={index} 
+              <div ><JobCard key={job.id || index} 
               job={job} jobs={jobs}
               onDelete={(jobIdToDelete) => {
-                setJobs(prevJobs => prevJobs.filter(j => j.id !== jobIdToDelete && j._id !== jobIdToDelete));
+                setRefreshTrigger(prev => !prev);
               }}
               /></div>
               

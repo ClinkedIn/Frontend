@@ -15,6 +15,7 @@ const JobBoardPage = () => {
   const [tab, setTab] = useState();
   const location = useLocation();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(false);
 
   // Filter states
   const [experience, setExperience] = useState(0);
@@ -63,7 +64,7 @@ const JobBoardPage = () => {
     };
 
     fetchFilteredJobs();
-  }, [experience, workType, selectedCompany]);
+  }, [experience, workType, selectedCompany,refreshTrigger]);
 
   
   const handleSave = async () => {
@@ -80,6 +81,7 @@ const JobBoardPage = () => {
         setSelectedJob(prev => ({ ...prev, isSaved: false }));
         alert("Job unsaved!");
       }
+      setRefreshTrigger(prev => !prev);
     } catch (error) {
       console.error("Save error:", error);
       if (error.response) alert(`Failed: ${error.response.data.message}`);
