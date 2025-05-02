@@ -43,17 +43,17 @@
  * @component
  * @returns {JSX.Element} The rendered job listing page
  */
+
 import React, { useEffect, useState } from 'react';
 import Header from '../../components/UpperNavBar';
 import ProfileCard from '../../components/ProfileCard';
 import FooterLinks from '../../components/FooterLinks';
 import axios from "axios";
-import { FaClipboardList, FaBookmark, FaFileAlt, FaPen,FaArrowRight } from 'react-icons/fa';
+import { FaClipboardList, FaBookmark, FaFileAlt, FaPen, FaArrowRight } from 'react-icons/fa';
 import { IoMdClose } from 'react-icons/io';
 import JobCard from '../../components/jobs/JobCard';
 import { useLocation, useNavigate } from "react-router-dom";
 import { BASE_URL } from "../../constants";
-
 
 /**
  * Jobs functional component
@@ -64,141 +64,118 @@ const Jobs = () => {
     const [user, setUser] = useState();
     const [searchQuery, setSearchQuery] = useState("");
     const [showPreferences, setShowPreferences] = useState(false);
-    const [jobs, setJobs]=useState()
- /**
-   * Fetches job listings from the backend server
-   * @async
-   * @function
-   * @returns {Promise&lt;Object[]>} Array of job objects
-   */
-   const getJobs = async () => {
-    try {
-      const response = await axios.get(`${BASE_URL}/jobs`, {
-      });
-      setJobs(response.data)
-      return response.data;
-    } catch (error) {
-      if (error.response) {
-        console.error("Error - Server Response:", error.response.data);
-      } else if (error.request) {
-        console.error("Error - No Response:", error.request);
-      } else {
-        console.error("Error:", error.message);
-      }
-    }
-  };
+    const [jobs, setJobs] = useState();
+    const [refreshTrigger, setRefreshTrigger] = useState(false);
 
- /**
-   * Fetches current user profile data
-   * @async
-   * @function
-   */
-  const fetchUser = async () => {
-    try {
-      const response = await axios.get(`${BASE_URL}/user/me`, {
-    
-        withCredentials:true
-      });
-  
-      setUser(response.data);
-      console.log("User data:", response.data);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-    }
-  };
-  useEffect(() => {
-    // const loginAndFetchData = async () => {
-      // await testLogin(); // Ensure login is completed first
-      fetchUser();
-      getJobs(); 
-    // };
-  
-    // loginAndFetchData();
-  }, []);
- /**
-   * Handles change in search query input
-   * @function
-   * @param {string} query - The search input string
-   */
-  const handleSearchChange = (query) => {
-    setSearchQuery(query);
-  };
-  return (
-    &lt;div className="container bg-[#f4f2ee] min-h-screen ">
-      &lt;Header />
-      &lt;div className="container mx-auto px-4 pt-20 flex flex-col md:flex-row gap-6">
-        {/* Left Sidebar */}
-        &lt;div className="w-full md:w-1/4 p-4">
-           &lt;ProfileCard user={user} /> 
-          &lt;div className="bg-white shadow-md rounded-lg pt-1 space-y-1 mt-2.5">
-            &lt;button 
-              onClick={() => setShowPreferences(true)}
-              className="flex items-center font-semibold text-[#3d3d3d] gap-3 w-full text-left py-3 px-6 hover:bg-gray-100">
-              &lt;FaClipboardList className="font-semibold text-[#3d3d3d]" /> Preferences
-            &lt;/button>
-            &lt;button 
-            onClick={() => navigate("/myjobs")}
-            className="flex items-center gap-3 font-semibold w-full text-left py-3 px-6 hover:bg-gray-100">
-              &lt;FaBookmark className="font-semibold text-[#3d3d3d]" /> My jobs
-            &lt;/button>
-            &lt;button className="flex items-center gap-3 w-full font-semibold text-left p-5 text-blue-600 hover:bg-gray-100 rounded-md">
-              &lt;FaPen className="text-blue-600 font-bold" /> Post a free job
-            &lt;/button>
-          &lt;/div>
-        &lt;/div>
+    /**
+     * Fetches job listings from the backend server
+     * @async
+     * @function
+     * @returns {Promise&lt;Object[]>} Array of job objects
+     */
+    const getJobs = async () => {
+        try {
+            const response = await axios.get(`${BASE_URL}/jobs`);
+            setJobs(response.data);
+            console.log("Jobs data:", response.data);
+            return response.data;
+        } catch (error) {
+            if (error.response) {
+                console.error("Error - Server Response:", error.response.data);
+            } else if (error.request) {
+                console.error("Error - No Response:", error.request);
+            } else {
+                console.error("Error:", error.message);
+            }
+        }
+    };
 
-        {/*Top picks for you */}
-        &lt;div className="flex-1 bg-white shadow-md rounded-lg p-6 mr-[315px]">
-          &lt;h2 className="text-xl font-semibold text-gray-800 mb-4 border-b-2 border-gray-300 pb-2" >
-            Job Picks for you
-          &lt;/h2>
-          {jobs &amp;&amp; jobs.length > 0 ? (
-            jobs.map((job, index) => (
-              &lt;div >&lt;JobCard key={index} 
-              job={job} jobs={jobs}
-              />&lt;/div>
-              
-            ))
-          ) : (
-            &lt;p>No jobs available at the moment.&lt;/p>
-          )}
-        &lt;/div>
-      &lt;/div>
-      
-      {/* Preferences Modal */}
-      {showPreferences &amp;&amp; (
-        &lt;div className="fixed inset-0 flex items-center justify-center bg-black/50 "
-        onClick={() => setShowPreferences(false)}>
-          &lt;div className="bg-white shadow-lg rounded-lg relative "
-            onClick={(e) => e.stopPropagation()}>
-            &lt;button onClick={() => setShowPreferences(false)} className="absolute top-3 right-3 text-gray-600 hover:text-black">
-              &lt;IoMdClose size={24} />
-            &lt;/button>
-            &lt;h2 className=" p-6 text-lg font-semibold border-b border-[#eaeaea]">Preferences&lt;/h2>
-            
-            {/* My Interests Section */}
-            &lt;div className="p-6 ">
-              &lt;h3 className="text-md font-semibold mb-2">My Interests&lt;/h3>
-              &lt;div className='flex flex-col text-left p-3 bg-gray-100 hover:bg-gray-200 rounded-md'>
-              &lt;button className="w-full  flex justify-between items-center ">Open to work  &lt;FaArrowRight />
-              &lt;/button>
-              &lt;p className='text-xs text-[#5e5e5e]'> Share job preferences with recuiters or others&lt;/p>
-              &lt;/div>
+    /**
+     * Fetches current user profile data
+     * @async
+     * @function
+     */
+    const fetchUser = async () => {
+        try {
+            const response = await axios.get(`${BASE_URL}/user/me`, {
+                withCredentials: true
+            });
+            setUser(response.data);
+            console.log("User data:", response.data);
+        } catch (error) {
+            console.error("Error fetching user:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchUser();
+        getJobs();
+    }, [refreshTrigger]);
+
+    /**
+     * Handles change in search query input
+     * @function
+     * @param {string} query - The search input string
+     */
+    const handleSearchChange = (query) => {
+        setSearchQuery(query);
+    };
+
+    /**
+     * Triggers refresh of job listings
+     * @function
+     */
+    const handleJobDelete = () => {
+        setRefreshTrigger(prev => !prev);
+    };
+
+    return (
+        &lt;div className="bg-[#f4f2ee] min-h-screen ">
+            &lt;Header />
+            &lt;div className="mx-auto px-4 pt-20 flex flex-col md:flex-row gap-6">
+                {/* Left Sidebar */}
+                &lt;div className="w-full md:w-1/4 p-4">
+                    &lt;ProfileCard user={user} />
+
+                    &lt;div className="bg-white shadow-md rounded-lg pt-1 space-y-1 mt-2.5">
+                        &lt;button 
+                            onClick={() => navigate("/myjobs", {
+                                state: { allJobs: jobs }
+                            })}
+                            className="flex items-center gap-3 font-semibold w-full text-left py-3 px-6 hover:bg-gray-100">
+                            &lt;FaBookmark className="font-semibold text-[#3d3d3d]" /> My jobs
+                        &lt;/button>
+                        &lt;button 
+                            onClick={() => navigate("/starthiring", { state: user })}
+                            className="flex items-center gap-3 w-full font-semibold text-left p-5 text-blue-600 hover:bg-gray-100 rounded-md"
+                        >
+                            &lt;FaPen className="text-blue-600 font-bold" /> Post a free job
+                        &lt;/button>
+                    &lt;/div>
+                &lt;/div>
+
+                {/* Top picks for you */}
+                &lt;div className="flex flex-col bg-white shadow-md rounded-lg p-6 mr-[315px] w-full lg:w-3/4">
+                    &lt;h2 className="text-xl font-semibold text-gray-800 mb-4 border-b-2 border-gray-300 pb-2" >
+                        Job Picks for you
+                    &lt;/h2>
+                    {jobs &amp;&amp; jobs.length > 0 ? (
+                        jobs.map((job, index) => (
+                            &lt;div key={job.id || job._id || index}>
+                                &lt;JobCard 
+                                    job={job} 
+                                    jobs={jobs}
+                                    onDelete={() => setRefreshTrigger(prev => !prev)}
+                                />
+                            &lt;/div>
+                        ))
+                    ) : (
+                        &lt;p>No jobs available at the moment.&lt;/p>
+                    )}
+                &lt;/div>
             &lt;/div>
-            
-            {/* My Qualifications Section */}
-            &lt;div className='p-6 '>
-              &lt;h3 className="text-md font-semibold mb-2">My Qualifications&lt;/h3>
-              &lt;div className='flex flex-col text-left p-3 bg-gray-100 hover:bg-gray-200 rounded-md'>
-              &lt;button className="w-full  flex justify-between items-center ">Resumes and application data  &lt;FaArrowRight />     
-              &lt;/button>
-              &lt;/div>
-              &lt;/div>
-          &lt;/div>
         &lt;/div>
-      )}
-    &lt;/div>
-  );
+    );
 };
 
 export default Jobs;
@@ -212,21 +189,13 @@ export default Jobs;
 </div>
 
 <nav>
-<<<<<<< HEAD
-    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#ApplyJob">ApplyJob</a></li><li><a href="global.html#ChatWindow">ChatWindow</a></li><li><a href="global.html#CommentSection">CommentSection</a></li><li><a href="global.html#ConversationListItem">ConversationListItem</a></li><li><a href="global.html#ConversationSearch">ConversationSearch</a></li><li><a href="global.html#CreatePostModal">CreatePostModal</a></li><li><a href="global.html#Filter">Filter</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#JobBoardPage">JobBoardPage</a></li><li><a href="global.html#JobCard">JobCard</a></li><li><a href="global.html#Jobs">Jobs</a></li><li><a href="global.html#Main">Main</a></li><li><a href="global.html#MyJobs">MyJobs</a></li><li><a href="global.html#Notification">Notification</a></li><li><a href="global.html#PostMenu">PostMenu</a></li><li><a href="global.html#PostReactions">PostReactions</a></li><li><a href="global.html#closeModal">closeModal</a></li><li><a href="global.html#fetchComments">fetchComments</a></li><li><a href="global.html#fetchCompanies">fetchCompanies</a></li><li><a href="global.html#fetchNotifications">fetchNotifications</a></li><li><a href="global.html#fetchPosts">fetchPosts</a></li><li><a href="global.html#fetchUser">fetchUser</a></li><li><a href="global.html#filteredNotifications">filteredNotifications</a></li><li><a href="global.html#getReactionIcon">getReactionIcon</a></li><li><a href="global.html#handleAddComment">handleAddComment</a></li><li><a href="global.html#handleBlockUser">handleBlockUser</a></li><li><a href="global.html#handleClick">handleClick</a></li><li><a href="global.html#handleCreatePost">handleCreatePost</a></li><li><a href="global.html#handleDeleteNotification">handleDeleteNotification</a></li><li><a href="global.html#handleFilter">handleFilter</a></li><li><a href="global.html#handleJobClick">handleJobClick</a></li><li><a href="global.html#handleLikeClick">handleLikeClick</a></li><li><a href="global.html#handleMainFilterChange">handleMainFilterChange</a></li><li><a href="global.html#handleMessagingClick">handleMessagingClick</a></li><li><a href="global.html#handleMuteDuration">handleMuteDuration</a></li><li><a href="global.html#handleNotificationClick">handleNotificationClick</a></li><li><a href="global.html#handleReact">handleReact</a></li><li><a href="global.html#handleReactToComment">handleReactToComment</a></li><li><a href="global.html#handleReportPost">handleReportPost</a></li><li><a href="global.html#handleSave">handleSave</a></li><li><a href="global.html#handleSavePost">handleSavePost</a></li><li><a href="global.html#handleSearch">handleSearch</a></li><li><a href="global.html#handleSendTestNotification">handleSendTestNotification</a></li><li><a href="global.html#handleSubmit">handleSubmit</a></li><li><a href="global.html#openModal">openModal</a></li><li><a href="global.html#requestOTP">requestOTP</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#toggleComments">toggleComments</a></li><li><a href="global.html#useEffect">useEffect</a></li><li><a href="global.html#verifyOTP">verifyOTP</a></li></ul>
-=======
-    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#ApplyJob">ApplyJob</a></li><li><a href="global.html#ChatWindow">ChatWindow</a></li><li><a href="global.html#CommentSection">CommentSection</a></li><li><a href="global.html#ConversationListItem">ConversationListItem</a></li><li><a href="global.html#ConversationSearch">ConversationSearch</a></li><li><a href="global.html#CreatePostModal">CreatePostModal</a></li><li><a href="global.html#Filter">Filter</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#JobBoardPage">JobBoardPage</a></li><li><a href="global.html#JobCard">JobCard</a></li><li><a href="global.html#Jobs">Jobs</a></li><li><a href="global.html#MyJobs">MyJobs</a></li><li><a href="global.html#Notification">Notification</a></li><li><a href="global.html#PostMenu">PostMenu</a></li><li><a href="global.html#PostReactions">PostReactions</a></li><li><a href="global.html#closeModal">closeModal</a></li><li><a href="global.html#fetchCompanies">fetchCompanies</a></li><li><a href="global.html#fetchNotifications">fetchNotifications</a></li><li><a href="global.html#fetchUser">fetchUser</a></li><li><a href="global.html#filteredNotifications">filteredNotifications</a></li><li><a href="global.html#getReactionIcon">getReactionIcon</a></li><li><a href="global.html#handleBlockUser">handleBlockUser</a></li><li><a href="global.html#handleClick">handleClick</a></li><li><a href="global.html#handleDeleteNotification">handleDeleteNotification</a></li><li><a href="global.html#handleFilter">handleFilter</a></li><li><a href="global.html#handleJobClick">handleJobClick</a></li><li><a href="global.html#handleLikeClick">handleLikeClick</a></li><li><a href="global.html#handleMainFilterChange">handleMainFilterChange</a></li><li><a href="global.html#handleMessagingClick">handleMessagingClick</a></li><li><a href="global.html#handleMuteDuration">handleMuteDuration</a></li><li><a href="global.html#handleNotificationClick">handleNotificationClick</a></li><li><a href="global.html#handleSave">handleSave</a></li><li><a href="global.html#handleSearch">handleSearch</a></li><li><a href="global.html#handleSendTestNotification">handleSendTestNotification</a></li><li><a href="global.html#handleSubmit">handleSubmit</a></li><li><a href="global.html#openModal">openModal</a></li><li><a href="global.html#requestOTP">requestOTP</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#useEffect">useEffect</a></li><li><a href="global.html#verifyOTP">verifyOTP</a></li></ul>
->>>>>>> 298a4e887adcb76e5ff0b30368755f329fc82575
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#ChatWindow">ChatWindow</a></li><li><a href="global.html#CommentSection">CommentSection</a></li><li><a href="global.html#ConversationListItem">ConversationListItem</a></li><li><a href="global.html#ConversationSearch">ConversationSearch</a></li><li><a href="global.html#CreatePostModal">CreatePostModal</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#HirePage">HirePage</a></li><li><a href="global.html#JobBoardPage">JobBoardPage</a></li><li><a href="global.html#JobDetails">JobDetails</a></li><li><a href="global.html#Jobs">Jobs</a></li><li><a href="global.html#Main">Main</a></li><li><a href="global.html#ManageJob">ManageJob</a></li><li><a href="global.html#MyJobs">MyJobs</a></li><li><a href="global.html#Notification">Notification</a></li><li><a href="global.html#NotificationCard">NotificationCard</a></li><li><a href="global.html#PostMenu">PostMenu</a></li><li><a href="global.html#PostReactions">PostReactions</a></li><li><a href="global.html#ScreeningQuestionCard">ScreeningQuestionCard</a></li><li><a href="global.html#debounce">debounce</a></li><li><a href="global.html#fetchComments">fetchComments</a></li><li><a href="global.html#fetchNotifications">fetchNotifications</a></li><li><a href="global.html#fetchPosts">fetchPosts</a></li><li><a href="global.html#fetchUser">fetchUser</a></li><li><a href="global.html#filteredNotifications">filteredNotifications</a></li><li><a href="global.html#getReactionIcon">getReactionIcon</a></li><li><a href="global.html#handleAddComment">handleAddComment</a></li><li><a href="global.html#handleBlockUser">handleBlockUser</a></li><li><a href="global.html#handleClick">handleClick</a></li><li><a href="global.html#handleCreatePost">handleCreatePost</a></li><li><a href="global.html#handleDeleteNotification">handleDeleteNotification</a></li><li><a href="global.html#handleLikeClick">handleLikeClick</a></li><li><a href="global.html#handleMainFilterChange">handleMainFilterChange</a></li><li><a href="global.html#handleMuteDuration">handleMuteDuration</a></li><li><a href="global.html#handleNotificationClick">handleNotificationClick</a></li><li><a href="global.html#handleReact">handleReact</a></li><li><a href="global.html#handleReactToComment">handleReactToComment</a></li><li><a href="global.html#handleReportPost">handleReportPost</a></li><li><a href="global.html#handleSavePost">handleSavePost</a></li><li><a href="global.html#handleSendTestNotification">handleSendTestNotification</a></li><li><a href="global.html#handleSubmit">handleSubmit</a></li><li><a href="global.html#requestOTP">requestOTP</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#toggleComments">toggleComments</a></li><li><a href="global.html#verifyOTP">verifyOTP</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-<<<<<<< HEAD
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun Apr 20 2025 19:24:34 GMT+0200 (Eastern European Standard Time)
-=======
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun Apr 20 2025 18:19:03 GMT+0200 (Eastern European Standard Time)
->>>>>>> 298a4e887adcb76e5ff0b30368755f329fc82575
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Fri May 02 2025 17:16:34 GMT+0300 (Eastern European Summer Time)
 </footer>
 
 <script> prettyPrint(); </script>

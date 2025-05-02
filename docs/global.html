@@ -104,286 +104,6 @@
     
 
     
-    <h4 class="name" id="ApplyJob"><span class="type-signature"></span>ApplyJob<span class="signature">(props)</span><span class="type-signature"> &rarr; {JSX.Element|null}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Component for applying to a job with multiple steps, including contact information and screening questions.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>props</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Component properties
-                <h6>Properties</h6>
-                
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>isOpen</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Whether the modal is open or not</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>onClose</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Function to close the modal</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>job</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The job data that the user is applying to</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>jobId</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The ID of the job being applied to</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-            </td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="components_jobs_ApplyJob.jsx.html">components/jobs/ApplyJob.jsx</a>, <a href="components_jobs_ApplyJob.jsx.html#line18">line 18</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    The ApplyJob component or null if the modal is not open
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">JSX.Element</span>
-|
-
-<span class="param-type">null</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
     <h4 class="name" id="ChatWindow"><span class="type-signature"></span>ChatWindow<span class="signature">(props)</span><span class="type-signature"> &rarr; {JSX.Element}</span></h4>
     
 
@@ -701,7 +421,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="components_messaging_ChatWindow.jsx.html">components/messaging/ChatWindow.jsx</a>, <a href="components_messaging_ChatWindow.jsx.html#line35">line 35</a>
+        <a href="components_messaging_ChatWindow.jsx.html">components/messaging/ChatWindow.jsx</a>, <a href="components_messaging_ChatWindow.jsx.html#line38">line 38</a>
     </li></ul></dd>
     
 
@@ -2288,99 +2008,6 @@
     
 
     
-    <h4 class="name" id="Filter"><span class="type-signature"></span>Filter<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    The Filter component provides an interface for users to filter job search results based on company, experience, and work type. It fetches company data from an API and allows users to select filters that are used to query job listings.
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="components_jobs_Filter.jsx.html">components/jobs/Filter.jsx</a>, <a href="components_jobs_Filter.jsx.html#line15">line 15</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>// Usage&lt;Filter /></code></pre>
-
-
-
-        
-            
-
-    
-
-    
     <h4 class="name" id="Header"><span class="type-signature"></span>Header<span class="signature">(props)</span><span class="type-signature"> &rarr; {JSX.Element}</span></h4>
     
 
@@ -2389,313 +2016,7 @@
 
 
 <div class="description">
-    The Header component includes:- A logo that navigates to the feed page.- A search bar for job searches (visible only on the "jobs" page).- Navigation icons for Home, Network, Jobs, Messaging, and Notifications.- User and Work dropdown icons.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>props</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Component props.
-                <h6>Properties</h6>
-                
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>notifications</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Array of notification objects.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-            </td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="components_UpperNavBar.jsx.html">components/UpperNavBar.jsx</a>, <a href="components_UpperNavBar.jsx.html#line37">line 37</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    The rendered Header component.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">JSX.Element</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>&lt;Header notifications={notifications} /></code></pre>
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="JobBoardPage"><span class="type-signature"></span>JobBoardPage<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    The JobBoardPage component displays a list of available jobs and allows users to view details,apply for jobs, and save jobs for later. It uses location state to display specific jobs basedon search queries or location data passed through routing. It features a modal for applying to jobsand includes a filter component to refine job search results.
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="pages_jobs_JobBoardPage.jsx.html">pages/jobs/JobBoardPage.jsx</a>, <a href="pages_jobs_JobBoardPage.jsx.html#line23">line 23</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>// Usage&lt;JobBoardPage /></code></pre>
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="JobCard"><span class="type-signature"></span>JobCard<span class="signature">(props)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    The JobCard component displays the details of a job listing, including the company logo, job title,job location, and the time since the job was posted. It also includes a clickable job title that navigates to a detailed job board page and a button to close the card.
+    Header component that manages the navigation, search, and notifications.
 </div>
 
 
@@ -2773,30 +2094,7 @@
 
         <tr>
             
-                <td class="name"><code>job</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The job object to display.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>jobs</code></td>
+                <td class="name"><code>notifications</code></td>
             
 
             <td class="type">
@@ -2812,30 +2110,7 @@
 
             
 
-            <td class="description last">A list of jobs, used for passing job data to the job board page.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>state</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The current state of the application, used when navigating to the job board page.</td>
+            <td class="description last">Array of notifications to be passed to the component.</td>
         </tr>
 
     
@@ -2883,7 +2158,232 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="components_jobs_JobCard.jsx.html">components/jobs/JobCard.jsx</a>, <a href="components_jobs_JobCard.jsx.html#line22">line 22</a>
+        <a href="components_UpperNavBar.jsx.html">components/UpperNavBar.jsx</a>, <a href="components_UpperNavBar.jsx.html#line22">line 22</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The Header component.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">JSX.Element</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>// Example usage:&lt;Header notifications={notifications} /></code></pre>
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="HirePage"><span class="type-signature"></span>HirePage<span class="signature">()</span><span class="type-signature"> &rarr; {JSX.Element}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    HirePage component for managing job title, company input, and job creation.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="pages_jobs_HirePage.jsx.html">pages/jobs/HirePage.jsx</a>, <a href="pages_jobs_HirePage.jsx.html#line28">line 28</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The rendered component.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">JSX.Element</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="JobBoardPage"><span class="type-signature"></span>JobBoardPage<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    JobBoardPage component displays a job board with job listings, company filters,and job details with options to save and apply for jobs.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="pages_jobs_JobBoardPage.jsx.html">pages/jobs/JobBoardPage.jsx</a>, <a href="pages_jobs_JobBoardPage.jsx.html#line20">line 20</a>
     </li></ul></dd>
     
 
@@ -2914,7 +2414,117 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>// Usage&lt;JobCard job={jobData} jobs={jobsList} state={locationState} /></code></pre>
+    <pre class="prettyprint"><code>return (  &lt;JobBoardPage />)</code></pre>
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="JobDetails"><span class="type-signature"></span>JobDetails<span class="signature">()</span><span class="type-signature"> &rarr; {JSX.Element}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    JobDetails component that fetches and displays job details, company data, and applicants for the job.It handles:1. Fetching the job details and company information using the job ID.2. Fetching applicants for the job and handling loading states, errors, and applicant selection.3. Displaying applicants and their details in a tabbed interface.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="pages_jobs_JobDetails.jsx.html">pages/jobs/JobDetails.jsx</a>, <a href="pages_jobs_JobDetails.jsx.html#line34">line 34</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    Job details page with applicants and selected applicant information.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">JSX.Element</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
 
 
 
@@ -3030,7 +2640,6 @@
     
 
     
-<<<<<<< HEAD
     <h4 class="name" id="Main"><span class="type-signature"></span>Main<span class="signature">()</span><span class="type-signature"> &rarr; {JSX.Element}</span></h4>
     
 
@@ -3083,7 +2692,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="components_Main.jsx.html">components/Main.jsx</a>, <a href="components_Main.jsx.html#line72">line 72</a>
+        <a href="components_Main.jsx.html">components/Main.jsx</a>, <a href="components_Main.jsx.html#line75">line 75</a>
     </li></ul></dd>
     
 
@@ -3146,8 +2755,116 @@
     
 
     
-=======
->>>>>>> 298a4e887adcb76e5ff0b30368755f329fc82575
+    <h4 class="name" id="ManageJob"><span class="type-signature"></span>ManageJob<span class="signature">()</span><span class="type-signature"> &rarr; {JSX.Element}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    ManageJob component for handling job-related tasks such as viewing and updating job details.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="pages_jobs_ManageJob.jsx.html">pages/jobs/ManageJob.jsx</a>, <a href="pages_jobs_ManageJob.jsx.html#line27">line 27</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    JSX code for rendering the ManageJob component.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">JSX.Element</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
     <h4 class="name" id="MyJobs"><span class="type-signature"></span>MyJobs<span class="signature">()</span><span class="type-signature"> &rarr; {JSX.Element}</span></h4>
     
 
@@ -3342,6 +3059,242 @@
     <h5>Example</h5>
     
     <pre class="prettyprint"><code>// Usage&lt;Notification /></code></pre>
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="NotificationCard"><span class="type-signature"></span>NotificationCard<span class="signature">(props)</span><span class="type-signature"> &rarr; {JSX.Element}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    NotificationCard component that displays a notification with options to mark as read, mute, delete, or restore.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>props</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Component props.
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>notification</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The notification object containing details such as content, read status, and user details.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>handleNotificationClick</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Function to be triggered when the notification is clicked.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="components_Notification_NotificationCard.jsx.html">components/Notification/NotificationCard.jsx</a>, <a href="components_Notification_NotificationCard.jsx.html#line30">line 30</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The rendered notification card.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">JSX.Element</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>const notification = {  id: '123',  isRead: false,  isMuted: false,  sendingUser: { profilePicture: 'path/to/image.jpg' },  content: 'Sample notification content'};&lt;NotificationCard notification={notification} handleNotificationClick={handleClick} /></code></pre>
 
 
 
@@ -4005,7 +3958,7 @@
     
 
     
-    <h4 class="name" id="closeModal"><span class="type-signature"></span>closeModal<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="ScreeningQuestionCard"><span class="type-signature"></span>ScreeningQuestionCard<span class="signature">(props)</span><span class="type-signature"> &rarr; {JSX.Element}</span></h4>
     
 
     
@@ -4013,7 +3966,7 @@
 
 
 <div class="description">
-    Closes the modal for applying to a job.
+    ScreeningQuestionCard component renders a dynamic form card based on a given screening question type.Depending on the `questionType` prop, it displays appropriate input fields to capture user responses,such as text inputs, dropdowns, and number fields. It also provides a remove button to delete the question card.
 </div>
 
 
@@ -4022,6 +3975,173 @@
 
 
 
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>props</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Component props.
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>questionType</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The type of screening question to render (e.g., "Education", "Language", "Work Experience", etc.).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">An object containing the values for the inputs (e.g., `degree`, `language`, `proficiency`, etc.).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onChange</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Callback triggered when input fields are updated. Receives the updated data object.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onRemove</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Callback triggered when the question card is removed.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -4057,7 +4177,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="pages_jobs_JobBoardPage.jsx.html">pages/jobs/JobBoardPage.jsx</a>, <a href="pages_jobs_JobBoardPage.jsx.html#line38">line 38</a>
+        <a href="components_jobs_ScreeningQuestionCard.jsx.html">components/jobs/ScreeningQuestionCard.jsx</a>, <a href="components_jobs_ScreeningQuestionCard.jsx.html#line17">line 17</a>
     </li></ul></dd>
     
 
@@ -4082,6 +4202,28 @@
 
 
 
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    A styled card displaying a question and related input fields based on the provided type.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">JSX.Element</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 
@@ -4093,7 +4235,370 @@
     
 
     
-<<<<<<< HEAD
+    <h4 class="name" id="debounce"><span class="type-signature"></span>debounce<span class="signature">(func, delay)</span><span class="type-signature"> &rarr; {function}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Utility function to debounce the execution of a given function.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>func</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The function to debounce.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>delay</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The delay in milliseconds before executing the function.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="pages_jobs_HirePage.jsx.html">pages/jobs/HirePage.jsx</a>, <a href="pages_jobs_HirePage.jsx.html#line16">line 16</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The debounced version of the function.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">function</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="debounce"><span class="type-signature"></span>debounce<span class="signature">(func, delay)</span><span class="type-signature"> &rarr; {function}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Debounce utility function to limit the rate at which a function is invoked.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>func</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The function to debounce.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>delay</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The delay (in ms) before calling the function.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="pages_jobs_JobDescriptionPage.jsx.html">pages/jobs/JobDescriptionPage.jsx</a>, <a href="pages_jobs_JobDescriptionPage.jsx.html#line12">line 12</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    - The debounced function.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">function</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
     <h4 class="name" id="fetchComments"><span class="type-signature">(async) </span>fetchComments<span class="signature">(postId)</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
     
 
@@ -4195,7 +4700,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="components_Main.jsx.html">components/Main.jsx</a>, <a href="components_Main.jsx.html#line223">line 223</a>
+        <a href="components_Main.jsx.html">components/Main.jsx</a>, <a href="components_Main.jsx.html#line225">line 225</a>
     </li></ul></dd>
     
 
@@ -4253,115 +4758,6 @@
     
 
     
-=======
->>>>>>> 298a4e887adcb76e5ff0b30368755f329fc82575
-    <h4 class="name" id="fetchCompanies"><span class="type-signature">(async) </span>fetchCompanies<span class="signature">()</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Fetches company data from the API and sets the companies state.This function is called on component mount to populate the company selection list.
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="components_jobs_Filter.jsx.html">components/jobs/Filter.jsx</a>, <a href="components_jobs_Filter.jsx.html#line22">line 22</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;void></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-<<<<<<< HEAD
     <h4 class="name" id="fetchNotifications"><span class="type-signature">(async) </span>fetchNotifications<span class="signature">()</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
     
 
@@ -4414,7 +4810,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="components_Main.jsx.html">components/Main.jsx</a>, <a href="components_Main.jsx.html#line144">line 144</a>
+        <a href="components_Main.jsx.html">components/Main.jsx</a>, <a href="components_Main.jsx.html#line146">line 146</a>
     </li></ul></dd>
     
 
@@ -4472,8 +4868,6 @@
     
 
     
-=======
->>>>>>> 298a4e887adcb76e5ff0b30368755f329fc82575
     <h4 class="name" id="fetchNotifications"><span class="type-signature">(async) </span>fetchNotifications<span class="signature">()</span><span class="type-signature"></span></h4>
     
 
@@ -4526,7 +4920,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="pages_notifications_Notifications.jsx.html">pages/notifications/Notifications.jsx</a>, <a href="pages_notifications_Notifications.jsx.html#line86">line 86</a>
+        <a href="pages_notifications_Notifications.jsx.html">pages/notifications/Notifications.jsx</a>, <a href="pages_notifications_Notifications.jsx.html#line83">line 83</a>
     </li></ul></dd>
     
 
@@ -4562,7 +4956,6 @@
     
 
     
-<<<<<<< HEAD
     <h4 class="name" id="fetchPosts"><span class="type-signature">(async) </span>fetchPosts<span class="signature">()</span><span class="type-signature"></span></h4>
     
 
@@ -4615,7 +5008,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="components_Main.jsx.html">components/Main.jsx</a>, <a href="components_Main.jsx.html#line169">line 169</a>
+        <a href="components_Main.jsx.html">components/Main.jsx</a>, <a href="components_Main.jsx.html#line171">line 171</a>
     </li></ul></dd>
     
 
@@ -4715,7 +5108,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="components_Main.jsx.html">components/Main.jsx</a>, <a href="components_Main.jsx.html#line125">line 125</a>
+        <a href="components_Main.jsx.html">components/Main.jsx</a>, <a href="components_Main.jsx.html#line126">line 126</a>
     </li></ul></dd>
     
 
@@ -4773,8 +5166,6 @@
     
 
     
-=======
->>>>>>> 298a4e887adcb76e5ff0b30368755f329fc82575
     <h4 class="name" id="fetchUser"><span class="type-signature">(async) </span>fetchUser<span class="signature">()</span><span class="type-signature"></span></h4>
     
 
@@ -4827,7 +5218,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="pages_notifications_Notifications.jsx.html">pages/notifications/Notifications.jsx</a>, <a href="pages_notifications_Notifications.jsx.html#line128">line 128</a>
+        <a href="pages_notifications_Notifications.jsx.html">pages/notifications/Notifications.jsx</a>, <a href="pages_notifications_Notifications.jsx.html#line125">line 125</a>
     </li></ul></dd>
     
 
@@ -5037,7 +5428,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="pages_notifications_Notifications.jsx.html">pages/notifications/Notifications.jsx</a>, <a href="pages_notifications_Notifications.jsx.html#line190">line 190</a>
+        <a href="pages_notifications_Notifications.jsx.html">pages/notifications/Notifications.jsx</a>, <a href="pages_notifications_Notifications.jsx.html#line180">line 180</a>
     </li></ul></dd>
     
 
@@ -5205,7 +5596,6 @@
     
 
     
-<<<<<<< HEAD
     <h4 class="name" id="handleAddComment"><span class="type-signature">(async) </span>handleAddComment<span class="signature">(postId, commentText, attachment<span class="signature-attributes">opt</span>, taggedUsers<span class="signature-attributes">opt</span>, parentComment<span class="signature-attributes">opt</span>, attachmentUrl<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise.&lt;Object>}</span></h4>
     
 
@@ -5523,7 +5913,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="components_Main.jsx.html">components/Main.jsx</a>, <a href="components_Main.jsx.html#line289">line 289</a>
+        <a href="components_Main.jsx.html">components/Main.jsx</a>, <a href="components_Main.jsx.html#line291">line 291</a>
     </li></ul></dd>
     
 
@@ -5619,8 +6009,6 @@
     
 
     
-=======
->>>>>>> 298a4e887adcb76e5ff0b30368755f329fc82575
     <h4 class="name" id="handleBlockUser"><span class="type-signature">(async) </span>handleBlockUser<span class="signature">()</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
     
 
@@ -5673,7 +6061,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="components_messaging_ChatWindow.jsx.html">components/messaging/ChatWindow.jsx</a>, <a href="components_messaging_ChatWindow.jsx.html#line218">line 218</a>
+        <a href="components_messaging_ChatWindow.jsx.html">components/messaging/ChatWindow.jsx</a>, <a href="components_messaging_ChatWindow.jsx.html#line295">line 295</a>
     </li></ul></dd>
     
 
@@ -5795,7 +6183,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="components_Notification_NotificationCard.jsx.html">components/Notification/NotificationCard.jsx</a>, <a href="components_Notification_NotificationCard.jsx.html#line20">line 20</a>
+        <a href="components_Notification_NotificationCard.jsx.html">components/Notification/NotificationCard.jsx</a>, <a href="components_Notification_NotificationCard.jsx.html#line39">line 39</a>
     </li></ul></dd>
     
 
@@ -5853,7 +6241,6 @@
     
 
     
-<<<<<<< HEAD
     <h4 class="name" id="handleCreatePost"><span class="type-signature">(async) </span>handleCreatePost<span class="signature">(postData)</span><span class="type-signature"></span></h4>
     
 
@@ -6047,7 +6434,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="components_Main.jsx.html">components/Main.jsx</a>, <a href="components_Main.jsx.html#line500">line 500</a>
+        <a href="components_Main.jsx.html">components/Main.jsx</a>, <a href="components_Main.jsx.html#line502">line 502</a>
     </li></ul></dd>
     
 
@@ -6100,8 +6487,6 @@
     
 
     
-=======
->>>>>>> 298a4e887adcb76e5ff0b30368755f329fc82575
     <h4 class="name" id="handleDeleteNotification"><span class="type-signature">(async) </span>handleDeleteNotification<span class="signature">(id)</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
     
 
@@ -6203,7 +6588,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="components_Notification_NotificationCard.jsx.html">components/Notification/NotificationCard.jsx</a>, <a href="components_Notification_NotificationCard.jsx.html#line39">line 39</a>
+        <a href="components_Notification_NotificationCard.jsx.html">components/Notification/NotificationCard.jsx</a>, <a href="components_Notification_NotificationCard.jsx.html#line57">line 57</a>
     </li></ul></dd>
     
 
@@ -6250,249 +6635,6 @@
 </dl>
 
     
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="handleFilter"><span class="type-signature">(async) </span>handleFilter<span class="signature">()</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Handles the job filter request. It builds a query string based on selected filter values and fetches filtered job listings from the API.
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="components_jobs_Filter.jsx.html">components/jobs/Filter.jsx</a>, <a href="components_jobs_Filter.jsx.html#line39">line 39</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;void></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="handleJobClick"><span class="type-signature"></span>handleJobClick<span class="signature">(job)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Handles the click event on the job title. It sets the selected job and navigates to the job board page.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>job</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The job object that was clicked.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="components_jobs_JobCard.jsx.html">components/jobs/JobCard.jsx</a>, <a href="components_jobs_JobCard.jsx.html#line24">line 24</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -6711,95 +6853,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="pages_notifications_Notifications.jsx.html">pages/notifications/Notifications.jsx</a>, <a href="pages_notifications_Notifications.jsx.html#line163">line 163</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="handleMessagingClick"><span class="type-signature"></span>handleMessagingClick<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    This function is triggered when the messaging button is clicked.It redirects the user to the `/messaging/123` route using the `navigate` function.
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="components_UpperNavBar.jsx.html">components/UpperNavBar.jsx</a>, <a href="components_UpperNavBar.jsx.html#line143">line 143</a>
+        <a href="pages_notifications_Notifications.jsx.html">pages/notifications/Notifications.jsx</a>, <a href="pages_notifications_Notifications.jsx.html#line160">line 160</a>
     </li></ul></dd>
     
 
@@ -6936,7 +6990,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="components_Notification_NotificationCard.jsx.html">components/Notification/NotificationCard.jsx</a>, <a href="components_Notification_NotificationCard.jsx.html#line92">line 92</a>
+        <a href="components_Notification_NotificationCard.jsx.html">components/Notification/NotificationCard.jsx</a>, <a href="components_Notification_NotificationCard.jsx.html#line108">line 108</a>
     </li></ul></dd>
     
 
@@ -7124,7 +7178,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="pages_notifications_Notifications.jsx.html">pages/notifications/Notifications.jsx</a>, <a href="pages_notifications_Notifications.jsx.html#line104">line 104</a>
+        <a href="pages_notifications_Notifications.jsx.html">pages/notifications/Notifications.jsx</a>, <a href="pages_notifications_Notifications.jsx.html#line101">line 101</a>
     </li></ul></dd>
     
 
@@ -7160,7 +7214,6 @@
     
 
     
-<<<<<<< HEAD
     <h4 class="name" id="handleReact"><span class="type-signature">(async) </span>handleReact<span class="signature">(postId, reactionType<span class="signature-attributes">opt</span>, isRemove<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
     
 
@@ -7359,7 +7412,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="components_Main.jsx.html">components/Main.jsx</a>, <a href="components_Main.jsx.html#line575">line 575</a>
+        <a href="components_Main.jsx.html">components/Main.jsx</a>, <a href="components_Main.jsx.html#line577">line 577</a>
     </li></ul></dd>
     
 
@@ -7683,7 +7736,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="components_Main.jsx.html">components/Main.jsx</a>, <a href="components_Main.jsx.html#line438">line 438</a>
+        <a href="components_Main.jsx.html">components/Main.jsx</a>, <a href="components_Main.jsx.html#line440">line 440</a>
     </li></ul></dd>
     
 
@@ -7871,7 +7924,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="components_Main.jsx.html">components/Main.jsx</a>, <a href="components_Main.jsx.html#line714">line 714</a>
+        <a href="components_Main.jsx.html">components/Main.jsx</a>, <a href="components_Main.jsx.html#line716">line 716</a>
     </li></ul></dd>
     
 
@@ -7941,97 +7994,6 @@
     
 
     
-=======
->>>>>>> 298a4e887adcb76e5ff0b30368755f329fc82575
-    <h4 class="name" id="handleSave"><span class="type-signature">(async) </span>handleSave<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Saves the selected job by sending a POST request to the backend.
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="pages_jobs_JobBoardPage.jsx.html">pages/jobs/JobBoardPage.jsx</a>, <a href="pages_jobs_JobBoardPage.jsx.html#line44">line 44</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-<<<<<<< HEAD
     <h4 class="name" id="handleSavePost"><span class="type-signature">(async) </span>handleSavePost<span class="signature">(postId)</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
     
 
@@ -8133,7 +8095,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="components_Main.jsx.html">components/Main.jsx</a>, <a href="components_Main.jsx.html#line694">line 694</a>
+        <a href="components_Main.jsx.html">components/Main.jsx</a>, <a href="components_Main.jsx.html#line696">line 696</a>
     </li></ul></dd>
     
 
@@ -8175,196 +8137,6 @@
         
 <div class="param-desc">
     - A promise that resolves when the post is successfully saved.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;void></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-=======
->>>>>>> 298a4e887adcb76e5ff0b30368755f329fc82575
-    <h4 class="name" id="handleSearch"><span class="type-signature">(async) </span>handleSearch<span class="signature">(e)</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Handles the search functionality by sending a GET request to the serverwith the provided search query and location parameters. Navigates to thejob board page with the search results and relevant state data.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>e</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The event object from the form submission.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="components_UpperNavBar.jsx.html">components/UpperNavBar.jsx</a>, <a href="components_UpperNavBar.jsx.html#line108">line 108</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Throws:</h5>
-
-        
-
-<dl>
-    <dt>
-        <div class="param-desc">
-        - Logs an error to the console if the search request fails.
-        </div>
-    </dt>
-    <dd></dd>
-    <dt>
-        <dl>
-            <dt>
-                Type
-            </dt>
-            <dd>
-                
-<span class="param-type">Error</span>
-
-
-            </dd>
-        </dl>
-    </dt>
-    <dd></dd>
-</dl>
-
-
-    
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    - A promise that resolves when the search is complete.
 </div>
 
 
@@ -8445,7 +8217,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="pages_notifications_Notifications.jsx.html">pages/notifications/Notifications.jsx</a>, <a href="pages_notifications_Notifications.jsx.html#line60">line 60</a>
+        <a href="pages_notifications_Notifications.jsx.html">pages/notifications/Notifications.jsx</a>, <a href="pages_notifications_Notifications.jsx.html#line57">line 57</a>
     </li></ul></dd>
     
 
@@ -8592,94 +8364,6 @@
 </dl>
 
     
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="openModal"><span class="type-signature"></span>openModal<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Opens the modal for applying to a job.
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="pages_jobs_JobBoardPage.jsx.html">pages/jobs/JobBoardPage.jsx</a>, <a href="pages_jobs_JobBoardPage.jsx.html#line31">line 31</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -8931,7 +8615,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="components_messaging_MessageInput.jsx.html">components/messaging/MessageInput.jsx</a>, <a href="components_messaging_MessageInput.jsx.html#line59">line 59</a>
+        <a href="components_messaging_MessageInput.jsx.html">components/messaging/MessageInput.jsx</a>, <a href="components_messaging_MessageInput.jsx.html#line69">line 69</a>
     </li></ul></dd>
     
 
@@ -9023,7 +8707,6 @@
     
 
     
-<<<<<<< HEAD
     <h4 class="name" id="toggleComments"><span class="type-signature">(async) </span>toggleComments<span class="signature">(postId)</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
     
 
@@ -9125,7 +8808,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="components_Main.jsx.html">components/Main.jsx</a>, <a href="components_Main.jsx.html#line264">line 264</a>
+        <a href="components_Main.jsx.html">components/Main.jsx</a>, <a href="components_Main.jsx.html#line266">line 266</a>
     </li></ul></dd>
     
 
@@ -9172,96 +8855,6 @@
 </dl>
 
     
-
-
-
-
-
-        
-            
-
-    
-
-    
-=======
->>>>>>> 298a4e887adcb76e5ff0b30368755f329fc82575
-    <h4 class="name" id="useEffect"><span class="type-signature"></span>useEffect<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    useEffect hook to load jobs, selected job, and current tab informationfrom location state when the component mounts.
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="pages_jobs_JobBoardPage.jsx.html">pages/jobs/JobBoardPage.jsx</a>, <a href="pages_jobs_JobBoardPage.jsx.html#line72">line 72</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -9871,7 +9464,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="components_AdminPanel_Analytics.jsx.html">components/AdminPanel/Analytics.jsx</a>, <a href="components_AdminPanel_Analytics.jsx.html#line1477">line 1477</a>
+        <a href="components_AdminPanel_Analytics.jsx.html">components/AdminPanel/Analytics.jsx</a>, <a href="components_AdminPanel_Analytics.jsx.html#line42">line 42</a>
     </li></ul></dd>
     
 
@@ -9889,202 +9482,6 @@
 
             
                 
-<<<<<<< HEAD
-<h4 class="name" id="AuthorInfo">AuthorInfo</h4>
-
-
-
-
-<div class="description">
-    Object representing the author's information.
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">Object</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-    <h5 class="subsection-title">Properties:</h5>
-
-    
-
-<table class="props">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>id</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The unique identifier for the author.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>name</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The name of the author.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>headline</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The professional headline or title of the author.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>profileImage</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The URL of the author's profile image.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="components_Main.jsx.html">components/Main.jsx</a>, <a href="components_Main.jsx.html#line108">line 108</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-            
-                
-=======
->>>>>>> 298a4e887adcb76e5ff0b30368755f329fc82575
 
     
 
@@ -10190,7 +9587,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="components_messaging_MessageInput.jsx.html">components/messaging/MessageInput.jsx</a>, <a href="components_messaging_MessageInput.jsx.html#line44">line 44</a>
+        <a href="components_messaging_MessageInput.jsx.html">components/messaging/MessageInput.jsx</a>, <a href="components_messaging_MessageInput.jsx.html#line54">line 54</a>
     </li></ul></dd>
     
 
@@ -10252,21 +9649,13 @@
 </div>
 
 <nav>
-<<<<<<< HEAD
-    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#ApplyJob">ApplyJob</a></li><li><a href="global.html#ChatWindow">ChatWindow</a></li><li><a href="global.html#CommentSection">CommentSection</a></li><li><a href="global.html#ConversationListItem">ConversationListItem</a></li><li><a href="global.html#ConversationSearch">ConversationSearch</a></li><li><a href="global.html#CreatePostModal">CreatePostModal</a></li><li><a href="global.html#Filter">Filter</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#JobBoardPage">JobBoardPage</a></li><li><a href="global.html#JobCard">JobCard</a></li><li><a href="global.html#Jobs">Jobs</a></li><li><a href="global.html#Main">Main</a></li><li><a href="global.html#MyJobs">MyJobs</a></li><li><a href="global.html#Notification">Notification</a></li><li><a href="global.html#PostMenu">PostMenu</a></li><li><a href="global.html#PostReactions">PostReactions</a></li><li><a href="global.html#closeModal">closeModal</a></li><li><a href="global.html#fetchComments">fetchComments</a></li><li><a href="global.html#fetchCompanies">fetchCompanies</a></li><li><a href="global.html#fetchNotifications">fetchNotifications</a></li><li><a href="global.html#fetchPosts">fetchPosts</a></li><li><a href="global.html#fetchUser">fetchUser</a></li><li><a href="global.html#filteredNotifications">filteredNotifications</a></li><li><a href="global.html#getReactionIcon">getReactionIcon</a></li><li><a href="global.html#handleAddComment">handleAddComment</a></li><li><a href="global.html#handleBlockUser">handleBlockUser</a></li><li><a href="global.html#handleClick">handleClick</a></li><li><a href="global.html#handleCreatePost">handleCreatePost</a></li><li><a href="global.html#handleDeleteNotification">handleDeleteNotification</a></li><li><a href="global.html#handleFilter">handleFilter</a></li><li><a href="global.html#handleJobClick">handleJobClick</a></li><li><a href="global.html#handleLikeClick">handleLikeClick</a></li><li><a href="global.html#handleMainFilterChange">handleMainFilterChange</a></li><li><a href="global.html#handleMessagingClick">handleMessagingClick</a></li><li><a href="global.html#handleMuteDuration">handleMuteDuration</a></li><li><a href="global.html#handleNotificationClick">handleNotificationClick</a></li><li><a href="global.html#handleReact">handleReact</a></li><li><a href="global.html#handleReactToComment">handleReactToComment</a></li><li><a href="global.html#handleReportPost">handleReportPost</a></li><li><a href="global.html#handleSave">handleSave</a></li><li><a href="global.html#handleSavePost">handleSavePost</a></li><li><a href="global.html#handleSearch">handleSearch</a></li><li><a href="global.html#handleSendTestNotification">handleSendTestNotification</a></li><li><a href="global.html#handleSubmit">handleSubmit</a></li><li><a href="global.html#openModal">openModal</a></li><li><a href="global.html#requestOTP">requestOTP</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#toggleComments">toggleComments</a></li><li><a href="global.html#useEffect">useEffect</a></li><li><a href="global.html#verifyOTP">verifyOTP</a></li></ul>
-=======
-    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#ApplyJob">ApplyJob</a></li><li><a href="global.html#ChatWindow">ChatWindow</a></li><li><a href="global.html#CommentSection">CommentSection</a></li><li><a href="global.html#ConversationListItem">ConversationListItem</a></li><li><a href="global.html#ConversationSearch">ConversationSearch</a></li><li><a href="global.html#CreatePostModal">CreatePostModal</a></li><li><a href="global.html#Filter">Filter</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#JobBoardPage">JobBoardPage</a></li><li><a href="global.html#JobCard">JobCard</a></li><li><a href="global.html#Jobs">Jobs</a></li><li><a href="global.html#MyJobs">MyJobs</a></li><li><a href="global.html#Notification">Notification</a></li><li><a href="global.html#PostMenu">PostMenu</a></li><li><a href="global.html#PostReactions">PostReactions</a></li><li><a href="global.html#closeModal">closeModal</a></li><li><a href="global.html#fetchCompanies">fetchCompanies</a></li><li><a href="global.html#fetchNotifications">fetchNotifications</a></li><li><a href="global.html#fetchUser">fetchUser</a></li><li><a href="global.html#filteredNotifications">filteredNotifications</a></li><li><a href="global.html#getReactionIcon">getReactionIcon</a></li><li><a href="global.html#handleBlockUser">handleBlockUser</a></li><li><a href="global.html#handleClick">handleClick</a></li><li><a href="global.html#handleDeleteNotification">handleDeleteNotification</a></li><li><a href="global.html#handleFilter">handleFilter</a></li><li><a href="global.html#handleJobClick">handleJobClick</a></li><li><a href="global.html#handleLikeClick">handleLikeClick</a></li><li><a href="global.html#handleMainFilterChange">handleMainFilterChange</a></li><li><a href="global.html#handleMessagingClick">handleMessagingClick</a></li><li><a href="global.html#handleMuteDuration">handleMuteDuration</a></li><li><a href="global.html#handleNotificationClick">handleNotificationClick</a></li><li><a href="global.html#handleSave">handleSave</a></li><li><a href="global.html#handleSearch">handleSearch</a></li><li><a href="global.html#handleSendTestNotification">handleSendTestNotification</a></li><li><a href="global.html#handleSubmit">handleSubmit</a></li><li><a href="global.html#openModal">openModal</a></li><li><a href="global.html#requestOTP">requestOTP</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#useEffect">useEffect</a></li><li><a href="global.html#verifyOTP">verifyOTP</a></li></ul>
->>>>>>> 298a4e887adcb76e5ff0b30368755f329fc82575
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#ChatWindow">ChatWindow</a></li><li><a href="global.html#CommentSection">CommentSection</a></li><li><a href="global.html#ConversationListItem">ConversationListItem</a></li><li><a href="global.html#ConversationSearch">ConversationSearch</a></li><li><a href="global.html#CreatePostModal">CreatePostModal</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#HirePage">HirePage</a></li><li><a href="global.html#JobBoardPage">JobBoardPage</a></li><li><a href="global.html#JobDetails">JobDetails</a></li><li><a href="global.html#Jobs">Jobs</a></li><li><a href="global.html#Main">Main</a></li><li><a href="global.html#ManageJob">ManageJob</a></li><li><a href="global.html#MyJobs">MyJobs</a></li><li><a href="global.html#Notification">Notification</a></li><li><a href="global.html#NotificationCard">NotificationCard</a></li><li><a href="global.html#PostMenu">PostMenu</a></li><li><a href="global.html#PostReactions">PostReactions</a></li><li><a href="global.html#ScreeningQuestionCard">ScreeningQuestionCard</a></li><li><a href="global.html#debounce">debounce</a></li><li><a href="global.html#fetchComments">fetchComments</a></li><li><a href="global.html#fetchNotifications">fetchNotifications</a></li><li><a href="global.html#fetchPosts">fetchPosts</a></li><li><a href="global.html#fetchUser">fetchUser</a></li><li><a href="global.html#filteredNotifications">filteredNotifications</a></li><li><a href="global.html#getReactionIcon">getReactionIcon</a></li><li><a href="global.html#handleAddComment">handleAddComment</a></li><li><a href="global.html#handleBlockUser">handleBlockUser</a></li><li><a href="global.html#handleClick">handleClick</a></li><li><a href="global.html#handleCreatePost">handleCreatePost</a></li><li><a href="global.html#handleDeleteNotification">handleDeleteNotification</a></li><li><a href="global.html#handleLikeClick">handleLikeClick</a></li><li><a href="global.html#handleMainFilterChange">handleMainFilterChange</a></li><li><a href="global.html#handleMuteDuration">handleMuteDuration</a></li><li><a href="global.html#handleNotificationClick">handleNotificationClick</a></li><li><a href="global.html#handleReact">handleReact</a></li><li><a href="global.html#handleReactToComment">handleReactToComment</a></li><li><a href="global.html#handleReportPost">handleReportPost</a></li><li><a href="global.html#handleSavePost">handleSavePost</a></li><li><a href="global.html#handleSendTestNotification">handleSendTestNotification</a></li><li><a href="global.html#handleSubmit">handleSubmit</a></li><li><a href="global.html#requestOTP">requestOTP</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#toggleComments">toggleComments</a></li><li><a href="global.html#verifyOTP">verifyOTP</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-<<<<<<< HEAD
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun Apr 20 2025 19:24:34 GMT+0200 (Eastern European Standard Time)
-=======
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun Apr 20 2025 18:19:03 GMT+0200 (Eastern European Standard Time)
->>>>>>> 298a4e887adcb76e5ff0b30368755f329fc82575
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Fri May 02 2025 17:16:34 GMT+0300 (Eastern European Summer Time)
 </footer>
 
 <script> prettyPrint(); </script>

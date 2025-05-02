@@ -30,9 +30,9 @@
 import axios from "axios";
 import { BsBookmarkFill } from "react-icons/bs";
 import Header from "../../components/UpperNavBar";
-import JobCard from '../../components/jobs/JobCard';
+import JobCard from "../../components/jobs/JobCard";
 import { BASE_URL } from "../../constants";
-
+import { useLocation } from "react-router-dom";
 
 /**
  * * MyJobs component displays either the user's saved/applied jobs
@@ -41,102 +41,112 @@ import { BASE_URL } from "../../constants";
  * @component
  * @returns {JSX.Element} Rendered MyJobs component
  */
-const MyJobs=()=> {
-    const [selectedTab, setSelectedTab] = useState("my-jobs");
-    const [activeFilter, setActiveFilter] = useState("Saved");
-    const [jobs, setJobs] = useState([]);
-    const [user, setUser]=useState()
-
+const MyJobs = () => {
+  const [selectedTab, setSelectedTab] = useState("my-jobs");
+  const [activeFilter, setActiveFilter] = useState("Saved");
+  const [jobs, setJobs] = useState([]);
+  const [user, setUser] = useState(null);
+  const [company, setCompany] = useState("");
+    const [refreshTrigger, setRefreshTrigger] = useState(false);
+  
+const location = useLocation();
+const {allJobs} = location.state || {} // Extract job from location state
+console.log("allJobs in MyJobs:", allJobs); // Log the job object
   /**
    * Fetches currently logged-in user data and updates state.
-   *
-   * @async
-   * @function
-   * @returns {Promise&lt;void>}
    */
   const fetchUser = async () => {
     try {
       const response = await axios.get(`${BASE_URL}/user/me`, {
-    
-        withCredentials:true
+        withCredentials: true,
       });
-  
-      setUser(response.data);
-      console.log("User data:", response.data);
+      setUser(response.data.user); // important! go into .user
+      console.log("User data:", response.data.user);
     } catch (error) {
       console.error("Error fetching user:", error);
     }
   };
+
   /**
    * Fetches jobs saved by the user.
-   * Updates job list state with the retrieved jobs.
-   *
-   * @async
-   * @function
-   * @returns {Promise&lt;void>}
    */
-    const fetchSavedJobs = async () => {
-      
-        try {
-          const response = await axios.get(`${BASE_URL}/jobs/saved`, {
-            withCredentials: true // Send cookies with request
-          });
-          setJobs(response.data.jobs);
-          console.log("jobs saved:",response.data.jobs)
-        } catch (err) {
-          console.log("error in save jobs")
-          setJobs(staticJobs);
-        }
-       
-    };
+  const fetchSavedJobs = async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}/jobs/saved`, {
+        withCredentials: true,
+      });
+      setJobs(response.data.jobs);
+      console.log("Saved jobs:", response.data.jobs);
+    } catch (error) {
+      console.error("Error fetching saved jobs:", error);
+      setJobs([]);
+    }
+  };
 
-     /**
+  /**
    * Fetches jobs the user has applied to, filtered by status.
-   *
-   * @async
-   * @function
-   * @param {string} status - The application status to filter by (e.g., "Pending", "Accepted")
-   * @returns {Promise&lt;void>}
    */
-     // Function to fetch jobs according to the current filter
   const fetchMyApplications = async (status) => {
     try {
       const response = await axios.get(`${BASE_URL}/jobs/my-applications?status=${status.toLowerCase()}`, {
         withCredentials: true,
       });
       setJobs(response.data.applications);
-      console.log(`Fetched jobs for status: ${status}`, response.data);
+      console.log(`Applications for status ${status}:`, response.data.applications);
     } catch (error) {
-      console.error(`Error fetching jobs with status ${status}:`, error);
+      console.error(`Error fetching applications with status ${status}:`, error);
       setJobs([]);
     }
   };
-/**
-   * Effect to handle login, fetch user and job data when selectedTab or activeFilter changes.
-   */
-    useEffect(() => {
-      // const loginAndFetchData = async () => {
-      //   await testLogin(); // Ensure login is completed first
-        fetchUser()
-        
-    setJobs([]); // Clear jobs before fetching new ones
-        if (selectedTab === "my-jobs" &amp;&amp; activeFilter === "Saved") {
-          fetchSavedJobs();
-        } else if (selectedTab === "my-jobs") {
-          fetchMyApplications(activeFilter);
-        }
-      // }
-      // loginAndFetchData();
-    },  [selectedTab, activeFilter]);
-  
 
- /**
-   * List of filters based on the selected tab.
-   * @type {string[]}
+  /**
+   * Fetches jobs posted by companies the user is admin of.
    */
+  const fetchPostedJobs = async () => {
+
+    try {
+      const allCompanyJobs = await Promise.all(
+        user.companies.map(async (companyId) => {
+          const response = await axios.get(`${BASE_URL}/jobs/company/${companyId}`, {
+            withCredentials: true,
+          });
+          return response.data || []; 
+        })
+      );
+
+      // Flatten the array of arrays into one array
+      const mergedJobs = allCompanyJobs.flat();
+      setJobs(mergedJobs);
+      console.log("Posted jobs:", mergedJobs);
+    } catch (error) {
+      console.error("Error fetching posted jobs:", error);
+      setJobs([]);
+    }
+  };
+
+  // Handle loading data when selectedTab or activeFilter changes
+  useEffect(() => {
+    fetchUser();
+  }, [refreshTrigger]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    setJobs([]); // Clear jobs first
+    if (selectedTab === "my-jobs") {
+      if (activeFilter === "Saved") {
+        fetchSavedJobs();
+      } else {
+        fetchMyApplications(activeFilter);
+      }
+    } else if (selectedTab === "posted-jobs") {
+      fetchPostedJobs();
+    }
+  }, [selectedTab, activeFilter, user]);
+
   // Determine filter options based on selected tab
   const filterOptions =
-    selectedTab === "posted-jobs" ? ["Drafts", "Posted"] : ["Saved", "Pending", "Viewed", "Accepted", "Rejected"];
+    selectedTab === "posted-jobs" ? ["Posted"] : ["Saved", "Pending", "Viewed", "Accepted", "Rejected"];
 
   return (
     &lt;div className="flex bg-[#F5F3EE] p-6 mt-14">
@@ -164,7 +174,6 @@ const MyJobs=()=> {
             onClick={() => setSelectedTab("my-jobs")}
           >
             &lt;span>My jobs&lt;/span>
-
           &lt;/li>
         &lt;/ul>
       &lt;/div>
@@ -174,27 +183,29 @@ const MyJobs=()=> {
         &lt;h2 className="text-2xl mb-4 pl-6">{selectedTab === "posted-jobs" ? "Posted Jobs" : "My Jobs"}&lt;/h2>
 
         {/* Dynamic Filter Buttons */}
-        &lt;div className="flex space-x-3 mb-6 pb-1 border-b border-[#e8e8e8] pl-6">
-          {filterOptions.map((filter) => (
-            &lt;button
-              key={filter}
-              onClick={() => setActiveFilter(filter)}
-              className={`px-4 py-2 rounded-full text-sm border ${
-                activeFilter === filter
-                  ? "bg-[#01754f] text-white font-semibold hover:bg-[#004c33]"
-                  : "bg-white text-gray-700 font-semibold border-gray-400 hover:bg-[#f3f3f3] hover:border-2"
-              }`}
-            >
-              {filter}
-            &lt;/button>
-          ))}
-        &lt;/div>
+        {selectedTab !== "posted-jobs" &amp;&amp; (
+          &lt;div className="flex space-x-3 mb-6 pb-1 border-b border-[#e8e8e8] pl-6">
+            {filterOptions.map((filter) => (
+              &lt;button
+                key={filter}
+                onClick={() => setActiveFilter(filter)}
+                className={`px-4 py-2 rounded-full text-sm border ${
+                  activeFilter === filter
+                    ? "bg-[#01754f] text-white font-semibold hover:bg-[#004c33]"
+                    : "bg-white text-gray-700 font-semibold border-gray-400 hover:bg-[#f3f3f3] hover:border-2"
+                }`}
+              >
+                {filter}
+              &lt;/button>
+            ))}
+          &lt;/div>
+        )}
 
         {/* Job Listings */}
         &lt;div className="space-y-4 pl-6 pr-6">
           {jobs &amp;&amp; jobs.length > 0 ? (
             jobs.map((job, index) => (
-              &lt;JobCard key={index} job={job} state={activeFilter} />
+              &lt;JobCard key={index} job={job} state={selectedTab} user={user} jobs={allJobs} companyId={job.companyId} onDelete={() => setRefreshTrigger(prev => !prev)} />
             ))
           ) : (
             &lt;p>No jobs available at the moment.&lt;/p>
@@ -203,8 +214,10 @@ const MyJobs=()=> {
       &lt;/div>
     &lt;/div>
   );
-}
-export default MyJobs;</code></pre>
+};
+
+export default MyJobs;
+</code></pre>
         </article>
     </section>
 
@@ -214,21 +227,13 @@ export default MyJobs;</code></pre>
 </div>
 
 <nav>
-<<<<<<< HEAD
-    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#ApplyJob">ApplyJob</a></li><li><a href="global.html#ChatWindow">ChatWindow</a></li><li><a href="global.html#CommentSection">CommentSection</a></li><li><a href="global.html#ConversationListItem">ConversationListItem</a></li><li><a href="global.html#ConversationSearch">ConversationSearch</a></li><li><a href="global.html#CreatePostModal">CreatePostModal</a></li><li><a href="global.html#Filter">Filter</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#JobBoardPage">JobBoardPage</a></li><li><a href="global.html#JobCard">JobCard</a></li><li><a href="global.html#Jobs">Jobs</a></li><li><a href="global.html#Main">Main</a></li><li><a href="global.html#MyJobs">MyJobs</a></li><li><a href="global.html#Notification">Notification</a></li><li><a href="global.html#PostMenu">PostMenu</a></li><li><a href="global.html#PostReactions">PostReactions</a></li><li><a href="global.html#closeModal">closeModal</a></li><li><a href="global.html#fetchComments">fetchComments</a></li><li><a href="global.html#fetchCompanies">fetchCompanies</a></li><li><a href="global.html#fetchNotifications">fetchNotifications</a></li><li><a href="global.html#fetchPosts">fetchPosts</a></li><li><a href="global.html#fetchUser">fetchUser</a></li><li><a href="global.html#filteredNotifications">filteredNotifications</a></li><li><a href="global.html#getReactionIcon">getReactionIcon</a></li><li><a href="global.html#handleAddComment">handleAddComment</a></li><li><a href="global.html#handleBlockUser">handleBlockUser</a></li><li><a href="global.html#handleClick">handleClick</a></li><li><a href="global.html#handleCreatePost">handleCreatePost</a></li><li><a href="global.html#handleDeleteNotification">handleDeleteNotification</a></li><li><a href="global.html#handleFilter">handleFilter</a></li><li><a href="global.html#handleJobClick">handleJobClick</a></li><li><a href="global.html#handleLikeClick">handleLikeClick</a></li><li><a href="global.html#handleMainFilterChange">handleMainFilterChange</a></li><li><a href="global.html#handleMessagingClick">handleMessagingClick</a></li><li><a href="global.html#handleMuteDuration">handleMuteDuration</a></li><li><a href="global.html#handleNotificationClick">handleNotificationClick</a></li><li><a href="global.html#handleReact">handleReact</a></li><li><a href="global.html#handleReactToComment">handleReactToComment</a></li><li><a href="global.html#handleReportPost">handleReportPost</a></li><li><a href="global.html#handleSave">handleSave</a></li><li><a href="global.html#handleSavePost">handleSavePost</a></li><li><a href="global.html#handleSearch">handleSearch</a></li><li><a href="global.html#handleSendTestNotification">handleSendTestNotification</a></li><li><a href="global.html#handleSubmit">handleSubmit</a></li><li><a href="global.html#openModal">openModal</a></li><li><a href="global.html#requestOTP">requestOTP</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#toggleComments">toggleComments</a></li><li><a href="global.html#useEffect">useEffect</a></li><li><a href="global.html#verifyOTP">verifyOTP</a></li></ul>
-=======
-    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#ApplyJob">ApplyJob</a></li><li><a href="global.html#ChatWindow">ChatWindow</a></li><li><a href="global.html#CommentSection">CommentSection</a></li><li><a href="global.html#ConversationListItem">ConversationListItem</a></li><li><a href="global.html#ConversationSearch">ConversationSearch</a></li><li><a href="global.html#CreatePostModal">CreatePostModal</a></li><li><a href="global.html#Filter">Filter</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#JobBoardPage">JobBoardPage</a></li><li><a href="global.html#JobCard">JobCard</a></li><li><a href="global.html#Jobs">Jobs</a></li><li><a href="global.html#MyJobs">MyJobs</a></li><li><a href="global.html#Notification">Notification</a></li><li><a href="global.html#PostMenu">PostMenu</a></li><li><a href="global.html#PostReactions">PostReactions</a></li><li><a href="global.html#closeModal">closeModal</a></li><li><a href="global.html#fetchCompanies">fetchCompanies</a></li><li><a href="global.html#fetchNotifications">fetchNotifications</a></li><li><a href="global.html#fetchUser">fetchUser</a></li><li><a href="global.html#filteredNotifications">filteredNotifications</a></li><li><a href="global.html#getReactionIcon">getReactionIcon</a></li><li><a href="global.html#handleBlockUser">handleBlockUser</a></li><li><a href="global.html#handleClick">handleClick</a></li><li><a href="global.html#handleDeleteNotification">handleDeleteNotification</a></li><li><a href="global.html#handleFilter">handleFilter</a></li><li><a href="global.html#handleJobClick">handleJobClick</a></li><li><a href="global.html#handleLikeClick">handleLikeClick</a></li><li><a href="global.html#handleMainFilterChange">handleMainFilterChange</a></li><li><a href="global.html#handleMessagingClick">handleMessagingClick</a></li><li><a href="global.html#handleMuteDuration">handleMuteDuration</a></li><li><a href="global.html#handleNotificationClick">handleNotificationClick</a></li><li><a href="global.html#handleSave">handleSave</a></li><li><a href="global.html#handleSearch">handleSearch</a></li><li><a href="global.html#handleSendTestNotification">handleSendTestNotification</a></li><li><a href="global.html#handleSubmit">handleSubmit</a></li><li><a href="global.html#openModal">openModal</a></li><li><a href="global.html#requestOTP">requestOTP</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#useEffect">useEffect</a></li><li><a href="global.html#verifyOTP">verifyOTP</a></li></ul>
->>>>>>> 298a4e887adcb76e5ff0b30368755f329fc82575
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#ChatWindow">ChatWindow</a></li><li><a href="global.html#CommentSection">CommentSection</a></li><li><a href="global.html#ConversationListItem">ConversationListItem</a></li><li><a href="global.html#ConversationSearch">ConversationSearch</a></li><li><a href="global.html#CreatePostModal">CreatePostModal</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#HirePage">HirePage</a></li><li><a href="global.html#JobBoardPage">JobBoardPage</a></li><li><a href="global.html#JobDetails">JobDetails</a></li><li><a href="global.html#Jobs">Jobs</a></li><li><a href="global.html#Main">Main</a></li><li><a href="global.html#ManageJob">ManageJob</a></li><li><a href="global.html#MyJobs">MyJobs</a></li><li><a href="global.html#Notification">Notification</a></li><li><a href="global.html#NotificationCard">NotificationCard</a></li><li><a href="global.html#PostMenu">PostMenu</a></li><li><a href="global.html#PostReactions">PostReactions</a></li><li><a href="global.html#ScreeningQuestionCard">ScreeningQuestionCard</a></li><li><a href="global.html#debounce">debounce</a></li><li><a href="global.html#fetchComments">fetchComments</a></li><li><a href="global.html#fetchNotifications">fetchNotifications</a></li><li><a href="global.html#fetchPosts">fetchPosts</a></li><li><a href="global.html#fetchUser">fetchUser</a></li><li><a href="global.html#filteredNotifications">filteredNotifications</a></li><li><a href="global.html#getReactionIcon">getReactionIcon</a></li><li><a href="global.html#handleAddComment">handleAddComment</a></li><li><a href="global.html#handleBlockUser">handleBlockUser</a></li><li><a href="global.html#handleClick">handleClick</a></li><li><a href="global.html#handleCreatePost">handleCreatePost</a></li><li><a href="global.html#handleDeleteNotification">handleDeleteNotification</a></li><li><a href="global.html#handleLikeClick">handleLikeClick</a></li><li><a href="global.html#handleMainFilterChange">handleMainFilterChange</a></li><li><a href="global.html#handleMuteDuration">handleMuteDuration</a></li><li><a href="global.html#handleNotificationClick">handleNotificationClick</a></li><li><a href="global.html#handleReact">handleReact</a></li><li><a href="global.html#handleReactToComment">handleReactToComment</a></li><li><a href="global.html#handleReportPost">handleReportPost</a></li><li><a href="global.html#handleSavePost">handleSavePost</a></li><li><a href="global.html#handleSendTestNotification">handleSendTestNotification</a></li><li><a href="global.html#handleSubmit">handleSubmit</a></li><li><a href="global.html#requestOTP">requestOTP</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#toggleComments">toggleComments</a></li><li><a href="global.html#verifyOTP">verifyOTP</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-<<<<<<< HEAD
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun Apr 20 2025 19:24:34 GMT+0200 (Eastern European Standard Time)
-=======
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun Apr 20 2025 18:19:03 GMT+0200 (Eastern European Standard Time)
->>>>>>> 298a4e887adcb76e5ff0b30368755f329fc82575
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Fri May 02 2025 17:16:34 GMT+0300 (Eastern European Summer Time)
 </footer>
 
 <script> prettyPrint(); </script>
