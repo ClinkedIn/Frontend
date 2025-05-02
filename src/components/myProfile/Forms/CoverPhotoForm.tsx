@@ -182,6 +182,10 @@ const CoverPhotoForm: React.FC<CoverPhotoFormProps> = ({
                 }deg) scale(${1 + zoomValue / 100})`,
               }}
             />
+
+            {/* Crop guide lines */}
+            <div className="absolute top-1/3 w-full border-t-2 border-white opacity-70" />
+            <div className="absolute bottom-1/3 w-full border-t-2 border-white opacity-70" />
           </div>
         )}
       </div>

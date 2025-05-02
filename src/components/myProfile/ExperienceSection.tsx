@@ -3,7 +3,6 @@ import axios from "axios";
 import ExperienceForm from "./Forms/ExperienceForm";
 import ConfirmationDialog from "./ConfirmationDialog";
 import { Loader, Plus, Pencil, Trash2 } from "lucide-react";
-import { BASE_URL } from "../../constants";
 
 /**
  * Interface representing an experience entry
@@ -55,13 +54,15 @@ interface ExperienceFormData {
 interface ExperienceSectionProps {
   showExperienceForm?: boolean;
   setShowExperienceForm?: React.Dispatch<React.SetStateAction<boolean>>;
+  experience?: Experience[];
+  onExperienceSaved?: () => void;
 }
 
 /**
  * Base URL for API requests
  * @constant {string}
  */
-const API_BASE_URL = BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 /**
  * API route endpoints
@@ -71,6 +72,11 @@ const API_ROUTES = {
   me: `${API_BASE_URL}/user/me`,
   experience: `${API_BASE_URL}/user/experience`,
 };
+
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  withCredentials: true,
+});
 
 /**
  * List of month names
@@ -109,7 +115,7 @@ const getMonthNumber = (monthName: string): string => {
  * @returns {{month: string, year: string}} Object containing month name and year
  */
 const extractDateInfo = (dateString: string) => {
-  if (!dateString) return { month: "January", year: "2023" };
+  if (!dateString) return { month: "April", year: "2025" };
 
   try {
     const date = new Date(dateString);
@@ -118,8 +124,42 @@ const extractDateInfo = (dateString: string) => {
     return { month, year };
   } catch (error) {
     console.error("Error parsing date:", error);
-    return { month: "January", year: "2023" };
+    return { month: "April", year: "2025" };
   }
+};
+
+/**
+ * Parses experience data from API response
+ * @param {any} data - Response data from API
+ * @returns {Experience[]} Formatted experience array
+ */
+const parseExperienceData = (data: any): Experience[] => {
+  if (Array.isArray(data)) {
+    return data.map((exp, idx) => ({ ...exp, index: idx }));
+  }
+
+  if (data.experiences && Array.isArray(data.experiences)) {
+    return data.experiences.map((exp: any, idx: number) => ({
+      ...exp,
+      index: idx,
+    }));
+  }
+
+  if (data.message && data.message.includes("deleted") && data.experiences) {
+    return Array.isArray(data.experiences)
+      ? data.experiences.map((exp: any, idx: number) => ({
+          ...exp,
+          index: idx,
+        }))
+      : [];
+  }
+
+  if (data.jobTitle) {
+    return [{ ...data, index: 0 }];
+  }
+
+  console.error("Invalid data structure from server:", data);
+  return [];
 };
 
 /**
@@ -131,12 +171,16 @@ const extractDateInfo = (dateString: string) => {
 const ExperienceSection: React.FC<ExperienceSectionProps> = ({
   showExperienceForm: externalShowForm,
   setShowExperienceForm: externalSetShowForm,
+  experience: initialExperiences,
+  onExperienceSaved,
 }) => {
-  const [experiences, setExperiences] = useState<Experience[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userData, setUserData] = useState<any>(null);
 
+  const [experiences, setExperiences] = useState<Experience[]>(
+    initialExperiences || []
+  );
   const [showForm, setShowFormInternal] = useState(false);
   const [showAddConfirmation, setShowAddConfirmation] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
@@ -145,9 +189,6 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
     number | undefined
   >(undefined);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [editingExperience, setEditingExperience] = useState<Experience | null>(
-    null
-  );
 
   /**
    * Combined state for showing experience form
@@ -248,7 +289,7 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
       setIsLoading(true);
       setError(null);
 
-      const response = await axios.get(API_ROUTES.me);
+      const response = await api.get(API_ROUTES.me);
 
       if (response.data && response.data.user) {
         setUserData(response.data.user);
@@ -284,30 +325,30 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
     try {
       setIsProcessing(true);
 
+      // First, convert the form data to the API format
       const apiData = convertFormToApiFormat(formData);
 
-      /**
-       * FormData object for API submission
-       * @type {FormData}
-       */
+      // Create FormData object for file uploads if needed
       const formDataForApi = new FormData();
 
-      Object.keys(apiData).forEach((key) => {
-        if (key === "skills" && Array.isArray(apiData[key])) {
-          apiData[key].forEach((skill: string) => {
+      // Add all fields to FormData
+      Object.entries(apiData).forEach(([key, value]) => {
+        if (key === "skills" && Array.isArray(value)) {
+          value.forEach((skill: string) => {
             formDataForApi.append("skills", skill);
           });
-        } else if (key === "media" && apiData[key] instanceof File) {
-          formDataForApi.append("media", apiData[key]);
+        } else if (key === "media" && value instanceof File) {
+          formDataForApi.append("media", value);
+        } else if (value !== undefined && value !== null) {
+          formDataForApi.append(key, String(value));
         }
       });
 
       let response;
 
       if (formData.index !== undefined && experiences[formData.index]?._id) {
-        const experienceId = experiences[formData.index]._id;
-        response = await axios.patch(
-          `${API_ROUTES.experience}/${experienceId}`,
+        response = await api.patch(
+          `${API_ROUTES.experience}/${formData.index}`,
           formDataForApi,
           {
             headers: {
@@ -316,21 +357,28 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
           }
         );
       } else {
-        response = await axios.post(API_ROUTES.experience, formDataForApi, {
+        // For new experiences
+        response = await api.post(API_ROUTES.experience, formDataForApi, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
         });
       }
 
-      await fetchUserData();
+      // Update local state with the response data
+      if (onExperienceSaved) {
+        onExperienceSaved();
+      } else {
+        await fetchUserData();
+      }
 
       setShowExperienceFormState(false);
       setShowAddConfirmation(true);
-      setEditingExperience(null);
       setIsProcessing(false);
     } catch (error: any) {
       console.error("Error saving experience:", error);
+      console.error("Response data:", error.response?.data);
+      console.error("Status:", error.response?.status);
       setError(
         error.response?.data?.message || "Failed to save experience data."
       );
@@ -339,35 +387,55 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
   };
 
   /**
-   * Prepares form for editing an existing experience
-   * @param {Experience} exp - The experience to edit
-   * @returns {void}
-   */
-  const handleEditExperience = (exp: Experience) => {
-    setEditingExperience(exp);
-    setShowExperienceFormState(true);
-  };
-
-  /**
    * Handles deleting an experience entry
    * @async
    * @returns {Promise<void>}
    */
+  const parseExperienceData = (data: any): Experience[] => {
+    if (Array.isArray(data)) {
+      return data.map((exp, idx) => ({ ...exp, index: idx }));
+    }
+
+    if (data.experiences && Array.isArray(data.experiences)) {
+      return data.experiences.map((exp: any, idx: number) => ({
+        ...exp,
+        index: idx,
+      }));
+    }
+
+    if (data.message && data.message.includes("deleted") && data.experiences) {
+      return Array.isArray(data.experiences)
+        ? data.experiences.map((exp: any, idx: number) => ({
+            ...exp,
+            index: idx,
+          }))
+        : [];
+    }
+
+    if (data.jobTitle) {
+      return [{ ...data, index: 0 }];
+    }
+
+    console.error("Invalid data structure from server:", data);
+    return [];
+  };
+
   const handleDeleteExperience = async () => {
+    setIsProcessing(true);
+
     if (pendingDeleteIndex === undefined) {
       return;
     }
 
     try {
-      setIsProcessing(true);
+      // const response = await api.delete(
+      //   `${API_ROUTES.experience}/${pendingDeleteIndex}`
+      // );
 
-      const experienceId = experiences[pendingDeleteIndex]?._id;
-      if (!experienceId) {
-        throw new Error("Experience ID not found");
-      }
+      await api.delete(`${API_ROUTES.experience}/${pendingDeleteIndex}`);
 
-      await axios.delete(`${API_ROUTES.experience}/${experienceId}`);
-
+      // const updatedExperiences = parseExperienceData(response.data);
+      // setExperiences(updatedExperiences);
       await fetchUserData();
 
       setShowDeleteConfirmation(false);
@@ -385,15 +453,17 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
    * Fetches user data on component mount
    */
   useEffect(() => {
-    fetchUserData();
-  }, []);
-
+    if (initialExperiences && initialExperiences.length > 0) {
+      setExperiences(initialExperiences);
+      setIsLoading(false);
+    }
+  }, [initialExperiences]);
   /**
    * Renders a loading overlay with spinner
    * @returns {JSX.Element} Loading overlay component
    */
   const LoadingOverlay = () => (
-    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+    <div className="fixed inset-0  bg-opacity-30 flex items-center justify-center z-50">
       <Loader className="h-8 w-8 text-gray-600 animate-spin" />
     </div>
   );
@@ -403,7 +473,7 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
    * @returns {JSX.Element} Loading skeleton component
    */
   const LoadingSkeletonView = () => (
-    <div className="bg-white rounded-lg shadow p-4 mb-4 w-full">
+    <div className="bg-white rounded-lg shadow p-4 mb-4 ">
       <div className="animate-pulse">
         <div className="h-6 bg-gray-200 rounded w-1/4 mb-4"></div>
         <div className="h-20 bg-gray-100 rounded-lg mb-3"></div>
@@ -470,7 +540,7 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
   }
 
   return (
-    <div className="bg-white rounded-lg shadow p-4 mb-4 w-[900px] m-auto relative">
+    <div className="bg-white rounded-lg shadow p-4 mb-4 m-auto relative w-full">
       {isProcessing && <LoadingOverlay />}
 
       <div className="flex justify-between items-center mb-4">
@@ -479,7 +549,6 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
           <div className="flex space-x-2">
             <button
               onClick={() => {
-                setEditingExperience(null);
                 setShowExperienceFormState(true);
               }}
               className="text-gray-600 hover:bg-gray-100 p-2 rounded-full transition-colors"
@@ -530,15 +599,8 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
                     </h3>
                     <div className="flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
-                        onClick={() => handleEditExperience(exp)}
-                        className="text-blue-500 hover:text-blue-700 p-1"
-                        title="Edit experience"
-                      >
-                        <Pencil size={16} />
-                      </button>
-                      <button
                         onClick={() => {
-                          setPendingDeleteIndex(exp.index);
+                          setPendingDeleteIndex(idx);
                           setShowDeleteConfirmation(true);
                         }}
                         className="text-red-500 hover:text-red-700 p-1"
@@ -590,16 +652,11 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
       )}
 
       {showExperienceFormState && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/30   flex items-center justify-center z-50">
           <ExperienceForm
-            initialData={
-              editingExperience
-                ? convertApiToFormData(editingExperience)
-                : undefined
-            }
+            initialData={undefined}
             onClose={() => {
               setShowExperienceFormState(false);
-              setEditingExperience(null);
             }}
             onSave={handleSaveExperience}
           />
@@ -608,23 +665,13 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
 
       {showAddConfirmation && (
         <ConfirmationDialog
-          title={
-            editingExperience
-              ? "Experience Updated Successfully"
-              : "Experience Added Successfully"
-          }
-          message={
-            editingExperience
-              ? "Your experience has been updated on your profile."
-              : "Your experience has been added to your profile."
-          }
-          confirmText="Done"
+          title="Experience Will Be Added"
+          message="Your experience will be added to your profile."
+          confirmText="Okay"
           onConfirm={() => setShowAddConfirmation(false)}
           onCancel={() => setShowAddConfirmation(false)}
-          showAddMore={!editingExperience}
           onAddMore={() => {
             setShowAddConfirmation(false);
-            setEditingExperience(null);
             setShowExperienceFormState(true);
           }}
         />

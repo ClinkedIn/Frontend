@@ -4,9 +4,23 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { MdLocationPin, MdSearch } from "react-icons/md";
 import Jobs from "../pages/jobs/Jobs";
 import { BASE_URL } from "../constants";
-import { collection, addDoc,getDoc,setDoc, serverTimestamp, doc, updateDoc, arrayUnion, onSnapshot, orderBy, query, where } from 'firebase/firestore';
+import {
+  collection,
+  addDoc,
+  getDoc,
+  setDoc,
+  serverTimestamp,
+  doc,
+  updateDoc,
+  arrayUnion,
+  onSnapshot,
+  orderBy,
+  query,
+  where,
+} from "firebase/firestore";
 import { db } from "../../firebase"; // Adjust the import path as necessary
 import React from "react";
+import { useAuth } from "../context/AuthContext";
 /**
  * Header component representing the upper navigation bar of the application.
  *
@@ -46,12 +60,32 @@ const Header = ({ notifications }) => {
   const locations = useLocation();
   const currentPath = locations.pathname.split("/")[1];
   const dropdownRef = useRef(null);
-  const [unreadCountMessages, setUnreadCountMessages] = useState(0)
+  const [unreadCountMessages, setUnreadCountMessages] = useState(0);
   const [conversations, setConversations] = useState([]);
   const [loadingConversations, setLoadingConversations] = useState(true);
-  const currentUser ={
-    uid:"123"
-  }
+
+  const [userInfo, setUserInfo] = useState(null);
+
+  const currentUser = {
+    uid: "123",
+  };
+
+  const { logout } = useAuth();
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const response = await axios.get(`${BASE_URL}/user/me`, {
+          withCredentials: true,
+        });
+        setUserInfo(response.data.user);
+      } catch (error) {
+        console.error("Failed to fetch user info:", error);
+      }
+    };
+
+    fetchUserInfo();
+  }, []);
 
   useEffect(() => {
     const fetchUnreadCount = async () => {
@@ -71,38 +105,39 @@ const Header = ({ notifications }) => {
   }, [notifications]);
 
   useEffect(() => {
-    const conversationsRef = collection(db, 'conversations');
+    const conversationsRef = collection(db, "conversations");
     const q = query(
       conversationsRef,
-      where('participants', 'array-contains', currentUser.uid)
+      where("participants", "array-contains", currentUser.uid)
     );
 
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      let totalUnread = 0;
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        const countForUser = data.unreadCounts?.[currentUser.uid] || 0;
-        totalUnread += countForUser;
-      });
+    const unsubscribe = onSnapshot(
+      q,
+      (querySnapshot) => {
+        let totalUnread = 0;
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          const countForUser = data.unreadCounts?.[currentUser.uid] || 0;
+          totalUnread += countForUser;
+        });
 
-      console.log("Total unread messages from Firestore:", totalUnread);
-      setUnreadCountMessages(totalUnread);
-
-    }, (error) => {
-      
-      console.error("Error fetching unread message count from Firestore:", error);
-      setUnreadCountMessages(0); 
-    });
+        console.log("Total unread messages from Firestore:", totalUnread);
+        setUnreadCountMessages(totalUnread);
+      },
+      (error) => {
+        console.error(
+          "Error fetching unread message count from Firestore:",
+          error
+        );
+        setUnreadCountMessages(0);
+      }
+    );
     return () => {
       console.log("Cleaning up Firestore listener for unread messages count.");
       unsubscribe();
     };
+  }, [currentUser?.uid]);
 
-
-  }
-, [currentUser?.uid]);
-
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -146,6 +181,15 @@ const Header = ({ notifications }) => {
     setShowUser(false);
   };
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
   /**
    * Handles the search functionality by sending a GET request to the server
    * with the provided search query and location parameters. Navigates to the
@@ -164,9 +208,7 @@ const Header = ({ notifications }) => {
       if (searchQuery) params.append("q", searchQuery);
       if (location) params.append("location", location);
 
-      const response = await axios.get(
-        `${BASE_URL}/search/jobs?${params}`
-      );
+      const response = await axios.get(`${BASE_URL}/search/jobs?${params}`);
 
       navigate("/job-board", {
         state: {
@@ -258,11 +300,18 @@ const Header = ({ notifications }) => {
           >
             <img src="/Images/nav-jobs.svg" alt="Jobs" className="w-6 h-6" />
           </button>
-          <button className="relative flex flex-col items-center text-xs text-gray-600 hover:text-black p-1" onClick={handleMessagingClick}>
-            <img src="/Images/nav-messaging.svg" alt="Messaging" className="w-6 h-6" />
+          <button
+            className="relative flex flex-col items-center text-xs text-gray-600 hover:text-black p-1"
+            onClick={handleMessagingClick}
+          >
+            <img
+              src="/Images/nav-messaging.svg"
+              alt="Messaging"
+              className="w-6 h-6"
+            />
             {unreadCountMessages > 0 && (
               <div className="absolute -top-1 left-1/2 ml-1 bg-[#cb112d] text-white rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-[10px] md:text-xs font-medium">
-                {unreadCountMessages > 10 ? '10+' : unreadCountMessages} 
+                {unreadCountMessages > 10 ? "10+" : unreadCountMessages}
               </div>
             )}
           </button>
@@ -286,7 +335,6 @@ const Header = ({ notifications }) => {
           </button>
         </nav>
 
-        {/* User & Work Icons with Dropdown */}
         <div className="flex space-x-4 items-center">
           <div className="relative" ref={dropdownRef}>
             <button
@@ -294,9 +342,9 @@ const Header = ({ notifications }) => {
               onClick={() => setShowUser(!showUser)}
             >
               <img
-                src="/Images/user.svg"
-                alt="User"
-                className="w-6 h-6 rounded-full"
+                src={userInfo?.profilePicture || "/Images/user.svg"}
+                alt="User Profile"
+                className="w-8 h-8 rounded-full mr-3"
               />
               <img
                 src="/Images/down-icon.svg"
@@ -307,20 +355,23 @@ const Header = ({ notifications }) => {
               />
             </button>
 
-            {/* User dropdown menu */}
             {showUser && (
               <div className="absolute right-0 mt-1 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200">
                 <div className="px-4 py-2 border-b border-gray-200">
                   <div className="flex items-center">
                     <img
-                      src="/Images/user.svg"
+                      src={userInfo?.profilePicture || "/Images/user.svg"}
                       alt="User Profile"
-                      className="w-10 h-10 rounded-full mr-3"
+                      className="w-8 h-8 rounded-full mr-3"
                     />
                     <div>
-                      <p className="font-medium text-gray-800">John Doe</p>
+                      <p className="font-medium text-gray-800">
+                        {userInfo
+                          ? `${userInfo.firstName} ${userInfo.lastName}`
+                          : "Loading..."}
+                      </p>
                       <p className="text-xs text-gray-500">
-                        Software Developer
+                        {userInfo?.lastJobTitle || ""}
                       </p>
                     </div>
                   </div>
@@ -337,9 +388,12 @@ const Header = ({ notifications }) => {
                 >
                   Settings
                 </button>
-                {/* <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 border-t border-gray-200">
+                <button
+                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 border-t border-gray-200"
+                  onClick={handleLogout}
+                >
                   Sign Out
-                </button> */}
+                </button>
               </div>
             )}
           </div>

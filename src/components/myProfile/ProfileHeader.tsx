@@ -3,812 +3,634 @@ import CoverPhoto from "./CoverPhoto";
 import ProfilePhoto from "./ProfilePicture";
 import { useNavigate } from "react-router";
 import axios from "axios";
-import { BASE_URL } from "../../constants";  
-/**
- * Interface representing the contact information of a user
- * @interface ContactInfo
- */
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPhone } from "@fortawesome/free-solid-svg-icons";
+import ConfirmationDialog from "./ConfirmationDialog";
+
 interface ContactInfo {
-  /** Birthday information with day and month */
   birthDay?: {
-    /** Day of birth (1-31) */
     day: number;
-    /** Month of birth (January-December) */
     month: string;
   };
-  /** Website information */
   website?: {
-    /** Website URL */
     url: string | null;
-    /** Type of website (Personal, Company, Blog, etc.) */
     type: string | null;
   };
-  /** Phone number */
   phone: string;
-  /** Type of phone (Home, Work, Mobile) */
   phoneType: string;
-  /** Physical address */
   address: string;
 }
 
-/**
- * Interface representing user's about information
- * @interface AboutInfo
- */
 interface AboutInfo {
-  /** User description/bio */
   description: string | null;
-  /** List of user's skills */
-  skills: string[];
+  skills?: string[];
 }
 
-/**
- * Interface representing a user profile
- * @interface User
- */
 interface User {
-  /** User's first name */
   firstName: string;
-  /** User's last name */
   lastName: string;
-  /** User's contact information */
   contactInfo: ContactInfo;
-  /** User's about information */
   about: AboutInfo;
-  /** URL to user's profile picture */
   profilePicture: string | null;
-  /** URL to user's cover picture */
   coverPicture: string | null;
-  /** User's professional headline */
   headline: string | null;
-  /** User's additional name (e.g. middle name) */
   additionalName: string | null;
-  /** User's personal or professional website */
   website: string | null;
-  /** User's location */
   location: string | null;
-  /** User's industry/sector */
   industry: string | null;
+  isVerified?: boolean;
+  connections?: number;
+  university?: string;
 }
 
-/**
- * Profile header component that displays and manages the user's profile information
- *
- * This component handles:
- * - Display of user profile and cover images
- * - User name and headline
- * - About section with description and skills
- * - Contact information
- * - Editing functionality for all profile sections
- *
- * @returns {JSX.Element} Rendered profile header component
- */
-const ProfileHeaderMain: React.FC = () => {
+interface ProfileHeaderProps {
+  userData: User;
+  onUpdateAbout: (about: AboutInfo) => Promise<boolean>;
+  onUpdateContactInfo: (contactInfo: ContactInfo) => Promise<boolean>;
+  onUpdateProfilePicture: (file: File) => Promise<boolean>;
+  onUpdateCoverPicture: (file: File) => Promise<boolean>;
+  onAddSection?: () => void;
+  onRefreshUserData: () => Promise<any>;
+}
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  withCredentials: true,
+});
+
+const ProfileHeader: React.FC<ProfileHeaderProps> = ({
+  userData,
+  onUpdateAbout,
+  onUpdateContactInfo,
+  onUpdateProfilePicture,
+  onUpdateCoverPicture,
+  onAddSection,
+  onRefreshUserData,
+}) => {
   const [coverImageUrl, setCoverImageUrl] = useState<string | undefined>(
-    "/default-cover.jpg"
+    userData?.coverPicture || "/default-cover.jpg"
   );
   const [profileImageUrl, setProfileImageUrl] = useState<string | undefined>(
-    "/profile-image.jpg"
+    userData?.profilePicture || "/profile-image.jpg"
   );
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [showEditForm, setShowEditForm] = useState(false);
 
-  // UI state
-  const [showAboutForm, setShowAboutForm] = useState(false);
-  const [showContactForm, setShowContactForm] = useState(false);
-  const [aboutText, setAboutText] = useState<string | null>(null);
-  const [aboutSkills, setAboutSkills] = useState<string[]>([]);
-  const [contactInfo, setContactInfo] = useState<ContactInfo>({
+  const [contactInfo, setContactInfo] = useState<ContactInfo>(
+    userData?.contactInfo || {
+      phone: "",
+      phoneType: "Mobile",
+      address: "",
+      website: { url: null, type: null },
+    }
+  );
+  const [isLoading, setIsLoading] = useState(false);
+  const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
+  const [updateError, setUpdateError] = useState<string | null>(null);
+  const [aboutText, setAboutText] = useState(
+    userData?.about?.description || ""
+  );
+
+  const [errors, setErrors] = useState({
     phone: "",
-    phoneType: "Home",
-    address: "",
-    birthDay: { day: 1, month: "January" },
-    website: { url: null, type: null },
+    website: "",
   });
 
   let navigate = useNavigate();
 
-  // Fetch user data from API
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get(`${BASE_URL}/user/me`);
-
-        if (response.data && response.data.user) {
-          setUser(response.data.user);
-
-          // Set profile and cover images if available
-          if (response.data.user.profilePicture) {
-            setProfileImageUrl(response.data.user.profilePicture);
-          }
-
-          if (response.data.user.coverPicture) {
-            setCoverImageUrl(response.data.user.coverPicture);
-          }
-
-          // Set about and contact info
-          if (response.data.user.about) {
-            setAboutText(response.data.user.about.description);
-            setAboutSkills(response.data.user.about.skills || []);
-          }
-
-          if (response.data.user.contactInfo) {
-            setContactInfo(response.data.user.contactInfo);
-          }
-        }
-
-        setLoading(false);
-      } catch (err) {
-        console.error("Error fetching user data:", err);
-        setError("Failed to load user data. Please try again later.");
-        setLoading(false);
-      }
+  const validateForm = () => {
+    let isValid = true;
+    const newErrors = {
+      phone: "",
+      website: "",
     };
 
-    fetchUserData();
+    // Phone validation - simple format check
+    if (contactInfo.phone && !/^[+]?[\d\s-()]+$/.test(contactInfo.phone)) {
+      newErrors.phone = "Please enter a valid phone number";
+      isValid = false;
+    }
+
+    // Website URL validation
+    if (
+      contactInfo.website?.url &&
+      !/^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,})([/\w .-]*)*\/?$/.test(
+        contactInfo.website.url
+      )
+    ) {
+      newErrors.website = "Please enter a valid website URL";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  const handleCoverImageChange = async (file: File) => {
+    try {
+      const success = await onUpdateCoverPicture(file);
+      if (success) {
+        setCoverImageUrl(URL.createObjectURL(file));
+      }
+    } catch (error) {
+      console.error("Error updating cover image:", error);
+      setUpdateError("Failed to update cover image");
+    }
+  };
+
+  const fetchProfilePicture = async () => {
+    try {
+      const response = await api.get("/user/pictures/profile-picture");
+      if (response.data?.profilePicture) {
+        setProfileImageUrl(response.data.profilePicture);
+      }
+    } catch (error) {
+      console.error("Error fetching profile picture:", error);
+      setProfileImageUrl("/profile-image.jpg");
+    }
+  };
+
+  const handleProfileImageChange = async (file: File) => {
+    if (!file) return;
+    try {
+      const success = await onUpdateProfilePicture(file);
+      if (success) {
+        setProfileImageUrl(URL.createObjectURL(file));
+      }
+    } catch (error) {
+      console.error("Error updating profile image:", error);
+      setUpdateError("Failed to update profile image");
+    }
+  };
+
+  useEffect(() => {
+    fetchProfilePicture();
   }, []);
 
-  /**
-   * Handles changing the cover image
-   * @param {File} file - The new cover image file
-   */
-  const handleCoverImageChange = (file: File) => {
-    const url = URL.createObjectURL(file);
-    setCoverImageUrl(url);
-  };
+  useEffect(() => {
+    if (userData?.about?.description !== undefined) {
+      setAboutText(userData.about.description);
+    }
+  }, [userData?.about?.description]);
 
-  /**
-   * Handles deletion of the cover image
-   */
-  const handleCoverImageDelete = () => {
-    setCoverImageUrl(undefined);
-  };
-
-  /**
-   * Handles changing the profile image
-   * @param {File} file - The new profile image file
-   */
-  const handleProfileImageChange = (file: File) => {
-    const url = URL.createObjectURL(file);
-    setProfileImageUrl(url);
-  };
-
-  /**
-   * Handles deletion of the profile image
-   */
-  const handleProfileImageDelete = () => {
-    setProfileImageUrl(undefined);
-  };
-
-  /**
-   * Navigates to the username update page
-   */
   const handleEditName = () => {
     navigate("/update-username");
   };
 
-  /**
-   * Submits the updated about section to the server
-   * @param {React.FormEvent} e - Form submission event
-   */
-  const handleAboutSubmit = async (e: React.FormEvent) => {
+  const handleEditFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      const response = await axios.patch(`${BASE_URL}/user/about`, {
-        about: {
-          description: aboutText,
-          skills: aboutSkills,
-        },
-      });
 
-      if (response.data) {
-        // Update local state with response data
-        setUser((prev) =>
-          prev
-            ? {
-                ...prev,
-                about: {
-                  description: aboutText,
-                  skills: aboutSkills,
-                },
-              }
-            : null
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsLoading(true);
+    setUpdateError(null);
+
+    try {
+      const aboutPayload: AboutInfo = {
+        description: aboutText.trim(),
+        skills: userData?.about?.skills || [],
+      };
+
+      const aboutSuccess = await onUpdateAbout(aboutPayload);
+      const contactSuccess = await onUpdateContactInfo(contactInfo);
+
+      if (aboutSuccess && contactSuccess) {
+        await onRefreshUserData();
+        setShowEditForm(false);
+        setShowConfirmationDialog(true);
+      } else {
+        setUpdateError(
+          !aboutSuccess
+            ? "Failed to update about section"
+            : "Failed to update contact information"
         );
-        setShowAboutForm(false);
       }
     } catch (err) {
-      console.error("Error updating about section:", err);
-      setError("Failed to update about section. Please try again.");
+      console.error("Error updating profile information:", err);
+      setUpdateError("An error occurred while updating your profile");
+    } finally {
+      setIsLoading(false);
     }
   };
-
-  /**
-   * Submits the updated contact information to the server
-   * @param {React.FormEvent} e - Form submission event
-   */
-  const handleContactSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const response = await axios.patch(
-        `${BASE_URL}/user/contact-info`,
-        contactInfo
-      );
-
-      if (response.data) {
-        // Update local state with response data
-        setUser((prev) =>
-          prev
-            ? {
-                ...prev,
-                contactInfo: contactInfo,
-              }
-            : null
-        );
-        setShowContactForm(false);
-      }
-    } catch (err) {
-      console.error("Error updating contact info:", err);
-      setError("Failed to update contact information. Please try again.");
-    }
+  const handleConfirmDialogClose = () => {
+    setShowConfirmationDialog(false);
   };
 
-  if (loading) {
-    return (
-      <div className="bg-white rounded-lg shadow w-240 m-auto ml-4 p-6">
-        <div className="animate-pulse">
-          <div className="h-48 bg-gray-200 rounded-t-lg"></div>
-          <div className="h-32 flex items-center justify-center">
-            <div className="h-24 w-24 bg-gray-300 rounded-full"></div>
-          </div>
-          <div className="h-6 bg-gray-200 rounded w-1/3 mt-6"></div>
-          <div className="h-4 bg-gray-200 rounded w-1/4 mt-4"></div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="bg-white rounded-lg shadow w-240 m-auto ml-4 p-6">
-        <div className="text-red-500 text-center">
-          <p>{error}</p>
-          <button
-            className="mt-4 bg-blue-600 text-white px-4 py-2 rounded"
-            onClick={() => window.location.reload()}
-          >
-            Try Again
-          </button>
-        </div>
-      </div>
-    );
-  }
+  const handleAddMoreSection = () => {
+    setShowConfirmationDialog(false);
+    if (onAddSection) {
+      onAddSection();
+    }
+  };
 
   return (
-    <div className="bg-white rounded-lg shadow w-240 m-auto ml-4">
-      <div className="relative">
-        <CoverPhoto
-          currentImageUrl={coverImageUrl}
-          onImageChange={handleCoverImageChange}
-          onImageDelete={handleCoverImageDelete}
-        />
-
-        <div className="absolute -bottom-16 left-8">
-          <ProfilePhoto
-            currentImageUrl={profileImageUrl}
-            onImageChange={handleProfileImageChange}
-            onImageDelete={handleProfileImageDelete}
+    <div className="rounded-lg shadow-[0_5px_5px_-3px_rgba(0,0,0,0.1)] bg-white mb-4 mt-10 overflow-hidden">
+      <div className="relative ">
+        <div className="h-60 overflow-hidden  bg-[#F4F2EE]">
+          <CoverPhoto
+            currentImageUrl={coverImageUrl}
+            onImageChange={handleCoverImageChange}
           />
+        </div>
+        <div className="absolute -bottom-16 left-8">
+          <div className="rounded-full border-4 border-white w-32 h-32 overflow-hidden">
+            <ProfilePhoto
+              currentImageUrl={profileImageUrl}
+              onImageChange={handleProfileImageChange}
+              onFetchImage={fetchProfilePicture}
+            />
+          </div>
         </div>
       </div>
 
-      <div className="p-6 pt-20">
-        <div className="flex justify-between">
+      {updateError && (
+        <div className="mx-8 mt-2 p-2 bg-red-100 text-red-700 rounded flex items-center">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5 mr-2"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fillRule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+              clipRule="evenodd"
+            />
+          </svg>
+          {updateError}
+        </div>
+      )}
+
+      <div className="bg-white pt-20 px-8 pb-4">
+        <div className="flex justify-between items-start mb-4">
           <div>
-            <div className="flex items-center">
-              <h1 className="text-3xl font-bold text-gray-900">
-                {user ? `${user.firstName} ${user.lastName}` : "Loading..."}
-              </h1>
-              <div className="ml-2 flex items-center justify-center text-gray-600">
+            <h1 className="text-2xl font-bold flex items-center">
+              {userData.firstName} {userData.lastName}
+              {userData.isVerified && (
+                <span className="ml-2 text-blue-800">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </span>
+              )}
+              <button
+                onClick={handleEditName}
+                className="ml-2 text-gray-500 hover:text-gray-700"
+                aria-label="Edit name"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
+                  className="h-4 w-4"
+                  viewBox="0 0 20 20"
                   fill="currentColor"
-                  className="h-5 w-5"
                 >
-                  <path
-                    fillRule="evenodd"
-                    d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zm7.007 6.387a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z"
-                    clipRule="evenodd"
-                  />
+                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                 </svg>
-              </div>
+              </button>
+            </h1>
+
+            {userData.headline && (
+              <p className="text-gray-600 mt-1">{userData.headline}</p>
+            )}
+
+            <div className="flex flex-wrap items-center gap-1 mt-2 text-gray-600 text-sm">
+              {userData.location && <p>{userData.location}</p>}
+              {userData.location && userData.industry && (
+                <span className="mx-1">•</span>
+              )}
+              {userData.industry && <p>{userData.industry}</p>}
+
+              {userData.university && (
+                <div className="flex items-center mt-1">
+                  <span className="mr-2">🎓</span>
+                  <span>{userData.university}</span>
+                </div>
+              )}
             </div>
 
-            <div className="flex items-center mt-2">
-              <div className="flex items-center text-gray-600 bg-gray-100 rounded-md px-2 py-1">
-                {user?.headline || ""}
-              </div>
-            </div>
+            {userData.connections && (
+              <p className="text-blue-600 text-sm font-medium mt-2">
+                {userData.connections}+ connections
+              </p>
+            )}
           </div>
+
           <button
-            className="p-2 text-gray-600 hover:bg-gray-100 rounded-full"
-            onClick={handleEditName}
+            onClick={() => setShowEditForm(true)}
+            className="text-[#0073b1] hover:text-gray-700"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-5 w-5"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+              viewBox="0 0 20 20"
+              fill="currentColor"
             >
-              <path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+              <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
             </svg>
           </button>
         </div>
 
-        {/* About Section */}
-        <div className="mt-6 border-t pt-4">
-          <div className="flex justify-between items-center mb-2">
-            <h2 className="text-lg font-semibold text-gray-800">About</h2>
-            <button
-              className="p-2 text-gray-600 hover:bg-gray-100 rounded-full"
-              onClick={() => setShowAboutForm(true)}
+        {showEditForm && (
+          <div
+            className="fixed inset-0 bg-black/30 flex items-center justify-center z-50"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setShowEditForm(false);
+            }}
+          >
+            <div
+              className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-screen overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
-              </svg>
-            </button>
-          </div>
-
-          {showAboutForm ? (
-            <form onSubmit={handleAboutSubmit} className="mt-2">
-              <div className="mb-4">
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="about"
-                >
-                  Description
-                </label>
-                <textarea
-                  id="about"
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  value={aboutText || ""}
-                  onChange={(e) => setAboutText(e.target.value)}
-                  rows={4}
-                  placeholder="Add a description about yourself..."
-                />
-              </div>
-
-              <div className="mb-4">
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="skills"
-                >
-                  Skills (up to 5)
-                </label>
-                <input
-                  id="skills"
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-2 leading-tight focus:outline-none focus:shadow-outline"
-                  value={aboutSkills.join(", ")}
-                  onChange={(e) => {
-                    const skillsArray = e.target.value
-                      .split(",")
-                      .map((skill) => skill.trim());
-                    setAboutSkills(
-                      skillsArray.filter((skill) => skill !== "").slice(0, 5)
-                    );
-                  }}
-                  placeholder="Add skills separated by commas (React, Node.js, etc.)"
-                />
-                <p className="text-xs text-gray-500">
-                  {aboutSkills.length}/5 skills added
-                </p>
-              </div>
-
-              <div className="flex items-center justify-end">
+              <div className="flex justify-between items-center p-4 border-b">
+                <h2 className="text-xl font-medium">Edit</h2>
                 <button
-                  type="button"
-                  className="mr-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-4 rounded"
-                  onClick={() => setShowAboutForm(false)}
+                  onClick={() => setShowEditForm(false)}
+                  className="text-gray-500 hover:text-gray-700"
                 >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded"
-                >
-                  Save
-                </button>
-              </div>
-            </form>
-          ) : (
-            <div>
-              <p className="text-gray-600 mt-1">
-                {user?.about?.description ||
-                  "Add a description about yourself..."}
-              </p>
-
-              {user?.about?.skills && user.about.skills.length > 0 && (
-                <div className="mt-3">
-                  <p className="text-gray-700 font-medium mb-1">Skills:</p>
-                  <div className="flex flex-wrap gap-2">
-                    {user.about.skills.map((skill, index) => (
-                      <span
-                        key={index}
-                        className="bg-blue-50 text-blue-600 text-sm px-3 py-1 rounded-full"
-                      >
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Contact Information Section */}
-        <div className="mt-6 border-t pt-4">
-          <div className="flex justify-between items-center mb-2">
-            <h2 className="text-lg font-semibold text-gray-800">
-              Contact Info
-            </h2>
-            <button
-              className="p-2 text-gray-600 hover:bg-gray-100 rounded-full"
-              onClick={() => setShowContactForm(true)}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
-              </svg>
-            </button>
-          </div>
-
-          {showContactForm ? (
-            <form onSubmit={handleContactSubmit} className="mt-2">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label
-                    className="block text-gray-700 text-sm font-bold mb-2"
-                    htmlFor="phone"
-                  >
-                    Phone
-                  </label>
-                  <input
-                    id="phone"
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    value={contactInfo.phone}
-                    onChange={(e) =>
-                      setContactInfo({ ...contactInfo, phone: e.target.value })
-                    }
-                    placeholder="Phone number"
-                  />
-                </div>
-
-                <div>
-                  <label
-                    className="block text-gray-700 text-sm font-bold mb-2"
-                    htmlFor="phoneType"
-                  >
-                    Phone Type
-                  </label>
-                  <select
-                    id="phoneType"
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    value={contactInfo.phoneType}
-                    onChange={(e) =>
-                      setContactInfo({
-                        ...contactInfo,
-                        phoneType: e.target.value,
-                      })
-                    }
-                  >
-                    <option value="Home">Home</option>
-                    <option value="Work">Work</option>
-                    <option value="Mobile">Mobile</option>
-                  </select>
-                </div>
-
-                <div className="md:col-span-2">
-                  <label
-                    className="block text-gray-700 text-sm font-bold mb-2"
-                    htmlFor="address"
-                  >
-                    Address
-                  </label>
-                  <input
-                    id="address"
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    value={contactInfo.address}
-                    onChange={(e) =>
-                      setContactInfo({
-                        ...contactInfo,
-                        address: e.target.value,
-                      })
-                    }
-                    placeholder="Address"
-                  />
-                </div>
-
-                <div>
-                  <label
-                    className="block text-gray-700 text-sm font-bold mb-2"
-                    htmlFor="birthDay"
-                  >
-                    Birth Day
-                  </label>
-                  <div className="flex gap-2">
-                    <select
-                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                      value={contactInfo.birthDay?.day || 1}
-                      onChange={(e) =>
-                        setContactInfo({
-                          ...contactInfo,
-                          birthDay: {
-                            ...(contactInfo.birthDay as any),
-                            day: Number(e.target.value),
-                          },
-                        })
-                      }
-                    >
-                      {Array.from({ length: 31 }, (_, i) => i + 1).map(
-                        (day) => (
-                          <option key={day} value={day}>
-                            {day}
-                          </option>
-                        )
-                      )}
-                    </select>
-
-                    <select
-                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                      value={contactInfo.birthDay?.month || "January"}
-                      onChange={(e) =>
-                        setContactInfo({
-                          ...contactInfo,
-                          birthDay: {
-                            ...(contactInfo.birthDay as any),
-                            month: e.target.value,
-                          },
-                        })
-                      }
-                    >
-                      {[
-                        "January",
-                        "February",
-                        "March",
-                        "April",
-                        "May",
-                        "June",
-                        "July",
-                        "August",
-                        "September",
-                        "October",
-                        "November",
-                        "December",
-                      ].map((month) => (
-                        <option key={month} value={month}>
-                          {month}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label
-                    className="block text-gray-700 text-sm font-bold mb-2"
-                    htmlFor="websiteUrl"
-                  >
-                    Website
-                  </label>
-                  <input
-                    id="websiteUrl"
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    value={contactInfo.website?.url || ""}
-                    onChange={(e) =>
-                      setContactInfo({
-                        ...contactInfo,
-                        website: {
-                          ...(contactInfo.website as any),
-                          url: e.target.value,
-                        },
-                      })
-                    }
-                    placeholder="Website URL"
-                  />
-                </div>
-
-                <div>
-                  <label
-                    className="block text-gray-700 text-sm font-bold mb-2"
-                    htmlFor="websiteType"
-                  >
-                    Website Type
-                  </label>
-                  <select
-                    id="websiteType"
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    value={contactInfo.website?.type || "Personal"}
-                    onChange={(e) =>
-                      setContactInfo({
-                        ...contactInfo,
-                        website: {
-                          ...(contactInfo.website as any),
-                          type: e.target.value,
-                        },
-                      })
-                    }
-                  >
-                    <option value="Personal">Personal</option>
-                    <option value="Company">Company</option>
-                    <option value="Blog">Blog</option>
-                    <option value="Portfolio">Portfolio</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-end mt-4">
-                <button
-                  type="button"
-                  className="mr-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-4 rounded"
-                  onClick={() => setShowContactForm(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded"
-                >
-                  Save
-                </button>
-              </div>
-            </form>
-          ) : (
-            <div className="space-y-2">
-              {contactInfo.phone && (
-                <div className="flex items-start">
                   <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 mr-2 text-gray-500 mt-0.5"
+                    className="w-6 h-6"
                     fill="none"
-                    viewBox="0 0 24 24"
                     stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                    />
+                      strokeWidth="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    ></path>
                   </svg>
+                </button>
+              </div>
+
+              <form onSubmit={handleEditFormSubmit} className="p-4">
+                <div className="mb-6">
                   <div>
-                    <p className="text-gray-700">{contactInfo.phone}</p>
-                    <p className="text-gray-500 text-sm">
-                      {contactInfo.phoneType}
+                    <label className="block text-gray-700 mb-1 font-medium">
+                      About
+                    </label>
+                    <textarea
+                      value={aboutText}
+                      onChange={(e) => setAboutText(e.target.value)}
+                      className="w-full border border-gray-300 rounded p-2 h-32"
+                      placeholder="Tell us about yourself..."
+                      maxLength={500}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      {aboutText?.length || 0}/500 characters
                     </p>
                   </div>
                 </div>
-              )}
 
-              {contactInfo.address && (
-                <div className="flex items-start">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 mr-2 text-gray-500 mt-0.5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
-                  <p className="text-gray-700">{contactInfo.address}</p>
-                </div>
-              )}
+                <div className="mb-6">
+                  <div className="mb-4">
+                    <label className="block text-gray-700 mb-1 font-medium">
+                      Phone
+                    </label>
+                    <div className="flex space-x-2">
+                      <div className="flex-1">
+                        <input
+                          type="text"
+                          value={contactInfo.phone}
+                          onChange={(e) =>
+                            setContactInfo({
+                              ...contactInfo,
+                              phone: e.target.value,
+                            })
+                          }
+                          className={`w-full border ${
+                            errors.phone ? "border-red-500" : "border-gray-300"
+                          } rounded p-2`}
+                          placeholder="Your phone number"
+                        />
+                        {errors.phone && (
+                          <p className="text-red-500 text-xs mt-1">
+                            {errors.phone}
+                          </p>
+                        )}
+                      </div>
+                      <select
+                        value={contactInfo.phoneType}
+                        onChange={(e) =>
+                          setContactInfo({
+                            ...contactInfo,
+                            phoneType: e.target.value,
+                          })
+                        }
+                        className="border border-gray-300 rounded p-2"
+                      >
+                        <option value="Mobile">Mobile</option>
+                        <option value="Home">Home</option>
+                        <option value="Work">Work</option>
+                      </select>
+                    </div>
+                  </div>
 
-              {contactInfo.birthDay && (
-                <div className="flex items-start">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 mr-2 text-gray-500 mt-0.5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  <div className="mb-4">
+                    <label className="block text-gray-700 mb-1 font-medium">
+                      Address
+                    </label>
+                    <input
+                      type="text"
+                      value={contactInfo.address}
+                      onChange={(e) =>
+                        setContactInfo({
+                          ...contactInfo,
+                          address: e.target.value,
+                        })
+                      }
+                      className="w-full border border-gray-300 rounded p-2"
+                      placeholder="Your address"
+                      maxLength={100}
                     />
-                  </svg>
-                  <p className="text-gray-700">
-                    {contactInfo.birthDay.day} {contactInfo.birthDay.month}
-                  </p>
-                </div>
-              )}
+                  </div>
 
-              {contactInfo.website?.url && (
-                <div className="flex items-start">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 mr-2 text-gray-500 mt-0.5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
-                    />
-                  </svg>
-                  <div>
-                    <a
-                      href={contactInfo.website.url || "#"}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline"
-                    >
-                      {contactInfo.website.url}
-                    </a>
-                    {contactInfo.website.type && (
-                      <p className="text-gray-500 text-sm">
-                        {contactInfo.website.type}
-                      </p>
-                    )}
+                  <div className="mb-4">
+                    <label className="block text-gray-700 mb-1 font-medium">
+                      Website
+                    </label>
+                    <div className="flex space-x-2">
+                      <div className="flex-1">
+                        <input
+                          type="text"
+                          value={contactInfo.website?.url || ""}
+                          onChange={(e) =>
+                            setContactInfo({
+                              ...contactInfo,
+                              website: {
+                                url: e.target.value,
+                                type: contactInfo.website?.type || "Personal",
+                              },
+                            })
+                          }
+                          className={`w-full border ${
+                            errors.website
+                              ? "border-red-500"
+                              : "border-gray-300"
+                          } rounded p-2`}
+                          placeholder="https://example.com"
+                        />
+                        {errors.website && (
+                          <p className="text-red-500 text-xs mt-1">
+                            {errors.website}
+                          </p>
+                        )}
+                      </div>
+                      <select
+                        value={contactInfo.website?.type || "Personal"}
+                        onChange={(e) =>
+                          setContactInfo({
+                            ...contactInfo,
+                            website: {
+                              url: contactInfo.website?.url || null,
+                              type: e.target.value,
+                            },
+                          })
+                        }
+                        className="border border-gray-300 rounded p-2"
+                      >
+                        <option value="Personal">Personal</option>
+                        <option value="Company">Company</option>
+                        <option value="Blog">Blog</option>
+                        <option value="Portfolio">Portfolio</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
-              )}
 
-              {!contactInfo.phone &&
-                !contactInfo.address &&
-                !contactInfo.website?.url && (
-                  <p className="text-gray-500">
-                    No contact information added yet.
-                  </p>
-                )}
+                <div className="flex justify-end space-x-2 pt-2 border-t">
+                  <button
+                    type="button"
+                    onClick={() => setShowEditForm(false)}
+                    className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "Saving..." : "Save"}
+                  </button>
+                </div>
+              </form>
             </div>
-          )}
+          </div>
+        )}
+
+        {/* Confirmation Dialog */}
+        {showConfirmationDialog && (
+          <ConfirmationDialog
+            title="Profile Updated"
+            message="Your profile information has been updated successfully."
+            confirmText="Done"
+            onConfirm={handleConfirmDialogClose}
+            onCancel={handleConfirmDialogClose}
+            showAddMore={!!onAddSection}
+            onAddMore={handleAddMoreSection}
+          />
+        )}
+
+        <div>
+          <div>
+            {userData?.about?.description ? (
+              <p className="text-gray-700 whitespace-pre-wrap">
+                {userData.about.description}
+              </p>
+            ) : (
+              <div className="flex justify-between items-center mt-2 pl-3 w-[25%]">
+                <p className="text-gray-500 italic">Add Your Bio</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="mt-3 w-[75%]">
+          <div className="flex flex-col space-y-3">
+            <div className="flex justify-between items-center w-full">
+              <div className="flex items-center space-x-2">
+                <FontAwesomeIcon icon={faPhone} className="text-[#0073b1]" />
+                <div>
+                  <p className="text-sm font-medium text-[#676767]">
+                    {contactInfo.phone || "No phone added"}
+                  </p>
+                  {contactInfo.phone && (
+                    <p className="text-sm text-[#676767] font-extralight">
+                      {contactInfo.phoneType}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 text-[#0073b1]"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                <p className="text-sm font-medium text-[#676767]">
+                  {contactInfo.address || "No address added"}
+                </p>
+              </div>
+            </div>
+
+            {contactInfo.website?.url && (
+              <div className="flex items-center space-x-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 text-gray-500"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M4.083 9h1.946c.089-1.546.383-2.97.837-4.118A6.004 6.004 0 004.083 9zM10 2a8 8 0 100 16 8 8 0 000-16zm0 2c-.076 0-.232.032-.465.262-.238.234-.497.623-.737 1.182-.389.907-.673 2.142-.766 3.556h3.936c-.093-1.414-.377-2.649-.766-3.556-.24-.56-.5-.948-.737-1.182C10.232 4.032 10.076 4 10 4zm3.971 5c-.089-1.546-.383-2.97-.837-4.118A6.004 6.004 0 0115.917 9h-1.946zm-2.003 2H8.032c.093 1.414.377 2.649.766 3.556.24.56.5.948.737 1.182.233.23.389.262.465.262.076 0 .232-.032.465-.262.238-.234.498-.623.737-1.182.389-.907.673-2.142.766-3.556zm1.166 4.118c.454-1.147.748-2.572.837-4.118h1.946a6.004 6.004 0 01-2.783 4.118zm-6.268 0C6.412 13.97 6.118 12.546 6.03 11H4.083a6.004 6.004 0 002.783 4.118z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                <div>
+                  <p className="font-medium">{contactInfo.website.url}</p>
+                  <p className="text-sm text-gray-500">
+                    {contactInfo.website.type} Website
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="flex space-x-2 mt-6">
+          <button
+            onClick={onAddSection}
+            className="bg-white cursor-pointer text-[#0073b1] border-[#0073b1] border-2 px-4 py-1 rounded-full hover:bg-[#EAF4FD] hover:[border-width:2px] box-border font-medium text-sm transition-all duration-150"
+          >
+            Add profile section
+          </button>
         </div>
       </div>
     </div>
   );
 };
 
-export default ProfileHeaderMain;
+export default ProfileHeader;
