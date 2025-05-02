@@ -17,8 +17,9 @@ import { formatDistanceToNow } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 import { BASE_URL } from "../../constants";
-
-const ApplicantDetails = ({ applicant, screeningAnswers }) => {
+import { BsCheckLg, BsX } from 'react-icons/bs';
+import toast from 'react-hot-toast';
+const ApplicantDetails = ({ applicant, screeningAnswers,jobId }) => {
   const navigate = useNavigate();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -35,6 +36,8 @@ const ApplicantDetails = ({ applicant, screeningAnswers }) => {
   const contactEmail = applicant?.contactEmail;
   const contactPhone = applicant?.contactPhone;
   const resumeUrl = applicant?.applicant.resume;
+
+  const [isProcessing, setIsProcessing] = useState(false);
 
   /**
    * Close dropdown menu if clicked outside of it.
@@ -75,6 +78,37 @@ const ApplicantDetails = ({ applicant, screeningAnswers }) => {
       </div>
     );
   }
+  const handleAccept = async () => {
+      setIsProcessing(true);
+      try {
+        console.log("Accepting application :", applicant);
+          await axios.put(
+              `${BASE_URL}/jobs/${jobId}/applications/${userId}/accept`,
+              { withCredentials: true }
+          );
+          toast.success('Application accepted successfully');
+      } catch (error) {
+          console.error('Error accepting application:', error);
+          toast.error(error.response?.data?.message || 'Failed to accept application');
+      } finally {
+          setIsProcessing(false);
+      }
+  };
+  const handleReject = async () => {
+    setIsProcessing(true);
+    try {
+        await axios.put(
+            `${BASE_URL}/jobs/${jobId}/applications/${userId}/reject`,
+            { withCredentials: true }
+        );
+        toast.success('Application rejected');
+    } catch (error) {
+        console.error('Error rejecting application:', error);
+        toast.error(error.response?.data?.message || 'Failed to reject application');
+    } finally {
+        setIsProcessing(false);
+    }
+  };
 
   /**
    * Navigate to the user's full profile.
@@ -298,6 +332,23 @@ const ApplicantDetails = ({ applicant, screeningAnswers }) => {
                 
             </div>
             <div className="flex items-center space-x-3">
+                {applicant?.status ==="pending" && <><button
+                    onClick={handleAccept}
+                    disabled={isProcessing}
+                    className="flex items-center px-4 py-1.5 bg-green-600 text-white rounded-full text-sm font-semibold hover:bg-green-700 transition-colors disabled:bg-green-300"
+                >
+                    <BsCheckLg className="mr-1" />
+                    Accept
+                </button>
+                <button
+                    onClick={handleReject}
+                    disabled={isProcessing}
+                    className="flex items-center px-4 py-1.5 bg-red-600 text-white rounded-full text-sm font-semibold hover:bg-red-700 transition-colors disabled:bg-red-300"
+                >
+                    <BsX className="mr-1" />
+                    Reject
+                </button>
+                </>}
                
                 <button 
                 onClick={handleMessageApplicant} 

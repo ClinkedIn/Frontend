@@ -163,6 +163,7 @@ const JobDetails = () => {
                                             applicant={applicant}
                                             onSelect={() => setSelectedApplicant(applicant)}
                                             isSelected={selectedApplicant?.applicationId === applicant.applicationId}
+                                            status={applicant.status}
                                         />
                                     ))
                                 )}
@@ -170,7 +171,7 @@ const JobDetails = () => {
                         </div>
 
                         <div className="md:col-span-2">
-                            <ApplicantDetails applicant={selectedApplicant} screeningAnswers={selectedApplicant?.screeningAnswers} />
+                            <ApplicantDetails applicant={selectedApplicant} screeningAnswers={selectedApplicant?.screeningAnswers} jobId={jobid} />
                         </div>
 
                     </div>
