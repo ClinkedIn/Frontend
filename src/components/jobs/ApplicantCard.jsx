@@ -25,7 +25,7 @@ import React from "react";
 import { formatDistanceToNow } from 'date-fns'; 
 
 
-const ApplicantCard = ({ applicant, onSelect, isSelected }) => {
+const ApplicantCard = ({ applicant, onSelect, isSelected,status }) => {
     const name = applicant ? `${applicant?.applicant.firstName} ${applicant?.applicant.lastName}` : 'N/A';
     const headline = applicant?.applicant.headline || 'No Headline';
     const profilePicture = applicant?.applicant.profilePicture;
@@ -75,6 +75,11 @@ const ApplicantCard = ({ applicant, onSelect, isSelected }) => {
                     Applied {appliedTime} • {mustHaveStatus} 
                     
                 </div>
+                {/* Status */}
+                <div className={`mt-1 text-xs font-semibold ${status === 'accepted' ? 'text-green-600' : status === 'rejected' ? 'text-red-600' : 'text-yellow-600'}`}>
+                     {status}
+                </div>
+                   
             </div>
         </div>
     );

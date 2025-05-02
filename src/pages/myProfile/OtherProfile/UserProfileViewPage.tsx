@@ -1,5 +1,5 @@
 import React from "react";
-import UserProfileView from "./UserProfileView";
+import UserProfileView from "./UserProfileView.tsx";
 
 const UserProfileViewPage: React.FC = () => {
   return (

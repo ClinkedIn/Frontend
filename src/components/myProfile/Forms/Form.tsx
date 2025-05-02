@@ -10,11 +10,11 @@ interface FormProps {
 
 const Form: React.FC<FormProps> = ({ title, onClose, children, footer }) => {
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/30  z-50 flex items-start justify-center overflow-y-auto">
       <div
-        className={`bg-white rounded-lg lg:w-[60%] w-[100%] h-[99%] flex flex-col`}
+        className={`bg-white rounded-lg lg:w-[45%] w-[100%] min-h-[100vh] flex flex-col`}
       >
-        <div className="flex justify-between items-center p-4 border-b">
+        <div className="sticky top-0 z-10 bg-white flex justify-between items-center p-4 border-b rounded-t-lg">
           <h2 className="text-xl font-semibold">{title}</h2>
           <button
             onClick={onClose}
@@ -38,7 +38,7 @@ const Form: React.FC<FormProps> = ({ title, onClose, children, footer }) => {
           </button>
         </div>
 
-        <div className="flex-grow overflow-auto">{children}</div>
+        <div className="flex-grow overflow-auto bg-transparent">{children}</div>
 
         {footer && (
           <div className="p-4 border-t flex justify-end">{footer}</div>

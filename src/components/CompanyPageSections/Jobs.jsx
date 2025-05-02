@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { FaSpinner, FaBriefcase, FaMapMarkerAlt, FaClock, FaMoneyBillWave } from 'react-icons/fa';
 import { MdWork } from 'react-icons/md';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa6';
+import Applyjob from '../../components/CompanyPageSections/applyjob';
 
 const CompanyJobsPage = ()=> {
 const {companyInfo}  = useOutletContext();
@@ -13,6 +14,13 @@ const {companyInfo}  = useOutletContext();
     const [loadingJobs, setLoadingJobs] = useState(true);
     const [user, setUser] = useState(null);
     const [expandedJobId, setExpandedJobId] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const openModal = () => setIsModalOpen(true);
+
+    /**
+     * Closes the job application modal
+     */
+    const closeModal = () => setIsModalOpen(false);
 
     const toggleJobDetails = (jobId) => {
         setExpandedJobId(expandedJobId === jobId ? null : jobId);
@@ -167,8 +175,8 @@ const {companyInfo}  = useOutletContext();
                             </div>
                             
                             <div className="flex flex-col gap-2 min-w-[150px]">
-                            <button 
-                                    onClick={() => navigate("/jobdetails", { state: { job, user } })}
+                                <button 
+                                    onClick={openModal}
                                     className="w-full bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 transition duration-200 flex items-center justify-center gap-2"
                                 >
                                     Apply Now
@@ -191,6 +199,7 @@ const {companyInfo}  = useOutletContext();
                                 </button>
                             </div>
                         </div>
+                        <Applyjob isOpen={isModalOpen} onClose={closeModal} job={job} jobId={job._id} />
                     </div>
                 ))}
             </div>

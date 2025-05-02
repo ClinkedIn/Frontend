@@ -22,7 +22,7 @@ export default function Button({
       id={id}
       onClick={onClick}
       className={clsx(
-        "rounded-full bg-[#0073b1] p-3 m-2 text-white cursor-pointer font-semibold",
+        "rounded-full bg-[#0073b1] p-3 m-2 text-white cursor-pointer hover:border-[#004182] font-semibold",
         className
       )}
     >

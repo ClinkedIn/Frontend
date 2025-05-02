@@ -1,12 +1,13 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-
+import { a } from "vitest/dist/chunks/suite.d.FvehnV49.js";
+import axios from "axios";
 // Define the shape of the context
 /**
  * Represents the authentication context type used to manage authentication state.
- * 
- * @property {string | null} authToken - The authentication token for the current user. 
+ *
+ * @property {string | null} authToken - The authentication token for the current user.
  *                                       It is `null` if the user is not authenticated.
- * @property {string | null} userRole - The role of the current user. 
+ * @property {string | null} userRole - The role of the current user.
  *                                      It is `null` if the user role is not defined.
  * @property {boolean} loading - Indicates whether the authentication state is still loading.
  * @property {(token: string | null) => void} setAuthToken - A function to update the authentication token.
@@ -15,21 +16,21 @@ import React, { createContext, useContext, useEffect, useState } from "react";
  */
 interface AuthContextType {
   authToken: string | null;
-  userRole: string | null; 
-  loading: boolean; 
+  userRole: string | null;
+  loading: boolean;
   setAuthToken: (token: string | null) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 // Create the context
 /**
  * Creates a React context for authentication.
- * 
+ *
  * This context is used to provide and consume authentication-related
  * data and functionality throughout the application. The context
  * is initialized with a default value of `undefined`, which means
  * it must be provided a value by a corresponding `AuthContext.Provider`.
- * 
+ *
  * @type {React.Context<AuthContextType | undefined>}
  */
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -40,10 +41,17 @@ export const useAuth = () => {
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
-  
+
   const isAuthenticated = !!context.authToken && context.authToken !== "null";
-    return { ...context, isAuthenticated };
+  return { ...context, isAuthenticated };
 };
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  withCredentials: true,
+});
 
 // Provider component to wrap the app
 /**
@@ -96,14 +104,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setAuthTokenState(token);
   };
 
-  // Function to log out the user
-  const logout = () => {
-    setAuthToken(null);
-    setUserRole(null);
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("refreshToken");
+  const logout = async () => {
+    try {
+      const response = await api.post("/user/logout", { authToken });
+      console.log("Logout response:", response.data);
+    } catch (error) {
+      console.error("Logout API call failed:", error);
+      localStorage.clear();
+      setAuthToken(null);
+      setUserRole(null);
+    }
   };
-
   // Context value
   const contextValue: AuthContextType = {
     authToken,

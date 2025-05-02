@@ -1,13 +1,16 @@
 import React, { useState } from "react";
 import ConfirmationDialog from "../ConfirmationDialog";
+import Form from "./Form";
 
 /**
  * @interface EducationFormProps
  * @description Props for the EducationForm component
+ * @property {object} initialData - Initial education data for editing mode
  * @property {function} onClose - Function to close the form
  * @property {function} onSave - Function to save the education data
  */
 interface EducationFormProps {
+  initialData?: any;
   onClose: () => void;
   onSave: (education: any) => void;
 }
@@ -122,33 +125,109 @@ const COMMON_SKILLS = [
   "Teamwork",
 ];
 
+const MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+/**
+ * Helper function to generate an array of years for dropdowns
+ */
+const generateYearOptions = () => {
+  const currentYear = new Date().getFullYear();
+  return Array.from({ length: 50 }, (_, i) => (currentYear - i).toString());
+};
+
 /**
  * @component EducationForm
  * @description A form component that allows users to add or edit their educational history
  * @param {EducationFormProps} props - Component props containing onClose and onSave functions
  * @returns {React.ReactElement} The rendered education form
  */
-const EducationForm: React.FC<EducationFormProps> = ({ onClose, onSave }) => {
-  // State definitions
-  const [school, setSchool] = useState("");
-  const [customSchool, setCustomSchool] = useState("");
-  const [degree, setDegree] = useState("");
-  const [fieldOfStudy, setFieldOfStudy] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [grade, setGrade] = useState("");
-  const [activitiesAndSocieties, setActivitiesAndSocieties] = useState("");
-  const [description, setDescription] = useState("");
-  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
-  const [customSkill, setCustomSkill] = useState("");
-  const [media, setMedia] = useState("");
+const EducationForm: React.FC<EducationFormProps> = ({
+  initialData,
+  onClose,
+  onSave,
+}) => {
+  // Helper functions for date formatting
+  const getMonthFromDate = (dateString: string): string => {
+    if (!dateString) return "";
+    const monthIndex = parseInt(dateString.split("-")[1]) - 1;
+    return MONTHS[monthIndex] || "";
+  };
+
+  const getYearFromDate = (dateString: string): string => {
+    if (!dateString) return "";
+    return dateString.split("-")[0] || "";
+  };
+
+  const currentYear = new Date().getFullYear();
+  const years = generateYearOptions();
+
+  // State initialization
+  const [school, setSchool] = useState<string>(initialData?.school || "");
+  const [showOtherSchool, setShowOtherSchool] = useState<boolean>(
+    initialData?.school && !UNIVERSITIES.includes(initialData.school)
+      ? true
+      : false
+  );
+  const [customSchool, setCustomSchool] = useState<string>(
+    initialData?.school && !UNIVERSITIES.includes(initialData.school)
+      ? initialData.school
+      : ""
+  );
+  const [degree, setDegree] = useState<string>(initialData?.degree || "");
+  const [fieldOfStudy, setFieldOfStudy] = useState<string>(
+    initialData?.fieldOfStudy || ""
+  );
+  const [startMonth, setStartMonth] = useState<string>(
+    initialData?.startDate ? getMonthFromDate(initialData.startDate) : "January"
+  );
+  const [startYear, setStartYear] = useState<string>(
+    initialData?.startDate
+      ? getYearFromDate(initialData.startDate)
+      : currentYear.toString()
+  );
+  const [endMonth, setEndMonth] = useState<string>(
+    initialData?.endDate ? getMonthFromDate(initialData.endDate) : ""
+  );
+  const [endYear, setEndYear] = useState<string>(
+    initialData?.endDate ? getYearFromDate(initialData.endDate) : ""
+  );
+  const [currentlyStudying, setCurrentlyStudying] = useState<boolean>(
+    initialData?.currentlyStudying || false
+  );
+  const [grade, setGrade] = useState<string>(initialData?.grade || "");
+  const [activitiesAndSocieties, setActivitiesAndSocieties] = useState<string>(
+    initialData?.activitiesAndSocieties || ""
+  );
+  const [description, setDescription] = useState<string>(
+    initialData?.description || ""
+  );
+  const [selectedSkills, setSelectedSkills] = useState<string[]>(
+    initialData?.skills || []
+  );
+  const [customSkill, setCustomSkill] = useState<string>("");
+  const [media, setMedia] = useState<string>(initialData?.media || "");
   const [errors, setErrors] = useState<{
     school?: string;
-    startDate?: string;
+    startYear?: string;
+    startMonth?: string;
+    endYear?: string;
+    endMonth?: string;
   }>({});
-  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
   const [educationData, setEducationData] = useState<any>(null);
-  const [showOtherSchool, setShowOtherSchool] = useState(false);
 
   /**
    * @function validateForm
@@ -156,7 +235,13 @@ const EducationForm: React.FC<EducationFormProps> = ({ onClose, onSave }) => {
    * @returns {boolean} True if the form is valid, false otherwise
    */
   const validateForm = () => {
-    const newErrors: { school?: string; startDate?: string } = {};
+    const newErrors: {
+      school?: string;
+      startYear?: string;
+      startMonth?: string;
+      endYear?: string;
+      endMonth?: string;
+    } = {};
     let isValid = true;
 
     const actualSchool = showOtherSchool ? customSchool : school;
@@ -166,9 +251,32 @@ const EducationForm: React.FC<EducationFormProps> = ({ onClose, onSave }) => {
       isValid = false;
     }
 
-    if (!startDate) {
-      newErrors.startDate = "Start date is required";
+    if (!startYear) {
+      newErrors.startYear = "Start year is required";
       isValid = false;
+    }
+
+    // Add validation for end dates if not currently studying
+    if (!currentlyStudying) {
+      if (endYear && !endMonth) {
+        newErrors.endMonth = "End month is required if end year is provided";
+        isValid = false;
+      }
+      if (endMonth && !endYear) {
+        newErrors.endYear = "End year is required if end month is provided";
+        isValid = false;
+      }
+
+      // Validate that end date is after start date
+      if (endYear && endMonth && startYear && startMonth) {
+        const startDate = new Date(`${startMonth} 1, ${startYear}`);
+        const endDate = new Date(`${endMonth} 1, ${endYear}`);
+
+        if (endDate < startDate) {
+          newErrors.endYear = "End date must be after start date";
+          isValid = false;
+        }
+      }
     }
 
     setErrors(newErrors);
@@ -182,12 +290,20 @@ const EducationForm: React.FC<EducationFormProps> = ({ onClose, onSave }) => {
   const handleSave = () => {
     if (validateForm()) {
       const finalSchool = showOtherSchool ? customSchool : school;
+
+      const formatDate = (month: string, year: string) => {
+        if (!month || !year) return undefined;
+        const monthIndex = MONTHS.indexOf(month) + 1;
+        return `${year}-${monthIndex.toString().padStart(2, "0")}-01`;
+      };
+
       const data = {
         school: finalSchool,
         degree,
         fieldOfStudy,
-        startDate,
-        endDate: endDate || undefined,
+        startDate: formatDate(startMonth, startYear),
+        endDate: currentlyStudying ? undefined : formatDate(endMonth, endYear),
+        currentlyStudying,
         grade: grade || undefined,
         activitiesAndSocieties: activitiesAndSocieties || undefined,
         description: description || undefined,
@@ -206,8 +322,9 @@ const EducationForm: React.FC<EducationFormProps> = ({ onClose, onSave }) => {
    */
   const handleConfirm = () => {
     // Call the onSave function with the education data
-    onSave(educationData);
     onClose();
+
+    onSave(educationData);
   };
 
   /**
@@ -218,6 +335,7 @@ const EducationForm: React.FC<EducationFormProps> = ({ onClose, onSave }) => {
     // Save current data and reset form
     onSave(educationData);
     resetForm();
+    setShowConfirmation(false);
   };
 
   /**
@@ -229,13 +347,18 @@ const EducationForm: React.FC<EducationFormProps> = ({ onClose, onSave }) => {
     setCustomSchool("");
     setDegree("");
     setFieldOfStudy("");
+    setStartMonth("January");
+    setStartYear(currentYear.toString());
+    setEndMonth("");
+    setEndYear("");
+    setCurrentlyStudying(false);
     setGrade("");
     setActivitiesAndSocieties("");
     setDescription("");
     setSelectedSkills([]);
     setCustomSkill("");
     setMedia("");
-    setShowConfirmation(false);
+    setErrors({});
     setShowOtherSchool(false);
   };
 
@@ -248,6 +371,11 @@ const EducationForm: React.FC<EducationFormProps> = ({ onClose, onSave }) => {
     const value = e.target.value;
     setSchool(value);
     setShowOtherSchool(value === "other");
+
+    // Clear any error when making a selection
+    if (value) {
+      setErrors((prev) => ({ ...prev, school: undefined }));
+    }
   };
 
   /**
@@ -281,44 +409,45 @@ const EducationForm: React.FC<EducationFormProps> = ({ onClose, onSave }) => {
     }
   };
 
+  /**
+   * @function handleKeyPress
+   * @description Handle Enter key press in the custom skill input
+   * @param {React.KeyboardEvent} e - The keyboard event
+   */
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      addSkill();
+    }
+  };
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg w-full max-w-xl shadow-lg overflow-y-auto max-h-[90vh]">
-        <div className="flex justify-between items-center p-4 border-b">
-          <h3 className="text-xl font-semibold">Add education</h3>
+    <div className="fixed inset-0 bg-black/30  z-50 flex items-center justify-center">
+      <div className="bg-white rounded-lg lg:w-[45%] w-[100%]  flex flex-col max-h-[100vh] overflow-y-auto shadow-lg">
+        <div className="sticky top-0 z-10 bg-white flex justify-between items-center p-4 border-b rounded-t-lg">
+          <h2 className="text-xl font-semibold">Add education</h2>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
+            ✕
           </button>
         </div>
-        <div className="p-4">
+        <div className="p-4 bg-white overflow-y-auto max-h-[calc(100vh-160px)]">
           <p className="text-sm text-gray-600 mb-4">* Indicates required</p>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium te    xt-gray-700 mb-1">
                 School<span className="text-red-500">*</span>
               </label>
               <select
                 value={school}
                 onChange={handleSchoolChange}
                 className={`w-full px-3 py-2 border rounded-md ${
-                  errors.school && !showOtherSchool ? "border-red-500" : ""
+                  errors.school && !showOtherSchool
+                    ? "border-red-500"
+                    : "border-gray-300"
                 }`}
                 required
               >
@@ -336,9 +465,14 @@ const EducationForm: React.FC<EducationFormProps> = ({ onClose, onSave }) => {
                   type="text"
                   placeholder="Enter school name"
                   value={customSchool}
-                  onChange={(e) => setCustomSchool(e.target.value)}
+                  onChange={(e) => {
+                    setCustomSchool(e.target.value);
+                    if (e.target.value.trim()) {
+                      setErrors((prev) => ({ ...prev, school: undefined }));
+                    }
+                  }}
                   className={`w-full px-3 py-2 border rounded-md mt-2 ${
-                    errors.school ? "border-red-500" : ""
+                    errors.school ? "border-red-500" : "border-gray-300"
                   }`}
                 />
               )}
@@ -355,7 +489,7 @@ const EducationForm: React.FC<EducationFormProps> = ({ onClose, onSave }) => {
               <select
                 value={degree}
                 onChange={(e) => setDegree(e.target.value)}
-                className="w-full px-3 py-2 border rounded-md"
+                className="w-full px-3 py-2 border rounded-md border-gray-300"
               >
                 <option value="">Select a degree</option>
                 {DEGREE_TYPES.map((degreeType, index) => (
@@ -373,7 +507,7 @@ const EducationForm: React.FC<EducationFormProps> = ({ onClose, onSave }) => {
               <select
                 value={fieldOfStudy}
                 onChange={(e) => setFieldOfStudy(e.target.value)}
-                className="w-full px-3 py-2 border rounded-md"
+                className="w-full px-3 py-2 border rounded-md border-gray-300"
               >
                 <option value="">Select field of study</option>
                 {FIELDS_OF_STUDY.map((field, index) => (
@@ -388,38 +522,135 @@ const EducationForm: React.FC<EducationFormProps> = ({ onClose, onSave }) => {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Start date<span className="text-red-500">*</span>
               </label>
-              <input
-                type="text"
-                placeholder="YYYY-MM-DD (e.g., 2017-09-01)"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className={`w-full px-3 py-2 border rounded-md ${
-                  errors.startDate ? "border-red-500" : ""
-                }`}
-              />
-              {errors.startDate && (
-                <p className="text-red-500 text-sm mt-1">{errors.startDate}</p>
-              )}
-              <p className="text-xs text-gray-500 mt-1">
-                Format: YYYY-MM-DD (e.g., 2017-09-01)
-              </p>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <select
+                    value={startMonth}
+                    onChange={(e) => setStartMonth(e.target.value)}
+                    className="w-full px-3 py-2 border rounded-md border-gray-300"
+                  >
+                    {MONTHS.map((month) => (
+                      <option key={month} value={month}>
+                        {month}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <select
+                    value={startYear}
+                    onChange={(e) => {
+                      setStartYear(e.target.value);
+                      if (e.target.value) {
+                        setErrors((prev) => ({
+                          ...prev,
+                          startYear: undefined,
+                        }));
+                      }
+                    }}
+                    className={`w-full px-3 py-2 border rounded-md ${
+                      errors.startYear ? "border-red-500" : "border-gray-300"
+                    }`}
+                  >
+                    <option value="">Select Year</option>
+                    {years.map((year) => (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.startYear && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.startYear}
+                    </p>
+                  )}
+                </div>
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                End date (or expected)
-              </label>
+            <div className="flex items-center">
               <input
-                type="text"
-                placeholder="YYYY-MM-DD (e.g., 2021-06-01)"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="w-full px-3 py-2 border rounded-md"
+                type="checkbox"
+                id="currentlyStudying"
+                checked={currentlyStudying}
+                onChange={(e) => setCurrentlyStudying(e.target.checked)}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
-              <p className="text-xs text-gray-500 mt-1">
-                Format: YYYY-MM-DD (e.g., 2021-06-01)
-              </p>
+              <label
+                htmlFor="currentlyStudying"
+                className="ml-2 block text-sm text-gray-700"
+              >
+                I am currently studying here
+              </label>
             </div>
+
+            {!currentlyStudying && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  End date
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <select
+                      value={endMonth}
+                      onChange={(e) => {
+                        setEndMonth(e.target.value);
+                        if (e.target.value) {
+                          setErrors((prev) => ({
+                            ...prev,
+                            endMonth: undefined,
+                          }));
+                        }
+                      }}
+                      className={`w-full px-3 py-2 border rounded-md ${
+                        errors.endMonth ? "border-red-500" : "border-gray-300"
+                      }`}
+                    >
+                      <option value="">Select Month</option>
+                      {MONTHS.map((month) => (
+                        <option key={month} value={month}>
+                          {month}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.endMonth && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.endMonth}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <select
+                      value={endYear}
+                      onChange={(e) => {
+                        setEndYear(e.target.value);
+                        if (e.target.value) {
+                          setErrors((prev) => ({
+                            ...prev,
+                            endYear: undefined,
+                          }));
+                        }
+                      }}
+                      className={`w-full px-3 py-2 border rounded-md ${
+                        errors.endYear ? "border-red-500" : "border-gray-300"
+                      }`}
+                    >
+                      <option value="">Select Year</option>
+                      {years.map((year) => (
+                        <option key={year} value={year}>
+                          {year}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.endYear && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.endYear}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -430,7 +661,7 @@ const EducationForm: React.FC<EducationFormProps> = ({ onClose, onSave }) => {
                 placeholder="Ex: 3.8 GPA"
                 value={grade}
                 onChange={(e) => setGrade(e.target.value)}
-                className="w-full px-3 py-2 border rounded-md"
+                className="w-full px-3 py-2 border rounded-md border-gray-300"
               />
             </div>
 
@@ -442,7 +673,7 @@ const EducationForm: React.FC<EducationFormProps> = ({ onClose, onSave }) => {
                 placeholder="Ex: Coding Club, Debate Team"
                 value={activitiesAndSocieties}
                 onChange={(e) => setActivitiesAndSocieties(e.target.value)}
-                className="w-full px-3 py-2 border rounded-md h-24 resize-none"
+                className="w-full px-3 py-2 border rounded-md h-24 resize-none border-gray-300"
                 maxLength={500}
               ></textarea>
               <div className="flex justify-end">
@@ -460,7 +691,7 @@ const EducationForm: React.FC<EducationFormProps> = ({ onClose, onSave }) => {
                 placeholder="You can write about projects, achievements, etc."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full px-3 py-2 border rounded-md h-32 resize-none"
+                className="w-full px-3 py-2 border rounded-md h-32 resize-none border-gray-300"
               ></textarea>
             </div>
 
@@ -476,8 +707,10 @@ const EducationForm: React.FC<EducationFormProps> = ({ onClose, onSave }) => {
                   >
                     <span>{skill}</span>
                     <button
+                      type="button"
                       onClick={() => removeSkill(skill)}
                       className="ml-2 text-blue-500 hover:text-blue-700"
+                      aria-label={`Remove ${skill}`}
                     >
                       &times;
                     </button>
@@ -490,10 +723,11 @@ const EducationForm: React.FC<EducationFormProps> = ({ onClose, onSave }) => {
                   placeholder="Add a skill"
                   value={customSkill}
                   onChange={(e) => setCustomSkill(e.target.value)}
-                  className="flex-grow px-3 py-2 border rounded-md"
-                  onKeyPress={(e) => e.key === "Enter" && addSkill()}
+                  className="flex-grow px-3 py-2 border rounded-md border-gray-300"
+                  onKeyPress={handleKeyPress}
                 />
                 <button
+                  type="button"
                   onClick={addSkill}
                   className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
                 >
@@ -507,6 +741,7 @@ const EducationForm: React.FC<EducationFormProps> = ({ onClose, onSave }) => {
                 <div className="flex flex-wrap gap-2">
                   {COMMON_SKILLS.map((skill, index) => (
                     <button
+                      type="button"
                       key={index}
                       onClick={() => selectSkill(skill)}
                       disabled={selectedSkills.includes(skill)}
@@ -532,35 +767,43 @@ const EducationForm: React.FC<EducationFormProps> = ({ onClose, onSave }) => {
                 placeholder="URL to your document (e.g., https://example.com/transcript.pdf)"
                 value={media}
                 onChange={(e) => setMedia(e.target.value)}
-                className="w-full px-3 py-2 border rounded-md"
+                className="w-full px-3 py-2 border rounded-md border-gray-300"
               />
             </div>
           </div>
         </div>
-
-        <div className="flex justify-end p-4 border-t bg-gray-50">
+        <div className="flex justify-end p-4 border-t ">
           <button
+            type="button"
+            className="mr-2 px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-full font-medium hover:bg-gray-50"
+            onClick={onClose}
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
             className="px-6 py-2 bg-blue-600 text-white rounded-full font-medium hover:bg-blue-700"
             onClick={handleSave}
           >
             Save
           </button>
         </div>
+        {showConfirmation && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 ">
+            <ConfirmationDialog
+              title="Education will be Added"
+              message={`${
+                showOtherSchool ? customSchool : school
+              } will be added to your profile.`}
+              confirmText="Okay"
+              onConfirm={handleConfirm}
+              onCancel={() => setShowConfirmation(false)}
+              showAddMore={true}
+              onAddMore={handleAddMore}
+            />
+          </div>
+        )}
       </div>
-
-      {showConfirmation && (
-        <ConfirmationDialog
-          title="Education Added"
-          message={`${
-            showOtherSchool ? customSchool : school
-          } has been added to your profile.`}
-          confirmText="Done"
-          onConfirm={handleConfirm}
-          onCancel={() => setShowConfirmation(false)}
-          showAddMore={true}
-          onAddMore={handleAddMore}
-        />
-      )}
     </div>
   );
 };

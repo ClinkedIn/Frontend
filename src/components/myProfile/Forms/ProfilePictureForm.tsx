@@ -1,38 +1,21 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
-/**
- * Props interface for the ProfilePictureForm component
- * @interface ProfilePictureFormProps
- * @property {string} currentImage - URL of the current profile picture
- * @property {function} onUpload - Callback function when a new image is uploaded
- * @property {function} onCancel - Callback function to cancel the profile picture update
- * @property {function} onApply - Callback function to apply the edited image
- */
 interface ProfilePictureFormProps {
   currentImage: string;
   onUpload: (file: File) => void;
   onCancel: () => void;
   onApply: (editedImageUrl: string) => void;
+  onDelete: () => void;
 }
 
-/**
- * Type definition for the different editor tabs available
- * @typedef {('crop'|'filters'|'adjust')} EditorTab
- */
 type EditorTab = "crop" | "filters" | "adjust";
 
-/**
- * Component for managing profile picture uploads and edits
- *
- * @component
- * @param {ProfilePictureFormProps} props - Component props
- * @returns {React.ReactElement} Profile picture form component
- */
 const ProfilePictureForm: React.FC<ProfilePictureFormProps> = ({
   currentImage,
   onUpload,
   onCancel,
   onApply,
+  onDelete,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isEditing, setIsEditing] = useState<boolean>(false);
@@ -40,63 +23,14 @@ const ProfilePictureForm: React.FC<ProfilePictureFormProps> = ({
   const [zoomValue, setZoomValue] = useState<number>(0);
   const [rotationValue, setRotationValue] = useState<number>(0);
   const [editedImage, setEditedImage] = useState<string>(currentImage);
+  const [selectedFilter, setSelectedFilter] = useState<string>("Original");
+  const [brightness, setBrightness] = useState<number>(100);
+  const [contrast, setContrast] = useState<number>(100);
+  const [saturation, setSaturation] = useState<number>(100);
+  const [previewImage, setPreviewImage] = useState<string>(currentImage);
 
-  /**
-   * Handles file input change events when a new image is selected
-   *
-   * @param {React.ChangeEvent<HTMLInputElement>} e - File input change event
-   * @returns {void}
-   */
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      onUpload(file);
-      const imageUrl = URL.createObjectURL(file);
-      setEditedImage(imageUrl);
-    }
-  };
-
-  /**
-   * Sets the editing state to true to open the image editor
-   *
-   * @returns {void}
-   */
-  const handleEdit = () => {
-    setIsEditing(true);
-  };
-
-  /**
-   * Opens the file selection dialog to add a new photo
-   *
-   * @returns {void}
-   */
-  const handleAddPhoto = () => {
-    fileInputRef.current?.click();
-  };
-
-  /**
-   * Handles frame selection functionality (placeholder)
-   *
-   * @returns {void}
-   */
-  const handleFrames = () => {};
-
-  /**
-   * Clears the current profile picture
-   *
-   * @returns {void}
-   */
-  const handleDelete = () => {
-    setEditedImage("");
-  };
-
-  /**
-   * Applies the current edits to the profile picture
-   * Creates a canvas with the image and applies rotation and zoom transformations
-   *
-   * @returns {void}
-   */
-  const handleApply = () => {
+  // Update preview image whenever any editing parameter changes
+  useEffect(() => {
     if (!editedImage) return;
 
     const canvas = document.createElement("canvas");
@@ -112,6 +46,28 @@ const ProfilePictureForm: React.FC<ProfilePictureFormProps> = ({
       canvas.width = img.width;
       canvas.height = img.height;
 
+      // Apply filters based on selected options
+      let filter = "";
+      if (selectedFilter === "B&W") {
+        filter += "grayscale(100%) ";
+      } else if (selectedFilter === "Sepia") {
+        filter += "sepia(100%) ";
+      } else if (selectedFilter === "Vintage") {
+        filter += "sepia(50%) contrast(110%) ";
+      } else if (selectedFilter === "Cool") {
+        filter += "saturate(110%) hue-rotate(10deg) ";
+      } else if (selectedFilter === "Warm") {
+        filter += "saturate(120%) hue-rotate(-10deg) ";
+      }
+
+      // Apply adjust settings (normalized to CSS filter values)
+      filter += `brightness(${brightness / 100}) `;
+      filter += `contrast(${contrast / 100}) `;
+      filter += `saturate(${saturation / 100})`;
+
+      ctx.filter = filter.trim();
+
+      // Apply transformations (zoom and rotation)
       ctx.save();
       ctx.translate(canvas.width / 2, canvas.height / 2);
       ctx.rotate((rotationValue * Math.PI) / 180);
@@ -126,46 +82,77 @@ const ProfilePictureForm: React.FC<ProfilePictureFormProps> = ({
       );
       ctx.restore();
 
-      canvas.toBlob((blob) => {
-        if (!blob) return;
-        onApply(URL.createObjectURL(blob));
-        setIsEditing(false);
-      }, "image/jpeg");
+      // Update preview
+      setPreviewImage(canvas.toDataURL("image/jpeg"));
     };
+  }, [
+    editedImage,
+    selectedFilter,
+    brightness,
+    contrast,
+    saturation,
+    zoomValue,
+    rotationValue,
+  ]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      onUpload(file);
+      const imageUrl = URL.createObjectURL(file);
+      setEditedImage(imageUrl);
+    }
   };
 
-  /**
-   * Changes the active tab in the editor
-   *
-   * @param {EditorTab} tab - Tab to activate
-   * @returns {void}
-   */
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+
+  const handleAddPhoto = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleDelete = () => {
+    onDelete();
+    setEditedImage("");
+    setPreviewImage("");
+  };
+
+  const handleApply = () => {
+    if (!previewImage) return;
+    onApply(previewImage);
+    setIsEditing(false);
+  };
+
   const handleTabChange = (tab: EditorTab) => {
     setActiveTab(tab);
   };
 
-  /**
-   * Exits the editor and resets editing values
-   *
-   * @returns {void}
-   */
   const handleExitEditor = () => {
     setIsEditing(false);
     setZoomValue(0);
     setRotationValue(0);
+    setSelectedFilter("Original");
+    setBrightness(100);
+    setContrast(100);
+    setSaturation(100);
   };
 
-  /**
-   * Renders the image editor UI with tabs for different editing functions
-   *
-   * @returns {React.ReactElement} Image editor UI component
-   */
+  const resetAdjustSettings = () => {
+    setBrightness(100);
+    setContrast(100);
+    setSaturation(100);
+  };
+
   const renderImageEditor = () => (
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg max-w-md w-full">
-        {/* Header */}
+    <div className="fixed inset-0 bg-black/30 z-50 flex items-center justify-center">
+      <div
+        className={`bg-white rounded-lg lg:w-[45%] w-[100%] min-h-[100vh] flex flex-col`}
+      >
         <div className="flex justify-between items-center p-4 border-b">
-          <h2 className="text-xl font-bold">Edit profile photo</h2>
+          <h2 className="text-xl font-semibold text-gray-800">
+            Edit profile photo
+          </h2>
           <button onClick={handleExitEditor} className="text-gray-500">
             <svg
               className="w-6 h-6"
@@ -189,14 +176,9 @@ const ProfilePictureForm: React.FC<ProfilePictureFormProps> = ({
           <div className="relative w-full h-full flex items-center justify-center">
             <div className="rounded-full overflow-hidden w-48 h-48">
               <img
-                src={editedImage}
+                src={previewImage}
                 alt="Profile preview"
                 className="w-full h-full object-cover"
-                style={{
-                  transform: `rotate(${rotationValue}deg) scale(${
-                    1 + zoomValue / 100
-                  })`,
-                }}
               />
             </div>
           </div>
@@ -416,8 +398,18 @@ const ProfilePictureForm: React.FC<ProfilePictureFormProps> = ({
             <div className="grid grid-cols-3 gap-3 py-2">
               {["Original", "B&W", "Sepia", "Vintage", "Cool", "Warm"].map(
                 (filter) => (
-                  <div key={filter} className="text-center">
-                    <div className="w-16 h-16 mx-auto rounded-full overflow-hidden border-2 border-transparent hover:border-blue-500 cursor-pointer">
+                  <div
+                    key={filter}
+                    className="text-center cursor-pointer"
+                    onClick={() => setSelectedFilter(filter)}
+                  >
+                    <div
+                      className={`w-16 h-16 mx-auto rounded-full overflow-hidden border-2 ${
+                        selectedFilter === filter
+                          ? "border-blue-500"
+                          : "border-transparent hover:border-blue-300"
+                      }`}
+                    >
                       <img
                         src={editedImage}
                         alt={filter}
@@ -450,13 +442,19 @@ const ProfilePictureForm: React.FC<ProfilePictureFormProps> = ({
               <div>
                 <div className="flex justify-between mb-1">
                   <span className="text-gray-700 text-sm">Brightness</span>
-                  <button className="text-xs text-blue-600">Reset</button>
+                  <button
+                    className="text-xs text-blue-600"
+                    onClick={() => setBrightness(100)}
+                  >
+                    Reset
+                  </button>
                 </div>
                 <input
                   type="range"
                   min="0"
-                  max="100"
-                  defaultValue="50"
+                  max="200"
+                  value={brightness}
+                  onChange={(e) => setBrightness(parseInt(e.target.value))}
                   className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                 />
               </div>
@@ -464,13 +462,19 @@ const ProfilePictureForm: React.FC<ProfilePictureFormProps> = ({
               <div>
                 <div className="flex justify-between mb-1">
                   <span className="text-gray-700 text-sm">Contrast</span>
-                  <button className="text-xs text-blue-600">Reset</button>
+                  <button
+                    className="text-xs text-blue-600"
+                    onClick={() => setContrast(100)}
+                  >
+                    Reset
+                  </button>
                 </div>
                 <input
                   type="range"
                   min="0"
-                  max="100"
-                  defaultValue="50"
+                  max="200"
+                  value={contrast}
+                  onChange={(e) => setContrast(parseInt(e.target.value))}
                   className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                 />
               </div>
@@ -478,13 +482,19 @@ const ProfilePictureForm: React.FC<ProfilePictureFormProps> = ({
               <div>
                 <div className="flex justify-between mb-1">
                   <span className="text-gray-700 text-sm">Saturation</span>
-                  <button className="text-xs text-blue-600">Reset</button>
+                  <button
+                    className="text-xs text-blue-600"
+                    onClick={() => setSaturation(100)}
+                  >
+                    Reset
+                  </button>
                 </div>
                 <input
                   type="range"
                   min="0"
-                  max="100"
-                  defaultValue="50"
+                  max="200"
+                  value={saturation}
+                  onChange={(e) => setSaturation(parseInt(e.target.value))}
                   className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                 />
               </div>
@@ -511,14 +521,14 @@ const ProfilePictureForm: React.FC<ProfilePictureFormProps> = ({
     </div>
   );
 
-  // Main component render
   return (
     <>
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-gray-900 text-white rounded-lg max-w-md w-full">
-          {/* Header */}
-          <div className="flex justify-between items-center p-4 border-b border-gray-700">
-            <h2 className="text-xl font-bold">Profile photo</h2>
+      <div className="fixed inset-0 bg-black/30 z-50 flex items-center justify-center">
+        <div
+          className={`bg-[#1B1F23] rounded-lg lg:w-[45%] w-[100%] min-h-[100vh] flex flex-col`}
+        >
+          <div className="flex justify-between items-center p-4">
+            <h2 className="text-lg font-semibold text-white">Profile photo</h2>
             <button onClick={onCancel} className="text-white">
               <svg
                 className="w-6 h-6"
@@ -537,19 +547,18 @@ const ProfilePictureForm: React.FC<ProfilePictureFormProps> = ({
             </button>
           </div>
 
-          {/* Profile Image */}
           <div className="flex justify-center p-6">
             <div className="w-64 h-64 rounded-full overflow-hidden">
-              {editedImage ? (
+              {previewImage ? (
                 <img
-                  src={editedImage}
+                  src={previewImage}
                   alt="Profile"
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full bg-gray-700 flex items-center justify-center">
+                <div className="w-full h-full bg-gray-200 flex items-center justify-center">
                   <svg
-                    className="w-20 h-20 text-gray-400"
+                    className="w-20 h-20 text-white"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -567,40 +576,10 @@ const ProfilePictureForm: React.FC<ProfilePictureFormProps> = ({
             </div>
           </div>
 
-          {/* Privacy Section */}
-          <div className="px-4 py-2">
-            <div className="flex items-center justify-between">
-              <div className="inline-flex items-center bg-gray-800 rounded-full px-2 py-1 border border-gray-700">
-                <svg
-                  className="w-4 h-4 mr-1"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                  />
-                </svg>
-                <span>Anyone</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="grid grid-cols-4 border-t border-gray-700 mt-4">
+          <div className="grid grid-cols-3 border-t border-gray-200 mt-20">
             <button
               onClick={handleEdit}
-              className="flex flex-col items-center justify-center p-4 hover:bg-gray-800"
+              className="flex flex-col items-center justify-center p-4 hover:cursor-pointer text-white"
             >
               <svg
                 className="w-6 h-6 mb-1"
@@ -621,7 +600,7 @@ const ProfilePictureForm: React.FC<ProfilePictureFormProps> = ({
 
             <button
               onClick={handleAddPhoto}
-              className="flex flex-col items-center justify-center p-4 hover:bg-gray-800"
+              className="flex flex-col items-center justify-center p-4 hover:cursor-pointer text-white"
             >
               <svg
                 className="w-6 h-6 mb-1"
@@ -647,29 +626,8 @@ const ProfilePictureForm: React.FC<ProfilePictureFormProps> = ({
             </button>
 
             <button
-              onClick={handleFrames}
-              className="flex flex-col items-center justify-center p-4 hover:bg-gray-800"
-            >
-              <svg
-                className="w-6 h-6 mb-1"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
-              </svg>
-              <span className="text-sm">Frames</span>
-            </button>
-
-            <button
               onClick={handleDelete}
-              className="flex flex-col items-center justify-center p-4 hover:bg-gray-800"
+              className="flex flex-col items-center justify-center p-4 hover:cursor-pointer text-white"
             >
               <svg
                 className="w-6 h-6 mb-1"
@@ -686,16 +644,6 @@ const ProfilePictureForm: React.FC<ProfilePictureFormProps> = ({
                 />
               </svg>
               <span className="text-sm">Delete</span>
-            </button>
-          </div>
-
-          {/* Apply button */}
-          <div className="p-4 border-t border-gray-700 flex justify-end">
-            <button
-              onClick={onApply.bind(null, editedImage)}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md"
-            >
-              Apply
             </button>
           </div>
 
