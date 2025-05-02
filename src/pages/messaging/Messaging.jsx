@@ -97,13 +97,13 @@ const MessagingPage = () => {
     }, [currentUser]);
 
     useEffect(() => {
-      if (jobApplicant && currentUser?._id) {
+      if (jobApplicant?._id && currentUser?._id) {
           const conversationId = createConversationId(currentUser._id, jobApplicant._id);
           setSelectedConversationId(conversationId);
           setOtherUser(jobApplicant);
           setShowChatOnMobile(true);
       }
-  }, [currentUser?._id, jobApplicant]);
+  }, [currentUser?._id, jobApplicant?._id]);
 
     const handleSelectConversation = (conversationId,otherUserInfo) => {
         setSelectedConversationId(conversationId);
