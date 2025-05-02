@@ -249,7 +249,7 @@ const CompanyProfileAdminViewPage = () => {
                 <div className="bg-white rounded-lg shadow-lg mt-16 relative"> 
                     <img src="/Images/card-bg.svg"  className="w-full h-30 rounded-t-lg" />
                     <div className="flex flex-column justify-between">
-                        <img src={ companyInfo.logo ? companyInfo.logo : "/Images/Company-icon.png"  }  className="w-28 h-28 -mt-10 ml-5  " />
+                        <img src={ companyInfo.logo ? companyInfo.logo : "/Images/CompanyLogo.png"  }  className="w-28 h-28 -mt-10 ml-5  " />
                         <button className="rounded-full  hover:bg-gray-100 m-4 p-4" 
                         onClick={()=>{setShowForm(true)}}>
                         < MdModeEdit size=" 24"/>

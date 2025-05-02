@@ -19,8 +19,8 @@ import CreateCompanyPage from "./pages/CompanyPages/CreateCompanyPage";
 import CompanyProfileMemberViewPage from "./pages/CompanyPages/CompanyProfileMemberView";
 import CompanyProfileAdminViewPage from "./pages/CompanyPages/CompanyProfileAdminView";
 import CompanyHomePage from "./components/CompanyPageSections/Home"
-import CompanyPostsPage from "./components/CompanyPageSections/Posts"
-import CompanyJobsPage from "./components/CompanyPageSections/Jobs"
+import CompanyPostsPage from "./components/CompanyPageSections/Posts.jsx"
+import CompanyJobsPage from "./components/CompanyPageSections/Jobs.jsx"
 import SettingsPage from "./components/Settings/Settings.tsx";
 import MyJobs from "./pages/jobs/MyJobs.jsx";
 import MessagingPage from "./pages/messaging/Messaging.jsx";

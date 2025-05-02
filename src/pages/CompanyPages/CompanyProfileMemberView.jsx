@@ -1,7 +1,7 @@
 import { FaPlus } from "react-icons/fa6";
 import { Outlet, useNavigate,useParams } from "react-router-dom";
 import Header from "../../components/UpperNavBar";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import InlineTabs from "../../components/CompanyPageSections/InlineTabs"
 import axios from "axios";
 import { BASE_URL } from "../../constants";
@@ -13,6 +13,7 @@ const CompanyProfileMemberViewPage = () => {
     const [notifications, setNotifications] = useState([]);
     const [companyInfo, setCompanyInfo] = useState();
     const [user, setUser] = useState(null);
+    const [followers, setFollowers] = useState([]);
     const Tabs =["Home", "Posts", "Jobs"];
 
     const handleTabClick = (tab) => {
@@ -27,7 +28,7 @@ const CompanyProfileMemberViewPage = () => {
                 withCredentials:true
               });
           
-              setUser(response.data);
+              setUser(response.data.user);
               console.log("User data:", response.data);
             } catch (error) {
               console.error("Error fetching user:", error);
@@ -35,14 +36,37 @@ const CompanyProfileMemberViewPage = () => {
           };
       
           fetchUser();
-      }, []);
+          if ( user?._id) {("userId:", user?._id);
+            console.log(" followers:", user?.following );
+            const isUserFollowing = user?.following?.some((follower) => follower?.entity === companyId && follower?.entityType === "Company");
+            setIsFollowing(isUserFollowing);
+        }
+
+      }, [user?._id]);
+    useEffect(() => {
+          const fetchFollowers = async() =>{
+            try {
+                const response = await axios.get(`${BASE_URL}/companies/${companyId}/follow`);
+                setFollowers(response.data.followers);
+                setCompanyInfo((prev) => ({ ...prev, followers: response.data.followers }));
+                console.log("Followers data:", response.data.followers);
+            } catch (error) {
+                console.error("Error fetching followers:", error);
+            }
+             
+
+          }
+            fetchFollowers();
+
+    }, 
+    [user?._id,]);
 
     const handleClickFollowingButton = async(e) => {
 
         e.preventDefault();
         const userId = user?._id;
         if(isFollowing) {
-            const response = await axios.delete(`${BASE_URL}/companies/${companyId}/unfollow`,{userId});
+            const response = await axios.delete(`${BASE_URL}/companies/${companyId}/follow`,{userId});
             console.log(response)
             setIsFollowing(false);
 
@@ -76,7 +100,7 @@ const CompanyProfileMemberViewPage = () => {
             <div className="lg:w-1/2 lg:h-3/4 md:w-3/4 max-[430px]:w-full">
                 <div className="bg-white  rounded-lg shadow-lg mt-16  ">
                     <img src="/Images/card-bg.svg"  className="w-full h-30 rounded-t-lg " />
-                    <img src={companyInfo.logo ? companyInfo.logo : "/Images/Company-icon.png" } alt="profile" className="w-28 h-28 -mt-10 ml-5  " />
+                    <img src={companyInfo.logo !==null ? companyInfo.logo : "/Images/CompanyLogo.png" } alt="profile" className="w-28 h-28 -mt-10 ml-5  " />
                     <div className="px-5 pt-5">
                         <h1 className="text-2xl">{companyInfo.name}</h1>
                         <div className="flex gap-2">
