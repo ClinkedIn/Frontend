@@ -76,6 +76,13 @@ const ApplicantDetails = ({ applicant, screeningAnswers }) => { // Added screeni
         }
         setIsDropdownOpen(false); // Close dropdown after action
     };
+    let fullName = name;
+    let _id=userId
+    const handleMessageApplicant = () => {
+        navigate("/messaging", {
+            state: { _id, fullName, profilePicture }, 
+        }
+    )}
 
     const handleEmailClick = () => {
         if (contactEmail) {
@@ -268,7 +275,9 @@ const ApplicantDetails = ({ applicant, screeningAnswers }) => { // Added screeni
             </div>
             <div className="flex items-center space-x-3">
                
-                <button className="px-4 py-1.5 border border-gray-400 text-gray-700 rounded-full text-sm font-semibold hover:bg-gray-100 transition-colors">
+                <button 
+                onClick={handleMessageApplicant} 
+                className="px-4 py-1.5 border border-gray-400 text-gray-700 rounded-full text-sm font-semibold hover:bg-gray-100 transition-colors">
                     Message
                 </button>
                 <div className="relative" ref={dropdownRef}> {/* Added relative positioning and ref */}
