@@ -27,11 +27,6 @@ interface PendingInvitation {
   read: boolean; // Track if the invitation has been viewed
 }
 
-// Define the API response interface for pending invitations
-interface PendingInvitationsResponse {
-  requests: PendingInvitation[];
-}
-
 const Network: React.FC = () => {
   const navigate = useNavigate();
   const [relatedUsers, setRelatedUsers] = useState<RelatedUser[]>([]);
@@ -94,7 +89,7 @@ const Network: React.FC = () => {
             <li className="flex items-center justify-between">
               <button
                 className="flex items-center space-x-2 w-full text-left text-gray-600 hover:text-blue-600"
-                onClick={() => navigate("/connections")}
+                onClick={() => navigate("connections")}
               >
                 <img src="/Images/nav-network.svg" alt="Connections" className="w-5 h-5" />
                 <span>Connections</span>
@@ -106,7 +101,7 @@ const Network: React.FC = () => {
             <li className="flex items-center justify-between">
               <button
                 className="flex items-center space-x-2 w-full text-left text-gray-600 hover:text-blue-600"
-                onClick={() => navigate("/following-followers")}
+                onClick={() => navigate("following-followers")}
               >
                 <img src="/Images/nav-network.svg" alt="Following" className="w-5 h-5" />
                 <span>Following & followers</span>

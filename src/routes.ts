@@ -43,6 +43,7 @@ import CompanyAnalyticsPage from "./components/CompanyPageSections/Analytics.jsx
 import CompanyManageJobsPage from "./components/CompanyPageSections/ManageJobs.jsx";
 import Network from "./components/Network/network";
 import InvitationManager from "./components/Network/invitations";
+import Connections from "./components/Network/connections";
 // Define your routes as an array of RouteObject (compatible with React Router v6)
 const routes: RouteObject[] = [
   //Add routes and their corresponding needed component page
@@ -136,6 +137,10 @@ const routes: RouteObject[] = [
   {
     path: "/network/invitation-manager",
     element: React.createElement(InvitationManager),
+  },
+  {
+    path: "/network/connections",
+    element: React.createElement(Connections),
   },
   {
     path: "/admin",

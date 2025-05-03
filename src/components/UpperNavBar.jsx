@@ -322,7 +322,7 @@ const Header = ({ notifications }) => {
               </>
             ) : (
               // Show User Search everywhere else
-              <div className="flex items-center bg-[#edf3f8] rounded-sm ml-2">
+              <div className="flex items-center bg-[#edf3f8] rounded-sm ml-2 w-90">
                 <MdSearch color="#5f6163" className="w-4 h-4 mr-2 ml-1" />
                 <input
                   type="text"
@@ -437,22 +437,6 @@ const Header = ({ notifications }) => {
               )}
             </div>
           </button>
-          <button
-            className="relative flex flex-col items-center text-xs text-gray-600 hover:text-black p-1"
-            onClick={handleMessagingClick}
-          >
-            <img
-              src="/Images/nav-messaging.svg"
-              alt="Messaging"
-              className="w-6 h-6"
-            />{" "}
-          </button>
-
-          {unreadCountMessages > 0 && (
-            <div className="absolute -top-1 left-1/2 ml-1 bg-[#cb112d] text-white rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-[10px] md:text-xs font-medium">
-              {unreadCountMessages > 10 ? "10+" : unreadCountMessages}
-            </div>
-          )}
           {/* Messaging */}
           <button
             className={`relative flex flex-col items-center hover:bg-gray-200 p-1.5 rounded-lg w-16 ${
@@ -575,7 +559,7 @@ const Header = ({ notifications }) => {
           </div>
           <div className="relative" ref={workDropdownRef}>
             <button
-              className="flex items-center space-x-2 hover:bg-gray-200 p-2 rounded-lg"
+              className="flex items-center space-x-2 hover:bg-gray-200 p-2 rounded-lg mr-22"
               onClick={() => setShowWork(!showWork)}
             >
               <img src="/Images/nav-work.svg" alt="Work" className="w-6 h-6" />

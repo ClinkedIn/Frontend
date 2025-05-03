@@ -35,12 +35,7 @@ const InvitationManager: React.FC = () => {
       }
     };
     fetchInvitations();
-  }, []);
-
-  // Handle Tab Change
-  const handleTabChange = (tab: string) => {
-    setSelectedTab(tab);
-  };
+  }, []);;
 
   // Placeholder for Sent Invitations
   const handleWithdraw = (invitationId: string) => {
