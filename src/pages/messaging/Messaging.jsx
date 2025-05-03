@@ -99,7 +99,7 @@ const MessagingPage = () => {
         // Cleanup listener on component unmount
         return () => unsubscribe();
 
-    }, [currentUser?._id]); // Re-run if user changes
+    }, [currentUser?._id,conversations.length]); // Re-run if user changes
 
     // Reset selected chat if user logs out/changes
     useEffect(() => {
