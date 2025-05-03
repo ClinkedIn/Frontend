@@ -23,6 +23,7 @@ const SinglePostView = ({ postId, notification }) => {
   const [comments, setComments] = useState([]);
   const [loadingComments, setLoadingComments] = useState(false);
   const [userReaction, setUserReaction] = useState(null);
+  const [commentError, setCommentError] = useState(null);
   
   const API_ENDPOINT = `${BASE_URL}/posts`;
   const reactionTypes = ['like', 'support', 'celebrate', 'love', 'insightful', 'funny'];
@@ -60,35 +61,58 @@ const SinglePostView = ({ postId, notification }) => {
    */
   const fetchComments = async () => {
     try {
-      console.log("first try", notification.resourceId)
       setLoadingComments(true);
-      const response = await axios.get(`${API_ENDPOINT}/${notification.resourceId}/comments`, {
-        withCredentials: true
-      });
+      setCommentError(null);
       
-      setComments(response.data.comments || []);
-      console.log("comments ", response.data)
-    } catch (err) {
-      //console.error(`Error fetching comments for post ${id}:`, err);
-      try{
-        console.log("second try", postId)
-        const response = await axios.get(`${API_ENDPOINT}/${postId}/comments`, {
-          withCredentials: true
-        });
-      }catch (error) {
-        try{
-          console.log("third try", notification.relatedCommentId)
-          const response = await axios.get(`${API_ENDPOINT}/${notification.relatedCommentId}/comments`, {
+      const idPriority = [
+        postId,
+        notification?.relatedCommentId,
+        notification?.resourceId
+      ].filter(Boolean);
+  
+      let commentsResponse = null;
+      let lastError = null; // Track last non-404 error
+      
+      for (const id of idPriority) {
+        try {
+          const response = await axios.get(`${API_ENDPOINT}/${id}/comments`, {
             withCredentials: true
           });
-        } 
-        catch (error) {
-          console.error('Error fetching comments:', error);
+          
+          if (response.data?.comments?.length) {
+            commentsResponse = response.data.comments;
+            break;
+          }
+        } catch (error) {
+          if (error.response?.status !== 404) {
+            lastError = {
+              message: error.response?.data?.message || error.message,
+              status: error.response?.status
+            };
+          }
         }
       }
-    } 
+  
+      if (lastError) {
+        // Show the most relevant error from non-404 responses
+        setCommentError(lastError.message || `Error loading comments (HTTP ${lastError.status})`);
+        setComments([]);
+      } else if (!commentsResponse) {
+        setCommentError('Comments not found - they may have been deleted');
+        setComments([]);
+      } else {
+        setComments(commentsResponse);
+      }
+  
+    } catch (error) {
+      // This catch block handles any unexpected errors
+      console.error('Unexpected error:', error);
+      setCommentError(error.response?.data?.message || 'An unexpected error occurred');
+      setComments([]);
+    } finally {
+      setLoadingComments(false);
+    }
   };
-
   // Fetch post when component mounts or postId changes
   useEffect(() => {
     if (postId) {
@@ -408,22 +432,36 @@ const SinglePostView = ({ postId, notification }) => {
       
       {/* Comment Section - Only show when expanded */}
       {expandedComments && (
-        <div className="border-t border-[#e9e5df] p-4">
-          {loadingComments ? (
-            <div className="text-center py-4">Loading comments...</div>
-          ) : (
-            <CommentSection 
-              postId={post.id || post.postId}
-              comments={comments}
-              authorInfo={{user: {profilePicture: "/Images/user.svg", firstName: "User", lastName: ""}}}
-              onAddComment={handleAddComment}
-              onReactToComment={() => {}}
-              reactionTypes={reactionTypes}
-              formatDate={formatDate}
-            />
-          )}
+    <div className="border-t border-[#e9e5df] p-4">
+      {commentError ? (
+        <div className="text-red-500 text-center">
+          <p className="mb-2">{commentError}</p>
+          <button 
+            onClick={fetchComments}
+            className="px-4 py-2 bg-blue-100 text-blue-600 rounded hover:bg-blue-200"
+          >
+            Retry Loading Comments
+          </button>
+        </div>
+      ) : loadingComments ? (
+        <div className="text-center py-4">Loading comments...</div>
+      ) : comments.length > 0 ? (
+        <CommentSection 
+          postId={post.id || post.postId}
+          comments={comments}
+          authorInfo={{user: {profilePicture: "/Images/user.svg", firstName: "User", lastName: ""}}}
+          onAddComment={handleAddComment}
+          onReactToComment={() => {}}
+          reactionTypes={reactionTypes}
+          formatDate={formatDate}
+        />
+      ) : (
+        <div className="text-gray-500 text-center">
+          No comments yet. Be the first to comment!
         </div>
       )}
+    </div>
+  )}
     </article>
   );
 };
