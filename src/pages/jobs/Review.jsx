@@ -26,8 +26,9 @@ import { BASE_URL } from '../../constants';
 export default function Review() {
     const location = useLocation();
     const navigate = useNavigate();
-    const { finalData, emailUpdates, screeningQuestions, rejectionSettings, pageState, jobId } = location.state || {}; 
-
+    const { finalData, emailUpdates, screeningQuestions, rejectionSettings, jobId } = location.state || {}; 
+    const pageState=location.state?.pageState
+    console.log("page state", pageState)
     /**
      * Renders the details of each screening question including its ideal answer.
      * 
@@ -136,11 +137,13 @@ export default function Review() {
 
             let response = null;
             if (pageState === "UpdateJob") {
+                console.log("updating job with put")
                 response = await axios.put(`${BASE_URL}/jobs/${jobId}`, payload);
-                toast.success(response.data.message || "Job posted successfully!");
+                toast.success( "Job put successfully!");
             } else {
+                console.log("posting job with post")
                 response = await axios.post(`${BASE_URL}/jobs`, payload);
-                toast.success(response.data.message || "Job posted successfully!");
+                toast.success("Job posted successfully!");
             }
 
             navigate('/jobdetails', {
