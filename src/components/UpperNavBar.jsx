@@ -76,11 +76,41 @@ const Header = ({ notifications }) => {
   const workDropdownRef = useRef(null);
   const [showWork, setShowWork] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userCompanies, setUserCompanies] = useState([]);
 
   const currentUser = {
     uid: "123",
   };
   const { logout } = useAuth();
+  useEffect(() => {
+    const fetchUserCompanies = async () => {
+        try {
+            const response = await axios.get(`${BASE_URL}/companies`, {
+                withCredentials: true
+            });
+            console.log("companies",response.data)
+            const filteredCompanies = response.data.map(item => ({
+              company: {
+                  id: item.company.id,
+                  name: item.company.name,
+                  logo: item.company.logo
+              },
+              userRelationship: item.userRelationship
+          })).filter(item => 
+              item.userRelationship === "owner" || 
+              item.userRelationship === "admin"
+          );
+          setUserCompanies(filteredCompanies);
+          console.log("formattedCompanies",filteredCompanies)
+        } catch (error) {
+            console.error('Error fetching user companies:', error);
+        }
+    };
+
+    if (userInfo?._id) {
+        fetchUserCompanies();
+    }
+}, [userInfo?._id]);
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -624,6 +654,30 @@ const Header = ({ notifications }) => {
                 >
                   My Profile
                 </button>
+                {userCompanies.length > 0 && (
+                    <>
+                        <div className="px-4 py-2 text-sm font-medium text-gray-700 border-b border-gray-200">
+                            My Pages
+                        </div>
+                        <div className="max-h-48 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                            {userCompanies.map((company) => (
+                                <button
+                                    key={company.company.id}
+                                    onClick={() => navigate(`/company/${company.company.id}/admin`)}
+                                    className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                >
+                                    <img
+                                        src={company.company.logo || "/Images/CompanyLogo.png"}
+                                        alt={company.company.name}
+                                        className="w-6 h-6 rounded-md mr-3 flex-shrink-0"
+                                    />
+                                    <span className="truncate flex-1">{company.company.name}</span>
+                                </button>
+                            ))}
+                        </div>
+                        <div className="border-t border-gray-200"></div>
+                    </>
+                )}
                 <button
                   onClick={handleSettingsClick}
                   className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
