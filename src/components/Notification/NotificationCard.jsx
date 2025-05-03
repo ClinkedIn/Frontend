@@ -27,7 +27,7 @@ import { BASE_URL } from "../../constants";
  *
  * @returns {JSX.Element} The rendered notification card.
  */
-const NotificationCard = ({ notification, handleNotificationClick }) => {
+const NotificationCard = ({ notification, handleNotificationClick, onRefresh}) => {
   const [showMenu, setShowMenu] = useState(false);
   const [isRead, setIsRead] = useState(notification.isRead || false);
   const [message, setMessage] = useState(null);
@@ -199,7 +199,7 @@ const NotificationCard = ({ notification, handleNotificationClick }) => {
               <div className="relative w-10 h-10 bg-gray-200 flex items-center justify-center">
                 <img
                   id="Notification-Img"
-                  src={notification.sendingUser?.profilePicture??"https://picsum.photos/80?random=1"}
+                  src={notification.sendingUser?.profilePicture??"blank-profile-picture.png"}
                   alt="image"
                   className="w-10 h-10 rounded-md"
                 />
@@ -298,15 +298,31 @@ const NotificationCard = ({ notification, handleNotificationClick }) => {
                         );
                         setIsRead(false);
                         console.log("Notification marked as unread");
+                        onRefresh();
                       } catch (error) {
                         console.error("Failed to mark as unread:", error);
                         setMessage("Failed to mark as unread.");
                       }
                     }
+                    else {
+                      try {
+                        await axios.patch(
+                          `${BASE_URL}/notifications/mark-read/${notification._id}`,
+                          {},
+                          { withCredentials: true }
+                        );
+                        setIsRead(true);
+                        console.log("Notification marked as read");
+                        onRefresh();
+                      } catch (error) {
+                        console.error("Failed to mark as read:", error);
+                        setMessage("Failed to mark as read.");
+                      }
+                    }
                   }}
                 >
                   <MdMarkChatUnread className="mr-2 text-gray-600" />
-                  Mark as Unread
+                  {isRead? "Mark as unread" : "Mark as read"}
                 </button>
               </div>
             )}

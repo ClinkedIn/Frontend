@@ -32,27 +32,7 @@ const Notification = () => {
   const [notifications, setNotifications] = useState([]);
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [user, setUser] = useState();
-
-  // async function requestFCMToken() {
-  //   try {
-  //     const messaging = getMessaging(app);
-  //     {
-  //       const fcmToken = await getToken(messaging, { 
-  //         vapidKey: 'BKQc38HyUXuvI_yz5hPvprjVjmWrcUjTP2H7J_cjGoyMMoBGNBbC0ucVGrzM67rICMclmUuOx-mdt7CXlpnhq9g' // From Firebase Console > Cloud Messaging
-  //       });
-  //       if (fcmToken) {
-  //         console.log('FCM Token:', fcmToken);
-          
-  //       }
-  //     }
-  //   } catch (error) {
-  //     console.error('Error getting token:', error);
-  //   }
-  // }
-  // useEffect(() => {
-  //   requestFCMToken();
-  // }, []);
-
+  const [refreshTrigger, setRefreshTrigger] = useState(false);
 
   /**
    * Sends a test notification to the backend and shows a toast notification in the app.
@@ -98,6 +78,10 @@ const Notification = () => {
       console.error("Error fetching notifications:", error);
     }
   };
+
+  const triggerRefresh = () => {
+    setRefreshTrigger(prev => !prev);
+  };
 /**
    * Marks a notification as read when clicked.
    *
@@ -128,7 +112,8 @@ const Notification = () => {
  * @async
  * @function fetchUser
  */
-  const fetchUser = async () => {
+useEffect(() => {  
+const fetchUser = async () => {
       try {
         const response = await axios.get(`${BASE_URL}/user/me`, {
       
@@ -140,7 +125,9 @@ const Notification = () => {
       } catch (error) {
         console.error("Error fetching user:", error);
       }
-    };
+    }
+    fetchUser();
+  },[])
   
   /**
    * useEffect hook for executing login, fetching user data, and notifications.
@@ -150,13 +137,8 @@ const Notification = () => {
    * @hook
    */
   useEffect(() => {
-    // const loginAndFetchData = async () => {
-    //   await testLogin(); // Ensure login is completed first
-    fetchUser();
     fetchNotifications();
-  // }
-  //   loginAndFetchData()
-  }, []);
+  }, [refreshTrigger]);
  /**
    * Handles the change in the main notification filter.
    * Resets post filter and closes dropdown when switching to a different category.
@@ -251,7 +233,7 @@ const Notification = () => {
                
                 id="Notification-Card">
                   {filteredNotifications.map((notif) => (
-                    <NotificationCard key={notif._id} notification={notif} handleNotificationClick={()=>handleNotificationClick(notif._id)} />
+                    <NotificationCard key={notif._id} notification={notif} onRefresh={triggerRefresh} handleNotificationClick={()=>handleNotificationClick(notif._id)} />
                   ))}
                 </ul>
                 
