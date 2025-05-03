@@ -5,10 +5,23 @@ import toast from "react-hot-toast";
 import Footer from "../../components/Footer/Footer";
 import { useAuth } from "../../context/AuthContext";
 import { useEffect } from "react";
+import axios from "axios";
+import { getMessaging, getToken } from "firebase/messaging";
+import { app } from "../../../firebase";
+import { useQueryClient } from "@tanstack/react-query";
+import { GrArticle } from "react-icons/gr";
+import { IoPeopleOutline, IoBagSharp } from "react-icons/io5";
+import { BsFillPuzzleFill } from "react-icons/bs";
+import { GoVideo } from "react-icons/go";
+import { MdOutlineLaptopMac } from "react-icons/md";
+
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const VAPID_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY;
 
 const LandingPage = () => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, setAuthToken } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (!loading && isAuthenticated) {
@@ -23,6 +36,49 @@ const LandingPage = () => {
   if (isAuthenticated) {
     return null;
   }
+
+  // Google Sign-in Handler
+  const handleGoogleLogin = async () => {
+    try {
+      // 1. Sign in with Google using Firebase
+      const result = await signInWithPopup(auth, provider);
+
+      // 2. Try to get FCM token (ignore if blocked)
+      let fcmToken: string | null = null;
+      try {
+        const messaging = getMessaging(app);
+        fcmToken = await getToken(messaging, {
+          vapidKey: VAPID_KEY,
+        });
+      } catch {
+        // ignore FCM errors
+      }
+
+      // 3. Get Google ID token
+      const tokenId = await result.user.getIdToken();
+
+      // 4. Send FCM token in body, Google ID token in Authorization header
+      const { data } = await axios.post(
+        `${BASE_URL}/user/auth/google`,
+        { fcmToken },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${tokenId}`,
+          },
+          withCredentials: true,
+        }
+      );
+
+      setAuthToken(data.token); 
+      queryClient.invalidateQueries({ queryKey: ["authUser"] });
+      toast.success("Signed in with Google!");
+      setTimeout(() => navigate("/feed"), 1000);
+    } catch (error: any) {
+      console.error("Google Sign-in Error:", error);
+      toast.error(error?.response?.data?.error || "Google sign-in failed. Try again.");
+    }
+  };
   
   return (
       <div className="min-h-screen flex flex-col justify-between bg-white">
@@ -30,42 +86,37 @@ const LandingPage = () => {
         <nav className="bg-white py-3 px-4 mb-8 md:px-12 flex flex-wrap items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center ml-4 md:ml-12">
-            <img src="/public/images/login-logo.svg" alt="LinkedIn Logo" className="h-6" />
+            <img src="/public/images/lockedin.png" alt="LinkedIn Logo" className="h-6" />
           </Link>
   
           {/* Icons & Buttons */}
           <div className="flex items-center space-x-4 md:space-x-6 ml-auto flex-wrap">
             {/* Navigation Links - Hidden on Mobile */}
             <div className="hidden md:flex flex-wrap items-center space-x-4 md:space-x-6 text-gray-500">
-              {/* Icons... */}
-              <Link to="/articles" className="text-xs hover:text-black flex flex-col items-center">
-                <img src="/public/Images/article.jpg" alt="Articles" className="h-5 w-5 mb-1" />
+              <div className="text-xs flex flex-col items-center hover:text-black cursor-pointer transition-colors">
+                <GrArticle className="h-5 w-5 mb-1" />
                 Articles
-              </Link>
-              <Link to="/people" className="text-xs hover:text-black flex flex-col items-center">
-                  <img src="/public/Images/people-outline.png" alt="People" className="h-5 w-5 mb-1" />
-                  People
-              </Link>
-              <Link to="/learning" className="text-xs hover:text-black flex flex-col items-center">
-                  <img src="/public/Images/learning-.png" alt="Learning" className="h-5 w-5 mb-1" />
-                  Learning
-              </Link>
-              <Link to="/jobs" className="text-xs hover:text-black flex flex-col items-center">
-                  <img
-                    src="/public/Images/job-icon.svg"
-                    alt="Jobs"
-                    className="h-5 w-5 mb-1 filter grayscale brightness-75"
-                  />
-                  Jobs
-              </Link>
-              <Link to="/games" className="text-xs hover:text-black flex flex-col items-center">
-                  <img src="/public/Images/games.png" alt="Games" className="h-5 w-5 mb-1" />
-                  Games
-              </Link>
-              <Link to="/app" className="text-xs hover:text-black flex flex-col items-center">
-                  <img src="/public/Images/app.png" alt="Get the app" className="h-5 w-5 mb-1" />
-                  Get the app
-              </Link>
+              </div>
+              <div className="text-xs flex flex-col items-center hover:text-black cursor-pointer transition-colors">
+                <IoPeopleOutline className="h-5 w-5 mb-1" />
+                People
+              </div>
+              <div className="text-xs flex flex-col items-center hover:text-black cursor-pointer transition-colors">
+                <GoVideo className="h-5 w-5 mb-1" />
+                Learning
+              </div>
+              <div className="text-xs flex flex-col items-center hover:text-black cursor-pointer transition-colors">
+                <IoBagSharp className="h-5 w-5 mb-1 filter grayscale brightness-75" />
+                Jobs
+              </div>
+              <div className="text-xs flex flex-col items-center hover:text-black cursor-pointer transition-colors">
+                <BsFillPuzzleFill className="h-5 w-5 mb-1" />
+                Games
+              </div>
+              <div className="text-xs flex flex-col items-center hover:text-black cursor-pointer transition-colors">
+                <MdOutlineLaptopMac className="h-5 w-5 mb-1" />
+                Get the app
+              </div>
             </div>
   
             {/* Auth Buttons */}
@@ -98,18 +149,7 @@ const LandingPage = () => {
   
             {/* Google Sign-in Button */}
             <motion.button
-              onClick={async () => {
-                try {
-                  const result = await signInWithPopup(auth, provider);
-                  const idToken = await result.user.getIdToken();
-                  console.log("Google Auth Token:", idToken);
-                  toast.success("Signed in with Google!");
-                  navigate("/home");
-                } catch (error) {
-                  console.error("Google Sign-in Error:", error);
-                  toast.error("Google sign-in failed. Try again.");
-                }
-              }}
+              onClick={handleGoogleLogin}
               className="w-[90%] max-w-[400px] flex items-center justify-center py-2 text-lg border border-blue-600 bg-blue-600 text-white rounded-full hover:bg-blue-700 mb-5 "
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -168,8 +208,7 @@ const LandingPage = () => {
         {/* Footer */}
           <Footer />
       </div>
-  
-    );
+      );
   };
 
 export default LandingPage;

@@ -116,23 +116,32 @@ const LoginPage = () => {
       // Step 1: Sign in with Google using Firebase
       const googleResult = await signInWithPopup(auth, provider);
 
-      // Step 2: Get FCM token (if supported and permission granted)
-      const messaging = getMessaging(app);
-      const fcmToken = await getToken(messaging, {
-        vapidKey:
-          "BKQc38HyUXuvI_yz5hPvprjVjmWrcUjTP2H7J_cjGoyMMoBGNBbC0ucVGrzM67rICMclmUuOx-mdt7CXlpnhq9g",
-      });
+      // Step 2: Try to get FCM token (ignore if blocked)
+      let fcmToken: string | null = null;
+      try {
+        const messaging = getMessaging(app);
+        fcmToken = await getToken(messaging, {
+          vapidKey: "BKQc38HyUXuvI_yz5hPvprjVjmWrcUjTP2H7J_cjGoyMMoBGNBbC0ucVGrzM67rICMclmUuOx-mdt7CXlpnhq9g",
+        });
+        if (fcmToken) {
+          console.log("FCM Token:", fcmToken);
+        }
+      } catch (err) {
+        console.warn("FCM token not available (permission denied or blocked). Proceeding without it.");
+        // Do not block login if FCM fails
+      }
 
       // Step 3: Get Google ID token
       const tokenId = await googleResult.user.getIdToken();
 
-      // Step 4: Send Google token and FCM token to your backend
+      // Step 4: Send FCM token in body, Google ID token in Authorization header
       const { data } = await axios.post(
         `${BASE_URL}/user/auth/google`,
-        { tokenId, fcmToken },
+        { fcmToken }, // fcmToken may be null
         {
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${tokenId}`,
           },
           withCredentials: true,
         }
@@ -241,7 +250,7 @@ const LoginPage = () => {
       {/* Logo */}
       <img
         className="absolute top-6 left-13 h-7"
-        src="/Images/login-logo.svg"
+        src="/Images/lockedin.png"
         alt="LinkedIn"
       />
 
