@@ -36,7 +36,7 @@ const CompanyProfileAdminViewPage = () => {
     const [location, setCompanyLocation] = useState("");
     const [errors, setErrors] = useState({ });
     const [notifications, setNotifications] = useState([]);
-    const Tabs =["Feed","Jobs","Analytics"];
+    const Tabs =["Feed","Jobs","Analytics" , "Setting"];
     const locationState = useLocation();
     const currentSection = locationState.pathname.split('/').pop() || 'Feed';
     const [activeTab, setActiveTab] = useState(currentSection);
