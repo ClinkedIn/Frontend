@@ -289,37 +289,50 @@ const SignupPage = () => {
    * @returns {Promise<void>} A promise that resolves when the sign-up process is complete.
    */
   const handleGoogleSignUp = async () => {
-  try {
-    // Step 1: Sign in with Google using Firebase
-    await signInWithPopup(auth, provider);
+    try {
+      // Step 1: Sign in with Google using Firebase
+      const googleResult = await signInWithPopup(auth, provider);
 
-    // Step 2: Get FCM token (if supported and permission granted)
-    const messaging = getMessaging();
-    const fcmToken = await getToken(messaging, {
-      vapidKey: import.meta.env.VITE_VAPID_PUBLIC_KEY, // Store this in .env
-    });
-
-    // Step 3: Send FCM token to your backend
-    const BASE_URL = import.meta.env.VITE_API_BASE_URL;
-    await axios.post(
-      `${BASE_URL}/user/auth/google`,
-      { fcmToken },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        withCredentials: true,
+      // Step 2: Try to get FCM token (ignore if blocked)
+      let fcmToken: string | null = null;
+      try {
+        const messaging = getMessaging();
+        fcmToken = await getToken(messaging, {
+          vapidKey: import.meta.env.VITE_VAPID_PUBLIC_KEY,
+        });
+        if (fcmToken) {
+          console.log("FCM Token:", fcmToken);
+        }
+      } catch (err) {
+        console.warn("FCM token not available (permission denied or blocked). Proceeding without it.");
+        // Do not block signup if FCM fails
       }
-    );
 
-    // Step 4: Navigate to verify email
-    navigate("/verify-email");
+      // Step 3: Get Google ID token
+      const tokenId = await googleResult.user.getIdToken();
 
-  } catch (error) {
-    console.error("Google sign-up failed:", error);
-    toast.error("Google signup failed.");
-  }
-};
+      // Step 4: Send FCM token in body, Google ID token in Authorization header
+      const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+      await axios.post(
+        `${BASE_URL}/user/auth/google`,
+        { fcmToken },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${tokenId}`,
+          },
+          withCredentials: true,
+        }
+      );
+
+      // Step 5: Navigate to feed
+      navigate("/feed");
+
+    } catch (error) {
+      console.error("Google sign-up failed:", error);
+      toast.error("Google signup failed.");
+    }
+  };
 
   return (
     <div className="relative min-h-screen">
@@ -327,7 +340,7 @@ const SignupPage = () => {
       <div className="flex flex-col items-center justify-center bg-gray-100 pt-16 pb-20">
         <img
           className="absolute top-6 left-32 h-8.5"
-          src="/Images/login-logo.svg"
+          src="/Images/lockedin.png"
           alt="LinkedIn"
         />
         <h1 className="text-3xl font-normal text-gray-900 mb-4 text-center">

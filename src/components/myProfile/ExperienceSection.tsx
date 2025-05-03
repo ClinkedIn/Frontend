@@ -2,7 +2,14 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import ExperienceForm from "./Forms/ExperienceForm";
 import ConfirmationDialog from "./ConfirmationDialog";
-import { Loader, Plus, Pencil, Trash2 } from "lucide-react";
+import { Loader, Plus, Trash2 } from "lucide-react";
+import {
+  faBriefcaseClock,
+  faCalendar,
+  faMapMarkedAlt,
+  faUserTie,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 /**
  * Interface representing an experience entry
@@ -325,13 +332,10 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
     try {
       setIsProcessing(true);
 
-      // First, convert the form data to the API format
       const apiData = convertFormToApiFormat(formData);
 
-      // Create FormData object for file uploads if needed
       const formDataForApi = new FormData();
 
-      // Add all fields to FormData
       Object.entries(apiData).forEach(([key, value]) => {
         if (key === "skills" && Array.isArray(value)) {
           value.forEach((skill: string) => {
@@ -357,7 +361,6 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
           }
         );
       } else {
-        // For new experiences
         response = await api.post(API_ROUTES.experience, formDataForApi, {
           headers: {
             "Content-Type": "multipart/form-data",
@@ -365,7 +368,6 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
         });
       }
 
-      // Update local state with the response data
       if (onExperienceSaved) {
         onExperienceSaved();
       } else {
@@ -428,14 +430,8 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
     }
 
     try {
-      // const response = await api.delete(
-      //   `${API_ROUTES.experience}/${pendingDeleteIndex}`
-      // );
-
       await api.delete(`${API_ROUTES.experience}/${pendingDeleteIndex}`);
 
-      // const updatedExperiences = parseExperienceData(response.data);
-      // setExperiences(updatedExperiences);
       await fetchUserData();
 
       setShowDeleteConfirmation(false);
@@ -577,24 +573,14 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
             return (
               <div key={idx} className="flex items-start group">
                 <div className="w-10 h-10 mr-3 bg-blue-50 flex items-center justify-center rounded-lg text-blue-500">
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                    />
-                  </svg>
+                  <FontAwesomeIcon
+                    icon={faBriefcaseClock}
+                    className=" text-md "
+                  />
                 </div>
                 <div className="flex-1">
                   <div className="flex justify-between">
-                    <h3 className="font-medium text-gray-800">
+                    <h3 className="font-medium text-gray-800 ">
                       {exp.jobTitle}
                     </h3>
                     <div className="flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -610,37 +596,45 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
                       </button>
                     </div>
                   </div>
-                  <p className="text-gray-600 text-sm">{exp.companyName}</p>
+                  <p className="text-gray-600 text-sm mt-[-5px]">
+                    {exp.companyName}
+                  </p>
                   {exp.employmentType && (
                     <p className="text-gray-500 text-sm">
+                      <FontAwesomeIcon
+                        icon={faUserTie}
+                        className="text-[#005cb7] hover:text-[#004182] text-xs mr-2"
+                      />
                       {exp.employmentType}
                     </p>
                   )}
                   {exp.location && (
-                    <p className="text-gray-500 text-sm">{exp.location}</p>
+                    <p className="text-gray-500 text-sm">
+                      <FontAwesomeIcon
+                        icon={faMapMarkedAlt}
+                        className="text-[#005cb7] hover:text-[#004182] text-xs mr-2"
+                      />{" "}
+                      {exp.location}
+                    </p>
                   )}
                   <p className="text-gray-500 text-sm">
+                    <FontAwesomeIcon
+                      icon={faCalendar}
+                      className="text-[#005cb7] hover:text-[#004182] text-xs mr-2"
+                    />
                     {startYear} - {endYear}
                   </p>
                   {exp.description && (
                     <p className="text-gray-600 mt-1 text-sm">
+                      <i className="fas fa-align-left mr-1"></i>
                       {exp.description}
                     </p>
                   )}
-                  {exp.skills && exp.skills.length > 0 && (
-                    <div className="mt-2">
-                      <p className="text-gray-500 text-sm">Skills:</p>
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {exp.skills.map((skill, idx) => (
-                          <span
-                            key={idx}
-                            className="bg-blue-50 text-blue-600 text-xs px-2 py-1 rounded"
-                          >
-                            {skill}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
+                  {exp.foundVia && (
+                    <p className="text-gray-500 text-sm">
+                      <i className="fas fa-search mr-1"></i>
+                      {exp.foundVia}
+                    </p>
                   )}
                 </div>
               </div>

@@ -4,7 +4,9 @@ import axios from "axios";
 import NavBar from "../../../components/UpperNavBar";
 import adPhoto from "../../../../public/Images/linkedInAd.png";
 import Form from "../../../components/myProfile/Forms/Form";
-
+import SkillEndorsements from "../../../components/myProfile/SkillEndorsements";
+import ConnectButton from "../../../components/Network/ConnectButton";
+import FollowButton from "../../../components/Network/FollowButton";
 interface Skill {
   skillName: string;
   endorsements?: Array<{
@@ -13,6 +15,7 @@ interface Skill {
     profilePicture?: string;
     firstName?: string;
     lastName?: string;
+    headline?: string;
   }>;
 }
 
@@ -60,7 +63,9 @@ interface UserProfile {
   privacySettings?: {
     profileVisibility: "public" | "connections" | "private";
   };
+  profilePrivacySettings?: "public" | "connectionsOnly" | "private";
   phone?: string;
+  website?: string;
 }
 
 interface MessageState {
@@ -132,13 +137,16 @@ const UserProfileView = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [message, setMessage] = useState<MessageState | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [canViewProfile, setCanViewProfile] = useState(false);
+  const [canViewProfile, setCanViewProfile] = useState(true); // Default to true, API will tell us if we can't view
   const [activeTab, setActiveTab] = useState("all");
-  const [showEndorsements, setShowEndorsements] = useState<
-    Record<string, boolean>
-  >({});
   const [endorsingSkill, setEndorsingSkill] = useState<string | null>(null);
   const [activeSkill, setActiveSkill] = useState<Skill | null>(null);
+  const [privacyNotice, setPrivacyNotice] = useState("");
+  const [error, setError] = useState("");
+  const [notFound, setNotFound] = useState(false);
+
+  const [basicProfile, setBasicProfile] = useState(null);
+  const [basicProfileLoading, setBasicProfileLoading] = useState(true);
 
   const openEndorsementModal = (skill: Skill) => {
     setActiveSkill(skill);
@@ -175,7 +183,7 @@ const UserProfileView = () => {
   };
 
   const fetchUserActivity = async (filter = "all") => {
-    if (!userId) return;
+    if (!userId || !canViewProfile) return;
 
     try {
       setActivityLoading(true);
@@ -255,77 +263,144 @@ const UserProfileView = () => {
     return new Date(dateString).toLocaleDateString();
   };
 
-  const handleEndorseSkill = async (skillName) => {
+  const EndorserCard = ({
+    endorser,
+  }: {
+    endorser: Skill["endorsements"][0];
+  }) => {
+    const [userDetails, setUserDetails] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+      const fetchUserDetails = async () => {
+        try {
+          const response = await api.get(`/user/${endorser.userId}`);
+          setUserDetails(response.data?.user);
+        } catch (error) {
+          console.error("Error fetching user details:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchUserDetails();
+    }, [endorser.userId]);
+
+    return (
+      <li className="flex items-center gap-3 p-3 bg-gray-50 rounded-md">
+        <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
+          {endorser.profilePicture || userDetails?.profilePicture ? (
+            <img
+              src={endorser.profilePicture || userDetails?.profilePicture}
+              alt={`${endorser.name || userDetails?.firstName}'s profile`}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <svg
+                className="w-6 h-6 text-gray-400"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                  clipRule="evenodd"
+                ></path>
+              </svg>
+            </div>
+          )}
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <h3 className="text-gray-800 font-medium truncate">
+            {endorser.firstName && endorser.lastName
+              ? `${endorser.firstName} ${endorser.lastName}`
+              : endorser.name ||
+                userDetails?.firstName ||
+                `User ${endorser.userId.substring(0, 4)}`}
+          </h3>
+
+          {loading ? (
+            <div className="h-4 bg-gray-200 rounded w-3/4 mt-1 animate-pulse"></div>
+          ) : (
+            <p className="text-gray-500 text-sm truncate">
+              {userDetails?.lastJobTitle ||
+                userDetails?.headline ||
+                endorser.headline ||
+                "LinkedIn Member"}
+            </p>
+          )}
+        </div>
+      </li>
+    );
+  };
+
+  const handleEndorseSkill = async (skillName: string) => {
     if (isProcessing || !userProfile || !currentUserId) return;
 
     try {
       setIsProcessing(true);
       setEndorsingSkill(skillName);
 
-      const response = await api.get("/user/me");
-      const currentUser = response.data.user;
-      const currentUserName = `${currentUser.firstName} ${currentUser.lastName}`;
-
       const skill = userProfile.skills.find((s) => s.skillName === skillName);
-      const hasEndorsed = skill?.endorsements?.some(
-        (e) => e.userId === currentUserId
-      );
+      const hasEndorsed = hasUserEndorsedSkill(skill);
 
       if (hasEndorsed) {
         await api.delete(
           `/user/skills/endorsements/remove-endorsement/${encodeURIComponent(
             skillName
           )}`,
-          {
-            data: {
-              skillOwnerId: userProfile._id,
-            },
-          }
+          { data: { skillOwnerId: userProfile._id } }
         );
 
-        setUserProfile({
-          ...userProfile,
-          skills: userProfile.skills.map((s) => {
-            if (s.skillName === skillName) {
-              return {
-                ...s,
-                endorsements: s.endorsements.filter(
-                  (e) => e.userId !== currentUserId
-                ),
-              };
-            }
-            return s;
-          }),
-        });
-
-        showMessage("Endorsement removed", "success");
+        setUserProfile((prev) => ({
+          ...prev,
+          skills: prev.skills.map((s) =>
+            s.skillName === skillName
+              ? {
+                  ...s,
+                  endorsements: (s.endorsements || []).filter(
+                    (e) => e.userId !== currentUserId
+                  ),
+                }
+              : s
+          ),
+        }));
       } else {
         await api.post("/user/skills/endorsements/add-endorsement", {
           skillOwnerId: userProfile._id,
           skillName,
         });
 
-        setUserProfile({
-          ...userProfile,
-          skills: userProfile.skills.map((s) => {
-            if (s.skillName === skillName) {
-              const newEndorsement = {
-                userId: currentUserId,
-                name: currentUserName,
-              };
-              return {
-                ...s,
-                endorsements: [...(s.endorsements || []), newEndorsement],
-              };
-            }
-            return s;
-          }),
-        });
+        const response = await api.get("/user/me");
+        const currentUser = response.data.user;
 
-        showMessage("Skill endorsed", "success");
+        setUserProfile((prev) => ({
+          ...prev,
+          skills: prev.skills.map((s) =>
+            s.skillName === skillName
+              ? {
+                  ...s,
+                  endorsements: [
+                    ...(s.endorsements || []),
+                    {
+                      userId: currentUserId,
+                      name: `${currentUser.firstName} ${currentUser.lastName}`,
+                      firstName: currentUser.firstName,
+                      lastName: currentUser.lastName,
+                      profilePicture: currentUser.profilePicture,
+                      headline:
+                        currentUser.headline || currentUser.lastJobTitle,
+                    },
+                  ],
+                }
+              : s
+          ),
+        }));
       }
     } catch (error) {
-      console.error("Error endorsing skill:", error);
+      console.error("Error updating endorsement:", error);
       showMessage(
         error.response?.data?.message || "Failed to update endorsement",
         "error"
@@ -334,6 +409,11 @@ const UserProfileView = () => {
       setEndorsingSkill(null);
       setIsProcessing(false);
     }
+  };
+
+  const hasUserEndorsedSkill = (skill: Skill): boolean => {
+    if (!currentUserId || !skill?.endorsements) return false;
+    return skill.endorsements.some((e) => e.userId === currentUserId);
   };
 
   const formatRelativeTime = (dateString) => {
@@ -374,6 +454,53 @@ const UserProfileView = () => {
     return `${diffInYears} year${diffInYears === 1 ? "" : "s"} ago`;
   };
 
+  const fetchBasicProfileInfo = async (userId: string) => {
+    try {
+      const response = await api.get(`/user/${userId}`);
+      return response.data?.user || null;
+    } catch (error: any) {
+      console.error("Error fetching basic profile info:", error);
+
+      if (error.response?.status === 403) {
+        if (error.response.data?.user) {
+          // Return whatever basic profile info we can get
+          return error.response.data.user;
+        }
+
+        // If no user info but we have a message, return minimal profile
+        if (error.response.data?.message) {
+          return {
+            _id: userId,
+            firstName: "LinkedIn",
+            lastName: "User",
+            profilePrivacySettings: "private",
+          };
+        }
+      }
+
+      // In case of other errors, return minimal profile info
+      return {
+        _id: userId,
+        firstName: "LinkedIn",
+        lastName: "User",
+        profilePrivacySettings: "private",
+      };
+    }
+  };
+  // Effect for fetching basic profile info when needed
+  useEffect(() => {
+    const getBasicInfo = async () => {
+      if (!userId || canViewProfile) return;
+
+      setBasicProfileLoading(true);
+      const basicInfo = await fetchBasicProfileInfo(userId);
+      setBasicProfile(basicInfo);
+      setBasicProfileLoading(false);
+    };
+
+    getBasicInfo();
+  }, [userId, canViewProfile]);
+
   useEffect(() => {
     const init = async () => {
       if (!userId) return;
@@ -387,24 +514,62 @@ const UserProfileView = () => {
         const currentId = currentUserResponse.data.user._id;
         setCurrentUserId(currentId);
 
-        const response = await api.get(`/user/${userId}`);
-        const user = response.data?.user;
+        try {
+          const response = await api.get(`/user/${userId}`);
+          const user = response.data?.user;
 
-        if (!user) throw new Error("User not found");
+          if (!user) throw new Error("User not found");
 
-        const isFollowing = user.followers?.some((f) => f.entity === currentId);
-        setIsFollowing(!!isFollowing);
-        setUserProfile(user);
+          const isFollowing = user.followers?.some(
+            (f) => f.entity === currentId
+          );
+          setIsFollowing(!!isFollowing);
+          setUserProfile(user);
+          setCanViewProfile(true);
+          setPrivacyNotice("");
 
-        const visibility = user.privacySettings?.profileVisibility || "public";
-        const isConnection = user.connectionList?.includes(currentId);
-        setCanViewProfile(
-          visibility === "public" ||
-            (visibility === "connections" && isConnection) ||
-            currentId === userId
-        );
+          const isCurrentUserConnected =
+            user.connectionList?.includes(currentId);
 
-        await fetchUserActivity();
+          // Check if privacy settings restrict viewing
+          if (user.profilePrivacySettings === "private") {
+            setCanViewProfile(false);
+            setPrivacyNotice("This profile is private. Connect to view more.");
+          } else if (
+            user.profilePrivacySettings === "connectionsOnly" &&
+            !isCurrentUserConnected
+          ) {
+            setCanViewProfile(false);
+            setPrivacyNotice(
+              "Only connections can view this profile. Send a connection request to see more."
+            );
+          } else {
+            // Only fetch activity if we can view the profile
+            await fetchUserActivity();
+          }
+        } catch (error: any) {
+          if (error.response?.status === 404) {
+            setNotFound(true);
+            setError("User not found.");
+          } else if (error.response?.status === 403) {
+            setCanViewProfile(false);
+
+            // Capture the privacy message from the error response
+            if (error.response.data?.message) {
+              setPrivacyNotice(error.response.data.message);
+            } else {
+              setPrivacyNotice("This profile has restricted access.");
+            }
+
+            // Get basic profile info even for restricted profiles
+            const basicInfo = await fetchBasicProfileInfo(userId);
+            if (basicInfo) {
+              setBasicProfile(basicInfo);
+            }
+          } else {
+            setError("Failed to load user profile.");
+          }
+        }
       } catch (error) {
         console.error("Error during initialization:", error);
         showMessage("Failed to load user profile", "error");
@@ -416,17 +581,91 @@ const UserProfileView = () => {
     init();
   }, [userId]);
 
-  const FollowButton = () => {
-    return (
-      <button
-        onClick={handleFollow}
-        disabled={isProcessing}
-        className="bg-white cursor-pointer text-[#0073b1] border-[#0073b1] border-2 px-4 py-1 rounded-full hover:bg-[#EAF4FD] hover:[border-width:2px] box-border font-medium text-sm transition-all duration-150"
-      >
-        {isProcessing ? "Processing..." : isFollowing ? "Following" : "Follow"}
-      </button>
-    );
+  useEffect(() => {
+    const fetchBasicInfo = async () => {
+      if (!userId || canViewProfile) return;
+
+      setBasicProfileLoading(true);
+      const basicInfo = await fetchBasicProfileInfo(userId);
+      setBasicProfile(basicInfo);
+      setBasicProfileLoading(false);
+    };
+
+    fetchBasicInfo();
+  }, [userId, canViewProfile]);
+
+  useEffect(() => {
+    const initializeProfile = async () => {
+      if (!userId) return;
+
+      try {
+        setLoading(true);
+        const currentUserResponse = await api.get("/user/me");
+        const currentId = currentUserResponse.data?.user?._id;
+        setCurrentUserId(currentId);
+
+        const response = await api.get(`/user/${userId}`);
+        const user = response.data?.user;
+
+        if (!user) throw new Error("User not found");
+
+        setUserProfile(user);
+        setIsFollowing(user.followers?.some((f) => f.entity === currentId));
+        setCanViewProfile(true);
+        setPrivacyNotice("");
+
+        if (user.profilePrivacySettings === "private") {
+          setCanViewProfile(false);
+          setPrivacyNotice("This profile is private. Connect to view more.");
+        } else if (
+          user.profilePrivacySettings === "connectionsOnly" &&
+          !user.connectionList?.includes(currentId)
+        ) {
+          setCanViewProfile(false);
+          setPrivacyNotice(
+            "Only connections can view this profile. Send a connection request to see more."
+          );
+        } else {
+          await fetchUserActivity();
+        }
+      } catch (error: any) {
+        if (error.response?.status === 404) {
+          setNotFound(true);
+          setError("User not found.");
+        } else if (error.response?.status === 403) {
+          setCanViewProfile(false);
+          setPrivacyNotice(
+            error.response.data?.message ||
+              "This profile has restricted access."
+          );
+          const basicInfo = await fetchBasicProfileInfo(userId);
+          setBasicProfile(basicInfo);
+        } else {
+          setError("Failed to load user profile.");
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeProfile();
+  }, [userId]);
+
+  const isSkillEndorsed = (skill: Skill): boolean => {
+    return hasUserEndorsedSkill(skill);
   };
+
+  // const FollowButton = () => {
+  //   return (
+  //     <button
+  //       onClick={handleFollow}
+  //       disabled={isProcessing}
+  //       className="bg-white cursor-pointer text-[#0073b1] border-[#0073b1] border-2 px-4 py-1 rounded-full hover:bg-[#EAF4FD] hover:[border-width:2px] box-border font-medium text-sm transition-all duration-150"
+  //     >
+  //       {isProcessing ? "Processing..." : isFollowing ? "Following" : "Follow"}
+  //     </button>
+  //   );
+  // };
 
   const SkillEndorsementSection = () => (
     <div className="bg-white shadow-sm rounded-lg overflow-hidden">
@@ -461,60 +700,22 @@ const UserProfileView = () => {
                 <div className="flex justify-between items-center">
                   <div>
                     <span className="font-medium">{skill.skillName}</span>
-                    {skill.endorsements && skill.endorsements.length > 0 && (
-                      <button
-                        onClick={() => openEndorsementModal(skill)}
-                        className="text-blue-600 hover:text-blue-800 text-sm ml-2"
-                      >
-                        · {skill.endorsements.length}{" "}
-                        {skill.endorsements.length === 1
-                          ? "endorsement"
-                          : "endorsements"}
-                      </button>
-                    )}
+                    <SkillEndorsements
+                      skillName={skill.skillName}
+                      endorsements={skill.endorsements}
+                      onEndorse={async (skillName) => {
+                        await handleEndorseSkill(skillName);
+                        return true;
+                      }}
+                      onRemoveEndorse={async (skillName) => {
+                        await handleEndorseSkill(skillName);
+                        return true;
+                      }}
+                      currentUserId={currentUserId || ""}
+                      skillOwnerId={userProfile._id}
+                    />
                   </div>
-
-                  {currentUserId !== userId && (
-                    <button
-                      onClick={() => handleEndorseSkill(skill.skillName)}
-                      disabled={endorsingSkill === skill.skillName}
-                      className={`px-3 py-1 rounded-full text-sm font-semibold shadow-sm transition-colors ${
-                        skill.endorsements?.some(
-                          (e) => e.userId === currentUserId
-                        )
-                          ? "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
-                          : "bg-white text-[#0073b1] border-[#0073b1] border-2 px-4 py-1 rounded-full hover:bg-[#EAF4FD] font-medium transition-all duration-150"
-                      }`}
-                    >
-                      {endorsingSkill === skill.skillName
-                        ? "Processing..."
-                        : skill.endorsements?.some(
-                            (e) => e.userId === currentUserId
-                          )
-                        ? "Endorsed"
-                        : "Endorse"}
-                    </button>
-                  )}
                 </div>
-
-                {showEndorsements[skill.skillName] &&
-                  skill.endorsements &&
-                  skill.endorsements.length > 0 && (
-                    <div className="mt-2 pl-4 border-l-2 border-gray-200">
-                      <p className="text-sm text-gray-500 mb-2">Endorsements</p>
-                      <div className="flex flex-wrap gap-2">
-                        {skill.endorsements.map((endorsement, i) => (
-                          <div
-                            key={i}
-                            className="flex items-center bg-gray-50 px-2 py-1 rounded text-sm"
-                          >
-                            {endorsement.name ||
-                              `User ${endorsement.userId.substring(0, 4)}`}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
               </div>
             ))}
           </div>
@@ -614,6 +815,164 @@ const UserProfileView = () => {
     );
   };
 
+  const ProfileHeader = ({ profile, isRestricted = false }) => {
+    return (
+      <div className="bg-white shadow-sm rounded-lg overflow-hidden">
+        <div className="relative">
+          {/* Cover photo with consistent fallback */}
+          <div
+            className="w-full h-48 bg-gray-200 bg-cover bg-center"
+            style={{
+              backgroundImage: profile?.coverPicture
+                ? `url(${profile.coverPicture})`
+                : "none",
+            }}
+          ></div>
+
+          {/* Profile picture with consistent fallback */}
+          <div className="absolute bottom-0 transform translate-y-1/2 left-8">
+            <div className="w-24 h-24 rounded-full border-4 border-white overflow-hidden bg-gray-200 flex items-center justify-center">
+              {profile?.profilePicture ? (
+                <img
+                  src={profile.profilePicture}
+                  alt={`${profile.firstName || "User"}'s profile`}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <svg
+                  className="w-12 h-12 text-gray-400"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                    clipRule="evenodd"
+                  ></path>
+                </svg>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="pt-16 px-8 flex flex-col md:flex-row md:items-center md:justify-between pb-10">
+          <div>
+            {/* Always show name with fallback */}
+            <h1 className="text-2xl font-bold">
+              {profile?.firstName && profile?.lastName
+                ? `${profile.firstName} ${profile.lastName}`
+                : "LinkedIn User"}
+            </h1>
+
+            {/* Conditionally show job title */}
+            {profile?.lastJobTitle && (
+              <p className="text-gray-600">{profile.lastJobTitle}</p>
+            )}
+
+            {/* Conditionally show location */}
+            {profile?.location && (
+              <p className="text-gray-500 text-sm flex items-center mt-1">
+                <svg
+                  className="w-4 h-4 mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                  ></path>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                  ></path>
+                </svg>
+                {profile.location}
+              </p>
+            )}
+          </div>
+
+          {!isRestricted && (
+            <div className="mt-4 md:mt-0 flex space-x-3">
+              <ConnectButton userId={profile._id} />
+              <FollowButton userId={profile._id} />
+            </div>
+          )}
+        </div>
+
+        {isRestricted && privacyNotice && (
+          <div className="px-8 pb-6">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <p className="text-blue-800">
+                <span>This profile has restricted access. </span>
+                <span className="font-semibold">
+                  {privacyNotice || "Connect to view more details."}
+                </span>
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderRestrictedProfile = () => {
+    if (basicProfileLoading) {
+      return (
+        <>
+          <NavBar />
+          <div className="max-w-6xl mx-auto p-4">
+            <div className="flex gap-6">
+              <div className="w-full lg:w-3/4">
+                <div className="animate-pulse flex flex-col space-y-4">
+                  <div className="w-full h-48 bg-gray-200 rounded"></div>
+                  <div className="flex items-center space-x-4">
+                    <div className="rounded-full bg-gray-200 h-24 w-24"></div>
+                    <div className="flex-1 space-y-2">
+                      <div className="h-6 bg-gray-200 rounded w-3/4"></div>
+                      <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      );
+    }
+
+    return (
+      <>
+        <NavBar />
+        <div className="max-w-6xl mx-auto p-4">
+          <div className="flex gap-6">
+            <div className="w-full lg:w-3/4">
+              {/* Use the ProfileHeader component */}
+              <ProfileHeader profile={basicProfile} isRestricted={true} />
+            </div>
+
+            {/* Advertisement section */}
+            <div className="hidden lg:block lg:w-1/4">
+              <div className="shadow-sm rounded-lg overflow-hidden mt-8">
+                <img
+                  src={adPhoto}
+                  alt="LinkedIn Advertisement"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  };
+
+  // Loading state
   if (loading) {
     return (
       <>
@@ -645,176 +1004,41 @@ const UserProfileView = () => {
     );
   }
 
-  if (!userProfile) {
+  // Not Found state
+  if (notFound) {
     return (
       <>
         <NavBar />
-        <div className="text-center py-8 text-lg">User not found</div>
-      </>
-    );
-  }
-
-  if (!canViewProfile && userProfile) {
-    const visibility =
-      userProfile.privacySettings?.profileVisibility || "public";
-
-    return (
-      <>
-        <NavBar />
-        <div className="max-w-6xl mx-auto p-4">
-          <div className="flex gap-6">
-            <div className="w-full lg:w-3/4">
-              <div className="bg-white shadow-sm rounded-lg overflow-hidden relative">
-                {message && (
-                  <div
-                    className={`fixed top-4 right-4 z-50 px-4 py-2 rounded shadow-lg ${
-                      message.type === "success" ? "bg-green-500" : "bg-red-500"
-                    } text-white`}
-                  >
-                    {message.content}
-                  </div>
-                )}
-
-                <div className="relative">
-                  <div
-                    className="w-full h-48 bg-cover bg-center"
-                    style={{
-                      backgroundImage: `url(${
-                        userProfile.coverPicture || "/placeholder-cover.jpg"
-                      })`,
-                    }}
-                  ></div>
-                  <div className="absolute bottom-0 transform translate-y-1/2 left-8">
-                    <div className="w-24 h-24 rounded-full border-4 border-white overflow-hidden">
-                      {userProfile.profilePicture ? (
-                        <img
-                          src={userProfile.profilePicture}
-                          alt={`${userProfile.firstName}'s profile`}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                          <svg
-                            className="w-12 h-12 text-gray-400"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                              clipRule="evenodd"
-                            ></path>
-                          </svg>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-16 px-8 flex flex-col md:flex-row md:items-center md:justify-between mb-16">
-                  <div>
-                    <h1 className="text-2xl font-bold">{`${userProfile.firstName} ${userProfile.lastName}`}</h1>
-                    {userProfile.lastJobTitle && (
-                      <p className="text-gray-600">
-                        {userProfile.lastJobTitle}
-                      </p>
-                    )}
-
-                    <p className="text-gray-500 text-sm mt-1">
-                      {userProfile.connectionList?.length > 500
-                        ? "500+ connections"
-                        : `${
-                            userProfile.connectionList?.length || 0
-                          } connections`}
-                      {userProfile.followers?.length > 0 &&
-                        ` • ${userProfile.followers.length} followers`}
-                    </p>
-                    {userProfile.location && (
-                      <p className="text-gray-500 text-sm flex items-center mt-1">
-                        <svg
-                          className="w-4 h-4 mr-1"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                          ></path>
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                          ></path>
-                        </svg>
-                        {userProfile.location}
-                      </p>
-                    )}
-                  </div>
-                  <div className="ml-115 mt-4 md:mt-0">
-                    <button className="bg-white cursor-pointer text-[#0073b1] border-[#0073b1] border-2 px-4 py-1 rounded-full hover:bg-[#EAF4FD] hover:[border-width:2px] box-border font-medium text-sm transition-all duration-150">
-                      Connect
-                    </button>
-                  </div>
-                  <div className="mt-4 md:mt-0">
-                    <FollowButton />
-                  </div>
-                </div>
-
-                <div className="border-t border-gray-200 mt-6"></div>
-
-                <div className="p-8 bg-gray-50 text-center">
-                  <div className="mx-auto max-w-lg">
-                    <svg
-                      className="w-12 h-12 text-gray-400 mx-auto mb-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                      ></path>
-                    </svg>
-                    <h2 className="text-xl font-semibold mb-2">
-                      Profile is {visibility}
-                    </h2>
-                    {visibility === "private" ? (
-                      <p className="text-gray-600">
-                        This profile is private. The user has chosen to keep
-                        their information private.
-                      </p>
-                    ) : (
-                      <p className="text-gray-600">
-                        This profile is only visible to connections.
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="hidden lg:block lg:w-1/4">
-              <div className="shadow-sm rounded-lg overflow-hidden mt-8 ">
-                <div className="w-full h-full">
-                  <img
-                    src={adPhoto}
-                    alt="LinkedIn Advertisement - See who's hiring on LinkedIn"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              </div>
-            </div>
+        <div className="max-w-6xl mx-auto p-4 mt-8">
+          <div className="bg-white shadow-sm rounded-lg p-10 text-center">
+            <svg
+              className="w-16 h-16 text-gray-400 mx-auto mb-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+            </svg>
+            <h2 className="text-xl font-semibold text-gray-700 mb-2">
+              User Not Found
+            </h2>
+            <p className="text-gray-500">
+              The user profile you are looking for doesn't exist or has been
+              removed.
+            </p>
           </div>
         </div>
       </>
     );
+  }
+
+  if (!canViewProfile) {
+    return renderRestrictedProfile();
   }
 
   return (
@@ -902,14 +1126,10 @@ const UserProfileView = () => {
                     </p>
                   )}
                 </div>
-                <div className="ml-115 mt-4 md:mt-0">
-                  <button className="bg-white cursor-pointer text-[#0073b1] border-[#0073b1] border-2 px-4 py-1 rounded-full hover:bg-[#EAF4FD] hover:[border-width:2px] box-border font-medium text-sm transition-all duration-150">
-                    Connect
-                  </button>
-                </div>
 
-                <div className="mt-4 md:mt-0">
-                  <FollowButton />
+                <div className="mt-4 md:mt-0 flex space-x-3">
+                  <ConnectButton userId={userProfile._id} />
+                  <FollowButton userId={userProfile._id} />
                 </div>
               </div>
             </div>
@@ -922,14 +1142,34 @@ const UserProfileView = () => {
                   {userProfile?.about?.description || "No bio available"}
                 </p>
 
-                {(userProfile?.location || userProfile?.phone) && (
-                  <div className="mt-2 text-sm text-gray-600 space-y-1">
-                    {userProfile?.location && (
-                      <p>📍 Address: {userProfile.location}</p>
-                    )}
-                    {userProfile.phone && <p>📞 Phone: {userProfile.phone}</p>}
-                  </div>
-                )}
+                {/* Fix 3: Contact information display */}
+                <div className="mt-4 text-sm text-gray-600 space-y-2">
+                  {userProfile?.location && (
+                    <p className="flex items-center">
+                      <span className="mr-2">📍</span>
+                      <span>{userProfile.location}</span>
+                    </p>
+                  )}
+                  {userProfile?.phone && (
+                    <p className="flex items-center">
+                      <span className="mr-2">📞</span>
+                      <span>{userProfile.phone}</span>
+                    </p>
+                  )}
+                  {userProfile?.website && (
+                    <p className="flex items-center">
+                      <span className="mr-2">🌐</span>
+                      <a
+                        href={userProfile.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline"
+                      >
+                        {userProfile.website}
+                      </a>
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -1202,7 +1442,7 @@ const UserProfileView = () => {
 
           {activeSkill && (
             <Form
-              title={`Endorsements "${activeSkill.skillName}"`}
+              title={`Endorsements for "${activeSkill.skillName}"`}
               onClose={closeEndorsementModal}
             >
               <div className="p-4">
@@ -1210,41 +1450,7 @@ const UserProfileView = () => {
                 activeSkill.endorsements.length > 0 ? (
                   <ul className="space-y-4">
                     {activeSkill.endorsements.map((endorser, i) => (
-                      <li
-                        key={i}
-                        className="flex items-center gap-3 p-3 bg-gray-50 rounded-md"
-                      >
-                        <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200">
-                          {endorser.profilePicture ? (
-                            <img
-                              src={endorser.profilePicture}
-                              alt={`${endorser.firstName} ${endorser.lastName}`}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <svg
-                              className="w-5 h-5 text-gray-500 mx-auto mt-2"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M12 4a4 4 0 110 8 4 4 0 010-8zM4 20a8 8 0 0116 0H4z"
-                              />
-                            </svg>
-                          )}
-                        </div>
-                        <span className="text-gray-800 font-medium">
-                          {endorser.firstName && endorser.lastName
-                            ? `${endorser.firstName} ${endorser.lastName}`
-                            : `User ${
-                                endorser.userId?.substring(0, 4) || "Unknown"
-                              }`}
-                        </span>
-                      </li>
+                      <EndorserCard key={i} endorser={endorser} />
                     ))}
                   </ul>
                 ) : (
