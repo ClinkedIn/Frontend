@@ -38,6 +38,7 @@ const ApplicantDetails = ({ applicant, screeningAnswers,jobId }) => {
   const resumeUrl = applicant?.applicant.resume;
 
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showbuttons , setShowButtons] = useState(true);
 
   /**
    * Close dropdown menu if clicked outside of it.
@@ -83,10 +84,11 @@ const ApplicantDetails = ({ applicant, screeningAnswers,jobId }) => {
       try {
         console.log("Accepting application :", applicant);
           await axios.put(
-              `${BASE_URL}/jobs/${jobId}/applications/${userId}/accept`,
+              `${BASE_URL}/jobs/${jobId}/applications/${applicant.userId}/accept`,
               { withCredentials: true }
           );
           toast.success('Application accepted successfully');
+          setShowButtons(false);
       } catch (error) {
           console.error('Error accepting application:', error);
           toast.error(error.response?.data?.message || 'Failed to accept application');
@@ -98,10 +100,11 @@ const ApplicantDetails = ({ applicant, screeningAnswers,jobId }) => {
     setIsProcessing(true);
     try {
         await axios.put(
-            `${BASE_URL}/jobs/${jobId}/applications/${userId}/reject`,
+            `${BASE_URL}/jobs/${jobId}/applications/${applicant.userId}/reject`,
             { withCredentials: true }
         );
         toast.success('Application rejected');
+        setShowButtons(false);
     } catch (error) {
         console.error('Error rejecting application:', error);
         toast.error(error.response?.data?.message || 'Failed to reject application');
@@ -332,7 +335,7 @@ const ApplicantDetails = ({ applicant, screeningAnswers,jobId }) => {
                 
             </div>
             <div className="flex items-center space-x-3">
-                {applicant?.status ==="pending" && <><button
+                {applicant?.status ==="pending" && showbuttons && <><button
                     onClick={handleAccept}
                     disabled={isProcessing}
                     className="flex items-center px-4 py-1.5 bg-green-600 text-white rounded-full text-sm font-semibold hover:bg-green-700 transition-colors disabled:bg-green-300"
