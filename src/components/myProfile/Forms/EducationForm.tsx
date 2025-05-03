@@ -214,11 +214,7 @@ const EducationForm: React.FC<EducationFormProps> = ({
   const [description, setDescription] = useState<string>(
     initialData?.description || ""
   );
-  const [selectedSkills, setSelectedSkills] = useState<string[]>(
-    initialData?.skills || []
-  );
-  const [customSkill, setCustomSkill] = useState<string>("");
-  const [media, setMedia] = useState<string>(initialData?.media || "");
+
   const [errors, setErrors] = useState<{
     school?: string;
     startYear?: string;
@@ -307,8 +303,6 @@ const EducationForm: React.FC<EducationFormProps> = ({
         grade: grade || undefined,
         activitiesAndSocieties: activitiesAndSocieties || undefined,
         description: description || undefined,
-        skills: selectedSkills.length > 0 ? selectedSkills : undefined,
-        media: media || undefined,
       };
 
       setEducationData(data);
@@ -355,9 +349,7 @@ const EducationForm: React.FC<EducationFormProps> = ({
     setGrade("");
     setActivitiesAndSocieties("");
     setDescription("");
-    setSelectedSkills([]);
-    setCustomSkill("");
-    setMedia("");
+
     setErrors({});
     setShowOtherSchool(false);
   };
@@ -378,52 +370,9 @@ const EducationForm: React.FC<EducationFormProps> = ({
     }
   };
 
-  /**
-   * @function addSkill
-   * @description Adds a custom skill to the selected skills list
-   */
-  const addSkill = () => {
-    if (customSkill && !selectedSkills.includes(customSkill)) {
-      setSelectedSkills([...selectedSkills, customSkill]);
-      setCustomSkill("");
-    }
-  };
-
-  /**
-   * @function removeSkill
-   * @description Removes a skill from the selected skills list
-   * @param {string} skill - The skill to remove
-   */
-  const removeSkill = (skill: string) => {
-    setSelectedSkills(selectedSkills.filter((s) => s !== skill));
-  };
-
-  /**
-   * @function selectSkill
-   * @description Adds a predefined skill from the common skills list
-   * @param {string} skill - The skill to add
-   */
-  const selectSkill = (skill: string) => {
-    if (!selectedSkills.includes(skill)) {
-      setSelectedSkills([...selectedSkills, skill]);
-    }
-  };
-
-  /**
-   * @function handleKeyPress
-   * @description Handle Enter key press in the custom skill input
-   * @param {React.KeyboardEvent} e - The keyboard event
-   */
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      addSkill();
-    }
-  };
-
   return (
-    <div className="fixed inset-0 bg-black/30  z-50 flex items-center justify-center">
-      <div className="bg-white rounded-lg lg:w-[45%] w-[100%]  flex flex-col max-h-[100vh] overflow-y-auto shadow-lg">
+    <div className="fixed inset-0 bg-black/30 max-h-[100vh] z-50 flex items-center justify-center">
+      <div className="bg-white rounded-lg lg:w-[45%] w-[100%] max-h-[100vh] flex flex-col  overflow-y-auto shadow-lg">
         <div className="sticky top-0 z-10 bg-white flex justify-between items-center p-4 border-b rounded-t-lg">
           <h2 className="text-xl font-semibold">Add education</h2>
           <button
@@ -693,82 +642,6 @@ const EducationForm: React.FC<EducationFormProps> = ({
                 onChange={(e) => setDescription(e.target.value)}
                 className="w-full px-3 py-2 border rounded-md h-32 resize-none border-gray-300"
               ></textarea>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Skills
-              </label>
-              <div className="flex flex-wrap gap-2 mb-2">
-                {selectedSkills.map((skill, index) => (
-                  <div
-                    key={index}
-                    className="bg-blue-100 px-3 py-1 rounded-full flex items-center"
-                  >
-                    <span>{skill}</span>
-                    <button
-                      type="button"
-                      onClick={() => removeSkill(skill)}
-                      className="ml-2 text-blue-500 hover:text-blue-700"
-                      aria-label={`Remove ${skill}`}
-                    >
-                      &times;
-                    </button>
-                  </div>
-                ))}
-              </div>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="Add a skill"
-                  value={customSkill}
-                  onChange={(e) => setCustomSkill(e.target.value)}
-                  className="flex-grow px-3 py-2 border rounded-md border-gray-300"
-                  onKeyPress={handleKeyPress}
-                />
-                <button
-                  type="button"
-                  onClick={addSkill}
-                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                >
-                  Add
-                </button>
-              </div>
-              <div className="mt-2">
-                <p className="text-sm font-medium text-gray-700 mb-1">
-                  Common skills:
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {COMMON_SKILLS.map((skill, index) => (
-                    <button
-                      type="button"
-                      key={index}
-                      onClick={() => selectSkill(skill)}
-                      disabled={selectedSkills.includes(skill)}
-                      className={`px-3 py-1 rounded-full text-sm ${
-                        selectedSkills.includes(skill)
-                          ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                          : "bg-gray-100 hover:bg-gray-200 text-gray-700"
-                      }`}
-                    >
-                      {skill}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Media (Transcripts, Certificates, etc.)
-              </label>
-              <input
-                type="text"
-                placeholder="URL to your document (e.g., https://example.com/transcript.pdf)"
-                value={media}
-                onChange={(e) => setMedia(e.target.value)}
-                className="w-full px-3 py-2 border rounded-md border-gray-300"
-              />
             </div>
           </div>
         </div>
