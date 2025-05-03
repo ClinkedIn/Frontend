@@ -25,8 +25,8 @@ const InvitationManager: React.FC = () => {
       try {
         const response = await axios.get(`${BASE_URL}/user/connections/requests`);
         console.log('Invitations API response:', response.data);
-        if (response.data.requests) {
-          setInvitations(response.data.requests);
+        if (response.data.pendingRequests) {
+          setInvitations(response.data.pendingRequests);
         }
       } catch (error) {
         console.error('Error fetching invitations:', error);
@@ -104,17 +104,17 @@ const InvitationManager: React.FC = () => {
                         <p className="font-medium truncate">{`${invitation.firstName} ${invitation.lastName}`}</p>
                         <p className="text-xs text-gray-500 truncate">{invitation.headline}</p>
                       </div>
-                      <div className="ml-0 sm:ml-auto flex items-center mt-2 sm:mt-0">
+                      <div className="ml-0 sm:ml-auto flex items-center mt-2 sm:mt-0 space-x-2">
                         {selectedTab === 'received' ? (
                           <>
                             <button
-                              className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition duration-300 mr-2"
+                              className="w-20 text-gray-600 py-1 rounded-full text-sm font-semibold hover:bg-blue-50 transition"
                               onClick={() => ignoreInvitation(invitation._id)}
                             >
                               Ignore
                             </button>
                             <button
-                              className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 transition duration-300"
+                              className="w-20 border border-blue-700 text-blue-700 py-1 rounded-full text-sm font-semibold hover:bg-gray-100 transition"
                               onClick={() => acceptInvitation(invitation._id)}
                             >
                               Accept

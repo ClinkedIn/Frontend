@@ -30,14 +30,15 @@ import { useAuth } from "../context/AuthContext";
  * @component
  * @example
  * // Example usage:
- * <Header notifications={notifications} />
+ * <Header notifications={[]} pendingInvitationsCount={pendingInvitations.length} />
  *
  * @param {Object} props - The properties passed to the component.
  * @param {Array} props.notifications - Array of notifications to be passed to the component.
+ * @param {number} props.pendingInvitationsCount - Count of pending invitations.
  *
  * @returns {JSX.Element} The Header component.
  */
-const Header = ({ notifications }) => {
+const Header = ({ notifications, pendingInvitationsCount }) => {
   /**
    * State variables:
    * - `showUser`: Toggles the visibility of the user dropdown.
@@ -520,7 +521,7 @@ const Header = ({ notifications }) => {
           </button>
           {/* Network */}
           <button
-            className={`lex flex-col items-center hover:bg-gray-200 p-1.5 rounded-lg w-16 ${
+            className={`relative flex flex-col items-center hover:bg-gray-200 p-1.5 rounded-lg w-16 ${
               currentPath === "network" ? "text-black" : "text-gray-600"
             }`}
             onClick={() => navigate("/network")}
@@ -532,6 +533,12 @@ const Header = ({ notifications }) => {
                 }`}
               />
               <span className="text-xs">Network</span>
+              {/* Pending Invitations Badge */}
+              {pendingInvitationsCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-[#cb112d] text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-medium">
+                  {pendingInvitationsCount > 99 ? "99+" : pendingInvitationsCount}
+                </span>
+              )}
               {currentPath === "network" && (
                 <div className="w-8 h-0.5 bg-black rounded-full mt-1" />
               )}
