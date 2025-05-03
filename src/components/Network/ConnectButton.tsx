@@ -54,7 +54,7 @@ const ConnectButton: React.FC<ConnectButtonProps> = ({ userId, onConnect }) => {
 
   return (
     <button
-      className={`px-4 mx-2 cursor-pointer border rounded-full text-sm font-semibold transition-colors
+      className={`px-4 py-1.5 mx-2 cursor-pointer border rounded-full text-sm font-semibold transition-colors
       ${
         state === "connect"
           ? "border-[#0073b1] text-[#0073b1] hover:bg-[#EAF4FD]"

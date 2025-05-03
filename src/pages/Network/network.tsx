@@ -10,6 +10,7 @@ import { getBlockedUsersCount } from './BlockedUsers'; // Import the count funct
 import { FiUserMinus } from "react-icons/fi";
 import { BsFillPeopleFill } from "react-icons/bs";
 import ConnectButton from '../../components/Network/ConnectButton'; // <-- Import ConnectButton
+import { motion, AnimatePresence } from "framer-motion";
 
 // Define the related user interface
 interface RelatedUser {
@@ -121,10 +122,20 @@ const Network: React.FC = () => {
     fetchBlockedUsersCount();
   }, []);
 
+  // Animated remove for invitations
+  const handleAcceptAnimated = async (invitationId: string) => {
+    await handleAccept(invitationId);
+    setPendingInvitations((prev) => prev.filter((inv) => inv._id !== invitationId));
+  };
+  const handleIgnoreAnimated = async (invitationId: string) => {
+    await handleIgnore(invitationId);
+    setPendingInvitations((prev) => prev.filter((inv) => inv._id !== invitationId));
+  };
+
   return (
     <div className="flex flex-col lg:flex-row bg-[#F5F3EE] p-2 sm:p-4 md:p-6 mt-14 min-h-screen">
       {/* Header */}
-      <Header notifications={[]} />
+      <Header notifications={[]} pendingInvitationsCount={pendingInvitations.length} />
 
       {/* Left Sidebar */}
       <div className="w-full lg:w-72 flex flex-col items-start lg:mr-8 mb-6 lg:mb-0">
@@ -164,75 +175,83 @@ const Network: React.FC = () => {
 
       {/* Main Content */}
       <div className="flex-grow p-2 sm:p-4">
-        {/* Manage Invitations in a white card */}
+        {/* Invitations Card */}
         <div className={`bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6${pendingInvitations.length === 0 ? " h-12" : ""}`}>
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
-            <div>
+          <div className="relative mb-4">
+            {/* Title and Show All/Manage Button */}
+            <div className="flex items-center">
               {pendingInvitations.length > 0 ? (
-                <div>
+                <>
                   <p className="text-gray-600 mb-2">
                     Invitations ({pendingInvitations.length})
                   </p>
-                  <ul className="space-y-4">
-                    {pendingInvitations.slice(0, 3).map((invitation) => (
-                      <li
-                        key={invitation._id}
-                        className={`flex items-center space-x-2 ${
-                          invitation.read ? '' : 'bg-[#E8F5FF]'
-                        }`}
-                      >
-                        <img
-                          src={invitation.profilePicture || "/Images/user.svg"}
-                          alt={`${invitation.firstName} ${invitation.lastName}`}
-                          className="w-8 h-8 rounded-full"
-                        />
-                        <div>
-                          <p className="font-medium">{`${invitation.firstName} ${invitation.lastName}`}</p>
-                          <p className="text-xs text-gray-500">{invitation.headline}</p>
-                        </div>
-                        <div className="ml-auto">
-                          <button
-                            className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition duration-300"
-                            onClick={() => handleIgnore(invitation._id)}
-                          >
-                            Ignore
-                          </button>
-                          <button
-                            className="bg-blue-500 text-white px-2 py-1 ml-2 rounded hover:bg-blue-600 transition duration-300"
-                            onClick={() => handleAccept(invitation._id)}
-                          >
-                            Accept
-                          </button>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                  <button
+                    className="absolute right-0 top-0 text-gray-800 font-semibold px-4 py-2 rounded hover:bg-gray-100 transition duration-300"
+                    onClick={() => navigate("invitation-manager")}
+                  >
+                    Show all
+                  </button>
+                </>
               ) : (
-                <p className="text-gray-600 mb-2 -mt-3">No pending invitations</p>
+                <>
+                  <p className="text-gray-600 mb-2 -mt-4 flex-1">No pending invitations</p>
+                  <button
+                    className="ml-auto text-gray-800 font-semibold px-4 py-2 rounded hover:bg-gray-100 transition duration-300 -mt-5"
+                    onClick={() => navigate("invitation-manager")}
+                  >
+                    Manage
+                  </button>
+                </>
               )}
             </div>
-
-            {/* Conditionally Render the "Show all" Button */}
-            {pendingInvitations.length > 3 && (
-              <button
-                className="text-gray-800 font-semibold px-4 py-2 rounded hover:bg-gray-100 transition duration-300 mt-4"
-                onClick={() => navigate("invitation-manager")}
-              >
-                Show all
-              </button>
-            )}
-
-            {/* Conditionally Render the "Manage" Button */}
-            {pendingInvitations.length === 0 && (
-              <button
-                className="text-gray-800 font-semibold px-4 py-2 rounded hover:bg-gray-100 transition duration-300 -mt-6"
-                onClick={() => navigate("invitation-manager")}
-              >
-                Manage
-              </button>
-            )}
           </div>
+          <AnimatePresence>
+            {pendingInvitations.length > 0 && (
+              <ul className="space-y-2">
+                {pendingInvitations.slice(0, 3).map((invitation) => (
+                  <motion.li
+                    key={invitation._id}
+                    initial={{ opacity: 0, x: 40 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -40, transition: { duration: 0.25 } }}
+                    layout
+                    className={`flex items-center px-2 py-2 rounded-lg relative ${
+                      invitation.read ? '' : 'bg-[#E8F5FF]'
+                    }`}
+                  >
+                    <img
+                      src={invitation.profilePicture || "/Images/user.svg"}
+                      alt={`${invitation.firstName} ${invitation.lastName}`}
+                      className="w-10 h-10 rounded-full"
+                    />
+                    <div className="flex flex-col flex-1 min-w-0 ml-3">
+                      <p className="font-medium truncate">{`${invitation.firstName} ${invitation.lastName}`}</p>
+                      <p className="text-xs text-gray-500 truncate">{invitation.headline}</p>
+                    </div>
+                    {/* Accept/Ignore buttons absolutely positioned on the right, stacked horizontally */}
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-row space-x-2">
+                      <motion.button
+                        whileTap={{ scale: 0.92, rotate: -4 }}
+                        whileHover={{ scale: 1.05, backgroundColor: "#f3f4f6" }}
+                        className="w-20 text-gray-700 py-1 rounded-full text-sm font-semibold border border-gray-400 hover:bg-gray-100 transition"
+                        onClick={() => handleIgnoreAnimated(invitation._id)}
+                      >
+                        Ignore
+                      </motion.button>
+                      <motion.button
+                        whileTap={{ scale: 0.92, rotate: 4 }}
+                        whileHover={{ scale: 1.05, backgroundColor: "#e0f2fe" }}
+                        className="w-20 border border-blue-700 text-blue-700 py-1 rounded-full text-sm font-semibold hover:bg-blue-50 transition"
+                        onClick={() => handleAcceptAnimated(invitation._id)}
+                      >
+                        Accept
+                      </motion.button>
+                    </div>
+                  </motion.li>
+                ))}
+              </ul>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* People you may know in a card */}
