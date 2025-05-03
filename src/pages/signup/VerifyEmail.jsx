@@ -1,17 +1,23 @@
-import { useState, useEffect } from "react";
 import axios from "axios";
 import { IoShieldHalf } from "react-icons/io5";
 import { BASE_URL } from "../../constants";
+import { useNavigate, useLocation } from "react-router-dom";
+import toast, { Toaster } from "react-hot-toast";
+import { useEffect, useState } from "react";
 
 const VerifyEmail = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const email = location.state?.email || "no email";
   const [code, setCode] = useState(""); // OTP input
   const [message, setMessage] = useState(""); // Feedback message
   const [isLoading, setIsLoading] = useState(false); // Loading state for verification
   const [isVerified, setIsVerified] = useState(false); // Verification status
   const [user, setUser] = useState(null); // User data
-  const [newEmail, setNewEmail] = useState(""); // New email for editing
+  const [newEmail, setNewEmail] = useState(email); // New email for editing
   const [canRequestOTP, setCanRequestOTP] = useState(true); // Cooldown for OTP requests
   const [timer, setTimer] = useState(0); // Timer for cooldown
+  const [isEditing, setIsEditing] = useState(false); // Editing state for email
 
   // Request OTP API call
   /**
@@ -32,35 +38,34 @@ const VerifyEmail = () => {
    */
   const requestOTP = async () => {
     if (!canRequestOTP) return;
-    setMessage("Requesting OTP...");
-    setCanRequestOTP(false);
-    setTimer(30);
-
-    // Start countdown timer
-    const countdown = setInterval(() => {
-      setTimer((prev) => {
-        if (prev === 1) {
-          clearInterval(countdown);
-          setCanRequestOTP(true);
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
+    setIsLoading(true);
+    
     try {
-      const response = await axios.get("/request-otp");
-      if (response.data.success) {
-        setMessage("✅ OTP sent! Check console.");
-        console.log("Mock OTP:", response.data.otp);
-      } else {
-        setMessage("❌ Failed to request OTP. Try again.");
-        setCanRequestOTP(true);
-        clearInterval(countdown);
-      }
+      const response = await axios.get(
+        `${BASE_URL}/user/resend-confirmation-email`,
+        { withCredentials: true }
+      );
+
+      toast.success(response.data.message || "Verification email resent!");
+      setCanRequestOTP(false);
+      setTimer(30);
+
+      // Start countdown timer
+      const countdown = setInterval(() => {
+        setTimer((prev) => {
+          if (prev === 1) {
+            clearInterval(countdown);
+            setCanRequestOTP(true);
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
     } catch (error) {
-      setMessage("❌ Network error. Please try again.");
+      toast.error(error.response?.data?.message || "Failed to resend verification email");
       setCanRequestOTP(true);
-      clearInterval(countdown);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -74,19 +79,19 @@ const VerifyEmail = () => {
      * @returns {Promise<void>} A promise that resolves when the user data is successfully fetched and state is updated.
      * @throws Will log an error to the console if the request fails.
      */
-    const fetchUser = async () => {
-      try {
-        const response = await axios.get(`${BASE_URL}/user`);
-        setUser(response.data);
-        setNewEmail(response.data.email);
-      } catch (error) {
-        console.error("Error fetching user:", error);
-      }
-    };
+    // const fetchUser = async () => {
+    //   try {
+    //     const response = await axios.get(`${BASE_URL}/user`);
+    //     setUser(response.data);
+    //     setNewEmail(response.data.email);
+    //   } catch (error) {
+    //     console.error("Error fetching user:", error);
+    //   }
+    // };
 
     // Initial calls
-    requestOTP();
-    fetchUser();
+    //requestOTP();
+    // fetchUser();
   }, []);
 
   // Verify OTP API call
@@ -102,23 +107,26 @@ const VerifyEmail = () => {
    */
   const verifyOTP = async () => {
     setIsLoading(true);
-    setMessage("Verifying OTP...");
     try {
-      const response = await axios.post("/verify-otp", { otp: code });
-      if (response.data.success) {
-        setIsVerified(true);
-        setMessage(response.data.message);
-      } else {
-        setMessage(response.data.message || "Invalid OTP. Please try again.");
+      const response = await axios.get(
+        `${BASE_URL}/user/confirm-email`,
+        { otp: code },
+        { withCredentials: true }
+      );
+
+      if (response.status === 200) {
+        toast.success("Welcome! Email verified successfully");
+        navigate("/feed");
       }
     } catch (error) {
-      setMessage(error.response?.data?.message || "Network error. Please try again.");
+      toast.error(error.response?.data?.message || "Verification failed. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
-
   return (
     <div className="container mx-auto flex flex-col items-center justify-center h-screen">
+        <Toaster position="top-center" />
       {/* Header */}
       <h2 className="text-2xl font-semibold text-center">Confirm your email</h2>
       <p className="text-gray-600 text-center mt-2">
