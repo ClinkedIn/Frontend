@@ -151,7 +151,7 @@ const Header = ({ notifications }) => {
         querySnapshot.forEach((doc) => {
           const data = doc.data();
           let countForUser = data.unreadCounts?.[currentUser._id] || 0;
-          if (data.forceUnread) countForUser = countForUser - 1;
+          if (data.forceUnread?.[currentUser._id]) countForUser = countForUser - 1;
           totalUnread += countForUser;
         });
 

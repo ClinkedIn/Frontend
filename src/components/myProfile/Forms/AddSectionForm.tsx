@@ -45,7 +45,7 @@ const AddSectionForm = ({ onClose, onAddSection }) => {
           <div className="space-y-4">
             <div className="border-b pb-4">
               <button
-                className="w-full text-left text-gray-700 hover:text-gray-900"
+                className="w-full max-h-[100vh] text-left text-gray-700 hover:text-gray-900"
                 onClick={() => onAddSection("education")}
               >
                 Add education

@@ -10,7 +10,11 @@ interface FollowButtonProps {
   userName?: string;
 }
 
-const FollowButton: React.FC<FollowButtonProps> = ({ userId, initialFollowed = false, userName = "this user" }) => {
+const FollowButton: React.FC<FollowButtonProps> = ({
+  userId,
+  initialFollowed = false,
+  userName = "this user",
+}) => {
   const [isFollowing, setIsFollowing] = useState(initialFollowed);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -18,7 +22,11 @@ const FollowButton: React.FC<FollowButtonProps> = ({ userId, initialFollowed = f
   const handleFollow = async () => {
     setLoading(true);
     try {
-      await axios.post(`${BASE_URL}/user/follow/${userId}`, {}, { withCredentials: true });
+      await axios.post(
+        `${BASE_URL}/user/follow/${userId}`,
+        {},
+        { withCredentials: true }
+      );
       setIsFollowing(true);
     } catch (error) {
       // Optionally handle error
@@ -30,7 +38,9 @@ const FollowButton: React.FC<FollowButtonProps> = ({ userId, initialFollowed = f
   const handleUnfollow = async () => {
     setLoading(true);
     try {
-      await axios.delete(`${BASE_URL}/user/follow/${userId}`, { withCredentials: true });
+      await axios.delete(`${BASE_URL}/user/follow/${userId}`, {
+        withCredentials: true,
+      });
       setIsFollowing(false);
       setShowModal(false);
     } catch (error) {
@@ -48,7 +58,9 @@ const FollowButton: React.FC<FollowButtonProps> = ({ userId, initialFollowed = f
           onClick={handleFollow}
           disabled={loading}
         >
-          {loading ? "Following..." : (
+          {loading ? (
+            "Following..."
+          ) : (
             <>
               <span className="mr-1 text-lg font-bold">+</span>Follow
             </>
@@ -57,7 +69,7 @@ const FollowButton: React.FC<FollowButtonProps> = ({ userId, initialFollowed = f
       ) : (
         <>
           <button
-            className="px-4 py-1.5 border border-blue-500 bg-white text-blue-600 rounded-full text-sm font-semibold hover:bg-blue-50 transition-colors flex items-center"
+            className="px-4 py-1.5 border border-[#0073b1] bg-white text-[#0073b1] rounded-full text-sm font-semibold hover:bg-blue-50 transition-colors flex items-center"
             onClick={() => setShowModal(true)}
             disabled={loading}
           >
@@ -81,17 +93,18 @@ const FollowButton: React.FC<FollowButtonProps> = ({ userId, initialFollowed = f
                 {/* Modal Body */}
                 <div className="px-6 pb-6">
                   <p className="mb-8 text-gray-700">
-                    Stop seeing posts from {userName} on your feed. {userName} won’t be notified that you’ve unfollowed.
+                    Stop seeing posts from {userName} on your feed. {userName}{" "}
+                    won’t be notified that you’ve unfollowed.
                   </p>
                   <div className="flex justify-end space-x-2">
                     <button
-                      className="px-5 py-2 rounded-full border border-blue-600 text-blue-600 font-semibold bg-white hover:bg-blue-50"
+                      className="px-5 py-2 rounded-full border border-[#0073b1] text-[#0073b1] font-semibold bg-white hover:bg-blue-50"
                       onClick={() => setShowModal(false)}
                     >
                       Cancel
                     </button>
                     <button
-                      className="px-5 py-2 rounded-full bg-blue-600 text-white font-semibold hover:bg-blue-700"
+                      className="px-5 py-2 rounded-full bg-[#0073b1] text-white font-semibold hover:bg-blue-700"
                       onClick={handleUnfollow}
                       disabled={loading}
                     >

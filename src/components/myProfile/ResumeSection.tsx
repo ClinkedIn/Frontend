@@ -3,6 +3,7 @@ import axios from "axios";
 import ConfirmationDialog from "./ConfirmationDialog";
 import { Loader, Trash2, FileText, ExternalLink } from "lucide-react";
 import Button from "../Button";
+import ResumeForm from "./Forms/ResumeForm";
 
 // API constants
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -13,37 +14,21 @@ const API_ROUTES = {
 interface ResumeSectionProps {
   resume: any;
   onResumeSaved: () => Promise<void>;
-  onUpdateResume: () => void;
 }
 
 const ResumeSection: React.FC<ResumeSectionProps> = ({
   resume,
   onResumeSaved,
-  onUpdateResume,
 }) => {
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
-  const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showResumeForm, setShowResumeForm] = useState(false);
 
-  const handleDeleteResume = async () => {
-    try {
-      setIsDeleting(true);
+  const handleOpenResumeForm = () => {
+    setShowResumeForm(true);
+  };
 
-      await axios.delete(API_ROUTES.resume, {
-        withCredentials: true,
-      });
-
-      setShowDeleteConfirmation(false);
-      setShowDeleteSuccess(true);
-      await onResumeSaved();
-    } catch (error: any) {
-      console.error("Error deleting resume:", error);
-      setError(error.response?.data?.message || "Failed to delete resume.");
-    } finally {
-      setIsDeleting(false);
-    }
+  const handleCloseResumeForm = () => {
+    setShowResumeForm(false);
   };
 
   const getFileNameFromUrl = (url: string): string => {
@@ -72,21 +57,15 @@ const ResumeSection: React.FC<ResumeSectionProps> = ({
 
   return (
     <div className="bg-white rounded-lg shadow p-4 mb-4 relative w-full">
-      {isDeleting && (
-        <div className="absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center z-10">
-          <Loader className="h-8 w-8 text-blue-600 animate-spin" />
-        </div>
-      )}
-
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold text-gray-800">Resume</h2>
         <div className="flex space-x-2">
-          <Button
-            className="text-blue-600 hover:bg-blue-50 border border-blue-600 px-3 py-1 rounded-full text-sm"
-            onClick={onUpdateResume}
+          <button
+            className="bg-white cursor-pointer text-[#0073b1] border-[#0073b1] border-2 px-4 py-1 rounded-full hover:bg-[#EAF4FD] hover:[border-width:2px] box-border font-medium text-sm transition-all duration-150"
+            onClick={handleOpenResumeForm}
           >
             Update
-          </Button>
+          </button>
         </div>
       </div>
 
@@ -95,23 +74,15 @@ const ResumeSection: React.FC<ResumeSectionProps> = ({
           <div className="w-10 h-10 mr-3 bg-blue-50 flex items-center justify-center rounded-lg text-blue-500">
             <FileText className="w-6 h-6" />
           </div>
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <div className="flex justify-between">
-              <h3 className="font-medium text-gray-800">
+              <h3 className="font-medium text-gray-800 truncate">
                 {getFileNameFromUrl(resume)}
               </h3>
-              <button
-                onClick={() => setShowDeleteConfirmation(true)}
-                className="text-red-500 hover:text-red-700 p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                title="Delete resume"
-              >
-                <Trash2 size={16} />
-              </button>
             </div>
             <p className="text-gray-500 text-sm">
               {getFileTypeInfo(resume).text}
             </p>
-
             <div className="mt-3 flex space-x-2">
               <a
                 href={resume}
@@ -146,7 +117,6 @@ const ResumeSection: React.FC<ResumeSectionProps> = ({
                 <ExternalLink size={16} />
               </a>
             </div>
-
             <div className="mt-4 border border-gray-200 rounded overflow-hidden h-64">
               <iframe
                 src={googleDocsUrl}
@@ -158,31 +128,19 @@ const ResumeSection: React.FC<ResumeSectionProps> = ({
         </div>
       </div>
 
-      {showDeleteConfirmation && (
-        <ConfirmationDialog
-          title="Delete Resume"
-          message="Are you sure you want to delete your resume? This action cannot be undone."
-          confirmText="Delete"
-          confirmButtonClass="bg-red-600 hover:bg-red-700"
-          onConfirm={handleDeleteResume}
-          onCancel={() => setShowDeleteConfirmation(false)}
-        />
-      )}
-
-      {showDeleteSuccess && (
-        <ConfirmationDialog
-          title="Resume Deleted Successfully"
-          message="Your resume has been removed from your profile."
-          confirmText="OK"
-          onConfirm={() => setShowDeleteSuccess(false)}
-          onCancel={() => setShowDeleteSuccess(false)}
-        />
-      )}
-
       {error && (
         <div className="mt-4 bg-red-50 border border-red-200 text-red-700 p-3 rounded-lg">
           {error}
         </div>
+      )}
+
+      {showResumeForm && (
+        <ResumeForm
+          onClose={handleCloseResumeForm}
+          onResumeSaved={onResumeSaved}
+          initialData={resume}
+          onUploadSuccess={() => {}}
+        />
       )}
     </div>
   );
