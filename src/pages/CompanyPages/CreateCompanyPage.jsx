@@ -138,13 +138,17 @@ const CreateCompanyPage = () => {
                 withCredentials:true,
               }) 
               console.log(response.data)          
-              navigate(`/company/${response.data.id}/admin`)
+              navigate(`/company/${response.data.company.id}/admin`)
 
 
            } 
            catch(err){
-               console.log(err.response.data)
-              toast.error("Error creating company" );
+               console.log(err.response)
+               if (err.response.data.message === "Company with this address already exists"){
+                toast.error("Company with this address already exists" );
+               }
+               else
+                toast.error("Error creating company" );
            }    
         }
 
