@@ -286,7 +286,7 @@ const Header = ({ notifications }) => {
         <div className="flex">
           {/* Logo */}
           <a href="/feed">
-            <img src="/Images/blue-lockedin.png" alt="Logo" className="w-12 h-12 ml-23" />
+            <img src="/Images/blue-lockedin.png" alt="Logo" className="w-12 h-12 ml-23 min-w-12" />
           </a>
 
           {/* Conditional Search Bar */}
@@ -298,7 +298,7 @@ const Header = ({ notifications }) => {
                   <MdSearch color="#5f6163" className="w-4 h-4 mr-2 ml-1" />
                   <input
                     type="text"
-                    placeholder="Title, skill or company"
+                    placeholder="Word, Title, skill or company"
                     className="text-sm placeholder-[#5f6163] w-full outline-none bg-transparent py-2"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
