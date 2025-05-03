@@ -15,8 +15,7 @@ interface ExperienceFormData {
   location?: string;
   locationType?: string;
   description?: string;
-  skills?: string[];
-  media?: File | null;
+  // media?: File | null;
   foundVia?: string;
 }
 
@@ -62,7 +61,7 @@ const EMPLOYMENT_TYPES = [
   "Volunteer",
 ];
 
-const LOCATION_TYPES = ["Remote", "Hybrid", "On-site"];
+const LOCATION_TYPES = ["Remote", "Hybrid", "Onsite"];
 
 const JOB_TITLES = [
   "Software Engineer",
@@ -87,26 +86,15 @@ const JOB_TITLES = [
   "Network Engineer",
 ];
 
-const COMMON_SKILLS = [
-  "Python",
-  "JavaScript",
-  "TypeScript",
-  "HTML",
-  "CSS",
-  "React",
-  "Node.js",
-  "SQL",
-  "Java",
-  "C++",
-  "AI",
-  "Machine Learning",
-  "Data Science",
-  "Project Management",
-  "Leadership",
-  "Communication",
-  "Problem Solving",
-  "Critical Thinking",
-  "Teamwork",
+const foundVia = [
+  "Indeed",
+  "LinkedIn",
+  "Company Website",
+  "Other job sites",
+  "Referral",
+  "Contracted by Recruiter",
+  "Staffing Agency",
+  "Other",
 ];
 
 const MONTHS = [
@@ -137,7 +125,6 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
     employmentType: "",
     location: "",
     description: "",
-    skills: [],
   });
 
   const [customCompany, setCustomCompany] = useState("");
@@ -230,40 +217,14 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
     }
   };
 
-  const addSkill = () => {
-    if (customSkill && !formData.skills?.includes(customSkill)) {
-      setFormData((prev) => ({
-        ...prev,
-        skills: [...(prev.skills || []), customSkill],
-      }));
-      setCustomSkill("");
-    }
-  };
-
-  const removeSkill = (skill: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      skills: prev.skills?.filter((s) => s !== skill) || [],
-    }));
-  };
-
-  const selectCommonSkill = (skill: string) => {
-    if (!formData.skills?.includes(skill)) {
-      setFormData((prev) => ({
-        ...prev,
-        skills: [...(prev.skills || []), skill],
-      }));
-    }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      setFormData((prev) => ({
-        ...prev,
-        media: e.target.files![0],
-      }));
-    }
-  };
+  // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   if (e.target.files && e.target.files.length > 0) {
+  //     setFormData((prev) => ({
+  //       ...prev,
+  //       media: e.target.files![0],
+  //     }));
+  //   }
+  // };
 
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
@@ -338,8 +299,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
       location: formData.location,
       locationType: formData.locationType,
       description: formData.description,
-      skills: formData.skills || [],
-      media: formData.media || undefined,
+      // media: formData.media || undefined,
       foundVia: formData.foundVia,
     };
   };
@@ -367,7 +327,6 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
       employmentType: "",
       location: "",
       description: "",
-      skills: [],
     });
     setCustomCompany("");
     setShowOtherCompany(false);
@@ -380,7 +339,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
         className={`bg-white rounded-lg lg:w-[45%] w-[100%]  flex flex-col max-h-[100vh] overflow-y-auto shadow-lg`}
       >
         <div className="sticky top-0 z-10 bg-white flex justify-between items-center p-4 border-b rounded-t-lg">
-          <h3 className="text-xl font-semibold">Add Experience"</h3>
+          <h3 className="text-xl font-semibold">Add Experience</h3>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700"
@@ -685,84 +644,14 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
                 id="description"
                 name="description"
                 rows={4}
-                placeholder="Describe your responsibilities, achievements, and the skills you used in this role."
+                placeholder="Describe your responsibilities and the achievements you made in this role."
                 value={formData.description || ""}
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md resize-none"
               ></textarea>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Skills
-              </label>
-              {formData.skills && formData.skills.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {formData.skills.map((skill, idx) => (
-                    <div
-                      key={idx}
-                      className="bg-blue-50 text-blue-600 px-3 py-1 rounded-full flex items-center text-sm"
-                    >
-                      <span>{skill}</span>
-                      <button
-                        type="button"
-                        onClick={() => removeSkill(skill)}
-                        className="ml-2 text-blue-400 hover:text-blue-600"
-                        aria-label={`Remove ${skill}`}
-                      >
-                        &times;
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
 
-              <div className="flex gap-2 mb-2">
-                <input
-                  type="text"
-                  placeholder="Add a skill"
-                  value={customSkill}
-                  onChange={(e) => setCustomSkill(e.target.value)}
-                  className="flex-grow px-3 py-2 border border-gray-300 rounded-md"
-                  onKeyPress={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      addSkill();
-                    }
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={addSkill}
-                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                >
-                  Add
-                </button>
-              </div>
-
-              <div>
-                <p className="text-sm font-medium text-gray-700 mb-1">
-                  Common skills:
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {COMMON_SKILLS.map((skill, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => selectCommonSkill(skill)}
-                      disabled={formData.skills?.includes(skill)}
-                      className={`px-3 py-1 rounded-full text-sm ${
-                        formData.skills?.includes(skill)
-                          ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                          : "bg-gray-100 hover:bg-gray-200 text-gray-700"
-                      }`}
-                    >
-                      {skill}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <div>
+            {/* <div>
               <label
                 htmlFor="media"
                 className="block text-sm font-medium text-gray-700 mb-1"
@@ -778,7 +667,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
               <p className="text-xs text-gray-500 mt-1">
                 Upload documents, images, or presentations related to this role
               </p>
-            </div>
+            </div> */}
             <div>
               <label
                 htmlFor="foundVia"
@@ -786,15 +675,20 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
               >
                 Found via
               </label>
-              <input
-                type="text"
+              <select
                 id="foundVia"
                 name="foundVia"
-                placeholder="e.g., LinkedIn, Referral, Job Board"
                 value={formData.foundVia || ""}
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
-              />
+              >
+                <option value="">Where did you found this job ?</option>
+                {foundVia.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
         </div>
@@ -818,13 +712,9 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
 
         {showConfirmation && (
           <ConfirmationDialog
-            title={initialData ? "Experience Updated" : "Experience Added"}
-            message={`${formData.jobTitle} at ${
-              formData.companyName
-            } has been ${
-              initialData ? "updated on" : "added to"
-            } your profile.`}
-            confirmText="Done"
+            title="Experience Add"
+            message={`${formData.jobTitle} at ${formData.companyName} will be added to your profile.`}
+            confirmText="Okay"
             onConfirm={handleConfirm}
             onCancel={() => setShowConfirmation(false)}
             showAddMore={!initialData}

@@ -12,6 +12,7 @@ const API_ROUTES = {
 interface ResumeFormProps {
   onClose: () => void;
   onResumeSaved: () => Promise<void>;
+  initialData?: any;
   onUploadSuccess: () => void;
 }
 
@@ -125,7 +126,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ onClose, onResumeSaved }) => {
       });
 
       await onResumeSaved();
-      onUploadSuccess();
+      onClose();
     } catch (error: any) {
       console.error("Error uploading resume:", error);
       setError(
