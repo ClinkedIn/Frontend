@@ -127,7 +127,9 @@ const Main = () => {
   
   const location = useLocation();
   const resourceId = location.state?.resourceId;
+  const notification=location.state?.notification;
   console.log('Resource ID from location state:', resourceId);
+  console.log('Notification from location state:', notification);
 
   // Use exact API endpoint as specified
   const API_ENDPOINT = `${BASE_URL}/posts`;
@@ -1104,6 +1106,7 @@ const Main = () => {
         {resourceId && (
           <SinglePostView 
             postId={resourceId}
+            notification={notification}
           />
         )}
 

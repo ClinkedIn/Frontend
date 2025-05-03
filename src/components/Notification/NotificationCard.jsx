@@ -45,13 +45,24 @@ const NotificationCard = ({ notification, handleNotificationClick }) => {
    * @function handleClick
    * @returns {Promise<void>} Resolves when the notification click handling is complete.
    */
+  const name = `${notification?.sendingUser.firstName} ${notification?.sendingUser.lastName}`
   const handleClick = async () => {
     if (!message) {
       setIsRead(true);
+      if(notification.subject==="comment"||notification.subject==="impression"){
       navigate('/feed',{
-        state:{ resourceId:notification.relatedPostId
+        state:{ resourceId:notification.relatedPostId, notification:notification
         }
-      })
+      })}
+      else if(notification.subject==="connection request"){
+        navigate('/network')
+      }
+      else if(notification.subject==="message"){  
+        navigate('/messaging',{
+          state: { _id: notification.from, fullName: name, profilePicture:notification.sendingUser.profilePicture },
+        })
+
+      }
       console.log("handleClick");
       await handleNotificationClick(notification.id);
     }

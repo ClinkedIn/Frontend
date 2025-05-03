@@ -15,7 +15,7 @@ import { BASE_URL } from '../constants';
  * @param {string} props.postId - The ID of the post to display
  * @returns {JSX.Element} SinglePostView component
  */
-const SinglePostView = ({ postId }) => {
+const SinglePostView = ({ postId, notification }) => {
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -60,17 +60,33 @@ const SinglePostView = ({ postId }) => {
    */
   const fetchComments = async () => {
     try {
+      console.log("first try", notification.resourceId)
       setLoadingComments(true);
-      const response = await axios.get(`${API_ENDPOINT}/${postId}/comments`, {
+      const response = await axios.get(`${API_ENDPOINT}/${notification.resourceId}/comments`, {
         withCredentials: true
       });
       
       setComments(response.data.comments || []);
+      console.log("comments ", response.data)
     } catch (err) {
-      console.error(`Error fetching comments for post ${postId}:`, err);
-    } finally {
-      setLoadingComments(false);
-    }
+      //console.error(`Error fetching comments for post ${id}:`, err);
+      try{
+        console.log("second try", postId)
+        const response = await axios.get(`${API_ENDPOINT}/${postId}/comments`, {
+          withCredentials: true
+        });
+      }catch (error) {
+        try{
+          console.log("third try", notification.relatedCommentId)
+          const response = await axios.get(`${API_ENDPOINT}/${notification.relatedCommentId}/comments`, {
+            withCredentials: true
+          });
+        } 
+        catch (error) {
+          console.error('Error fetching comments:', error);
+        }
+      }
+    } 
   };
 
   // Fetch post when component mounts or postId changes
