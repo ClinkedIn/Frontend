@@ -94,12 +94,13 @@ const CompanySettingPage = () => {
 
   const handleRemoveAdmin = async (admin) => {
     if (!companyInfo || !companyInfo.id || !admin.id) return;
-    setRemovingAdmin(admin.id);
+    
     try {
-      await axios.delete(`${BASE_URL}/companies/${companyInfo.id}/admin/`, { userId: admin.id }, {
-        withCredentials: true
-      });
-      
+        await axios.delete(`${BASE_URL}/companies/${companyInfo.id}/admin`, {
+        data: { userId: admin.id }, 
+        withCredentials: true 
+        });
+      setRemovingAdmin(admin.id);
       fetchAdmins();
     } catch (error) {
       console.error("Error removing admin:", error);
