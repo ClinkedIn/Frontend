@@ -86,7 +86,7 @@ const LandingPage = () => {
         <nav className="bg-white py-3 px-4 mb-8 md:px-12 flex flex-wrap items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center ml-4 md:ml-12">
-            <img src="/public/images/lockedin.png" alt="LinkedIn Logo" className="h-6" />
+            <img src="/images/lockedin.png" alt="LinkedIn Logo" className="h-6" />
           </Link>
   
           {/* Icons & Buttons */}
@@ -154,7 +154,7 @@ const LandingPage = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <img src="/public/images/google-white.png" alt="Google" className="h-6 w-6 mr-2" />
+              <img src="/images/google-white.png" alt="Google" className="h-6 w-6 mr-2" />
               Continue with Google
             </motion.button>
   
@@ -196,7 +196,7 @@ const LandingPage = () => {
   
           {/* Right Section (Hero Image) */}
           <motion.img
-            src="/public/images/hero.svg"
+            src="/images/hero.svg"
             alt="Hero"
             className="w-[90%] max-w-[600px] md:w-[800px] md:ml-10 mr:0"
             initial={{ x: 30, opacity: 0 }}

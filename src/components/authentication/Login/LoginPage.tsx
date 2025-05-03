@@ -10,7 +10,7 @@ import { useAuth } from "../../../context/AuthContext";
 import axios from "axios";
 import { BASE_URL } from "../../../constants";
 import { getMessaging, getToken } from "firebase/messaging";
-import { app, auth, provider } from "../../../../firebase"; // adjust import if needed
+import { app, auth, provider, generateToken } from "../../../../firebase"; // adjust import if needed
 import { signInWithPopup } from "firebase/auth";
 
 /**
@@ -51,26 +51,22 @@ const LoginPage = () => {
   const queryClient = useQueryClient();
   const { setAuthToken } = useAuth();
 
-  async function requestFCMToken() {
-    try {
-      const messaging = getMessaging(app);
+
+
+
+  useEffect (()=>{
+
+    const getFCM = async () =>
       {
-        const fcmToken = await getToken(messaging, {
-          vapidKey:
-            "BKQc38HyUXuvI_yz5hPvprjVjmWrcUjTP2H7J_cjGoyMMoBGNBbC0ucVGrzM67rICMclmUuOx-mdt7CXlpnhq9g",
-        });
-        if (fcmToken) {
-          console.log("FCM Token:", fcmToken);
-          setFcmToken(fcmToken);
-        }
+        const token = await generateToken();
+        setFcmToken(token);
       }
-    } catch (error) {
-      console.error("Error getting token:", error);
-    }
-  }
-  useEffect(() => {
-    requestFCMToken();
-  }, []);
+  
+      getFCM();
+   },[])
+
+
+
   // Helper function to validate form inputs
   /**
    * Validates the login form by checking if the username and password fields are filled.
@@ -87,6 +83,8 @@ const LoginPage = () => {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
+
 
   // Helper function to handle token storage
   /**
@@ -109,6 +107,8 @@ const LoginPage = () => {
       localStorage.setItem("refreshToken", data.refreshToken); // Persist refreshToken
     }
   };
+
+
 
   // Google login handler (Firebase-based, with FCM token)
   const handleGoogleSuccess = async () => {
@@ -157,6 +157,8 @@ const LoginPage = () => {
       toast.error(error?.response?.data?.error || "Google login failed.");
     }
   };
+
+
 
   // Login mutation hook
   /**
@@ -227,6 +229,8 @@ const LoginPage = () => {
       toast.error(errorMessage);
     },
   });
+
+
 
   // Form submission handler
   /**
