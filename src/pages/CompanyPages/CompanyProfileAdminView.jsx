@@ -43,7 +43,13 @@ const CompanyProfileAdminViewPage = () => {
     const [isAdmin, setIsAdmin] = useState(false);
     const [errorFetchCompanyInfo, setErrorFetchCompanyInfo] = useState(false);
     const [isOwner, setIsOwner] = useState(false);
+    useEffect(() => {
+        setCompanyInfo(null);
+        setErrorFetchCompanyInfo(false);
+        fetchCompanyInfo();
+        setActiveTab(currentSection);
 
+    }, [companyId]);
      /**
        * Fetches current user profile data
        * @async

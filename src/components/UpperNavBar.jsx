@@ -30,14 +30,15 @@ import { useAuth } from "../context/AuthContext";
  * @component
  * @example
  * // Example usage:
- * <Header notifications={notifications} />
+ * <Header notifications={[]} pendingInvitationsCount={pendingInvitations.length} />
  *
  * @param {Object} props - The properties passed to the component.
  * @param {Array} props.notifications - Array of notifications to be passed to the component.
+ * @param {number} props.pendingInvitationsCount - Count of pending invitations.
  *
  * @returns {JSX.Element} The Header component.
  */
-const Header = ({ notifications }) => {
+const Header = ({ notifications, pendingInvitationsCount }) => {
   /**
    * State variables:
    * - `showUser`: Toggles the visibility of the user dropdown.
@@ -76,11 +77,41 @@ const Header = ({ notifications }) => {
   const workDropdownRef = useRef(null);
   const [showWork, setShowWork] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userCompanies, setUserCompanies] = useState([]);
 
   const currentUser = {
     uid: "123",
   };
   const { logout } = useAuth();
+  useEffect(() => {
+    const fetchUserCompanies = async () => {
+        try {
+            const response = await axios.get(`${BASE_URL}/companies`, {
+                withCredentials: true
+            });
+            console.log("companies",response.data)
+            const filteredCompanies = response.data.map(item => ({
+              company: {
+                  id: item.company.id,
+                  name: item.company.name,
+                  logo: item.company.logo
+              },
+              userRelationship: item.userRelationship
+          })).filter(item => 
+              item.userRelationship === "owner" || 
+              item.userRelationship === "admin"
+          );
+          setUserCompanies(filteredCompanies);
+          console.log("formattedCompanies",filteredCompanies)
+        } catch (error) {
+            console.error('Error fetching user companies:', error);
+        }
+    };
+
+    if (userInfo?._id) {
+        fetchUserCompanies();
+    }
+}, [userInfo?._id]);
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -490,7 +521,7 @@ const Header = ({ notifications }) => {
           </button>
           {/* Network */}
           <button
-            className={`lex flex-col items-center hover:bg-gray-200 p-1.5 rounded-lg w-16 ${
+            className={`relative flex flex-col items-center hover:bg-gray-200 p-1.5 rounded-lg w-16 ${
               currentPath === "network" ? "text-black" : "text-gray-600"
             }`}
             onClick={() => navigate("/network")}
@@ -502,6 +533,12 @@ const Header = ({ notifications }) => {
                 }`}
               />
               <span className="text-xs">Network</span>
+              {/* Pending Invitations Badge */}
+              {pendingInvitationsCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-[#cb112d] text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-medium">
+                  {pendingInvitationsCount > 99 ? "99+" : pendingInvitationsCount}
+                </span>
+              )}
               {currentPath === "network" && (
                 <div className="w-8 h-0.5 bg-black rounded-full mt-1" />
               )}
@@ -624,6 +661,30 @@ const Header = ({ notifications }) => {
                 >
                   My Profile
                 </button>
+                {userCompanies.length > 0 && (
+                    <>
+                        <div className="px-4 py-2 text-sm font-medium text-gray-700 border-b border-gray-200">
+                            My Pages
+                        </div>
+                        <div className="max-h-48 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                            {userCompanies.map((company) => (
+                                <button
+                                    key={company.company.id}
+                                    onClick={() => navigate(`/company/${company.company.id}/admin`)}
+                                    className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                >
+                                    <img
+                                        src={company.company.logo || "/Images/CompanyLogo.png"}
+                                        alt={company.company.name}
+                                        className="w-6 h-6 rounded-md mr-3 flex-shrink-0"
+                                    />
+                                    <span className="truncate flex-1">{company.company.name}</span>
+                                </button>
+                            ))}
+                        </div>
+                        <div className="border-t border-gray-200"></div>
+                    </>
+                )}
                 <button
                   onClick={handleSettingsClick}
                   className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
