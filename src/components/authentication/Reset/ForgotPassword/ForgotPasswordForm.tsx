@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLinkedin } from "@fortawesome/free-brands-svg-icons";
 import { useNavigate } from "react-router";
 import { toast } from "react-hot-toast";
+import Footer from "../../../Footer/Footer";
 
 const ForgotPasswordForm = () => {
   const [email, setEmail] = useState("");
@@ -189,43 +190,7 @@ const ForgotPasswordForm = () => {
       </div>
 
       {/* Footer */}
-      <div className="w-full bg-white py-1 hidden lg:block">
-        <div className="max-w-6xl mx-auto px-6 flex justify-between items-center text-sm text-gray-600">
-          <div className="flex items-center gap-6 m-auto mt-[-65px] mb-1">
-            <div className="flex items-center gap-2">
-              <img
-                src="/Images/black-lockedIn-login-logo.png"
-                className="text-black w-20 hover:cursor-pointer"
-                onClick={handleLogoClick}
-              />
-              <span className="text-gray-500">© 2025</span>
-            </div>
-            <div className="font-medium flex gap-3 text-[13px]">
-              <a href="#" className="hover:underline">
-                User Agreement
-              </a>
-              <a href="#" className="hover:underline">
-                Privacy Policy
-              </a>
-              <a href="#" className="hover:underline">
-                Community Guidelines
-              </a>
-              <a href="#" className="hover:underline">
-                Cookie Policy
-              </a>
-              <a href="#" className="hover:underline">
-                Copyright Policy
-              </a>
-              <a href="#" className="hover:underline">
-                Send Feedback
-              </a>
-              <a href="#" className="hover:underline">
-                Language
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
+      <Footer />
     </div>
   );
 };
