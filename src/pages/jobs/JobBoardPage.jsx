@@ -7,6 +7,7 @@ import JobCard from '../../components/jobs/JobCard';
 import Filter from "../../components/jobs/Filter";
 import ApplyJob from "../../components/jobs/ApplyJob";
 import { BASE_URL } from "../../constants";
+import { IoLocationSharp } from "react-icons/io5";
 /**
  * JobBoardPage component displays a job board with job listings, company filters,
  * and job details with options to save and apply for jobs.
@@ -27,10 +28,14 @@ const JobBoardPage = () => {
   const [refreshTrigger, setRefreshTrigger] = useState(false); // Used to trigger job list refresh
 
   const [experience, setExperience] = useState(0); // Filter by minimum experience
+  const [industry, setIndustry] = useState(""); // Filter by industry
   const [workType, setWorkType] = useState(""); // Filter by work type (e.g., full-time, part-time)
   const [selectedCompany, setSelectedCompany] = useState(""); // Filter by company
   const [applications, setApplications] = useState([]); // Stores job applications
 
+
+  const params=location.state?.params || "no params"
+  console.log("params in JobBoardPage:", params); // Log the params object
   /**
    * Opens the job application modal
    */
@@ -99,7 +104,7 @@ const JobBoardPage = () => {
    * Filters jobs based on experience, work type, or selected company
    */
   useEffect(() => {
-    const shouldFilter = experience || workType || selectedCompany;
+    const shouldFilter = experience || workType || selectedCompany || industry;
     if (!shouldFilter) return;
     const fetchFilteredJobs = async () => {
       try {
@@ -107,16 +112,20 @@ const JobBoardPage = () => {
         if (experience) params.append('minExperience', experience);
         if (workType) params.append('q', workType);
         if (selectedCompany) params.append('companyId', selectedCompany);
-
+        if (industry) params.append('industry', industry);
+        console.log("params in search:", params.toString()); // Log the params object
         const res = await axios.get(`${BASE_URL}/search/jobs?${params}`);
         setJobs(res.data.jobs || []);
+        if(res.data.jobs.length === 0) {
+          setJobs(location.state.jobs)
+        }
       } catch (err) {
         console.error("Error filtering jobs", err);
       }
     };
 
     fetchFilteredJobs();
-  }, [experience, workType, selectedCompany, refreshTrigger]);
+  }, [experience,industry, workType, selectedCompany, refreshTrigger]);
 
   /**
    * Saves or unsaves the selected job
@@ -155,6 +164,8 @@ const JobBoardPage = () => {
           selectedCompany={selectedCompany}
           setSelectedCompany={setSelectedCompany}
           companies={companies}
+          industry={industry}
+          setIndustry={setIndustry}
         />
 
       <div className="md:w-1/3 w-full h-1/2 md:h-full overflow-y-auto border-r border-gray-300 bg-gray-50">
@@ -182,7 +193,7 @@ const JobBoardPage = () => {
           <div>
             <div className="flex flex-row gap-5">
               <img
-                src={selectedJob?.companyId?.logo || "https://picsum.photos/80?random=1"}
+                src={selectedJob?.companyId?.logo || "blank-profile-picture.png"}
                 alt="Company Logo"
                 className="w-12 h-12 object-contain"
               />
