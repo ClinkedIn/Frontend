@@ -312,8 +312,8 @@ const SignupPage = () => {
       }
     );
 
-    // Step 4: Navigate to verify email
-    navigate("/verify-email");
+    // Step 4: Navigate to feed
+    navigate("/feed");
 
   } catch (error) {
     console.error("Google sign-up failed:", error);
