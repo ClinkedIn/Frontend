@@ -75,6 +75,19 @@ const MessagingPage = () => {
                 convos.push({ id: doc.id, ...doc.data() });
             });
             setConversations(convos);
+            const targetUserId = otherUser?._id || jobApplicant?._id;
+            if (targetUserId && currentUser?._id) {
+                const relevantConvo = convos.find(conv => 
+                    conv.participants.includes(currentUser._id) && 
+                    conv.participants.includes(targetUserId)
+                );
+                
+                if (relevantConvo && (!selectedConversationId || relevantConvo.id !== selectedConversationId)) {
+                    setSelectedConversationId(relevantConvo.id);
+                    setShowChatOnMobile(true);
+                }
+            }
+          
             setLoadingConversations(false);
         }, (error) => {
             console.error("Error fetching conversations: ", error);
@@ -140,10 +153,11 @@ const MessagingPage = () => {
  
     };
     useEffect(() => {
-      if (jobApplicant?._id && currentUser?._id && conversations.length > 0) {
+      const targetUser = jobApplicant?._id || otherUser?._id
+      if (targetUser?._id && currentUser?._id && conversations.length > 0) {
           const conversationWithApplicant = conversations.find(conv => 
               conv.participants.includes(currentUser._id) && 
-              conv.participants.includes(jobApplicant._id)
+              conv.participants.includes(targetUser._id)
           );
           
           if (conversationWithApplicant) {
@@ -153,6 +167,14 @@ const MessagingPage = () => {
           }
       }
   }, [conversations, currentUser?._id, jobApplicant?._id]);
+  useEffect(() => {
+    if ((jobApplicant?._id ) && currentUser?._id && conversations.length === 0) {
+        const conversationId = createConversationId(currentUser._id, jobApplicant._id);
+        setSelectedConversationId(conversationId);
+        setOtherUser(jobApplicant);
+        setShowChatOnMobile(true);
+    }
+}, [conversations.length, currentUser?._id, jobApplicant?._id]);
       const useConnections = () => {
         const [connections, setConnections] = useState([]);
         const [loading, setLoading] = useState(false);
