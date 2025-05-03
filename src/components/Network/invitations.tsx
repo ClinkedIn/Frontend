@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { BASE_URL } from '../../constants';
-import { handleAccept as acceptInvitation, handleIgnore as ignoreInvitation } from './HandleInvitations';
+import { handleAccept as acceptInvitation, handleIgnore as ignoreInvitation } from './handleInvitations';
 import Header from '../UpperNavBar'; 
 import HiringAd from '../HiringAd';
 
@@ -44,16 +44,16 @@ const InvitationManager: React.FC = () => {
   };
 
   return (
-    <div className="flex bg-[#F5F3EE] p-6 mt-14">
+    <div className="flex flex-col lg:flex-row bg-[#F5F3EE] p-2 sm:p-4 md:p-6 mt-14 min-h-screen">
       {/* Header */}
       <Header notifications={[]} />
 
       {/* Main Content */}
-      <div className="flex-grow p-4 flex">
+      <div className="flex-grow p-2 sm:p-4 flex flex-col lg:flex-row">
         {/* Left/Main Section */}
-        <div className="flex-1 ml-22">
+        <div className="w-full lg:flex-1 lg:ml-22">
           {/* Manage Invitations in a white card */}
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6">
             <h2 className="text-xl mb-4">Manage invitations</h2>
             <div className="border-b border-gray-200 mb-4"></div>
 
@@ -94,17 +94,17 @@ const InvitationManager: React.FC = () => {
               ) : invitations.length > 0 ? (
                 <ul className="space-y-4">
                   {invitations.map((invitation) => (
-                    <li key={invitation._id} className="flex items-center space-x-2">
+                    <li key={invitation._id} className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
                       <img
                         src={invitation.profilePicture || "/Images/user.svg"}
                         alt={`${invitation.firstName} ${invitation.lastName}`}
-                        className="w-8 h-8 rounded-full"
+                        className="w-10 h-10 rounded-full"
                       />
-                      <div>
-                        <p className="font-medium">{`${invitation.firstName} ${invitation.lastName}`}</p>
-                        <p className="text-xs text-gray-500">{invitation.headline}</p>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{`${invitation.firstName} ${invitation.lastName}`}</p>
+                        <p className="text-xs text-gray-500 truncate">{invitation.headline}</p>
                       </div>
-                      <div className="ml-auto">
+                      <div className="ml-0 sm:ml-auto flex items-center mt-2 sm:mt-0">
                         {selectedTab === 'received' ? (
                           <>
                             <button
@@ -137,9 +137,9 @@ const InvitationManager: React.FC = () => {
                   <img
                     src="/Images/invitations.png"
                     alt="No new invitations"
-                    className="w-46 h-44 mb-4"
+                    className="w-40 h-40 mb-4"
                   />
-                  <p className="text-black text-2xl">No new invitations</p>
+                  <p className="text-black text-2xl text-center">No new invitations</p>
                 </div>
               )}
             </div>
@@ -147,7 +147,7 @@ const InvitationManager: React.FC = () => {
         </div>
 
         {/* Right Sidebar */}
-        <div className="w-80 ml-6 hidden lg:block">
+        <div className="w-full lg:w-80 lg:ml-6 mt-6 lg:mt-0 hidden lg:block">
           <div className="sticky top-20">
             <HiringAd />
           </div>

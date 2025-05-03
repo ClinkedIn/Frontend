@@ -24,6 +24,15 @@ interface ConnectionsResponse {
   };
 }
 
+export const getConnectionsCount = async (): Promise<number> => {
+  try {
+    const response = await axios.get(`${BASE_URL}/user/connections`);
+    return response.data?.pagination?.total || 0;
+  } catch {
+    return 0;
+  }
+};
+
 const Connections: React.FC = () => {
   const navigate = useNavigate();
   const [connections, setConnections] = useState<Connection[]>([]);
@@ -148,16 +157,16 @@ const Connections: React.FC = () => {
   };
 
   return (
-    <div className="flex bg-[#F5F3EE] p-6 mt-14">
+    <div className="flex flex-col lg:flex-row bg-[#F5F3EE] p-2 sm:p-4 md:p-6 mt-14 min-h-screen">
       {/* Header */}
       <Header notifications={[]} />
 
       {/* Main Content */}
-      <div className="flex-grow p-4">
+      <div className="flex-grow p-2 sm:p-4">
         {/* Manage Connections in a white card */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6">
           <h2 className="text-lg font-semibold mb-4">{`${totalConnections} connections`}</h2>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
             {/* Sort Dropdown */}
             <div className="relative inline-block text-left" ref={sortDropdownRef}>
               <button
@@ -216,83 +225,88 @@ const Connections: React.FC = () => {
                 </div>
               )}
             </div>
-
+            <div className="flex-grow" />
             {/* Search Bar */}
-            <div className="flex-grow"></div>
-            <div>
+            <div className="w-full sm:w-auto">
               <input
                 type="text"
                 placeholder="Search by name"
                 value={searchTerm}
                 onChange={handleSearch}
-                className="border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:border-blue-500"
+                className="border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:border-blue-500 w-full sm:w-64"
               />
             </div>
           </div>
 
           {/* Connections List */}
           <div>
-            {filteredConnections.map((connection) => (
-              <div key={connection._id} className="flex items-start space-x-4 mb-4 relative">
-                <img
-                  src={connection.profilePicture || "/Images/user.svg"}
-                  alt={`${connection.firstName} ${connection.lastName}`}
-                  className="w-12 h-12 rounded-full cursor-pointer"
-                  onClick={() => navigate(`/profile/${connection._id}`)}
-                />
-                <div>
-                  <p
-                    className="font-medium cursor-pointer hover:underline"
+            {filteredConnections.map((connection, idx) => (
+              <React.Fragment key={connection._id}>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 mb-4 relative">
+                  <img
+                    src={connection.profilePicture || "/Images/user.svg"}
+                    alt={`${connection.firstName} ${connection.lastName}`}
+                    className="w-12 h-12 rounded-full cursor-pointer"
                     onClick={() => navigate(`/profile/${connection._id}`)}
-                  >
-                    {`${connection.firstName} ${connection.lastName}`}
-                  </p>
-                  <p className="text-xs text-gray-500">{connection.lastJobTitle}</p>
-                </div>
-                <div className="ml-auto flex items-center relative">
-                  <button
-                    onClick={() =>
-                      handleMessageApplicant(
-                        connection._id,
-                        `${connection.firstName} ${connection.lastName}`,
-                        connection.profilePicture
-                      )
-                    }
-                    className="px-4 py-1.5 border border-blue-500 text-blue-600 rounded-full text-sm font-semibold hover:bg-blue-50 transition-colors"
-                  >
-                    Message
-                  </button>
-                  <button
-                    className="ml-4 px-2 py-1 rounded hover:bg-gray-200 transition"
-                    onClick={() =>
-                      setOpenDropdownId(openDropdownId === connection._id ? null : connection._id)
-                    }
-                  >
-                    &#8230;
-                  </button>
-                  {/* Dropdown */}
-                  {openDropdownId === connection._id && (
-                    <div
-                      ref={threeDotsDropdownRef}
-                      className="absolute right-0 mt-8 z-30 bg-white border rounded shadow-lg w-48"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p
+                      className="font-medium cursor-pointer hover:underline truncate"
+                      onClick={() => navigate(`/profile/${connection._id}`)}
                     >
-                      <button
-                        className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                        onClick={() => {
-                          setConfirmRemoveId(connection._id);
-                          setConfirmRemoveName(`${connection.firstName} ${connection.lastName}`);
-                          setOpenDropdownId(null);
-                        }}
+                      {`${connection.firstName} ${connection.lastName}`}
+                    </p>
+                    <p className="text-xs text-gray-500 truncate">{connection.lastJobTitle}</p>
+                  </div>
+                  <div className="ml-0 sm:ml-auto flex items-center relative mt-2 sm:mt-0">
+                    <button
+                      onClick={() =>
+                        handleMessageApplicant(
+                          connection._id,
+                          `${connection.firstName} ${connection.lastName}`,
+                          connection.profilePicture
+                        )
+                      }
+                      className="px-4 py-1.5 border border-blue-500 text-blue-600 rounded-full text-sm font-semibold hover:bg-blue-50 transition-colors"
+                    >
+                      Message
+                    </button>
+                    <button
+                      className="ml-4 px-2 py-1 rounded hover:bg-gray-200 transition"
+                      onClick={() =>
+                        setOpenDropdownId(openDropdownId === connection._id ? null : connection._id)
+                      }
+                    >
+                      &#8230;
+                    </button>
+                    {/* Dropdown */}
+                    {openDropdownId === connection._id && (
+                      <div
+                        ref={threeDotsDropdownRef}
+                        className="absolute right-0 mt-8 z-30 bg-white border rounded shadow-lg w-48"
                       >
-                        <svg className="w-4 h-4 mr-2 text-red-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M10 3h4a2 2 0 012 2v2H8V5a2 2 0 012-2z" />
-                        </svg>
-                        Remove connection
-                      </button>
-                    </div>
-                  )}
+                        <button
+                          className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                          onClick={() => {
+                            setConfirmRemoveId(connection._id);
+                            setConfirmRemoveName(`${connection.firstName} ${connection.lastName}`);
+                            setOpenDropdownId(null);
+                          }}
+                        >
+                          <svg className="w-4 h-4 mr-2 text-red-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M10 3h4a2 2 0 012 2v2H8V5a2 2 0 012-2z" />
+                          </svg>
+                          Remove connection
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
+                {/* Add a line between users except after the last one */}
+                {idx < filteredConnections.length - 1 && (
+                  <hr className="border-t border-gray-200 mb-4" />
+                )}
+              </React.Fragment>
             ))}
           </div>
         </div>
@@ -300,7 +314,7 @@ const Connections: React.FC = () => {
 
       {/* Confirmation Modal */}
       {confirmRemoveId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
           <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
             <button
               className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-2xl"
@@ -332,7 +346,7 @@ const Connections: React.FC = () => {
       )}
 
       {/* Right Sidebar */}
-      <div className="w-80 ml-6 hidden lg:block">
+      <div className="w-full lg:w-80 lg:ml-6 mt-6 lg:mt-0 hidden lg:block">
         <div className="sticky top-20">
           <HiringAd />
         </div>

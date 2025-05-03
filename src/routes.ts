@@ -44,6 +44,8 @@ import CompanyManageJobsPage from "./components/CompanyPageSections/ManageJobs.j
 import Network from "./components/Network/network";
 import InvitationManager from "./components/Network/invitations";
 import Connections from "./components/Network/connections";
+import BlockedUsers from "./components/Network/BlockedUsers";
+
 // Define your routes as an array of RouteObject (compatible with React Router v6)
 const routes: RouteObject[] = [
   //Add routes and their corresponding needed component page
@@ -141,6 +143,10 @@ const routes: RouteObject[] = [
   {
     path: "/network/connections",
     element: React.createElement(Connections),
+  },
+  {
+    path: "/network/blocked-users",
+    element: React.createElement(BlockedUsers),
   },
   {
     path: "/admin",
