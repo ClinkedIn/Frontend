@@ -139,6 +139,20 @@ const MessagingPage = () => {
 
  
     };
+    useEffect(() => {
+      if (jobApplicant?._id && currentUser?._id && conversations.length > 0) {
+          const conversationWithApplicant = conversations.find(conv => 
+              conv.participants.includes(currentUser._id) && 
+              conv.participants.includes(jobApplicant._id)
+          );
+          
+          if (conversationWithApplicant) {
+              setSelectedConversationId(conversationWithApplicant.id);
+              setOtherUser(jobApplicant);
+              setShowChatOnMobile(true);
+          }
+      }
+  }, [conversations, currentUser?._id, jobApplicant?._id]);
       const useConnections = () => {
         const [connections, setConnections] = useState([]);
         const [loading, setLoading] = useState(false);
