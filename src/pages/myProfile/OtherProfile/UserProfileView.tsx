@@ -5,7 +5,8 @@ import NavBar from "../../../components/UpperNavBar";
 import adPhoto from "../../../../public/Images/linkedInAd.png";
 import Form from "../../../components/myProfile/Forms/Form";
 import SkillEndorsements from "../../../components/myProfile/SkillEndorsements";
-
+import ConnectButton from "../../../components/Network/ConnectButton";
+import FollowButton from "../../../components/Network/FollowButton";
 interface Skill {
   skillName: string;
   endorsements?: Array<{
@@ -654,17 +655,17 @@ const UserProfileView = () => {
     return hasUserEndorsedSkill(skill);
   };
 
-  const FollowButton = () => {
-    return (
-      <button
-        onClick={handleFollow}
-        disabled={isProcessing}
-        className="bg-white cursor-pointer text-[#0073b1] border-[#0073b1] border-2 px-4 py-1 rounded-full hover:bg-[#EAF4FD] hover:[border-width:2px] box-border font-medium text-sm transition-all duration-150"
-      >
-        {isProcessing ? "Processing..." : isFollowing ? "Following" : "Follow"}
-      </button>
-    );
-  };
+  // const FollowButton = () => {
+  //   return (
+  //     <button
+  //       onClick={handleFollow}
+  //       disabled={isProcessing}
+  //       className="bg-white cursor-pointer text-[#0073b1] border-[#0073b1] border-2 px-4 py-1 rounded-full hover:bg-[#EAF4FD] hover:[border-width:2px] box-border font-medium text-sm transition-all duration-150"
+  //     >
+  //       {isProcessing ? "Processing..." : isFollowing ? "Following" : "Follow"}
+  //     </button>
+  //   );
+  // };
 
   const SkillEndorsementSection = () => (
     <div className="bg-white shadow-sm rounded-lg overflow-hidden">
@@ -896,18 +897,14 @@ const UserProfileView = () => {
             )}
           </div>
 
-          {/* Action buttons section */}
           {!isRestricted && (
             <div className="mt-4 md:mt-0 flex space-x-3">
-              <button className="bg-white cursor-pointer text-[#0073b1] border-[#0073b1] border-2 px-4 py-1 rounded-full hover:bg-[#EAF4FD] hover:[border-width:2px] box-border font-medium text-sm transition-all duration-150">
-                Connect
-              </button>
-              <FollowButton />
+              <ConnectButton userId={profile._id} />
+              <FollowButton userId={profile._id} />
             </div>
           )}
         </div>
 
-        {/* Show privacy notice for restricted profiles */}
         {isRestricted && privacyNotice && (
           <div className="px-8 pb-6">
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -1129,14 +1126,10 @@ const UserProfileView = () => {
                     </p>
                   )}
                 </div>
-                <div className="ml-115 mt-4 md:mt-0">
-                  <button className="bg-white cursor-pointer text-[#0073b1] border-[#0073b1] border-2 px-4 py-1 rounded-full hover:bg-[#EAF4FD] hover:[border-width:2px] box-border font-medium text-sm transition-all duration-150">
-                    Connect
-                  </button>
-                </div>
 
-                <div className="mt-4 md:mt-0">
-                  <FollowButton />
+                <div className="mt-4 md:mt-0 flex space-x-3">
+                  <ConnectButton userId={userProfile._id} />
+                  <FollowButton userId={userProfile._id} />
                 </div>
               </div>
             </div>
