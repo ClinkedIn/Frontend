@@ -153,11 +153,10 @@ const MessagingPage = () => {
  
     };
     useEffect(() => {
-      const targetUser = jobApplicant?._id || otherUser?._id
-      if (targetUser?._id && currentUser?._id && conversations.length > 0) {
+      if (jobApplicant?._id && currentUser?._id && conversations.length > 0) {
           const conversationWithApplicant = conversations.find(conv => 
               conv.participants.includes(currentUser._id) && 
-              conv.participants.includes(targetUser._id)
+              conv.participants.includes(jobApplicant._id)
           );
           
           if (conversationWithApplicant) {
