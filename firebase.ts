@@ -27,5 +27,20 @@ const db = getFirestore(app);
 const storage = getStorage(app);
 const provider = new GoogleAuthProvider();
 
+export const generateToken = async () => {
+  const permission = await Notification.requestPermission();
+  console.log(permission);
+  if (permission === "granted") {
+      const token = await getToken(messaging, {
+          vapidKey: "BKQc38HyUXuvI_yz5hPvprjVjmWrcUjTP2H7J_cjGoyMMoBGNBbC0ucVGrzM67rICMclmUuOx-mdt7CXlpnhq9g",
+      })
+      console.log(token)
+      return token;
+  }
+  else
+      return null
 
-export {  getToken, onMessage ,app, auth, provider,db,storage, signInWithPopup };
+}
+
+
+export { getToken, onMessage, app, auth, provider, db, storage, signInWithPopup };
