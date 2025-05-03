@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
-import Header from '../UpperNavBar'; // Import the Header component
-import HiringAd from '../HiringAd'; // Import the HiringAd component
+import Header from '../../components/UpperNavBar'; // Import the Header component
+import HiringAd from '../../components/HiringAd'; // Import the HiringAd component
 import { BASE_URL } from '../../constants';
 
 // Define the connection interface
@@ -314,7 +314,7 @@ const Connections: React.FC = () => {
 
       {/* Confirmation Modal */}
       {confirmRemoveId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
+        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "none" }}>
           <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
             <button
               className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-2xl"

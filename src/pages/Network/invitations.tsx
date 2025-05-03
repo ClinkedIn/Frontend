@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { BASE_URL } from '../../constants';
-import { handleAccept as acceptInvitation, handleIgnore as ignoreInvitation } from './handleInvitations';
-import Header from '../UpperNavBar'; 
-import HiringAd from '../HiringAd';
+import { handleAccept as acceptInvitation, handleIgnore as ignoreInvitation } from '../../components/Network/handleInvitations';
+import Header from '../../components/UpperNavBar'; 
+import HiringAd from '../../components/HiringAd';
 
 // Define the invitation interface
 interface Invitation {

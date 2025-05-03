@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
-import Header from '../UpperNavBar';
-import HiringAd from '../HiringAd';
+import Header from '../../components/UpperNavBar';
+import HiringAd from '../../components/HiringAd';
 import { BASE_URL } from '../../constants';
-import BlockButton from './BlockButton';
+import BlockButton from '../../components/Network/BlockButton';
 
 interface BlockedUser {
   _id: string;

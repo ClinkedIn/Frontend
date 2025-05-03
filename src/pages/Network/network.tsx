@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import HiringAd from '../HiringAd'; // Import the HiringAd component
-import Header from '../UpperNavBar'; // Import the Header component
+import HiringAd from '../../components/HiringAd'; // Import the HiringAd component
+import Header from '../../components/UpperNavBar'; // Import the Header component
 import { BASE_URL } from "../../constants";
-import { handleAccept, handleIgnore } from './handleInvitations'; // Import handleAccept and handleIgnore
+import { handleAccept, handleIgnore } from '../../components/Network/handleInvitations'; // Import handleAccept and handleIgnore
 import { getConnectionsCount } from './connections'; // Import getConnectionsCount from Connections
 import { getBlockedUsersCount } from './BlockedUsers'; // Import the count function
 import { FiUserMinus } from "react-icons/fi";
 import { BsFillPeopleFill } from "react-icons/bs";
-import ConnectButton from './ConnectButton'; // <-- Import ConnectButton
+import ConnectButton from '../../components/Network/ConnectButton'; // <-- Import ConnectButton
 
 // Define the related user interface
 interface RelatedUser {
