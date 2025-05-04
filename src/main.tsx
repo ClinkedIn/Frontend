@@ -19,7 +19,7 @@ async function enableMocking() {
   return Promise.resolve();
 }
 
-enableMocking().then(() => {
+//enableMocking().then(() => {
   const queryClient = new QueryClient();
   createRoot(document.getElementById("root")!).render(
     <StrictMode>
@@ -32,4 +32,4 @@ enableMocking().then(() => {
       </BrowserRouter>
     </StrictMode>
   );
-});
+//});

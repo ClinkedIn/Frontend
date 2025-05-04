@@ -57,7 +57,7 @@ const JobDetails = () => {
     useEffect(() => {
         const fetchCompany = async () => {
             try {
-                const response = await axios.get(`${BASE_URL}/companies/${companyid}`);
+                const response = await axios.get(`${BASE_URL}/companies/${companyid}`, {withCredentials: true});
                 console.log("Company data:", response.data);
                 setCompany(response.data);
             } catch (error) {
@@ -73,6 +73,10 @@ const JobDetails = () => {
         jobid = job?._id;
     }
     else if(!jobid) { jobid = job?.job?.id }
+    else{
+        jobid = job.company.id;
+    }
+    console.log("Job ID after ", jobid); // Log the job ID being used
 
     // Fetch applicants when the component mounts or job.id changes
     useEffect(() => {
@@ -87,7 +91,8 @@ const JobDetails = () => {
             setApplicantError(null);
         
             try {
-                const response = await axios.get(`${BASE_URL}/jobs/${jobid}/apply`);
+                const response = await axios.get(`${BASE_URL}/jobs/${companyid}/apply`, {withCredentials: true});
+                console.log("Response from fetchApplicants:", companyid); // Log the response
                 const fetchedApplicants = response?.data.applications;
                 setApplicants(fetchedApplicants);
                 console.log("Fetched applicants:", fetchedApplicants); // Log the fetched applicants
@@ -100,6 +105,7 @@ const JobDetails = () => {
                 setLoadingApplicants(false);
             }
         };
+        console.log("Job ID in fetchApplicants:", jobid); // Log the job ID being used
 
         if (jobid) { 
             fetchApplicants();
