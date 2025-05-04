@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { BASE_URL } from "../constants";
+import CommentReaction from './CommentReaction.jsx';
 
 /**
  * CommentSection component
@@ -586,25 +587,23 @@ const CommentSection = ({
                   </span>
 
                   {/* Like button + count */}
-                  <div className="flex items-center">
-                    <button
-                      onClick={() => handleLikeClick(comment)}
-                      disabled={likeLoading[comment._id]}
-                      className={`hover:text-[#0a66c2] hover:underline cursor-pointer ${
-                        (optimisticLikes[comment._id]?.isLiked ?? comment.isLiked?.like)
-                          ? 'text-[#0a66c2] font-semibold'
-                          : ''
-                      }`}
-                    >
-                      Like
-                    </button>
-                    {/* Display count only if > 0 */}
-                    {((optimisticLikes[comment._id]?.count ?? comment.impressionCounts?.total) || 0) > 0 && (
-                      <span className="ml-1">
-                        • {(optimisticLikes[comment._id]?.count ?? comment.impressionCounts?.total)}
-                      </span>
-                    )}
-                  </div>
+                    <div className="flex items-center">
+                      <CommentReaction
+                        commentId={comment._id}
+                        onReact={(reactionType, isRemove) =>
+                          onReactToComment(postId, comment._id, reactionType, isRemove)
+                        }
+                        reactionTypes={reactionTypes}
+                        isLiked={comment.isLiked?.like}
+                        currentReaction={comment.isLiked?.type || 'like'}
+                      />
+                      {/* Display count only if > 0 */}
+                      {(comment.impressionCounts?.total || 0) > 0 && (
+                        <span className="ml-1">
+                          • {comment.impressionCounts?.total}
+                        </span>
+                      )}
+                    </div>
 
                   {/* Reply button */}
                   <button
@@ -740,21 +739,18 @@ const CommentSection = ({
 
                               {/* Like button for reply */}
                               <div className="flex items-center">
-                                <button
-                                  onClick={() => handleReplyLikeClick(reply, comment._id)}
-                                  disabled={replyLikeLoading[reply._id]}
-                                  className={`hover:text-[#0a66c2] hover:underline cursor-pointer ${
-                                    (optimisticReplyLikes[reply._id]?.isLiked ?? reply.isLiked?.like)
-                                      ? 'text-[#0a66c2] font-semibold'
-                                      : ''
-                                  }`}
-                                >
-                                  Like
-                                </button>
-                                {/* Display count only if > 0 */}
-                                {((optimisticReplyLikes[reply._id]?.count ?? reply.impressionCounts?.total) || 0) > 0 && (
+                                <CommentReaction
+                                  commentId={reply._id}
+                                  onReact={(reactionType, isRemove) =>
+                                    onReactToComment(postId, reply._id, reactionType, isRemove)
+                                  }
+                                  reactionTypes={reactionTypes}
+                                  isLiked={reply.isLiked?.like}
+                                  currentReaction={reply.isLiked?.type || 'like'}
+                                />
+                                {(reply.impressionCounts?.total || 0) > 0 && (
                                   <span className="ml-1">
-                                    • {(optimisticReplyLikes[reply._id]?.count ?? reply.impressionCounts?.total)}
+                                    • {reply.impressionCounts?.total}
                                   </span>
                                 )}
                               </div>

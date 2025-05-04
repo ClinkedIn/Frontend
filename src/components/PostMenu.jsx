@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 
+// Update the PostMenu component definition
+
 /**
  * PostMenu component renders a dropdown menu with options to hide, save, report, or delete a post.
  * The menu toggles visibility when the ellipsis button is clicked and closes when clicking outside.
@@ -11,6 +13,7 @@ import React, { useState, useEffect, useRef } from 'react';
  * @param {Function} props.onSave - Callback function triggered when the "Save this post" option is selected.
  * @param {Function} props.onReport - Callback function triggered when the "Report this post" option is selected.
  * @param {Function} [props.onDelete] - Callback function triggered when the "Delete post" option is selected.
+ * @param {Function} [props.onEdit] - Callback function triggered when the "Edit this post" option is selected.
  * @param {boolean} [props.isPostOwner=false] - Whether the current user is the owner of the post.
  * @param {boolean} [props.isSaved=false] - Whether the post is currently saved by the user.
  * @returns {JSX.Element} The rendered PostMenu component.
@@ -20,7 +23,8 @@ const PostMenu = ({
   onHide, 
   onSave, 
   onReport, 
-  onDelete, 
+  onDelete,
+  onEdit, 
   isPostOwner = false, 
   isSaved = false 
 }) => {
@@ -85,6 +89,22 @@ const PostMenu = ({
               </svg>
               {isSaved ? "Unsave this post" : "Save this post"}
             </li>
+
+            {/* Add Edit button - only show if user is post owner */}
+            {isPostOwner && onEdit && (
+              <li 
+                onClick={() => {
+                  onEdit(postId);
+                  setIsOpen(false);
+                }}
+                className="px-4 py-2 hover:bg-[rgba(0,0,0,0.05)] cursor-pointer flex items-center text-[rgba(0,0,0,0.6)]"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Edit post
+              </li>
+            )}
             
             {/* Only show delete option if user is post owner */}
             {isPostOwner && onDelete && (

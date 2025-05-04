@@ -16,7 +16,7 @@ const getUserInfo = async () => {
   return response.data;
 };
 
-const Leftside = () => {
+const Leftside = ({ onShowSavedPosts }) => {
   const [userData, setUserData] = useState(null);
   const [isShowMore, setIsShowMore] = useState(false);
 
@@ -75,10 +75,15 @@ const Leftside = () => {
         </div>
 
         {/* My Items Section */}
-        <a href="/my-items" className="flex items-center text-xs text-[rgba(0,0,0,0.6)] font-semibold p-3 hover:bg-[rgba(0,0,0,0.08)]">
-          <img src="/Images/item-icon.svg" alt="Item icon" className="w-4 h-4 mr-2" />
-          My Items
-        </a>
+        <button
+        type="button"
+        onClick={onShowSavedPosts}
+        className="flex items-center text-xs text-[rgba(0,0,0,0.6)] font-semibold p-3 hover:bg-[rgba(0,0,0,0.08)] w-full text-left"
+        style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+        >
+        <img src="/Images/item-icon.svg" alt="Item icon" className="w-4 h-4 mr-2" />
+        My Items
+      </button>
       </div>
     </div>
   );
