@@ -41,8 +41,11 @@ import PaymentSuccess from './components/SubscriptionBasedPayment/PaymentSuccess
 import CompanyFeedPage from "./components/CompanyPageSections/Feed";
 import CompanyAnalyticsPage from "./components/CompanyPageSections/Analytics.jsx";
 import CompanyManageJobsPage from "./components/CompanyPageSections/ManageJobs.jsx";
-
-import Network from "./components/Network/network";
+import CompanySettingPage from "./components/CompanyPageSections/Setting.jsx";
+import InvitationManager from "./pages/Network/invitations.tsx";
+import Connections from "./pages/Network/connections.tsx";
+import BlockedUsers from "./pages/Network/BlockedUsers.tsx";
+import Network from "./pages/Network/network.tsx";
 
 // Define your routes as an array of RouteObject (compatible with React Router v6)
 const routes: RouteObject[] = [
@@ -135,6 +138,18 @@ const routes: RouteObject[] = [
     element: React.createElement(Network),
   },
   {
+    path: "/network/invitation-manager",
+    element: React.createElement(InvitationManager),
+  },
+  {
+    path: "/network/connections",
+    element: React.createElement(Connections),
+  },
+  {
+    path: "/network/blocked-users",
+    element: React.createElement(BlockedUsers),
+  },
+  {
     path: "/admin",
     element: React.createElement(AdminPanel),
     children: [
@@ -193,6 +208,7 @@ const routes: RouteObject[] = [
       { path: "Feed", element: React.createElement(CompanyFeedPage) },
       { path: "Analytics", element: React.createElement(CompanyAnalyticsPage) },
       { path: "Jobs", element: React.createElement(CompanyManageJobsPage) },
+      { path: "Setting", element: React.createElement(CompanySettingPage) },
     ],
   },
     {

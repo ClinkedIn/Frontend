@@ -1,25 +1,44 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
-import { MdSearch } from "react-icons/md";
+import { MdSearch, MdHome } from "react-icons/md";
+import { IoBagSharp, IoChatbubbleEllipses, IoNotifications } from "react-icons/io5";
+import { BsFillPeopleFill } from "react-icons/bs";
+import { FaBars } from "react-icons/fa"; // Add this for a mobile menu icon if needed
 import { BASE_URL } from "../constants";
-import { db } from "../../firebase";
-import { collection, query, where, onSnapshot } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  getDoc,
+  setDoc,
+  serverTimestamp,
+  doc,
+  updateDoc,
+  arrayUnion,
+  onSnapshot,
+  orderBy,
+  query,
+  where,
+} from "firebase/firestore";
+import { db } from "../../firebase"; // Adjust the import path as necessary
+import React from "react";
+import { useAuth } from "../context/AuthContext";
 
 /**
  * Header component that manages the navigation, search, and notifications.
- * 
+ *
  * @component
  * @example
  * // Example usage:
- * <Header notifications={notifications} />
- * 
+ * <Header notifications={[]} pendingInvitationsCount={pendingInvitations.length} />
+ *
  * @param {Object} props - The properties passed to the component.
  * @param {Array} props.notifications - Array of notifications to be passed to the component.
- * 
+ * @param {number} props.pendingInvitationsCount - Count of pending invitations.
+ *
  * @returns {JSX.Element} The Header component.
  */
-const Header = ({ notifications }) => {
+const Header = ({ notifications, pendingInvitationsCount }) => {
   /**
    * State variables:
    * - `showUser`: Toggles the visibility of the user dropdown.
@@ -34,7 +53,8 @@ const Header = ({ notifications }) => {
    * - `loadingConversations`: Boolean flag for loading state of conversations.
    * - `currentUser`: Stores the current user's data.
    * - `showWork`: Toggles the visibility of the work dropdown.
-   * 
+   * - `mobileMenuOpen`: Toggles the visibility of the mobile menu.
+   *
    * @type {object}
    */
   const [showUser, setShowUser] = useState(false);
@@ -52,19 +72,71 @@ const Header = ({ notifications }) => {
   const [unreadCountMessages, setUnreadCountMessages] = useState(0);
   const [conversations, setConversations] = useState([]);
   const [loadingConversations, setLoadingConversations] = useState(true);
-  const [currentUser, setUser] = useState();
+  const [userInfo, setUserInfo] = useState(null);
+
   const workDropdownRef = useRef(null);
   const [showWork, setShowWork] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userCompanies, setUserCompanies] = useState([]);
 
-  /**
-   * Fetches the count of unread notifications and updates the state.
-   */
+  const currentUser = {
+    uid: "123",
+  };
+  const { logout } = useAuth();
+  useEffect(() => {
+    const fetchUserCompanies = async () => {
+        try {
+            const response = await axios.get(`${BASE_URL}/companies`, {
+                withCredentials: true
+            });
+            console.log("companies",response.data)
+            const filteredCompanies = response.data.map(item => ({
+              company: {
+                  id: item.company.id,
+                  name: item.company.name,
+                  logo: item.company.logo
+              },
+              userRelationship: item.userRelationship
+          })).filter(item => 
+              item.userRelationship === "owner" || 
+              item.userRelationship === "admin"
+          );
+          setUserCompanies(filteredCompanies);
+          console.log("formattedCompanies",filteredCompanies)
+        } catch (error) {
+            console.error('Error fetching user companies:', error);
+        }
+    };
+
+    if (userInfo?._id) {
+        fetchUserCompanies();
+    }
+}, [userInfo?._id]);
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const response = await axios.get(`${BASE_URL}/user/me`, {
+          withCredentials: true,
+        });
+        setUserInfo(response.data.user);
+      } catch (error) {
+        console.error("Failed to fetch user info:", error);
+      }
+    };
+
+    fetchUserInfo();
+  }, []);
+
   useEffect(() => {
     const fetchUnreadCount = async () => {
       try {
-        const response = await axios.get(`${BASE_URL}/notifications/unread-count`, {
-          withCredentials: true,
-        });
+        const response = await axios.get(
+          `${BASE_URL}/notifications/unread-count`,
+          {
+            withCredentials: true,
+          }
+        );
         setUnreadCount(response.data.unreadCount || 0);
       } catch (error) {
         console.error("Error fetching unread count:", error);
@@ -82,7 +154,7 @@ const Header = ({ notifications }) => {
         const response = await axios.get(`${BASE_URL}/user/me`, {
           withCredentials: true,
         });
-        setUser(response.data.user);
+        setUserInfo(response.data.user);
         console.log("User data:", response.data.user);
       } catch (error) {
         console.error("Error fetching user:", error);
@@ -97,28 +169,34 @@ const Header = ({ notifications }) => {
   useEffect(() => {
     if (!currentUser?._id) return;
 
-    const conversationsRef = collection(db, 'conversations');
+    const conversationsRef = collection(db, "conversations");
     const q = query(
       conversationsRef,
-      where('participants', 'array-contains', currentUser._id)
+      where("participants", "array-contains", currentUser._id)
     );
 
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      let totalUnread = 0;
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        let countForUser = data.unreadCounts?.[currentUser._id] || 0;
-        if (data.forceUnread) countForUser = countForUser - 1;
-        totalUnread += countForUser;
-      });
+    const unsubscribe = onSnapshot(
+      q,
+      (querySnapshot) => {
+        let totalUnread = 0;
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          let countForUser = data.unreadCounts?.[currentUser._id] || 0;
+          if (data.forceUnread?.[currentUser._id]) countForUser = countForUser - 1;
+          totalUnread += countForUser;
+        });
 
-      console.log("Total unread messages from Firestore:", totalUnread);
-      setUnreadCountMessages(totalUnread);
-
-    }, (error) => {
-      console.error("Error fetching unread message count from Firestore:", error);
-      setUnreadCountMessages(0);
-    });
+        console.log("Total unread messages from Firestore:", totalUnread);
+        setUnreadCountMessages(totalUnread);
+      },
+      (error) => {
+        console.error(
+          "Error fetching unread message count from Firestore:",
+          error
+        );
+        setUnreadCountMessages(0);
+      }
+    );
 
     return () => {
       console.log("Cleaning up Firestore listener for unread messages count.");
@@ -139,8 +217,7 @@ const Header = ({ notifications }) => {
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () =>
-      document.removeEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   /**
@@ -201,7 +278,9 @@ const Header = ({ notifications }) => {
       const params = new URLSearchParams();
       if (searchQuery) params.append("q", searchQuery);
       if (location) params.append("location", location);
+
       const response = await axios.get(`${BASE_URL}/search/jobs?${params}`);
+      console.log("Job search response:", response.data);
       navigate("/job-board", {
         state: {
           jobs: response.data.jobs,
@@ -216,117 +295,223 @@ const Header = ({ notifications }) => {
   };
 
   /**
+   * Handles user logout
+   */
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/login");
+    } catch (error) {
+      console.error("Failed to log out:", error);
+    }
+  };
+
+  /**
    * Determines whether to show the job search bar based on the current path.
    */
   let path = false;
-  if (currentPath === "jobs" || currentPath === "job-board" || currentPath === "myjobs") {
+  if (
+    currentPath === "jobs" ||
+    currentPath === "job-board" ||
+    currentPath === "myjobs"
+  ) {
     path = true;
   }
   return (
     <header className="fixed top-0 left-0 w-full bg-white border-b border-gray-200 z-50">
-      <div className="flex items-center justify-between px-4 py-2">
-        <div className="flex">
-          {/* Logo */}
-          <a href="/feed">
-            <img src="/Images/blue-lockedin.png" alt="Logo" className="w-12 h-12" />
-          </a>
+      <div className="relative flex items-center justify-between px-2 sm:px-4 py-2">
+        {/* Logo */}
+        <a
+          href="/feed"
+          className="flex-shrink-0 absolute left-2 top-1/2 transform -translate-y-1/2 md:static md:translate-y-0 md:left-0 ml-23"
+          style={{ zIndex: 10 }}
+        >
+          <img src="/Images/blue-lockedin.png" alt="Logo" className="w-12 h-12 min-w-12" />
+        </a>
 
-          {/* Conditional Search Bar */}
-          <form
-            onSubmit={handleJobSearch}
-            className="relative flex rounded-lg"
-          >
-            {/* Show Job Search only on /jobs */}
-            {path ? (
-              <>
-                <div className="flex items-center bg-[#edf3f8] rounded-sm ml-2">
-                  <MdSearch color="#5f6163" className="w-4 h-4 mr-2 ml-1" />
-                  <input
-                    type="text"
-                    placeholder="Title, skill or company"
-                    className="text-sm placeholder-[#5f6163] w-full outline-none bg-transparent py-2"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </div>
-                <div className="flex items-center bg-[#edf3f8] rounded-sm ml-2">
-                  <input
-                    type="text"
-                    placeholder="City, state, or zip code"
-                    className="text-sm placeholder-[#5f6163] w-full outline-none bg-transparent pl-1 py-2 ml-1"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="bg-blue-600 ml-1 text-white px-2 py-2 rounded-lg"
-                >
-                  Search
-                </button>
-              </>
-            ) : (
-              // Show User Search everywhere else
+        {/* Desktop Search Bar */}
+        <form
+          onSubmit={handleJobSearch}
+          className="relative flex rounded-lg flex-1 max-w-xl mx-4 hidden md:flex"
+        >
+          {path ? (
+            <>
               <div className="flex items-center bg-[#edf3f8] rounded-sm ml-2">
                 <MdSearch color="#5f6163" className="w-4 h-4 mr-2 ml-1" />
+                <input
+                  type="text"
+                  placeholder="Word, Title, skill or company"
+                  className="text-sm placeholder-[#5f6163] w-full outline-none bg-transparent py-2"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              <div className="flex items-center bg-[#edf3f8] rounded-sm ml-2">
+                <input
+                  type="text"
+                  placeholder="City, state, or zip code"
+                  className="text-sm placeholder-[#5f6163] w-full outline-none bg-transparent pl-1 py-2 ml-1"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                />
+              </div>
+              <button
+                type="submit"
+                className="bg-blue-600 ml-1 text-white px-2 py-2 rounded-lg"
+              >
+                Search
+              </button>
+            </>
+          ) : (
+            <div className="flex items-center bg-[#edf3f8] rounded-sm ml-2 w-90">
+              <MdSearch color="#5f6163" className="w-4 h-4 mr-2 ml-1" />
+              <input
+                type="text"
+                placeholder="Search"
+                className="text-sm placeholder-[#5f6163] w-full outline-none bg-transparent py-2"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onFocus={() => setShowResults(true)}
+              />
+            </div>
+          )}
+        </form>
+
+        {/* Mobile Search Bar */}
+        <div className="flex md:hidden flex-1 mx-2 min-w-0 justify-center">
+          <div className="flex items-center bg-[#edf3f8] rounded-sm w-full max-w-xs mx-auto">
+            <MdSearch color="#5f6163" className="w-4 h-4 mr-2 ml-1" />
+            <input
+              type="text"
+              placeholder="Search"
+              className="text-sm placeholder-[#5f6163] w-full outline-none bg-transparent py-2"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onFocus={() => setShowResults(true)}
+            />
+          </div>
+        </div>
+
+        {/* Mobile Search Icon (replaces search bar on mobile) */}
+        <div className="flex md:hidden items-center ml-14">
+          <button
+            className="p-2 rounded-full hover:bg-gray-200"
+            onClick={() => setShowResults(true)}
+            aria-label="Open search"
+            type="button"
+          >
+            <MdSearch color="#5f6163" className="w-6 h-6" />
+          </button>
+        </div>
+
+        {/* Mobile Search Dropdown */}
+        {showResults && (
+          <div className="fixed inset-0 z-50 flex items-start justify-center md:hidden" style={{ background: "none" }}>
+            <div className="bg-white rounded-lg shadow-lg mt-4 w-11/12 max-w-md p-4 relative">
+              <button
+                className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+                onClick={() => setShowResults(false)}
+                aria-label="Close search"
+                type="button"
+              >
+                ×
+              </button>
+              <div className="flex items-center bg-[#edf3f8] rounded-sm w-full">
+                <MdSearch color="#5f6163" className="w-5 h-5 mr-2 ml-1" />
                 <input
                   type="text"
                   placeholder="Search"
                   className="text-sm placeholder-[#5f6163] w-full outline-none bg-transparent py-2"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  onFocus={() => setShowResults(true)}
+                  autoFocus
                 />
               </div>
-            )}
-          </form>
-
-          {/* User Results Dropdown */}
-          {showResults && userResults.length > 0 && currentPath !== "jobs" && (
-            <div
-              ref={searchRef}
-              className="absolute top-full mt-12 w-64 bg-white border border-gray-200 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto"
-            >
-              <ul>
-                {userResults.map((user) => (
-                  <li
-                    key={user._id}
-                    className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                    onClick={() => {
-                      setSearchTerm("");
-                      navigate(`/profile/${user._id}`);
-                      setShowResults(false);
-                    }}
-                  >
-                    <img
-                      src={user.profilePicture || "/Images/user.svg"}
-                      alt={`${user.firstName} ${user.lastName}`}
-                      className="w-8 h-8 rounded-full mr-3"
-                    />
-                    <div className="text-sm">
-                      <p className="font-medium">{`${user.firstName} ${user.lastName}`}</p>
-                      {user.company && <p className="text-xs text-gray-500">{user.company}</p>}
-                      <p className="text-xs text-gray-400">{user.industry}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+              {/* User Results Dropdown (mobile) */}
+              {userResults.length > 0 && (
+                <div className="mt-2 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                  <ul>
+                    {userResults.map((user) => (
+                      <li
+                        key={user._id}
+                        className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        onClick={() => {
+                          setSearchTerm("");
+                          navigate(`/user/${user._id}`);
+                          setShowResults(false);
+                        }}
+                      >
+                        <img
+                          src={user.profilePicture || "/Images/user.svg"}
+                          alt={`${user.firstName} ${user.lastName}`}
+                          className="w-8 h-8 rounded-full mr-3"
+                        />
+                        <div className="text-sm">
+                          <p className="font-medium">{`${user.firstName} ${user.lastName}`}</p>
+                          {user.company && (
+                            <p className="text-xs text-gray-500">{user.company}</p>
+                          )}
+                          <p className="text-xs text-gray-400">{user.industry}</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </div>
+        )}
+
+        {/* User Results Dropdown */}
+        {showResults && userResults.length > 0 && currentPath !== "jobs" && (
+          <div
+            ref={searchRef}
+            className="absolute left-0 right-0 mt-2 w-full max-w-xl bg-white border border-gray-200 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto mx-auto"
+            style={{ top: "100%" }}
+          >
+            <ul>
+              {userResults.map((user) => (
+                <li
+                  key={user._id}
+                  className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => {
+                    setSearchTerm("");
+                    navigate(`/user/${user._id}`);
+                    setShowResults(false);
+                  }}
+                >
+                  <img
+                    src={user.profilePicture || "/Images/user.svg"}
+                    alt={`${user.firstName} ${user.lastName}`}
+                    className="w-8 h-8 rounded-full mr-3"
+                  />
+                  <div className="text-sm">
+                    <p className="font-medium">{`${user.firstName} ${user.lastName}`}</p>
+                    {user.company && (
+                      <p className="text-xs text-gray-500">{user.company}</p>
+                    )}
+                    <p className="text-xs text-gray-400">{user.industry}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {/* Navigation Icons */}
-        <nav className="flex space-x-2">
+        <nav className="hidden md:flex space-x-2 ml-2 mr-27">
           {/* Home */}
           <button
-            className={`flex flex-col items-center hover:bg-gray-200 p-1.5 rounded-lg w-16 ${currentPath === "feed" ? "text-black" : "text-gray-600"}`}
+            className={`flex flex-col items-center hover:bg-gray-200 p-1.5 rounded-lg w-16 ${
+              currentPath === "feed" ? "text-black" : "text-gray-600"
+            }`}
             onClick={() => navigate("/feed")}
           >
             <div className="flex flex-col items-center w-full">
-              <img
-                src="/Images/nav-home.svg"
-                alt="Home"
-                className={`w-5 h-5 mb-1 ${currentPath === "feed" ? "filter-none" : "filter grayscale"}`}
+              <MdHome
+                className={`w-5 h-5 mb-1 ${
+                  currentPath === "feed" ? "text-black" : "text-gray-600"
+                }`}
               />
               <span className="text-xs">Home</span>
               {currentPath === "feed" && (
@@ -336,16 +521,24 @@ const Header = ({ notifications }) => {
           </button>
           {/* Network */}
           <button
-            className={`flex flex-col items-center hover:bg-gray-200 p-1.5 rounded-lg w-16 ${currentPath === "network" ? "text-black" : "text-gray-600"}`}
+            className={`relative flex flex-col items-center hover:bg-gray-200 p-1.5 rounded-lg w-16 ${
+              currentPath === "network" ? "text-black" : "text-gray-600"
+            }`}
             onClick={() => navigate("/network")}
           >
             <div className="flex flex-col items-center w-full">
-              <img
-                src="/Images/nav-network.svg"
-                alt="Network"
-                className={`w-5 h-5 mb-1 ${currentPath === "network" ? "filter-none" : "filter grayscale"}`}
+              <BsFillPeopleFill
+                className={`w-5 h-5 mb-1 ${
+                  currentPath === "network" ? "text-black" : "text-gray-600"
+                }`}
               />
               <span className="text-xs">Network</span>
+              {/* Pending Invitations Badge */}
+              {pendingInvitationsCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-[#cb112d] text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-medium">
+                  {pendingInvitationsCount > 99 ? "99+" : pendingInvitationsCount}
+                </span>
+              )}
               {currentPath === "network" && (
                 <div className="w-8 h-0.5 bg-black rounded-full mt-1" />
               )}
@@ -353,14 +546,16 @@ const Header = ({ notifications }) => {
           </button>
           {/* Jobs */}
           <button
-            className={`flex flex-col items-center hover:bg-gray-200 p-1.5 rounded-lg w-16 ${currentPath === "jobs" ? "text-black" : "text-gray-600"}`}
+            className={`flex flex-col items-center hover:bg-gray-200 p-1.5 rounded-lg w-16 ${
+              currentPath === "jobs" ? "text-black" : "text-gray-600"
+            }`}
             onClick={handleJobsClick}
           >
             <div className="flex flex-col items-center w-full">
-              <img
-                src="/Images/nav-jobs.svg"
-                alt="Jobs"
-                className={`w-5 h-5 mb-1 ${currentPath === "jobs" ? "filter-none" : "filter grayscale"}`}
+              <IoBagSharp
+                className={`w-5 h-5 mb-1 ${
+                  currentPath === "jobs" ? "text-black" : "text-gray-600"
+                }`}
               />
               <span className="text-xs">Jobs</span>
               {currentPath === "jobs" && (
@@ -370,14 +565,16 @@ const Header = ({ notifications }) => {
           </button>
           {/* Messaging */}
           <button
-            className={`relative flex flex-col items-center hover:bg-gray-200 p-1.5 rounded-lg w-16 ${currentPath === "messaging" ? "text-black" : "text-gray-600"}`}
+            className={`relative flex flex-col items-center hover:bg-gray-200 p-1.5 rounded-lg w-16 ${
+              currentPath === "messaging" ? "text-black" : "text-gray-600"
+            }`}
             onClick={handleMessagingClick}
           >
             <div className="flex flex-col items-center w-full">
-              <img
-                src="/Images/nav-messaging.svg"
-                alt="Messaging"
-                className={`w-5 h-5 mb-1 ${currentPath === "messaging" ? "filter-none" : "filter grayscale"}`}
+              <IoChatbubbleEllipses
+                className={`w-5 h-5 mb-1 ${
+                  currentPath === "messaging" ? "text-black" : "text-gray-6"
+                }`}
               />
               <span className="text-xs">Messaging</span>
               {currentPath === "messaging" && (
@@ -385,21 +582,23 @@ const Header = ({ notifications }) => {
               )}
               {unreadCountMessages > 0 && (
                 <div className="absolute -top-1 left-1/2 ml-3 bg-[#cb112d] text-white rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-[10px] md:text-xs font-medium">
-                  {unreadCountMessages > 10 ? '10+' : unreadCountMessages}
+                  {unreadCountMessages > 10 ? "10+" : unreadCountMessages}
                 </div>
               )}
             </div>
           </button>
           {/* Notifications */}
           <button
-            className={`hover:bg-gray-200 p-1.5 rounded-lg relative flex flex-col items-center w-16 ${currentPath === "notifications" ? "text-black" : "text-gray-600"}`}
+            className={`hover:bg-gray-200 p-1.5 rounded-lg relative flex flex-col items-center w-16 ${
+              currentPath === "notifications" ? "text-black" : "text-gray-600"
+            }`}
             onClick={handleNotificationsClick}
           >
             <div className="flex flex-col items-center w-full">
-              <img
-                src="/Images/nav-notifications.svg"
-                alt="Notifications"
-                className={`w-5 h-5 mb-1 ${currentPath === "notifications" ? "filter-none" : "filter grayscale"}`}
+              <IoNotifications
+                className={`w-5 h-5 mb-1 ${
+                  currentPath === "notifications" ? "text-black" : "text-gray-600"
+                }`}
               />
               <span className="text-xs">Notifications</span>
               {currentPath === "notifications" && (
@@ -414,17 +613,17 @@ const Header = ({ notifications }) => {
           </button>
         </nav>
 
-        {/* User & Work Dropdowns */}
-        <div className="flex space-x-4 items-center">
+        {/* User Profile & Work Dropdown (Desktop) */}
+        <div className="hidden md:flex space-x-4 items-center ml-2">
           <div className="relative" ref={dropdownRef}>
-          <button
+            <button
               className="flex items-center space-x-2 hover:bg-gray-200 p-2 rounded-lg"
               onClick={() => setShowUser(!showUser)}
             >
               <img
-                src={currentUser?.profilePicture || "/Images/user.svg"}
-                alt={currentUser?.firstName || "User"}
-                className="w-6 h-6 rounded-full"
+                src={userInfo?.profilePicture}
+                alt="User Profile"
+                className="w-8 h-8 rounded-full mr-3"
               />
               <img
                 src="/Images/down-icon.svg"
@@ -434,23 +633,33 @@ const Header = ({ notifications }) => {
                 }`}
               />
             </button>
+
             {showUser && (
               <div className="absolute right-0 mt-1 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200">
                 <div className="px-4 py-2 border-b border-gray-200">
                   <div className="flex items-center">
                     <img
-                      src={currentUser?.profilePicture || "/Images/user.svg"}
-                      alt={`${currentUser?.firstName || 'User'} Profile`}
-                      className="w-10 h-10 rounded-full mr-3"
+                      src={userInfo?.profilePicture}
+                      alt="User Profile"
+                      className="w-8 h-8 rounded-full mr-3"
                     />
                     <div>
                       <p className="font-medium text-gray-800">
+<<<<<<< HEAD
                         {currentUser?.firstName && currentUser?.lastName
                           ? `${currentUser.firstName} ${currentUser.lastName}`
                           : "User"}
                       </p>
                       <p className="text-xs text-gray-500">
                         {currentUser?.headline || currentUser?.jobTitle || "Your job title"}
+=======
+                        {userInfo
+                          ? `${userInfo.firstName} ${userInfo.lastName}`
+                          : "Loading..."}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {userInfo?.lastJobTitle || ""}
+>>>>>>> c1929874522576fff5c658dce2341259f070f4d9
                       </p>
                     </div>
                   </div>
@@ -461,24 +670,54 @@ const Header = ({ notifications }) => {
                 >
                   My Profile
                 </button>
+                {userCompanies.length > 0 && (
+                    <>
+                        <div className="px-4 py-2 text-sm font-medium text-gray-700 border-b border-gray-200">
+                            My Pages
+                        </div>
+                        <div className="max-h-48 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                            {userCompanies.map((company) => (
+                                <button
+                                    key={company.company.id}
+                                    onClick={() => navigate(`/company/${company.company.id}/admin`)}
+                                    className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                >
+                                    <img
+                                        src={company.company.logo || "/Images/CompanyLogo.png"}
+                                        alt={company.company.name}
+                                        className="w-6 h-6 rounded-md mr-3 flex-shrink-0"
+                                    />
+                                    <span className="truncate flex-1">{company.company.name}</span>
+                                </button>
+                            ))}
+                        </div>
+                        <div className="border-t border-gray-200"></div>
+                    </>
+                )}
                 <button
                   onClick={handleSettingsClick}
                   className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 >
                   Settings
                 </button>
+                <button
+                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 border-t border-gray-200"
+                  onClick={handleLogout}
+                >
+                  Sign Out
+                </button>
               </div>
             )}
           </div>
           <div className="relative" ref={workDropdownRef}>
-            <button 
-              className="flex items-center space-x-2 hover:bg-gray-200 p-2 rounded-lg"
+            <button
+              className="flex items-center space-x-2 hover:bg-gray-200 p-2 rounded-lg mr-22"
               onClick={() => setShowWork(!showWork)}
             >
               <img src="/Images/nav-work.svg" alt="Work" className="w-6 h-6" />
-              <img 
-                src="/Images/down-icon.svg" 
-                alt="Dropdown" 
+              <img
+                src="/Images/down-icon.svg"
+                alt="Dropdown"
                 className={`w-4 h-4 transition-transform duration-200 ${
                   showWork ? "rotate-180" : ""
                 }`}
@@ -496,7 +735,114 @@ const Header = ({ notifications }) => {
             )}
           </div>
         </div>
+
+        {/* Mobile Navigation Icons */}
+        <div className="flex md:hidden items-center space-x-2 ml-2">
+          <button
+            className={`flex flex-col items-center hover:bg-gray-200 p-1.5 rounded-lg w-10 ${
+              currentPath === "feed" ? "text-black" : "text-gray-600"
+            }`}
+            onClick={() => navigate("/feed")}
+          >
+            <MdHome className="w-5 h-5" />
+          </button>
+          <button
+            className={`flex flex-col items-center hover:bg-gray-200 p-1.5 rounded-lg w-10 ${
+              currentPath === "network" ? "text-black" : "text-gray-600"
+            }`}
+            onClick={() => navigate("/network")}
+          >
+            <BsFillPeopleFill className="w-5 h-5" />
+          </button>
+          <button
+            className={`flex flex-col items-center hover:bg-gray-200 p-1.5 rounded-lg w-10 ${
+              currentPath === "jobs" ? "text-black" : "text-gray-600"
+            }`}
+            onClick={handleJobsClick}
+          >
+            <IoBagSharp className="w-5 h-5" />
+          </button>
+          <button
+            className={`flex flex-col items-center hover:bg-gray-200 p-1.5 rounded-lg w-10 ${
+              currentPath === "messaging" ? "text-black" : "text-gray-600"
+            }`}
+            onClick={handleMessagingClick}
+          >
+            <IoChatbubbleEllipses className="w-5 h-5" />
+            {unreadCountMessages > 0 && (
+              <span className="absolute top-0 right-0 bg-[#cb112d] text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-medium">
+                {unreadCountMessages > 10 ? "10+" : unreadCountMessages}
+              </span>
+            )}
+          </button>
+          <button
+            className={`flex flex-col items-center hover:bg-gray-200 p-1.5 rounded-lg w-10 ${
+              currentPath === "notifications" ? "text-black" : "text-gray-600"
+            }`}
+            onClick={handleNotificationsClick}
+          >
+            <IoNotifications className="w-5 h-5" />
+            {unreadCount > 0 && (
+              <span className="absolute top-0 right-0 bg-[#cb112d] text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-medium">
+                {unreadCount}
+              </span>
+            )}
+          </button>
+          {/* User Profile Icon */}
+          <button
+            className="flex items-center ml-2"
+            onClick={() => setShowUser(!showUser)}
+          >
+            <img
+              src={userInfo?.profilePicture}
+              alt="User Profile"
+              className="w-8 h-8 rounded-full"
+            />
+          </button>
+        </div>
       </div>
+      {/* User Dropdown for mobile */}
+      {showUser && (
+        <div className="md:hidden absolute right-4 top-16 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
+          <div className="px-4 py-2 border-b border-gray-200">
+            <div className="flex items-center">
+              <img
+                src={userInfo?.profilePicture}
+                alt="User Profile"
+                className="w-8 h-8 rounded-full mr-3"
+              />
+              <div>
+                <p className="font-medium text-gray-800">
+                  {userInfo
+                    ? `${userInfo.firstName} ${userInfo.lastName}`
+                    : "Loading..."}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {userInfo?.lastJobTitle || ""}
+                </p>
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={handleProfileClick}
+            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+          >
+            My Profile
+          </button>
+          <button
+            onClick={handleSettingsClick}
+            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+          >
+            Settings
+          </button>
+          <button
+            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 border-t border-gray-200"
+            onClick={handleLogout}
+          >
+            Sign Out
+          </button>
+        </div>
+      )}
     </header>
   );
 };

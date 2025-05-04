@@ -28,17 +28,18 @@ const location = useLocation();
      * Final data passed from previous page via router state.
      * @type {Object}
      */
-const finalData = location.state || {};
+const finalData = location.state.finalData|| {};
     /**
      * State representing the current page state.
      * @type {Object}
      */
-const pageState= location.state ||{}
+const pageState= location.state.pageState ||"no page state available"
+console.log("job settings page state:", pageState); // Debugging line to check page state
     /**
      * Job ID passed via router state.
      * @type {string}
      */
-const jobId=location.state||""
+const jobId=location.state.jobId||""
 
     /**
      * State for tracking email updates in "Manage applicants" settings.
@@ -139,7 +140,7 @@ const handleGoBack = () => navigate(-1);
 const handleContinue = () => {
     const rejectionSettings = settings.find(s => s.title === "Rejection settings");
 console.log("job settings screenig questions:", screeningQuestions); // Debugging line to check screening questions
-
+    console.log("settings page state:", pageState); // Debugging line to check page state
     navigate('/review', {
         state: {
             screeningQuestions,

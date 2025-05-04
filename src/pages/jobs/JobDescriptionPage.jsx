@@ -85,7 +85,7 @@ export default function JobDescriptionPage() {
     } = location.state || {};
 
     const initialData = UpdateJobData || initialNewJobData || {};
-    console.log("job description data", initialData)
+    console.log("pageState", initialData.pageState);
 
     // Extract individual pieces of data from the determined initialData
     const initialJobTitle = initialData.jobTitle || (initialData.job?.title) || (initialData.job.job.title)||'Job Title';
@@ -109,6 +109,7 @@ Qualifications
     const allCompanies = initialData.allCompanies || [];
     const user = initialData.user;
     const pageState = initialData.pageState; 
+    console.log("pageState in desc after setting", pageState);
     let jobId = null;
     if(initialData.job){
         jobId = initialData.job._id; 
@@ -248,8 +249,8 @@ Qualifications
             description: jobDescription,
             user: user,
         };
-
-        navigate('/jobsettings', { state: finalData, pageState, jobId });
+        console.log("finalData page state", pageState);
+        navigate('/jobsettings', { state: {finalData, pageState, jobId }});
     };
 
     // Rendering Sections
@@ -352,7 +353,7 @@ Qualifications
                          )}
                          {/* Display placeholder if no logo */}
                          {!selectedCompany?.logo && (
-                             <img src={'https://picsum.photos/80?random=1'} alt="Company Logo" className="w-10 h-10 object-contain rounded-full mr-2" />
+                             <img src={'blank-profile-picture.png'} alt="Company Logo" className="w-10 h-10 object-contain rounded-full mr-2" />
                          )}
                         <span className="font-medium">{selectedCompany?.name || 'N/A'}</span> {/* Display company name safely */}
                         <span className="mx-1.5">•</span>

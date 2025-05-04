@@ -1,4 +1,4 @@
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
@@ -9,10 +9,9 @@ import GoogleLogin from "../../GoogleLoginButton";
 import { useAuth } from "../../../context/AuthContext";
 import axios from "axios";
 import { BASE_URL } from "../../../constants";
-import { getMessaging, getToken } from 'firebase/messaging';
-import { app } from '../../../../firebase'; 
-
-
+import { getMessaging, getToken } from "firebase/messaging";
+import { app, auth, provider, generateToken } from "../../../../firebase"; // adjust import if needed
+import { signInWithPopup } from "firebase/auth";
 
 /**
  * The `LoginPage` component renders a login form for user authentication.
@@ -42,7 +41,7 @@ const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [fcmToken, setFcmToken] = useState<string | null>(null); 
+  const [fcmToken, setFcmToken] = useState<string | null>(null);
   const [errors, setErrors] = useState<{
     username?: string;
     password?: string;
@@ -53,25 +52,21 @@ const LoginPage = () => {
   const { setAuthToken } = useAuth();
 
 
-    async function requestFCMToken() {
-    try {
-      const messaging = getMessaging(app);
+
+
+  useEffect (()=>{
+
+    const getFCM = async () =>
       {
-        const fcmToken = await getToken(messaging, { 
-          vapidKey: 'BKQc38HyUXuvI_yz5hPvprjVjmWrcUjTP2H7J_cjGoyMMoBGNBbC0ucVGrzM67rICMclmUuOx-mdt7CXlpnhq9g' 
-        });
-        if (fcmToken) {
-          console.log('FCM Token:', fcmToken);
-          setFcmToken(fcmToken); 
-        }
+        const token = await generateToken();
+        setFcmToken(token);
       }
-    } catch (error) {
-      console.error('Error getting token:', error);
-    }
-  }
-  useEffect(() => {
-    requestFCMToken();
-  }, []);
+  
+      getFCM();
+   },[])
+
+
+
   // Helper function to validate form inputs
   /**
    * Validates the login form by checking if the username and password fields are filled.
@@ -88,6 +83,8 @@ const LoginPage = () => {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
+
 
   // Helper function to handle token storage
   /**
@@ -110,6 +107,58 @@ const LoginPage = () => {
       localStorage.setItem("refreshToken", data.refreshToken); // Persist refreshToken
     }
   };
+
+
+
+  // Google login handler (Firebase-based, with FCM token)
+  const handleGoogleSuccess = async () => {
+    try {
+      // Step 1: Sign in with Google using Firebase
+      const googleResult = await signInWithPopup(auth, provider);
+
+      // Step 2: Try to get FCM token (ignore if blocked)
+      let fcmToken: string | null = null;
+      try {
+        const messaging = getMessaging(app);
+        fcmToken = await getToken(messaging, {
+          vapidKey: "BKQc38HyUXuvI_yz5hPvprjVjmWrcUjTP2H7J_cjGoyMMoBGNBbC0ucVGrzM67rICMclmUuOx-mdt7CXlpnhq9g",
+        });
+        if (fcmToken) {
+          console.log("FCM Token:", fcmToken);
+        }
+      } catch (err) {
+        console.warn("FCM token not available (permission denied or blocked). Proceeding without it.");
+        // Do not block login if FCM fails
+      }
+
+      // Step 3: Get Google ID token
+      const tokenId = await googleResult.user.getIdToken();
+
+      // Step 4: Send FCM token in body, Google ID token in Authorization header
+      const { data } = await axios.post(
+        `${BASE_URL}/user/auth/google`,
+        { fcmToken }, // fcmToken may be null
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${tokenId}`,
+          },
+          withCredentials: true,
+        }
+      );
+
+      // Step 5: Save tokens and login
+      saveTokens(data);
+      queryClient.invalidateQueries({ queryKey: ["authUser"] });
+      toast.success("Login successful!");
+      setTimeout(() => navigate("/feed"), 1000);
+    } catch (error: any) {
+      console.error("Google login failed:", error);
+      toast.error(error?.response?.data?.error || "Google login failed.");
+    }
+  };
+
+
 
   // Login mutation hook
   /**
@@ -181,6 +230,8 @@ const LoginPage = () => {
     },
   });
 
+
+
   // Form submission handler
   /**
    * Handles the form submission event for the login page.
@@ -203,26 +254,26 @@ const LoginPage = () => {
       {/* Logo */}
       <img
         className="absolute top-6 left-13 h-7"
-        src="/Images/login-logo.svg"
+        src="/Images/lockedin.png"
         alt="LinkedIn"
       />
-  
+
       {/* Login Form */}
       <motion.div className="w-full max-w-sm p-6 bg-white rounded-lg shadow-lg">
         <h2 className="text-3xl font-semibold text-gray-900 text-left mb-4">
           Sign in
         </h2>
-  
+
         {/* Google Login Button */}
-        <GoogleLogin className="w-full" />
-  
+        <GoogleLogin className="w-full" onClick={handleGoogleSuccess} />
+
         {/* Separator */}
         <div className="relative flex items-center my-4">
           <div className="w-full border-t border-gray-300"></div>
           <span className="px-3 text-sm text-gray-500 bg-white">or</span>
           <div className="w-full border-t border-gray-300"></div>
         </div>
-  
+
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Email Input */}
@@ -240,7 +291,7 @@ const LoginPage = () => {
               <p className="text-red-500 text-xs mt-1">{errors.username}</p>
             )}
           </div>
-  
+
           {/* Password Input */}
           <div className="relative">
             <input
@@ -263,7 +314,7 @@ const LoginPage = () => {
               <p className="text-red-500 text-xs mt-1">{errors.password}</p>
             )}
           </div>
-  
+
           {/* Remember Me & Forgot Password Row */}
           <div className="flex justify-between items-center text-sm">
             <div className="flex items-center">
@@ -278,7 +329,7 @@ const LoginPage = () => {
                 Remember me
               </label>
             </div>
-  
+
             {/* Forgot Password Link */}
             <Link
               to="/forgot-password"
@@ -287,7 +338,7 @@ const LoginPage = () => {
               Forgot password?
             </Link>
           </div>
-  
+
           {/* Submit Button */}
           <motion.button
             type="submit"
@@ -303,7 +354,7 @@ const LoginPage = () => {
             )}
           </motion.button>
         </form>
-  
+
         {/* Signup Link */}
         <p className="mt-4 text-center text-sm text-gray-600">
           New to LinkedIn?{" "}
@@ -312,7 +363,7 @@ const LoginPage = () => {
           </Link>
         </p>
       </motion.div>
-  
+
       {/* Fixed Footer - Always at bottom of screen */}
       <footer className="fixed bottom-0 left-0 right-0 z-10 bg-white border-t border-gray-200 py-4">
         <Footer />

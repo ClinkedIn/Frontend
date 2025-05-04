@@ -43,7 +43,7 @@ const ConversationList = ({
                 await updateDoc(conversationDocRef, {
                     
                     [`unreadCounts.${currentUser._id}`]: newUnreadValue,
-                    ['forceUnread']: markAsUnread ? true : false,
+                    [`forceUnread.${currentUser._id}`]: markAsUnread ? true : false,
                 });
                 console.log(`Successfully updated unread count for ${currentUser._id} in ${conversationId}`);
                 

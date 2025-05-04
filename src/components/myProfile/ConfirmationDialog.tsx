@@ -23,6 +23,7 @@ interface ConfirmationDialogProps {
   onAddMore?: () => void;
   /** Class name for the confirm button (optional) */
   confirmButtonClass?: string;
+  isLoading?: boolean;
 }
 
 /**
@@ -47,9 +48,10 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   showAddMore = false,
   onAddMore,
   onCancel,
+  isLoading = false,
 }) => {
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 h-full">
+    <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 h-full">
       <div className="bg-white rounded-lg w-full max-w-md p-6">
         <div className="flex flex-col items-center text-center">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
@@ -96,8 +98,9 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
                   ? "border border-gray-300 text-gray-700 hover:bg-gray-50"
                   : "bg-blue-600 text-white hover:bg-blue-700"
               }`}
+              disabled={isLoading}
             >
-              {confirmText}
+              {isLoading ? "Processing..." : confirmText}
             </button>
           </div>
         </div>

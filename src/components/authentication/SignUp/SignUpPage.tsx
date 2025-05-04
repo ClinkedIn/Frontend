@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef , useEffect} from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import toast, { Toaster } from "react-hot-toast";
@@ -7,7 +7,7 @@ import GoogleLogin from "../../GoogleLoginButton";
 import Footer from "../../Footer/Footer";
 import { useSignup } from "../../../context/SignUpContext";
 import { useAuth } from "../../../context/AuthContext";
-import { auth, provider, signInWithPopup } from "../../../../firebase";
+import { auth, provider, signInWithPopup, generateToken } from "../../../../firebase";
 import { getMessaging, getToken } from "firebase/messaging";
 import axios from "axios";
 
@@ -59,9 +59,12 @@ const SignupPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const recaptchaRef = useRef<ReCAPTCHA>(null);
+  const [fcmToken, setFcmToken] = useState<string | null>(null);
   const sitekey = import.meta.env.VITE_SITEKEY;
   const navigate = useNavigate();
   const { setAuthToken } = useAuth();
+
+
 
   // Helper function to validate email
   /**
@@ -89,6 +92,8 @@ const SignupPage = () => {
     setEmailError("");
     return true;
   };
+
+
 
   // Helper function to validate password
   /**
@@ -119,6 +124,8 @@ const SignupPage = () => {
     return true;
   };
 
+
+
   // Helper function to validate names (only alphabetic characters allowed)
   /**
    * Validates a given name to ensure it contains only alphabetic characters.
@@ -146,6 +153,8 @@ const SignupPage = () => {
     return true;
   };
 
+
+
   // Helper function to handle form validation
   /**
    * Validates the signup form by checking the validity of the user's input fields.
@@ -159,6 +168,50 @@ const SignupPage = () => {
     const isPasswordValid = validatePassword(signupData.password);
     return isFirstNameValid && isLastNameValid && isEmailValid && isPasswordValid;
   };
+
+
+  // Helper function to handle token storage
+  /**
+   * Saves authentication and refresh tokens.
+   *
+   * This function stores the provided authentication token in the AuthContext
+   * and persists both the authentication token and refresh token in the browser's
+   * localStorage for future use.
+   *
+   * @param {any} data - An object containing the tokens to be saved.
+   * @param {string} [data.authToken] - The authentication token to be saved.
+   * @param {string} [data.refreshToken] - The refresh token to be saved.
+   */
+  const saveTokens = (data: any) => {
+    if (data.authToken) {
+      setAuthToken(data.authToken); // Save the token in AuthContext
+      localStorage.setItem("authToken", data.authToken); // Persist in localStorage
+    }
+    if (data.refreshToken) {
+      localStorage.setItem("refreshToken", data.refreshToken); // Persist refreshToken
+    }
+  };
+
+
+
+
+  useEffect(() => {
+    const getFCM = async () => {
+      try {
+        const token = await generateToken();
+        if (token) {
+          setFcmToken(token);
+          console.log("FCM Token saved:", token);
+        } else {
+          console.warn("FCM Token not generated. Permission might be denied.");
+        }
+      } catch (error) {
+        console.error("Error generating FCM token:", error);
+      }
+    };
+  
+    getFCM();
+  }, []);
 
   // Helper function to handle API request
   /**
@@ -181,58 +234,71 @@ const SignupPage = () => {
    * - Displays success or error messages using the `toast` library.
    * - Navigates to the `/feed` route upon successful signup.
    */
-  const handleSignupRequest = async (recaptchaValue: string) => {
-    const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+ // Mutation function to handle token saving
+const saveTokensMutation = (data: any) => {
+  try {
+    saveTokens(data); // Call the existing saveTokens function
+    console.log("Tokens saved successfully:", data);
+  } catch (error) {
+    console.error("Error saving tokens:", error);
+  }
+};
 
+// Example usage of the mutation function
+const handleSignupRequest = async (recaptchaValue: string) => {
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+  try {
+    const response = await fetch(`${BASE_URL}/user/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        firstName: signupData.firstName,
+        lastName: signupData.lastName,
+        email: signupData.email,
+        password: signupData.password,
+        recaptchaResponseToken: recaptchaValue,
+        fcmToken: fcmToken,
+      }),
+    });
+
+    let data = null;
+    let text = "";
     try {
-      const response = await fetch(`${BASE_URL}/user/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          firstName: signupData.firstName,
-          lastName: signupData.lastName,
-          email: signupData.email,
-          password: signupData.password,
-          recaptchaResponseToken: recaptchaValue,
-        }),
-      });
-
-      let data = null;
-      let text = "";
-      try {
-        text = await response.text(); // Get raw text
-        data = text ? JSON.parse(text) : null;
-      } catch (e) {
-        console.warn("Could not parse JSON. Raw text:", text);
-      }
-
-      if (!response.ok) {
-        console.error("Full response:", response);
-        console.error("Raw response text:", text);
-
-        // Handle specific status codes with user-friendly messages
-        if (response.status === 409) {
-          throw new Error("This email is already registered. Please try logging in or use a different email.");
-        }
-
-        // Fallback for other errors
-        const errorMessage = data?.error || "Oops! Something went wrong. Please check your details and try again.";
-        throw new Error(errorMessage); // Throw the error for the catch block
-      }
-
-      // Store the authToken in the AuthContext if returned by the backend
-      if (data.authToken) {
-        setAuthToken(data.authToken); // Save the token
-      }
-
-      setSignupData((prev) => ({ ...prev, confirmationLink: data.confirmationLink }));
-      toast.success("Signup successful! Check your email for confirmation.");
-      navigate("/verify-email");
-    } catch (error: any) {
-      // Display the error message to the user
-      toast.error(error.message || "An unexpected error occurred. Please try again.");
+      text = await response.text(); // Get raw text
+      data = text ? JSON.parse(text) : null;
+    } catch (e) {
+      console.warn("Could not parse JSON. Raw text:", text);
     }
-  };
+
+    if (!response.ok) {
+      console.error("Full response:", response);
+      console.error("Raw response text:", text);
+
+      // Handle specific status codes with user-friendly messages
+      if (response.status === 409) {
+        throw new Error("This email is already registered. Please try logging in or use a different email.");
+      }
+
+      // Fallback for other errors
+      const errorMessage = data?.error || "Oops! Something went wrong. Please check your details and try again.";
+      throw new Error(errorMessage); // Throw the error for the catch block
+    }
+
+    // Call the mutation function to save tokens
+    if (data.authToken || data.refreshToken) {
+      saveTokensMutation(data);
+    }
+
+    setSignupData((prev) => ({ ...prev, confirmationLink: data.confirmationLink }));
+    toast.success("Signup successful! Check your email for confirmation.");
+    navigate("/verify-email");
+  } catch (error: any) {
+    // Display the error message to the user
+    toast.error(error.message || "An unexpected error occurred. Please try again.");
+  }
+};
+
 
   // Form submission handler
   /**
@@ -277,6 +343,8 @@ const SignupPage = () => {
     handleSignupRequest(recaptchaValue);
   };
 
+
+
   // Handle Google Sign-Up
   /**
    * Handles the Google Sign-Up process using Firebase Authentication.
@@ -289,37 +357,50 @@ const SignupPage = () => {
    * @returns {Promise<void>} A promise that resolves when the sign-up process is complete.
    */
   const handleGoogleSignUp = async () => {
-  try {
-    // Step 1: Sign in with Google using Firebase
-    await signInWithPopup(auth, provider);
+    try {
+      // Step 1: Sign in with Google using Firebase
+      const googleResult = await signInWithPopup(auth, provider);
 
-    // Step 2: Get FCM token (if supported and permission granted)
-    const messaging = getMessaging();
-    const fcmToken = await getToken(messaging, {
-      vapidKey: import.meta.env.VITE_VAPID_PUBLIC_KEY, // Store this in .env
-    });
-
-    // Step 3: Send FCM token to your backend
-    const BASE_URL = import.meta.env.VITE_API_BASE_URL;
-    await axios.post(
-      `${BASE_URL}/user/auth/google`,
-      { fcmToken },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        withCredentials: true,
+      // Step 2: Try to get FCM token (ignore if blocked)
+      let fcmToken: string | null = null;
+      try {
+        const messaging = getMessaging();
+        fcmToken = await getToken(messaging, {
+          vapidKey: import.meta.env.VITE_VAPID_PUBLIC_KEY,
+        });
+        if (fcmToken) {
+          console.log("FCM Token:", fcmToken);
+        }
+      } catch (err) {
+        console.warn("FCM token not available (permission denied or blocked). Proceeding without it.");
+        // Do not block signup if FCM fails
       }
-    );
 
-    // Step 4: Navigate to verify email
-    navigate("/verify-email");
+      // Step 3: Get Google ID token
+      const tokenId = await googleResult.user.getIdToken();
 
-  } catch (error) {
-    console.error("Google sign-up failed:", error);
-    toast.error("Google signup failed.");
-  }
-};
+      // Step 4: Send FCM token in body, Google ID token in Authorization header
+      const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+      await axios.post(
+        `${BASE_URL}/user/auth/google`,
+        { fcmToken },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${tokenId}`,
+          },
+          withCredentials: true,
+        }
+      );
+
+      // Step 5: Navigate to feed
+      navigate("/feed");
+
+    } catch (error) {
+      console.error("Google sign-up failed:", error);
+      toast.error("Google signup failed.");
+    }
+  };
 
   return (
     <div className="relative min-h-screen">
@@ -327,7 +408,7 @@ const SignupPage = () => {
       <div className="flex flex-col items-center justify-center bg-gray-100 pt-16 pb-20">
         <img
           className="absolute top-6 left-32 h-8.5"
-          src="/Images/login-logo.svg"
+          src="/Images/lockedin.png"
           alt="LinkedIn"
         />
         <h1 className="text-3xl font-normal text-gray-900 mb-4 text-center">

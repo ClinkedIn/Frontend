@@ -103,7 +103,7 @@ const JobCard = ({ job, jobs, state, user, onDelete, companyId }) => {
           job.companyId?.logo ??
           job.company?.logo ??
           job.job?.company?.logo ??
-          "https://picsum.photos/80?random=1"
+          "blank-profile-picture.png"
         }
         alt="Company Logo"
         className="w-12 h-12 object-contain"

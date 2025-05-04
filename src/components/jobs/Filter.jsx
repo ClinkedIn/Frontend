@@ -21,7 +21,7 @@
  */
 
 import React from 'react';
-
+import { MdSearch } from "react-icons/md";
 const Filter = ({
   experience,
   setExperience,
@@ -30,10 +30,23 @@ const Filter = ({
   selectedCompany,
   setSelectedCompany,
   companies,
+  industry,
+  setIndustry,
 }) => {
   return (
     <div className="fixed top-[56px] left-0 right-0 bg-white shadow-sm border-t border-b border-gray-200 z-10">
-      <div className="flex flex-wrap md:flex-nowrap items-center gap-3 px-4 md:px-56 py-3 overflow-x-auto">
+      <div className="flex flex-wrap md:flex-nowrap items-center gap-3 px-4 py-3 overflow-x-auto">
+        {/*Industry input*/}
+        <div className="flex items-center bg-[#edf3f8] rounded-sm ml-2 w-full md:w-auto">
+            <MdSearch color="#5f6163" className="w-4 h-4 mr-2 ml-1" />
+            <input
+              type="text"
+              placeholder="Search by industry"
+              className="text-sm placeholder-[#5f6163] outline-none bg-transparent py-2"
+              value={industry}
+              onChange={(e) => setIndustry(e.target.value)}
+            />
+        </div>
         {/* Experience slider */}
         <div className="flex items-center gap-2 w-full md:w-auto">
           <label htmlFor="experience" className="text-sm whitespace-nowrap">

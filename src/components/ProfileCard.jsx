@@ -7,12 +7,12 @@ const ProfileCard = ({ user={} }) => {
       <div className="relative w-full h-14">
         {/* Profile Image */}
         <img
-          src={user.user?.coverPicture || "https://via.placeholder.com/300x80"}
+          src={user.user?.coverPicture || "blank-profile-picture.png"}
           alt="Cover"
           className="w-full h-full object-cover rounded-t-xl"
         />
         <img
-          src={user.user?.profilePicture || "https://via.placeholder.com/80"}
+          src={user.user?.profilePicture || "blank-profile-picture.png"}
           alt="Profile"
            className="absolute top-6 left-[25%] transform -translate-x-1/2 w-20 h-20 rounded-full border-2 border-white object-cover shadow-md"
         />

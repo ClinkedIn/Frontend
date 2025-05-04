@@ -14,7 +14,7 @@
 // //     const fetchSubscriptionStatus = async () => {
 // //       try {
 // //         // In a real app, you would fetch the user's subscription status here
-// //         // const response = await fetch(`${BASE_URL}/api/user/subscription`);
+// //         // const response = await fetch(`${BASE_URL}/user/subscription`);
 // //         // const data = await response.json();
 // //         // setCurrentPlan(data.subscriptionType);
 // //       } catch (err) {
@@ -31,7 +31,7 @@
 // //     setError(null);
 
 // //     try {
-// //       const response = await fetch(`${BASE_URL}/api/stripe/create-checkout-session`, {
+// //       const response = await fetch(`${BASE_URL}/stripe/create-checkout-session`, {
 // //         method: 'POST',
 // //         headers: {
 // //           'Content-Type': 'application/json',
@@ -63,7 +63,7 @@
 // //     setError(null);
 
 // //     try {
-// //       const response = await fetch(`${BASE_URL}/api/stripe/cancel-subscription`, {
+// //       const response = await fetch(`${BASE_URL}/stripe/cancel-subscription`, {
 // //         method: 'POST',
 // //         headers: {
 // //           'Content-Type': 'application/json',
@@ -243,7 +243,7 @@
 //   //   const fetchSubscriptionStatus = async () => {
 //   //     setLoading(true);
 //   //     try {
-//   //       const response = await fetch(`${BASE_URL}/api/user/subscription`, {
+//   //       const response = await fetch(`${BASE_URL}/user/subscription`, {
 //   //         credentials: 'include',
 //   //         headers: {
 //   //           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -279,7 +279,7 @@
 
 //     try {
 //       const response = await fetch(
-//         `${BASE_URL}/api/stripe/create-checkout-session`,
+//         `${BASE_URL}/stripe/create-checkout-session`,
 //         {
 //           method: "POST",
 //           headers: {
@@ -323,7 +323,7 @@
 //     setError(null);
 
 //     try {
-//       const response = await fetch(`${BASE_URL}/api/stripe/cancel-subscription`, {
+//       const response = await fetch(`${BASE_URL}/stripe/cancel-subscription`, {
 //         method: "DELETE",
 //         headers: {
 //           "Content-Type": "application/json",
@@ -634,7 +634,7 @@ const SubscriptionPlans = () => {
 
     try {
       const response = await fetch(
-        `${BASE_URL}/api/stripe/create-checkout-session`,
+        `${BASE_URL}/stripe/create-checkout-session`,
         {
           method: "POST",
           headers: {
@@ -679,17 +679,14 @@ const SubscriptionPlans = () => {
     setError(null);
 
     try {
-      const response = await fetch(
-        `${BASE_URL}/api/stripe/cancel-subscription`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          credentials: "include",
-        }
-      );
+      const response = await fetch(`${BASE_URL}/stripe/cancel-subscription`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        credentials: "include",
+      });
 
       if (!response.ok) {
         const errorData = await response.json();

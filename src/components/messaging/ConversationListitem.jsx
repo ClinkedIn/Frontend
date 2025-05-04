@@ -28,7 +28,7 @@ const ConversationListItem = ({
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null); // Ref for detecting clicks outside the menu
-   const defaultAvatar = 'https://via.placeholder.com/150'; // Placeholder for user avatar
+   const defaultAvatar = 'https://picsum.photos/80?random=1'; // Placeholder for user avatar
 
    // Close menu if clicking outside
    useEffect(() => {
