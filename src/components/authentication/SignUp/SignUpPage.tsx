@@ -2,6 +2,7 @@ import { useState, useRef , useEffect} from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import toast, { Toaster } from "react-hot-toast";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import ReCAPTCHA from "react-google-recaptcha";
 import GoogleLogin from "../../GoogleLoginButton";
 import Footer from "../../Footer/Footer";
@@ -10,6 +11,7 @@ import { useAuth } from "../../../context/AuthContext";
 import { auth, provider, signInWithPopup, generateToken } from "../../../../firebase";
 import { getMessaging, getToken } from "firebase/messaging";
 import axios from "axios";
+import { SaveIcon } from "lucide-react";
 
 /**
  * The `SignupPage` component renders a user interface for signing up to the application.
@@ -63,6 +65,8 @@ const SignupPage = () => {
   const sitekey = import.meta.env.VITE_SITEKEY;
   const navigate = useNavigate();
   const { setAuthToken } = useAuth();
+  const queryClient = useQueryClient();
+
 
 
 
@@ -185,9 +189,11 @@ const SignupPage = () => {
   const saveTokens = (data: any) => {
     if (data.authToken) {
       setAuthToken(data.authToken); // Save the token in AuthContext
+      console.log("Auth token saved:", data.authToken);
       localStorage.setItem("authToken", data.authToken); // Persist in localStorage
     }
     if (data.refreshToken) {
+      console.log("Refresh token saved:", data.refreshToken);
       localStorage.setItem("refreshToken", data.refreshToken); // Persist refreshToken
     }
   };
@@ -292,13 +298,61 @@ const handleSignupRequest = async (recaptchaValue: string) => {
 
     setSignupData((prev) => ({ ...prev, confirmationLink: data.confirmationLink }));
     toast.success("Signup successful! Check your email for confirmation.");
-    navigate("/verify-email");
+    navigate("/feed");
   } catch (error: any) {
     // Display the error message to the user
     toast.error(error.message || "An unexpected error occurred. Please try again.");
   }
 };
 
+
+const signupMutation = useMutation({
+  mutationFn: async () => {
+    const BASE_URL = import.meta.env.VITE_API_BASE_URL; // Ensure BASE_URL is defined
+    const recaptchaValue = recaptchaRef.current?.getValue(); // Ensure recaptchaValue is defined
+
+    if (!recaptchaValue) {
+      throw new Error("ReCAPTCHA value is missing.");
+    }
+
+    await axios.post(`${BASE_URL}/user`, {
+      firstName: signupData.firstName,
+      lastName: signupData.lastName,
+      email: signupData.email,
+      password: signupData.password,
+      recaptchaResponseToken: recaptchaValue,
+      fcmToken: fcmToken,
+    });
+  },
+  onSuccess: (data:any) => {
+    queryClient.invalidateQueries({ queryKey: ["authUser"] });
+    saveTokens(data);
+    toast.success("Signup successful! Check your email for confirmation.");
+    setTimeout(() => navigate("/feed"), 1000);
+  },
+  onError: (err) => {
+    // Extract error details from the response
+    const errorResponse = err as {
+      response?: { status?: number; data?: { error?: string } };
+    };
+    const statusCode = errorResponse.response?.status;
+    const errorMessageFromServer = errorResponse.response?.data?.error;
+
+    // Define the error message based on the status code or default fallback
+    let errorMessage: string;
+
+    if (statusCode === 404) {
+      errorMessage = "User not found. Please check your email or password.";
+    } else if (errorMessageFromServer) {
+      errorMessage = errorMessageFromServer; // Use the error message from the server
+    } else {
+      errorMessage = "Invalid credentials"; // Default fallback message
+    }
+
+    // Display the error message using toast
+    toast.error(errorMessage);
+  },
+});
 
   // Form submission handler
   /**
@@ -317,7 +371,7 @@ const handleSignupRequest = async (recaptchaValue: string) => {
    * 6. Validates the form using the `validateForm` function.
    * 7. If all validations pass, triggers the `handleSignupRequest` function with the ReCAPTCHA value.
    */
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const recaptchaValue = recaptchaRef.current?.getValue();
 
@@ -339,6 +393,7 @@ const handleSignupRequest = async (recaptchaValue: string) => {
     if (!validateForm()) {
       return;
     }
+    signupMutation.mutate();
 
     handleSignupRequest(recaptchaValue);
   };
@@ -414,7 +469,7 @@ const handleSignupRequest = async (recaptchaValue: string) => {
         <h1 className="text-3xl font-normal text-gray-900 mb-4 text-center">
           Make the most of your professional life
         </h1>
-
+  
         {/* Form Container */}
         <motion.div
           className="w-full max-w-sm p-6 bg-white rounded-lg shadow-lg"
@@ -441,7 +496,7 @@ const handleSignupRequest = async (recaptchaValue: string) => {
               />
               {firstNameError && <p className="text-xs text-red-500 mt-1">{firstNameError}</p>}
             </div>
-
+  
             {/* Last Name */}
             <div className="flex flex-col">
               <label htmlFor="last-name" className="text-sm font-semibold text-gray-700 mb-1">
@@ -461,7 +516,7 @@ const handleSignupRequest = async (recaptchaValue: string) => {
               />
               {lastNameError && <p className="text-xs text-red-500 mt-1">{lastNameError}</p>}
             </div>
-
+  
             {/* Email */}
             <div className="flex flex-col">
               <label htmlFor="email" className="text-sm font-semibold text-gray-700 mb-1">
@@ -481,7 +536,7 @@ const handleSignupRequest = async (recaptchaValue: string) => {
               />
               {emailError && <p className="text-xs text-red-500 mt-1">{emailError}</p>}
             </div>
-
+  
             {/* Password */}
             <div className="relative flex flex-col">
               <label htmlFor="password" className="text-sm font-semibold text-gray-700 mb-1">
@@ -508,7 +563,7 @@ const handleSignupRequest = async (recaptchaValue: string) => {
               </button>
               {passwordError && <p className="text-xs text-red-500 mt-1">{passwordError}</p>}
             </div>
-
+  
             {/* Remember Me */}
             <div className="flex items-center">
               <input
@@ -522,13 +577,13 @@ const handleSignupRequest = async (recaptchaValue: string) => {
                 Remember me
               </label>
             </div>
-
+  
             {/* ReCAPTCHA */}
             <div className="flex justify-center w-full">
               <ReCAPTCHA sitekey={sitekey} ref={recaptchaRef} />
               <Toaster />
             </div>
-
+  
             {/* Submit Button */}
             <motion.button
               type="submit"
@@ -552,21 +607,21 @@ const handleSignupRequest = async (recaptchaValue: string) => {
               Agree & Join
             </motion.button>
           </form>
-
+  
           {/* OR Separator */}
           <div className="relative flex items-center my-4">
             <div className="w-full border-t border-gray-300"></div>
             <span className="px-3 text-sm text-gray-500 bg-white">or</span>
             <div className="w-full border-t border-gray-300"></div>
           </div>
-
+  
           {/* Google Login */}
           <GoogleLogin
             className="w-full"
             type="button"
             onClick={handleGoogleSignUp}
           />
-
+  
           {/* Already Signed Up */}
           <p className="mt-4 text-center text-sm text-gray-600">
             Already on LinkedIn?{" "}
@@ -576,7 +631,7 @@ const handleSignupRequest = async (recaptchaValue: string) => {
           </p>
         </motion.div>
       </div>
-
+  
       {/* Footer */}
       <div className="absolute bottom-0 w-full">
         <Footer />
