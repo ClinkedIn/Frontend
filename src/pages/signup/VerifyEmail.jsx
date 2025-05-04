@@ -105,10 +105,11 @@ const VerifyEmail = () => {
    * @returns {Promise<void>} No return value.
    * @throws Will set an error message if the network request fails or the OTP is invalid.
    */
+  console.log("otp",code)
   const verifyOTP = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get(
+      const response = await axios.post(
         `${BASE_URL}/user/confirm-email`,
         { otp: code },
         { withCredentials: true }

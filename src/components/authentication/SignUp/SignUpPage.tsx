@@ -298,7 +298,7 @@ const handleSignupRequest = async (recaptchaValue: string) => {
 
     setSignupData((prev) => ({ ...prev, confirmationLink: data.confirmationLink }));
     toast.success("Signup successful! Check your email for confirmation.");
-    navigate("/feed");
+    navigate("/verify-email", { state: { email: signupData.email } });
   } catch (error: any) {
     // Display the error message to the user
     toast.error(error.message || "An unexpected error occurred. Please try again.");
