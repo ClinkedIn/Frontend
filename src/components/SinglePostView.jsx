@@ -406,11 +406,11 @@ const SinglePostView = ({ postId, notification }) => {
       {/* Updated post action buttons with PostReactions component */}
       <div className="p-0 px-4 flex justify-between min-h-[40px] overflow-hidden">
         <PostReactions 
-          postId={post.id || post.postId}
+          postId={postId || post.id || post.postId}
           onReact={handleReact}
           reactionTypes={reactionTypes}
-          isLiked={post.isLiked ? true : false}
-          currentReaction={userReaction || 'like'}
+          isLiked={!!userReaction}
+          currentReaction={{ type: userReaction || 'like' }}
         />
         
         <button 
@@ -447,7 +447,7 @@ const SinglePostView = ({ postId, notification }) => {
         <div className="text-center py-4">Loading comments...</div>
       ) : comments.length > 0 ? (
         <CommentSection 
-          postId={post.id || post.postId}
+          postId={postId|| post.id || post.postId}
           comments={comments}
           authorInfo={{user: {profilePicture: "/Images/user.svg", firstName: "User", lastName: ""}}}
           onAddComment={handleAddComment}
