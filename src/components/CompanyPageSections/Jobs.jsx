@@ -7,6 +7,7 @@ import { FaSpinner, FaBriefcase, FaMapMarkerAlt, FaClock, FaMoneyBillWave } from
 import { MdWork } from 'react-icons/md';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa6';
 import Applyjob from '../../components/CompanyPageSections/applyjob';
+import ApplyJob from '../jobs/ApplyJob';
 
 const CompanyJobsPage = ()=> {
 const {companyInfo}  = useOutletContext();

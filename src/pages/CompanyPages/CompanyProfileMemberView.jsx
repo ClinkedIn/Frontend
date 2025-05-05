@@ -102,7 +102,7 @@ const CompanyProfileMemberViewPage = () => {
     useEffect(()=>{
         if(!companyInfo)
              fetchCompanyInfo();
-    },[]);
+    },[companyId]);
     if(errorFetchCompanyInfo){
         return(
             <div className=" bg-[#f4f2ee] min-h-screen  items-center flex flex-col   w-full rounded-lg shadow-lg p-4 ">

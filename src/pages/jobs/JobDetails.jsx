@@ -47,17 +47,18 @@ const JobDetails = () => {
 
     // Retrieve company ID from the job object
     let companyid = job?.company?.id || job?.job?.company?.id;
-
+    console.log("initial company id", companyid); // Log the initial company ID
     // If no company ID found, fallback to companyId
     if(!companyid){
         companyid = job?.companyId;
+        console.log("secondary companyId", companyid); // Log the company ID from companyId
     }
-
+    console.log("Company ID after ", companyid); // Log the company ID being used
     // Fetch company details using the company ID
     useEffect(() => {
         const fetchCompany = async () => {
             try {
-                const response = await axios.get(`${BASE_URL}/companies/${companyid}`);
+                const response = await axios.get(`${BASE_URL}/companies/${companyid}`, {withCredentials: true});
                 console.log("Company data:", response.data);
                 setCompany(response.data);
             } catch (error) {
@@ -72,7 +73,9 @@ const JobDetails = () => {
     if(!jobid){
         jobid = job?._id;
     }
-    else if(!jobid) { jobid = job?.job?.id }
+    else if(!jobid) { jobid = job?.job?.id ||job.company.id; }
+
+    console.log("Job ID after ", jobid); // Log the job ID being used
 
     // Fetch applicants when the component mounts or job.id changes
     useEffect(() => {
@@ -87,8 +90,9 @@ const JobDetails = () => {
             setApplicantError(null);
         
             try {
-                const response = await axios.get(`${BASE_URL}/jobs/${jobid}/apply`);
-                const fetchedApplicants = response?.data.applications;
+                const response = await axios.get(`${BASE_URL}/jobs/${jobid}/apply`, {withCredentials: true});
+                console.log("Response from fetchApplicants:", jobid); // Log the response
+                const fetchedApplicants = response?.data.applications                ;
                 setApplicants(fetchedApplicants);
                 console.log("Fetched applicants:", fetchedApplicants); // Log the fetched applicants
             } catch (error) {
@@ -100,6 +104,7 @@ const JobDetails = () => {
                 setLoadingApplicants(false);
             }
         };
+        console.log("Job ID in fetchApplicants:", jobid); // Log the job ID being used
 
         if (jobid) { 
             fetchApplicants();

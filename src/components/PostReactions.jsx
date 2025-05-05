@@ -39,7 +39,7 @@ import React, { useState, useEffect, useRef } from 'react';
  *   currentReaction="celebrate"
  * />
  */
-const PostReactions = ({ postId, onReact, reactionTypes, isLiked = false, currentReaction = 'like' }) => {
+const PostReactions = ({ postId, onReact, reactionTypes, isLiked = false, currentReaction ='like' }) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef(null);
   const menuRef = useRef(null);
@@ -47,8 +47,8 @@ const PostReactions = ({ postId, onReact, reactionTypes, isLiked = false, curren
   
   // Find the current reaction object based on type
   const activeReaction = isLiked ? 
-    reactionTypes.find(r => r.type.toLowerCase() === currentReaction.toLowerCase()) || reactionTypes[0] : 
-    null;
+  reactionTypes.find(r => r.type.toLowerCase() === currentReaction.toLowerCase()) || reactionTypes[0] : 
+  null;
   
   // Handle click outside
   useEffect(() => {

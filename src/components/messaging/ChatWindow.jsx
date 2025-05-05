@@ -8,6 +8,7 @@ import { db } from '../../../firebase';
 import { format, isToday, isYesterday } from 'date-fns';
 import { BASE_URL } from '../../constants';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 
 /**
@@ -46,7 +47,7 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
   const [isTyping, setIsTyping] = useState(false);
   const messagesContainerRef = useRef(null);
   const messagesEndRef = useRef(null);
-
+  const navigate = useNavigate();
  
   const otherUserInfo = otherUser
   const otherUserId = otherUser?._id || null; // Use userId from otherUser prop
@@ -511,7 +512,14 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
              className="w-10 h-10 rounded-full flex-shrink-0" 
            />
            <div className="min-w-0">
-             <p className="font-semibold truncate">{(otherUserInfo?.fullName ) || (otherUserInfo?.firstName + " " + otherUserInfo?.lastName )   || 'Loading...'}</p>
+                 <p 
+                    onClick={() => navigate(`/user/${otherUserId}`)}
+                    className="font-semibold truncate hover:text-blue-600 hover:underline cursor-pointer"
+                 >
+                    {(otherUserInfo?.fullName) || 
+                    (otherUserInfo?.firstName + " " + otherUserInfo?.lastName) || 
+                    'Loading...'}
+                </p>
              {isTyping && <p className="text-xs text-blue-600 animate-pulse">Typing...</p>}
              
            </div>

@@ -138,11 +138,11 @@ export default function Review() {
             let response = null;
             if (pageState === "UpdateJob") {
                 console.log("updating job with put")
-                response = await axios.put(`${BASE_URL}/jobs/${jobId}`, payload);
+                response = await axios.put(`${BASE_URL}/jobs/${jobId}`, payload, {withCredentials: true});
                 toast.success( "Job put successfully!");
             } else {
                 console.log("posting job with post")
-                response = await axios.post(`${BASE_URL}/jobs`, payload);
+                response = await axios.post(`${BASE_URL}/jobs`, payload), {withCredentials: true};
                 toast.success("Job posted successfully!");
             }
 

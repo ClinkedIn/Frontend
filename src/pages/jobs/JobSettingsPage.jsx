@@ -58,8 +58,8 @@ sub: "Ideal answer: Yes",
 
         editableData: {
             questionText: "Have you completed the following level of education: Bachelor's Degree?", // This appears static in the image
-            idealAnswer: "Yes", // This is editable
-            isMustHave: true, // Checkbox state
+            idealAnswer: "Yes", 
+            isMustHave: true, 
         }
     },
     {
@@ -76,7 +76,7 @@ sub: "Ideal answer: Yes",
         title: "Manage applicants",
         description: "On LinkedIn",
         sub: `I'll send email updates to ${emailUpdates}`,
-        avatar: null, // Keep avatar null if not used for this setting
+        avatar: null,
          editableData: {
             emailUpdates: finalData.user?.email,
         }

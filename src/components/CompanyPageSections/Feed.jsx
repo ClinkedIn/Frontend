@@ -450,8 +450,8 @@ const CompanyFeedPage = ()=> {
    }
   if(posts.length===0){
      return(
-          <div className="mt-4 bg-white flex justify-center   w-full rounded-lg shadow-lg p-4 ">
-            <div className='grid-area-main'>
+          <div className="   w-full ">
+            <div className='grid-area-main  '>
         <div className="overflow-hidden text-center mb-2 bg-white rounded-md border-none shadow-[0_0_0_1px_rgba(0,0,0,0.15),0_0_0_rgba(0,0,0,0.20)]">
           <div className="flex flex-col text-[#958b7b] mb-2 bg-white">
             <div className="flex items-center p-2 pl-4 pr-4">
@@ -501,14 +501,14 @@ const CompanyFeedPage = ()=> {
           </div>
         </div>
             
-                <h1 className="text-2xl  ">No Posts Found</h1>
+                <h1 className="text-2xl flex justify-center">No Posts Found</h1>
                 </div>
           </div>
      )
     }
 
    return(
-    <div className="mt-4 bg-white flex flex-col justify-center   w-full rounded-lg shadow-lg p-4 ">
+    <div className="mt-4  flex flex-col justify-center   w-full rounded-lg  ">
         <div className='grid-area-main'>
           {/* Create Post Form */}
         <div className="overflow-hidden text-center mb-2 bg-white rounded-md border-none shadow-[0_0_0_1px_rgba(0,0,0,0.15),0_0_0_rgba(0,0,0,0.20)]">

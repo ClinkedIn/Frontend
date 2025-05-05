@@ -146,7 +146,7 @@ const CompanyAnalyticsPage = () => {
         labels: analyticsData?.visitors.map(item => item.date) || [],
         datasets: [
             {
-                type: 'line',
+                type: 'bar',
                 label: 'Followers',
                 data: analyticsData?.followers.map(item => item.count) || [],
                 borderColor: 'rgb(153, 102, 255)',

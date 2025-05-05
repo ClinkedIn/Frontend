@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Header from "../../components/UpperNavBar";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import JobCard from '../../components/jobs/JobCard';
 import Filter from "../../components/jobs/Filter";
 import ApplyJob from "../../components/jobs/ApplyJob";
@@ -33,7 +33,7 @@ const JobBoardPage = () => {
   const [selectedCompany, setSelectedCompany] = useState(""); // Filter by company
   const [applications, setApplications] = useState([]); // Stores job applications
 
-
+  const navigate= useNavigate()
   const params=location.state?.params || "no params"
   console.log("params in JobBoardPage:", params); // Log the params object
   /**
@@ -52,7 +52,7 @@ const JobBoardPage = () => {
   useEffect(() => {
     const fetchCompanies = async () => {
       try {
-        const res = await axios.get(`${BASE_URL}/companies`);
+        const res = await axios.get(`${BASE_URL}/companies`, {withCredentials: true});
         setCompanies(res.data);
       } catch (err) {
         console.error("Error fetching companies", err);
@@ -188,9 +188,15 @@ const JobBoardPage = () => {
         )}
       </div>
 
+
       <div className="md:w-2/3 w-full h-1/2 md:h-full overflow-y-auto p-6 bg-white">
         {selectedJob ? (
           <div>
+            
+            <div
+            className="cursor-pointer"
+            onClick={()=>navigate(`/company/${selectedJob.companyId?._id}/Home`)}
+            >
             <div className="flex flex-row gap-5">
               <img
                 src={selectedJob?.companyId?.logo || "blank-profile-picture.png"}
@@ -198,6 +204,7 @@ const JobBoardPage = () => {
                 className="w-12 h-12 object-contain"
               />
               <p>{selectedJob?.companyId?.name || ""}</p>
+            </div>
             </div>
             <h2 className="text-xl font-semibold mb-2">{selectedJob.title}</h2>
             <p className="text-sm text-gray-600 mb-1">{selectedJob.jobLocation}</p>

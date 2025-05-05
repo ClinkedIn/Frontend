@@ -194,7 +194,7 @@ const fetchUser = async () => {
               onClick={()=>navigate("/profile")}
               className="text-[#0a66c2] text-sm font-medium hover:underline" >  View settings</button>
             </div>
-            <div className="w-full lg:w-72">
+            <div className="w-full lg:w-72 mt-4">
             <button
               onClick={handleSendTestNotification}
               className=" mb-4 p-2 bg-[#004c33] text-white rounded-lg hover:bg-[#003825] transition-colors"
