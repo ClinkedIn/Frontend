@@ -43,6 +43,10 @@ const Applyjob = ({ isOpen, onClose, job, jobId }) => {
             toast.error("Please fill in all required fields");
             return false;
         }
+        else if (phoneNumber.length>10){
+            toast.error("Please enter a valid number");
+            return false;
+        }
         return true;
     };
 
@@ -77,7 +81,7 @@ const Applyjob = ({ isOpen, onClose, job, jobId }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/30  bg-opacity-50">
+        <div className="fixed inset-0 z-50  bg-black/10  bg-opacity-10 ">
             <div className="flex min-h-screen items-center justify-center p-4">
                 <div className="w-full max-w-2xl rounded-xl bg-white shadow-2xl">
                     {/* Header */}
@@ -96,7 +100,7 @@ const Applyjob = ({ isOpen, onClose, job, jobId }) => {
                     {/* Content */}
                     <div className="p-6">
                         {step === 1 ? (
-                            <div className="space-y-6">
+                            <div className={`space-y-6 ${step !== 1 ? 'hidden' : ''}`}>
                                 {/* User Info */}
                                 <div className="flex items-center space-x-4 rounded-lg bg-gray-50 p-4">
                                     <div className="h-16 w-16 overflow-hidden rounded-full bg-gray-200">
@@ -164,7 +168,7 @@ const Applyjob = ({ isOpen, onClose, job, jobId }) => {
                         ) : (
                             <div className="space-y-6">
                                 {job.screeningQuestions?.map((question, index) => (
-                                    <div key={index}>
+                                    <div key={index} className = "">
                                         <label className="block text-sm font-medium text-gray-700">
                                             {question.question}
                                         </label>
@@ -182,20 +186,30 @@ const Applyjob = ({ isOpen, onClose, job, jobId }) => {
 
                     {/* Footer */}
                     <div className="flex items-center justify-end gap-3 border-t bg-gray-50 p-6">
-                        <button
-                            onClick={onClose}
-                            className="rounded-lg px-4 py-2 text-gray-600 hover:bg-gray-100"
-                        >
-                            Cancel
-                        </button>
+
                         {step === 1 && job.screeningQuestions?.length > 0 ? (
+                            <>
+                            <button
+                                onClick={onClose}
+                                className="rounded-lg px-4 py-2 text-gray-600 hover:bg-gray-100"
+                            >
+                                Cancel
+                            </button>
                             <button
                                 onClick={() => setStep(2)}
                                 className="rounded-lg bg-blue-600 px-6 py-2 text-white hover:bg-blue-700"
                             >
                                 Next
                             </button>
+                            </>
                         ) : (
+                            <>
+                            <button
+                                onClick={() => setStep(1)}
+                                className="rounded-lg px-4 py-2 text-gray-600 hover:bg-gray-100"
+                            >
+                                Back
+                            </button>
                             <button
                                 onClick={handleSubmit}
                                 disabled={isSubmitting}
@@ -203,6 +217,7 @@ const Applyjob = ({ isOpen, onClose, job, jobId }) => {
                             >
                                 {isSubmitting ? 'Submitting...' : 'Submit Application'}
                             </button>
+                            </>
                         )}
                     </div>
                 </div>

@@ -456,7 +456,7 @@ const CompanyPostsPage = ()=> {
     }
 
    return(
-    <div className="mt-4 bg-white flex flex-col justify-center   w-full rounded-lg shadow-lg p-4 ">
+    <div className="  flex flex-col justify-center   w-full   ">
         <div className='grid-area-main'>
         {posts.map((post) => (
           <article key={post.companyId.id || post.postId} className="overflow-visible p-0 mb-2 bg-white rounded-md border-none shadow-[0_0_0_1px_rgba(0,0,0,0.15),0_0_0_rgba(0,0,0,0.20)]">
