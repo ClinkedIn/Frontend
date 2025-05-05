@@ -9,8 +9,8 @@ import React, { useState, useRef, useEffect } from 'react';
  * @param {Function} props.onClose - Callback function to close the modal.
  * @param {Function} props.onSubmit - Callback function to handle form submission. Receives an object with post details.
  * @param {Object} props.authorInfo - Information about the post author.
- * @param {string} props.authorInfo.name - The name of the author.
- * @param {string} props.authorInfo.profileImage - The URL of the author's profile image.
+ * @param {string} props.authorInfo.user.name - The name of the author.
+ * @param {string} props.authorInfo.user.profilePicture - The URL of the author's profile image.
  *
  * @returns {JSX.Element|null} The rendered modal component or null if the modal is closed.
  */
@@ -171,12 +171,12 @@ const CreatePostModal = ({ isOpen, onClose, onSubmit, authorInfo }) => {
         <div className="p-4 pb-2">
           <div className="flex items-center">
             <img 
-              src={authorInfo.profileImage} 
-              alt={authorInfo.name} 
+              src={authorInfo.user.profilePicture} 
+              alt={authorInfo.user.name} 
               className="w-12 h-12 rounded-full mr-3"
             />
             <div>
-              <p className="font-semibold">{authorInfo.name}</p>
+              <p className="font-semibold">{authorInfo.user.firstName + " " + authorInfo.user.lastName}</p>
               
               {/* Privacy selector */}
               <div 
@@ -235,12 +235,6 @@ const CreatePostModal = ({ isOpen, onClose, onSubmit, authorInfo }) => {
           )}
         </div>
         
-        {/* Add hashtag button */}
-        <div className="px-4 mb-3">
-          <button className="text-[#0a66c2] font-semibold text-sm rounded-full px-3 py-1 hover:bg-[rgba(10,102,194,0.1)]">
-            Add hashtag
-          </button>
-        </div>
         
         {/* Media options */}
         <div className="p-4 border-t flex justify-between items-center">

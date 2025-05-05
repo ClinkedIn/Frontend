@@ -59,14 +59,10 @@ const Rightside: React.FC<RightsideProps> = () => {
           ))}
         </ul>
 
-        <a href="#" className="text-[#0a66c2] flex items-center text-sm cursor-pointer">
-          View all recommendations
-          <img src="/Images/right-icon.svg" alt="" className="ml-1" />
-        </a>
       </div>
 
       <div className="text-center overflow-hidden mb-2 bg-white rounded-md relative border-none shadow-[0_0_0_1px_rgba(0,0,0,0.15),0_0_0_rgba(0,0,0,0.20)] p-3 sticky top-[75px]">
-        <img src="/Images/ads.png" alt="" className="w-full h-full" />
+        <img src="/Images/linkedInAd.png" alt="" className="w-full h-full" />
       </div>
     </div>
   );
