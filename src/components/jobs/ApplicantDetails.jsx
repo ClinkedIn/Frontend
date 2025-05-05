@@ -336,7 +336,7 @@ const ApplicantDetails = ({ applicant, screeningAnswers,jobId }) => {
                 
             </div>
             <div className="flex items-center space-x-3">
-                {applicant?.status !=="pending" && showbuttons && <>
+                {applicant?.status ==="pending" && showbuttons && <>
                 <button
                     onClick={handleAccept}
                     disabled={isProcessingAccept}
