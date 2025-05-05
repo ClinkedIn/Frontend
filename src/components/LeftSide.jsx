@@ -16,9 +16,21 @@ const getUserInfo = async () => {
   return response.data;
 };
 
-const Leftside = ({ onShowSavedPosts }) => {
+const Leftside = ({ onShowSavedPosts, onShowAllPosts }) => {
   const [userData, setUserData] = useState(null);
   const [isShowMore, setIsShowMore] = useState(false);
+
+  const [activeView, setActiveView] = useState('feed'); // 'feed' or 'saved'
+
+  const handleSavedPostsClick = () => {
+    if (activeView === 'feed') {
+      setActiveView('saved');
+      onShowSavedPosts();
+    } else {
+      setActiveView('feed');
+      onShowAllPosts();
+    }
+  };
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -76,14 +88,14 @@ const Leftside = ({ onShowSavedPosts }) => {
 
         {/* My Items Section */}
         <button
-        type="button"
-        onClick={onShowSavedPosts}
-        className="flex items-center text-xs text-[rgba(0,0,0,0.6)] font-semibold p-3 hover:bg-[rgba(0,0,0,0.08)] w-full text-left"
-        style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+          type="button"
+          onClick={handleSavedPostsClick}
+          className="flex items-center text-xs text-[rgba(0,0,0,0.6)] font-semibold p-3 hover:bg-[rgba(0,0,0,0.08)] w-full text-left"
+          style={{ background: 'none', border: 'none', cursor: 'pointer' }}
         >
-        <img src="/Images/item-icon.svg" alt="Item icon" className="w-4 h-4 mr-2" />
-        My Items
-      </button>
+          <img src="/Images/item-icon.svg" alt="Item icon" className="w-4 h-4 mr-2" />
+          {activeView === 'feed' ? 'My Items' : 'Back to Feed'}
+        </button>
       </div>
     </div>
   );

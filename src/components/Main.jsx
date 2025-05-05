@@ -6,10 +6,7 @@ import PostReactions from "./PostReactions.jsx";
 import CommentSection from "./CommentSection.jsx";
 import { BASE_URL } from "../constants";
 import { useLocation } from 'react-router-dom';
-<<<<<<< HEAD
 import Leftside from './LeftSide';
-=======
->>>>>>> c1929874522576fff5c658dce2341259f070f4d9
 import SinglePostView from './SinglePostView.jsx';
 
 // Set axios defaults to include credentials with all requests
@@ -94,23 +91,9 @@ export async function savePost(postId, token) {
   return data;
 }
 
-const fetchSavedPosts = async (page = 1, limit = 10) => {
-  setSavedPostsLoading(true);
-  try {
-    const response = await axios.get(
-      `${BASE_URL}/user/saved-posts?page=${page}&limit=${limit}`,
-      { withCredentials: true }
-    );
-    setSavedPosts(response.data.posts || []);
-  } catch (err) {
-    console.error("Error fetching saved posts:", err);
-    setSavedPosts([]);
-  } finally {
-    setSavedPostsLoading(false);
-  }
-};
 
-const Main = () => {
+
+const Main = ({ showSavedPosts, onShowSavedPosts, onShowAllPosts }) => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -128,16 +111,17 @@ const Main = () => {
   const [editContent, setEditContent] = useState('');
 
   //saved posts
-  const [showSavedPosts, setShowSavedPosts] = useState(false);
+  //const [showSavedPosts, setShowSavedPosts] = useState(false);
   const [savedPosts, setSavedPosts] = useState([]);
   const [savedPostsLoading, setSavedPostsLoading] = useState(false);
-
-  
-  const location = useLocation();
-  const resourceId = location.state?.resourceId;
-  const notification=location.state?.notification;
-  console.log('Resource ID from location state:', resourceId);
-  console.log('Notification from location state:', notification);
+  useEffect(() => {
+    if (showSavedPosts) {
+      fetchSavedPosts();
+    } else {
+      fetchPosts();
+    }
+    // eslint-disable-next-line
+  }, [showSavedPosts]);
 
   
   const location = useLocation();
@@ -170,7 +154,6 @@ const Main = () => {
     { type: "funny", emoji: "😄", label: "Funny" },
   ];
 
-<<<<<<< HEAD
 
 const handleEditPost = (postId) => {
   const postToEdit = posts.find(post => post.id === postId || post.postId === postId);
@@ -221,8 +204,6 @@ const handleEditPostCancel = () => {
 
   
 
-=======
->>>>>>> c1929874522576fff5c658dce2341259f070f4d9
   useEffect(() => {
     const fetchAndSetUser = async () => {
       try {
@@ -236,6 +217,28 @@ const handleEditPostCancel = () => {
     };
     fetchAndSetUser();
   }, []);
+
+
+
+
+  const fetchSavedPosts = async (page = 1, limit = 10) => {
+  setSavedPostsLoading(true);
+  try {
+    const response = await axios.get(
+      `${BASE_URL}/user/saved-posts`,
+      { withCredentials: true }
+    );
+    setSavedPosts(response.data.posts || []);
+  } catch (err) {
+    console.error("Error fetching saved posts:", err);
+    setSavedPosts([]);
+  } finally {
+    setSavedPostsLoading(false);
+  }
+};
+
+
+
 
   // Define fetchUser and fetchNotifications functions
   /**
@@ -486,46 +489,8 @@ const handleEditPostCancel = () => {
     }
   };
 
-<<<<<<< HEAD
-    // Send DELETE request to the API endpoint
-    const response = await axios.delete(`${API_ENDPOINT}/${postId}`);
-    console.log('Post deletion response:', response.data);
-
-    // If successful, remove the post from the UI
-    setPosts(posts.filter(post => post.id !== postId && post.postId !== postId));
-
-    // Show success message
-    alert('Post deleted successfully.');
-    return true;
-  } catch (err) {
-    console.error('Error deleting post:', err);
     
-    if (err.response) {
-      const status = err.response.status;
-      const errorMsg = err.response.data.message || 'Error deleting post';
-      
-      console.error(`Server responded with: ${status} - ${errorMsg}`);
-      
-      // Handle specific error cases
-      if (status === 400) {
-        alert('Error: Post ID is missing or invalid.');
-      } else if (status === 403) {
-        alert('Error: You can only delete your own posts.');
-      } else if (status === 404) {
-        alert('Error: Post not found or already deleted.');
-        // Remove from UI anyway since it doesn't exist
-        setPosts(posts.filter(post => post.id !== postId && post.postId !== postId));
-      } else {
-        alert(`Failed to delete post: ${errorMsg}`);
-      }
-    } else {
-      alert('Failed to delete post. Please check your connection and try again.');
-    }
-    return false;
-  }
-};
-
-
+    
   
 const handleAddComment = async (postId, commentText, attachment = null, taggedUsers = [], parentComment = null, attachmentUrl = null) => {
   try {
@@ -633,173 +598,6 @@ const handleAddComment = async (postId, commentText, attachment = null, taggedUs
         alert('Error: Comment text cannot be empty.');
       } else {
         alert(`Failed to post comment: ${err.response.data.message || 'Unknown error'}`);
-=======
-  // Add a new comment to a post with all API parameters
-  /**
-   * Handles adding a comment to a post, including support for attachments, tagged users, and replies.
-   *
-   * @async
-   * @function handleAddComment
-   * @param {string} postId - The ID of the post to which the comment is being added.
-   * @param {string} commentText - The content of the comment.
-   * @param {File|null} [attachment=null] - An optional file attachment for the comment.
-   * @param {Array<string>} [taggedUsers=[]] - An optional array of user IDs to tag in the comment.
-   * @param {string|null} [parentComment=null] - The ID of the parent comment if this is a reply.
-   * @param {string|null} [attachmentUrl=null] - An optional URL for an attachment.
-   * @returns {Promise<Object>} The response data from the API, including the posted comment.
-   * @throws {Error} Throws an error if the comment could not be posted.
-   *
-   * @example
-   * // Add a top-level comment
-   * await handleAddComment('postId123', 'This is a comment');
-   *
-   * @example
-   * // Add a comment with an attachment
-   * const file = new File(['content'], 'example.txt', { type: 'text/plain' });
-   * await handleAddComment('postId123', 'This is a comment with a file', file);
-   *
-   * @example
-   * // Add a reply to a comment
-   * await handleAddComment('postId123', 'This is a reply', null, [], 'parentCommentId456');
-   */
-  const handleAddComment = async (
-    postId,
-    commentText,
-    attachment = null,
-    taggedUsers = [],
-    parentComment = null,
-    attachmentUrl = null
-  ) => {
-    try {
-      const endpoint = `${COMMENTS_ENDPOINT}`;
-      console.log(`Posting comment to ${endpoint}:`, commentText);
-
-      // Use FormData to support file uploads
-      const formData = new FormData();
-
-      // Required parameters
-      formData.append("postId", postId);
-      formData.append("commentContent", commentText);
-
-      // Add attachment file if provided (using 'file' as the field name per API spec)
-      if (attachment) {
-        formData.append("file", attachment);
-      }
-
-      // Add attachment URL if provided
-      if (attachmentUrl) {
-        formData.append("commentAttachment", attachmentUrl);
-      }
-
-      // Add tagged users if any
-      if (taggedUsers && taggedUsers.length > 0) {
-        formData.append("taggedUsers", JSON.stringify(taggedUsers));
-      }
-
-      // Add parent comment ID for replies
-      if (parentComment) {
-        formData.append("parentComment", parentComment);
-      }
-
-      // Log what we're sending
-      console.log("Sending comment:");
-      console.log("- Post ID:", postId);
-      console.log("- Content:", commentText);
-      console.log("- File attachment:", attachment ? "Yes" : "No");
-      console.log("- URL attachment:", attachmentUrl);
-      console.log(
-        "- Tagged users:",
-        taggedUsers.length > 0 ? taggedUsers : "None"
-      );
-      console.log(
-        "- Parent comment:",
-        parentComment || "None (top-level comment)"
-      );
-
-      const response = await axios.post(endpoint, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      console.log(`Comment posted successfully:`, response.data);
-
-      // If we receive the comment in the response, add it to our comment list
-      if (response.data && response.data.comment) {
-        setComments((prev) => {
-          const existingComments = prev[postId] || [];
-
-          // If it's a reply and we're showing replies, handle accordingly
-          if (parentComment) {
-            // Find parent comment and increment its reply count
-            return {
-              ...prev,
-              [postId]: existingComments.map((comment) =>
-                comment._id === parentComment
-                  ? {
-                      ...comment,
-                      replyCount: (comment.replyCount || 0) + 1,
-                      // If we're tracking replies in-memory, could add to replies array too
-                      replies: [
-                        ...(comment.replies || []),
-                        response.data.comment,
-                      ],
-                    }
-                  : comment
-              ),
-            };
-          }
-
-          // For top-level comments, add to the beginning of the array
-          return {
-            ...prev,
-            [postId]: [response.data.comment, ...existingComments],
-          };
-        });
-      } else {
-        // If API doesn't return the comment object, just refresh comments
-        await fetchComments(postId);
-      }
-
-      // Update comment count in posts
-      setPosts(
-        posts.map((post) => {
-          if (post.id === postId || post.postId === postId) {
-            return {
-              ...post,
-              commentCount: (post.commentCount || 0) + 1,
-              metrics: post.metrics
-                ? {
-                    ...post.metrics,
-                    comments: (post.metrics.comments || 0) + 1,
-                  }
-                : undefined,
-            };
-          }
-          return post;
-        })
-      );
-
-      return response.data;
-    } catch (err) {
-      console.error(`Error posting comment:`, err);
-
-      //error handling
-      if (err.response) {
-        console.error("Comment error response:", err.response.data);
-        console.error("Status code:", err.response.status);
-        alert(
-          `Failed to post comment: ${
-            err.response.data.message || "Server error"
-          }`
-        );
-      } else if (err.request) {
-        console.error("No response received:", err.request);
-        alert("Failed to post comment: No response from server");
-      } else {
-        console.error("Error setting up request:", err.message);
-        alert(`Failed to post comment: ${err.message}`);
->>>>>>> c1929874522576fff5c658dce2341259f070f4d9
       }
     } else {
       alert('Failed to post comment. Please check your connection and try again.');
@@ -809,7 +607,6 @@ const handleAddComment = async (postId, commentText, attachment = null, taggedUs
   }
 };
 
-<<<<<<< HEAD
 // Update handleDeleteComment to properly decrement the comment count
 const handleDeleteComment = async (postId, commentId) => {
   try {
@@ -826,33 +623,6 @@ const handleDeleteComment = async (postId, commentId) => {
     return false;
   }
 };
-=======
-  /**
-   * Handles the deletion of a comment, ensuring UI and count are always in sync with backend.
-   *
-   * @async
-   * @function handleDeleteComment
-   * @param {string} postId - The ID of the post containing the comment.
-   * @param {string} commentId - The ID of the comment to delete.
-   * @returns {Promise<boolean>} - Returns true if deletion was successful, false otherwise.
-   */
-  const handleDeleteComment = async (postId, commentId) => {
-    try {
-      // API call to delete the comment
-      await axios.delete(`${COMMENTS_ENDPOINT}/${commentId}`);
-
-      // Always re-fetch comments to ensure state matches backend (handles soft deletes)
-      await fetchComments(postId);
->>>>>>> c1929874522576fff5c658dce2341259f070f4d9
-
-      return true;
-    } catch (err) {
-      console.error("Error deleting comment:", err);
-      alert("Failed to delete comment. Please try again.");
-      return false;
-    }
-  };
-
 
 
 
@@ -868,7 +638,6 @@ const handleDeleteComment = async (postId, commentId) => {
    * @param {boolean} [isRemove=false] - Whether the reaction is being removed (true) or added (false).
    * @returns {Promise<void>} - A promise that resolves when the state is updated.
    */
-<<<<<<< HEAD
   // Add this to your existing handleReactToComment function in Main.jsx
 const handleReactToComment = async (postId, commentId, reactionType = 'like', isRemove = false) => {
   try {
@@ -910,62 +679,10 @@ const handleReactToComment = async (postId, commentId, reactionType = 'like', is
       });
       
       if (foundInComments) {
-=======
-  const handleReactToComment = async (
-    postId,
-    commentId,
-    reactionType = "like",
-    isRemove = false
-  ) => {
-    try {
-      // No API calls here - CommentSection.jsx already handles them
-
-      // Update local state immediately for responsive UI
-      setComments((prevComments) => {
-        // Get the array of comments for this post (or empty array if none)
-        const postComments = [...(prevComments[postId] || [])];
-
-        // Find and update the specific comment
-        const updatedPostComments = postComments.map((comment) => {
-          if (comment._id === commentId) {
-            // Get current counts or initialize if they don't exist
-            const impressionCounts = comment.impressionCounts || { total: 0 };
-            const currentTypeCount = impressionCounts[reactionType] || 0;
-            const currentTotal = impressionCounts.total || 0;
-
-            // Calculate new counts
-            const newTypeCount = isRemove
-              ? Math.max(0, currentTypeCount - 1)
-              : currentTypeCount + 1;
-
-            const newTotal = isRemove
-              ? Math.max(0, currentTotal - 1)
-              : currentTotal + 1;
-
-            // Return updated comment with new reaction state
-            return {
-              ...comment,
-              isLiked: {
-                like: !isRemove,
-                type: !isRemove ? reactionType : null,
-              },
-              impressionCounts: {
-                ...impressionCounts,
-                [reactionType]: newTypeCount,
-                total: newTotal,
-              },
-            };
-          }
-          return comment; // Return unchanged comment if it's not the one we're updating
-        });
-
-        // Return updated comments state
->>>>>>> c1929874522576fff5c658dce2341259f070f4d9
         return {
           ...prevComments,
           [postId]: updatedPostComments,
         };
-<<<<<<< HEAD
       }
       
       return prevComments;
@@ -1007,13 +724,6 @@ const updateReactionCounts = (item, reactionType, isRemove) => {
   };
 };
   
-=======
-      });
-    } catch (err) {
-      console.error("Error updating comment reaction state:", err);
-    }
-  };
->>>>>>> c1929874522576fff5c658dce2341259f070f4d9
 
   // Fetch data when component mounts
   useEffect(() => {
@@ -1031,21 +741,7 @@ const updateReactionCounts = (item, reactionType, isRemove) => {
     initializeData();
   }, []);
 
-  // Fetch replies for a comment
-  const fetchReplies = async (commentId) => {
-    try {
-      const endpoint = `${BASE_URL}/comments/${commentId}/replies`;
-      const response = await axios.get(endpoint);
-      setReplies((prev) => ({
-        ...prev,
-        [commentId]: response.data.replies || [],
-      }));
-    } catch (err) {
-      console.error("Error fetching replies:", err);
-    }
-  };
 
-<<<<<<< HEAD
 // Fetch replies for a comment
 // Fetch replies for a comment
 const fetchReplies = async (commentId) => {
@@ -1061,8 +757,6 @@ const fetchReplies = async (commentId) => {
   }
 };
   
-=======
->>>>>>> c1929874522576fff5c658dce2341259f070f4d9
   // Handle creating a new post
   /**
    * Handles the creation of a new post by sending the provided post data to the server.
@@ -1120,7 +814,6 @@ const fetchReplies = async (commentId) => {
 
       // Check response structure
       const newPost = response.data.post || response.data;
-<<<<<<< HEAD
       
       // Enhance the new post with the current user's profile information
       const enhancedPost = {
@@ -1133,32 +826,11 @@ const fetchReplies = async (commentId) => {
       
       setPosts([enhancedPost, ...posts]);
       
-=======
-      setPosts([newPost, ...posts]);
->>>>>>> c1929874522576fff5c658dce2341259f070f4d9
     } catch (err) {
       console.error("Error creating post:", err);
 
       if (err.response) {
-<<<<<<< HEAD
         // Error handling code remains the same
-=======
-        // The request was made but server responded with error
-        console.error("Server response:", err.response.data);
-        console.error("Status code:", err.response.status);
-        alert(
-          `Failed to create post: ${
-            err.response.data.message || "Server error"
-          }`
-        );
-      } else if (err.request) {
-        // Request was made but no response received
-        console.error("No response received:", err.request);
-        alert("Failed to create post: No response from server");
-      } else {
-        // Error setting up request
-        alert(`Failed to create post: ${err.message}`);
->>>>>>> c1929874522576fff5c658dce2341259f070f4d9
       }
     }
   };
@@ -1348,33 +1020,8 @@ const fetchReplies = async (commentId) => {
     }
   };
 
-  //saved posts handlers
-  const handleShowSavedPosts = () => {
-    setShowSavedPosts(true);
-    fetchSavedPosts();
-  };
 
-<<<<<<< HEAD
-
- //saved posts handlers
- const handleShowSavedPosts = () => {
-  setShowSavedPosts(true);
-  fetchSavedPosts();
-};
-
-const handleShowAllPosts = () => {
-  setShowSavedPosts(false);
-  fetchPosts();
-};
-
-
-
-=======
-  const handleShowAllPosts = () => {
-    setShowSavedPosts(false);
-  };
->>>>>>> c1929874522576fff5c658dce2341259f070f4d9
-
+ 
   // Format date for display
   /**
    * Formats a given date string into a human-readable relative time format.
@@ -1426,7 +1073,7 @@ const handleShowAllPosts = () => {
             <div className="flex items-center p-2 pl-4 pr-4">
               <img
                 src={
-                  authorInfo?.profilePicture || "/Images/default-profile.svg"
+                  authorInfo?.user.profilePicture || "/Images/default-profile.svg"
                 }
                 alt="user"
                 className="w-12 h-12 rounded-full mr-2"
@@ -1496,20 +1143,12 @@ const handleShowAllPosts = () => {
         )}
 
         {/* Post List */}
-<<<<<<< HEAD
         {
         showSavedPosts && savedPostsLoading ? (
           <div className="text-center py-4">Loading saved posts...</div>
         ) : (
         (showSavedPosts ? savedPosts : posts).map((post) => (
           <article key={post.id || post.postId} className="overflow-visible p-0 mb-2 bg-white rounded-md border-none shadow-[0_0_0_1px_rgba(0,0,0,0.15),0_0_0_rgba(0,0,0,0.20)]">
-=======
-        {posts.map((post) => (
-          <article
-            key={post.id || post.postId}
-            className="overflow-visible p-0 mb-2 bg-white rounded-md border-none shadow-[0_0_0_1px_rgba(0,0,0,0.15),0_0_0_rgba(0,0,0,0.20)]"
-          >
->>>>>>> c1929874522576fff5c658dce2341259f070f4d9
             <div className="p-3 pr-10 pb-0 flex justify-between items-start relative">
               <a href="/feed" className="overflow-hidden flex">
                 <img
@@ -1535,14 +1174,9 @@ const handleShowAllPosts = () => {
                 onHide={handleHidePost}
                 onSave={handleSavePost}
                 onReport={handleReportPost}
-<<<<<<< HEAD
                 onDelete={handleDeletePost}  // New prop
                 onEdit={handleEditPost}
                 isPostOwner={true}  // Set this based on user authentication
-=======
-                onDelete={handleDeletePost} // New prop
-                isPostOwner={true} // Set this based on user authentication
->>>>>>> c1929874522576fff5c658dce2341259f070f4d9
                 isSaved={post.isSaved}
               />
             </div>
@@ -1574,7 +1208,6 @@ const handleShowAllPosts = () => {
                 post.content?.text || post.postDescription
               )}
             </div>
-<<<<<<< HEAD
             
             {/* Handle different media formats */}
             {/* Handle content.files with multiple media support */}
@@ -1748,55 +1381,6 @@ const handleShowAllPosts = () => {
                 </div>
               )}
             
-=======
-
-            {/* Handle different media formats */}
-            {post.content?.files && post.content.files.length > 0 && (
-              <div className="w-full relative bg-[#f9fafb] mt-2">
-                <div className="aspect-[16/9] relative overflow-hidden">
-                  {post.content.files[0].url.match(/\.(mp4|webm|ogg)$/i) ? (
-                    <video
-                      src={post.content.files[0].url}
-                      className="absolute inset-0 w-full h-full object-contain"
-                      controls
-                      preload="metadata"
-                    />
-                  ) : (
-                    <img
-                      src={post.content.files[0].url}
-                      alt={post.content.files[0].alt || "Post image"}
-                      className="absolute inset-0 w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                  )}
-                </div>
-              </div>
-            )}
-
-            {post.attachments && post.attachments.length > 0 && (
-              <div className="w-full relative bg-[#f9fafb] mt-2">
-                <div className="aspect-[16/9] relative overflow-hidden">
-                  {typeof post.attachments[0] === "string" &&
-                  post.attachments[0].match(/\.(mp4|webm|ogg)$/i) ? (
-                    <video
-                      src={post.attachments[0]}
-                      className="absolute inset-0 w-full h-full object-contain"
-                      controls
-                      preload="metadata"
-                    />
-                  ) : (
-                    <img
-                      src={post.attachments[0]}
-                      alt="Post attachment"
-                      className="absolute inset-0 w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                  )}
-                </div>
-              </div>
-            )}
-
->>>>>>> c1929874522576fff5c658dce2341259f070f4d9
             {/* Updated metrics section with reaction emojis */}
             <ul className="flex justify-between mx-4 p-2 border-b border-[#e9e5df] text-sm overflow-auto">
               <li className="flex items-center cursor-pointer hover:text-[#0a66c2] hover:underline">
@@ -1851,16 +1435,9 @@ const handleShowAllPosts = () => {
                 onClick={() => toggleComments(post.id || post.postId)}
               >
                 <p>
-<<<<<<< HEAD
                   {comments[post.id || post.postId] 
                     ? comments[post.id || post.postId].length 
                     : (post.commentCount)} comments
-=======
-                  {comments[post.id || post.postId]
-                    ? comments[post.id || post.postId].length
-                    : post.metrics?.comments || post.commentCount || 0}{" "}
-                  comments
->>>>>>> c1929874522576fff5c658dce2341259f070f4d9
                 </p>
               </li>
 
@@ -1913,20 +1490,9 @@ const handleShowAllPosts = () => {
                     comments={comments[post.id || post.postId] || []}
                     authorInfo={authorInfo}
                     onAddComment={handleAddComment}
-<<<<<<< HEAD
                     onDeleteComment={handleDeleteComment}
                     onReactToComment={(commentId, reactionType, isRemove) => 
                       handleReactToComment(post.id || post.postId, commentId, reactionType, isRemove)
-=======
-                    onDeleteComment={handleDeleteComment} // Add this prop
-                    onReactToComment={(commentId, reactionType, isRemove) =>
-                      handleReactToComment(
-                        post.id || post.postId,
-                        commentId,
-                        reactionType,
-                        isRemove
-                      )
->>>>>>> c1929874522576fff5c658dce2341259f070f4d9
                     }
                     reactionTypes={reactionTypes}
                     formatDate={formatDate}
