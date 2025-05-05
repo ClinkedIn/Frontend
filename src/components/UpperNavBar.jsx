@@ -670,7 +670,10 @@ const Header = ({ notifications, pendingInvitationsCount }) => {
                             {userCompanies.map((company) => (
                                 <button
                                     key={company.company.id}
-                                    onClick={() => navigate(`/company/${company.company.id}/admin`)}
+                                    onClick={() => {
+                                      navigate(`/company/${company.company.id}/admin`)
+                                      setShowUser(false)
+                                    }}
                                     className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                 >
                                     <img
