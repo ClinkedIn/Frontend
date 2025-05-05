@@ -37,7 +37,8 @@ const ApplicantDetails = ({ applicant, screeningAnswers,jobId }) => {
   const contactPhone = applicant?.contactPhone;
   const resumeUrl = applicant?.applicant.resume;
 
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [isProcessingAccept, setIsProcessingAccept] = useState(false);
+  const [isProcessingReject, setIsProcessingReject] = useState(false);
   const [showbuttons , setShowButtons] = useState(true);
 
   /**
@@ -80,7 +81,7 @@ const ApplicantDetails = ({ applicant, screeningAnswers,jobId }) => {
     );
   }
   const handleAccept = async () => {
-      setIsProcessing(true);
+      setIsProcessingAccept(true);
       try {
         console.log("Accepting application :", applicant);
           await axios.put(
@@ -93,11 +94,11 @@ const ApplicantDetails = ({ applicant, screeningAnswers,jobId }) => {
           console.error('Error accepting application:', error);
           toast.error(error.response?.data?.message || 'Failed to accept application');
       } finally {
-          setIsProcessing(false);
+        setIsProcessingAccept(false);
       }
   };
   const handleReject = async () => {
-    setIsProcessing(true);
+    setIsProcessingReject(true);
     try {
         await axios.put(
             `${BASE_URL}/jobs/${jobId}/applications/${applicant.userId}/reject`,
@@ -109,7 +110,7 @@ const ApplicantDetails = ({ applicant, screeningAnswers,jobId }) => {
         console.error('Error rejecting application:', error);
         toast.error(error.response?.data?.message || 'Failed to reject application');
     } finally {
-        setIsProcessing(false);
+      setIsProcessingReject(false);
     }
   };
 
@@ -335,9 +336,10 @@ const ApplicantDetails = ({ applicant, screeningAnswers,jobId }) => {
                 
             </div>
             <div className="flex items-center space-x-3">
-                {applicant?.status ==="pending" && showbuttons && <><button
+                {applicant?.status !=="pending" && showbuttons && <>
+                <button
                     onClick={handleAccept}
-                    disabled={isProcessing}
+                    disabled={isProcessingAccept}
                     className="flex items-center px-4 py-1.5 bg-green-600 text-white rounded-full text-sm font-semibold hover:bg-green-700 transition-colors disabled:bg-green-300"
                 >
                     <BsCheckLg className="mr-1" />
@@ -345,7 +347,7 @@ const ApplicantDetails = ({ applicant, screeningAnswers,jobId }) => {
                 </button>
                 <button
                     onClick={handleReject}
-                    disabled={isProcessing}
+                    disabled={isProcessingReject}
                     className="flex items-center px-4 py-1.5 bg-red-600 text-white rounded-full text-sm font-semibold hover:bg-red-700 transition-colors disabled:bg-red-300"
                 >
                     <BsX className="mr-1" />
