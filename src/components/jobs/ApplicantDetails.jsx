@@ -83,9 +83,9 @@ const ApplicantDetails = ({ applicant, screeningAnswers,jobId }) => {
   const handleAccept = async () => {
       setIsProcessingAccept(true);
       try {
-        console.log("Accepting application :", applicant);
+        console.log("Accepting application :", applicant.applicant.userId);
           await axios.put(
-              `${BASE_URL}/jobs/${jobId}/applications/${applicant.userId}/accept`,
+              `${BASE_URL}/jobs/${jobId}/applications/${applicant.applicant.userId}/accept`,
               { withCredentials: true }
           );
           toast.success('Application accepted successfully');
@@ -101,7 +101,7 @@ const ApplicantDetails = ({ applicant, screeningAnswers,jobId }) => {
     setIsProcessingReject(true);
     try {
         await axios.put(
-            `${BASE_URL}/jobs/${jobId}/applications/${applicant.userId}/reject`,
+            `${BASE_URL}/jobs/${jobId}/applications/${applicant.applicant.userId}/reject`,
             { withCredentials: true }
         );
         toast.success('Application rejected');
