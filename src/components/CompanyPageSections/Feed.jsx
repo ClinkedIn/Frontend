@@ -1,7 +1,7 @@
 
 
 import { useOutletContext } from 'react-router-dom';
-import { useEffect,useState } from 'react';
+import { useEffect,useState,useRef } from 'react';
 import axios from 'axios';
 import { BASE_URL } from '../../constants';
 import Main from '../Main';
@@ -9,7 +9,6 @@ import PostMenu from '../PostMenu.jsx';
 import PostReactions from '../PostReactions';
 import CommentSection from '../CommentSection';
 import CreatePostModal from '../PostCreation.jsx';
-
 
 const CompanyFeedPage = ()=> {
     const {companyInfo}  = useOutletContext();
@@ -26,6 +25,9 @@ const CompanyFeedPage = ()=> {
     const [expandedReplies, setExpandedReplies] = useState({});
     const [replies, setReplies] = useState({});
     const [user,setUser] = useState()
+    const [inlinePostText, setInlinePostText] = useState('');
+    const [inlinePostAttachment, setInlinePostAttachment] = useState(null);
+    const inlineAttachmentInputRef = useRef(null);
     const reactionTypes = [
         { type: 'like', emoji: '👍', label: 'Like' },
         { type: 'celebrate', emoji: '👏', label: 'Celebrate' },
@@ -205,62 +207,7 @@ const CompanyFeedPage = ()=> {
           console.error('Error fetching replies:', err);
         }
       };
-      /////////////
-      const handleCreatePost = async (postData) => {
-        try {
-          console.log("Creating post with data:", postData);
-          
-          // Create FormData for proper multipart/form-data encoding
-          const formData = new FormData();
-          
-          // Add description (required)
-          formData.append('description', postData.text);
-          
-          // Add attachments if any
-          if (postData.files && postData.files.length > 0) {
-            for (let i = 0; i < postData.files.length; i++) {
-              formData.append('files', postData.files[i]);
-            }
-          }
-          
-          // Add privacy settings
-          formData.append('whoCanSee', 'anyone');
-          formData.append('whoCanComment', 'anyone');
-          
-          // Log form data for debugging
-          console.log("Sending post with description:", postData.text);
-          console.log("Number of files:", postData.files ? postData.files.length : 0);
-          
-          const response = await axios.post(`${BASE_URL}/posts`, formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-          });
-          
-          console.log("Post creation successful:", response.data);
-          
-          // Check response structure
-          const newPost = response.data.post || response.data;
-          setPosts([newPost, ...posts]);
-          
-        } catch (err) {
-          console.error('Error creating post:', err);
-          
-          if (err.response) {
-            // The request was made but server responded with error
-            console.error('Server response:', err.response.data);
-            console.error('Status code:', err.response.status);
-            alert(`Failed to create post: ${err.response.data.message || 'Server error'}`);
-          } else if (err.request) {
-            // Request was made but no response received
-            console.error('No response received:', err.request);
-            alert('Failed to create post: No response from server');
-          } else {
-            // Error setting up request
-            alert(`Failed to create post: ${err.message}`);
-          }
-        }
-      };
+      
       const handleReact = async (postId, reactionType = 'like', isRemove = false) => {
         try {
           const postIdToUse = postId.toString();
@@ -442,6 +389,78 @@ const CompanyFeedPage = ()=> {
 
         fetchPosts();
     }, [companyInfo?.id]);
+  const handleInlineFileChange = (e) => {
+      if (e.target.files && e.target.files[0]) {
+        setInlinePostAttachment(e.target.files[0]);
+      } else {
+        setInlinePostAttachment(null); 
+      }
+    };
+
+const handleCreatePost = async (postData) => { 
+    if (!companyInfo || !companyInfo.id) {
+        console.error("Company information is missing, cannot create post.");
+        alert("Error: Company information is not available to associate the post with.");
+        return; 
+    }
+
+    try {
+        const formData = new FormData();
+        formData.append('description', postData.text); 
+
+        if (postData.files && postData.files.length > 0) {
+            for (let i = 0; i < postData.files.length; i++) {
+                formData.append('files', postData.files[i]); 
+            }
+        }
+        
+        
+        formData.append('whoCanSee', 'anyone');     
+        formData.append('whoCanComment', 'anyone'); 
+
+        
+        const response = await axios.post(
+            `${BASE_URL}/companies/${companyInfo.id}/post`, 
+            formData,
+            {
+                headers: { 'Content-Type': 'multipart/form-data' },
+                withCredentials: true, 
+            }
+        );
+
+        console.log("Post creation successful:", response.data);
+        setInlinePostAttachment(null);
+        setInlinePostText("")
+        
+        const newPostFromApi = response.data.post; 
+
+        if (newPostFromApi) {
+           
+            setPosts(prevPosts => [newPostFromApi, ...prevPosts]);
+        } else {
+            console.warn("Post object not found in API response. Consider re-fetching posts.");
+           
+        }
+
+        if (isPostModalOpen) { 
+            setIsPostModalOpen(false);
+        }
+        
+    } catch (err) {
+        console.error('Error creating post:', err);
+        if (err.response) {
+            console.error('Server response error data:', err.response.data);
+            console.error('Server response error status:', err.response.status);
+            alert(`Failed to create post: ${err.response.data.message || 'Server error'}`);
+        } else if (err.request) {
+            console.error('No response received from server:', err.request);
+            alert('Failed to create post: No response from server. Please check your connection.');
+        } else {
+            console.error('Error setting up post request:', err.message);
+            alert(`Failed to create post: ${err.message}`);
+        }
+    }
+};
 
    if(loadingPoasts){
     return(
@@ -452,60 +471,56 @@ const CompanyFeedPage = ()=> {
    }
   if(posts.length===0){
      return(
-          <div className="   w-full ">
-            <div className='grid-area-main  '>
-        <div className="overflow-hidden text-center mb-2 bg-white rounded-md border-none shadow-[0_0_0_1px_rgba(0,0,0,0.15),0_0_0_rgba(0,0,0,0.20)]">
-          <div className="flex flex-col text-[#958b7b] mb-2 bg-white">
-            <div className="flex items-center p-2 pl-4 pr-4">
-              <img
-                src={companyInfo.logo || "/Images/CompanyLogo.png"}
-                alt="user"
-                className="w-12 h-12 rounded-full mr-2"
-              />
-              <button
-                onClick={() => setIsPostModalOpen(true)}
-                className="text-[rgba(0,0,0,0.6)] outline-none min-h-[48px] leading-1.5 text-sm font-semibold flex items-center p-2 pl-4 flex-grow border border-[rgba(0,0,0,0.15)] rounded-[35px] cursor-pointer hover:bg-[rgba(0,0,0,0.08)] text-left"
-              >
-                Start a post
-              </button>
-            </div>
 
-            <div className="flex justify-around flex-wrap p-1 pb-1">
-              <button 
-                onClick={() => setIsPostModalOpen(true)}
-                className="text-[rgba(0,0,0,0.6)] outline-none border-none bg-transparent min-h-[48px] leading-1.5 text-sm font-semibold flex items-center transition duration-200 p-2 hover:bg-[rgba(0,0,0,0.08)] rounded-md"
-              >
-                <img src="/Images/photo-icon.svg" alt="pic" className="mr-2.5 ml-[-0.5rem]" />
-                <span>Photo</span>
-              </button>
-              <button 
-                onClick={() => setIsPostModalOpen(true)}
-                className="text-[rgba(0,0,0,0.6)] outline-none border-none bg-transparent min-h-[48px] leading-1.5 text-sm font-semibold flex items-center transition duration-200 p-2 hover:bg-[rgba(0,0,0,0.08)] rounded-md"
-              >
-                <img src="/Images/vedio-icon.svg" alt="vedio" className="mr-2.5 ml-[-0.5rem]" />
-                <span>Video</span>
-              </button>
-              <button
-                onClick={() => setIsPostModalOpen(true)}
-                className="text-[rgba(0,0,0,0.6)] outline-none border-none bg-transparent min-h-[48px] leading-1.5 text-sm font-semibold flex items-center transition duration-200 p-2 hover:bg-[rgba(0,0,0,0.08)] rounded-md"
-              >
-                <img src="/Images/job-icon.svg" alt="job" className="mr-2.5 ml-[-0.5rem]" />
-                <span>Job</span>
-              </button>
-              <button
-                onClick={() => setIsPostModalOpen(true)}
-                className="text-[rgba(0,0,0,0.6)] outline-none border-none bg-transparent min-h-[48px] leading-1.5 text-sm font-semibold flex items-center transition duration-200 p-2 hover:bg-[rgba(0,0,0,0.08)] rounded-md"
-              >
-                <img src="/Images/article-icon.svg" alt="article" className="mr-2.5 ml-[-0.5rem]" />
-                <span>Write article</span>
-              </button>
+        <div className="w-full">
+          <div className='grid-area-main'>
+            <div className="overflow-hidden text-center mb-2 bg-white rounded-md border-none shadow-[0_0_0_1px_rgba(0,0,0,0.15),0_0_0_rgba(0,0,0,0.20)]">
+              <div className="flex flex-col text-[#958b7b] bg-white"> 
+                <div className="flex items-start p-3"> 
+                  <img
+                    src={companyInfo.logo || "/Images/CompanyLogo.png"} 
+                    alt="user"
+                    className="w-12 h-12 rounded-full mr-3 shrink-0" 
+                  />
+                  <div className="flex-grow">
+                    <textarea
+                      value={inlinePostText} 
+                      onChange={(e) => setInlinePostText(e.target.value)} 
+                      placeholder={`What's on your mind, ${companyInfo.name || 'Company'}?`}
+                      className="w-full p-2 border border-[rgba(0,0,0,0.15)] rounded-md resize-none focus:ring-2 focus:ring-blue-500 outline-none"
+                      rows="3"
+                    ></textarea>
+                    <div className="flex items-center justify-between mt-2">
+                      <div>
+                        <label
+                          htmlFor="inlineAttachmentInput"
+                          className="cursor-pointer text-sm text-blue-600 hover:text-blue-800 py-1 px-2 rounded-md hover:bg-gray-100 transition-colors"
+                        >
+                          {inlinePostAttachment ? inlinePostAttachment.name : "Add Attachment"}
+                        </label>
+                        <input
+                          type="file"
+                          id="inlineAttachmentInput"
+                          className="hidden"
+                          onChange={handleInlineFileChange} 
+                          ref={inlineAttachmentInputRef} 
+                          accept="image/*,video/*,audio/*,.pdf,.doc,.docx,,.ppt,.pptx,.txt,.zip,.rar,.7z,"
+                        />
+                      </div>
+                      <button
+                        onClick={handleCreatePost} 
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm py-2 px-4 rounded-full transition-colors"
+                      >
+                        Post
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
+            <h1 className="text-2xl flex justify-center mt-4">No Posts Found</h1>
           </div>
         </div>
-            
-                <h1 className="text-2xl flex justify-center">No Posts Found</h1>
-                </div>
-          </div>
      )
     }
 
@@ -513,6 +528,55 @@ const CompanyFeedPage = ()=> {
     <div className="mt-4  flex flex-col justify-center   w-full rounded-lg  ">
         <div className='grid-area-main'>
           {/* Create Post Form */}
+        
+          <div className="w-full">
+          <div className='grid-area-main'>
+            <div className="overflow-hidden text-center mb-2 bg-white rounded-md border-none shadow-[0_0_0_1px_rgba(0,0,0,0.15),0_0_0_rgba(0,0,0,0.20)]">
+              <div className="flex flex-col text-[#958b7b] bg-white"> 
+                <div className="flex items-start p-3"> 
+                  <img
+                    src={companyInfo.logo || "/Images/CompanyLogo.png"} 
+                    alt="user"
+                    className="w-12 h-12 rounded-full mr-3 shrink-0" 
+                  />
+                  <div className="flex-grow">
+                    <textarea
+                      value={inlinePostText} 
+                      onChange={(e) => setInlinePostText(e.target.value)} 
+                      placeholder={`What's on your mind, ${companyInfo.name || 'Company'}?`}
+                      className="w-full p-2 border border-[rgba(0,0,0,0.15)] rounded-md resize-none focus:ring-2 focus:ring-blue-500 outline-none"
+                      rows="3"
+                    ></textarea>
+                    <div className="flex items-center justify-between mt-2">
+                      <div>
+                        <label
+                          htmlFor="inlineAttachmentInput"
+                          className="cursor-pointer text-sm text-blue-600 hover:text-blue-800 py-1 px-2 rounded-md hover:bg-gray-100 transition-colors"
+                        >
+                          {inlinePostAttachment ? inlinePostAttachment.name : "Add Attachment"}
+                        </label>
+                        <input
+                          type="file"
+                          id="inlineAttachmentInput"
+                          className="hidden"
+                          onChange={handleInlineFileChange} 
+                          ref={inlineAttachmentInputRef} 
+                          accept="image/*,video/*,audio/*,.pdf,.doc,.docx,,.ppt,.pptx,.txt,.zip,.rar,.7z,"
+                        />
+                      </div>
+                      <button
+                        onClick={handleCreatePost} 
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm py-2 px-4 rounded-full transition-colors"
+                      >
+                        Post
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
           
         {posts.map((post) => (
           <article key={post.companyId.id || post.postId} className="overflow-visible p-0 mb-2 bg-white rounded-md border-none shadow-[0_0_0_1px_rgba(0,0,0,0.15),0_0_0_rgba(0,0,0,0.20)]">
@@ -678,12 +742,7 @@ const CompanyFeedPage = ()=> {
             )}
           </article>
         ))}
-        <CreatePostModal 
-        isOpen={isPostModalOpen}
-        onClose={() => setIsPostModalOpen(false)}
-        onSubmit={handleCreatePost}
-        authorInfo={user}
-      />
+       
       </div>
 
     </div>
