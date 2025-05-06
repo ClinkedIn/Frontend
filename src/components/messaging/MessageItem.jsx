@@ -148,9 +148,12 @@ const formatTimestamp = (ts) => {
   return ts ? format(ts.toDate(), 'p') : 'Sending...';
 }
 
+
 return (
 // Add group class for hover effect on menu button
-<div className={`group flex gap-2 my-1 ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>
+
+message.text !=="" && message.mediaUrl !==[] &&
+(<div className={`group flex gap-2 my-1 ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>
   {/* Avatar (only for other messages) */}
   {!isOwnMessage && (
     <img
@@ -264,7 +267,7 @@ return (
   {/* Spacer for own messages to align left content */}
   {isOwnMessage && <div className="w-8 flex-shrink-0"></div>}
 
-</div>
+</div>)
 );
 };
 
