@@ -55,6 +55,7 @@ const CompanyAnalyticsPage = () => {
                 }
             );
             setAnalyticsData(response.data.analytics);
+            console.log(response.data)
             setError(null);
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to fetch analytics');
@@ -303,7 +304,7 @@ const CompanyAnalyticsPage = () => {
                 <div className="bg-white p-4 rounded-lg shadow">
                     <h3 className="text-lg font-semibold mb-4">Visitor Statistics</h3>
                     <div className="h-64">
-                        <Bar 
+                        <Line 
                             data={{
                                 labels: analyticsData?.visitors.map(item => item.date) || [],
                                 datasets: [{
