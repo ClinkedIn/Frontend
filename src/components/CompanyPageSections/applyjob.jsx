@@ -4,7 +4,7 @@ import { BASE_URL } from '../../constants';
 import { FiUser, FiMail, FiPhone, FiX } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
-const Applyjob = ({ isOpen, onClose, job, jobId }) => {
+const Applyjob = ({ isOpen, onClose, job, jobId, onApplicationSuccess }) => {
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState('');
   const [countryCode, setCountryCode] = useState('+20');
@@ -14,7 +14,7 @@ const Applyjob = ({ isOpen, onClose, job, jobId }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    console.log('Applyjob job prop:', job); // Debug log
+    console.log('Applyjob job prop:', job);
     if (isOpen) {
       fetchUser();
       setStep(1);
@@ -68,6 +68,7 @@ const Applyjob = ({ isOpen, onClose, job, jobId }) => {
         withCredentials: true,
       });
       toast.success('Application submitted successfully!');
+      onApplicationSuccess(); // Call the callback to re-fetch jobs
       onClose();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to submit application');

@@ -16,8 +16,26 @@ const CompanyJobsPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState(null);
 
+  const fetchJobs = async () => {
+    try {
+      setLoadingJobs(true);
+      const response = await axios.get(`${BASE_URL}/jobs/company/${companyInfo.id}`, {
+        withCredentials: true,
+      });
+      const filteredJobs = response.data.filter(
+        (job) => !job.applicants.includes(user?._id) && !job.rejected.includes(user?._id) && !job.accepted.includes(user?._id)
+      );
+      setJobs(filteredJobs);
+      console.log('Fetched jobs:', response.data);
+    } catch (error) {
+      console.error('Error fetching jobs:', error);
+    } finally {
+      setLoadingJobs(false);
+    }
+  };
+
   const openModal = (job) => {
-    console.log('Opening modal for job:', job); // Debug log
+    console.log('Opening modal for job:', job);
     setSelectedJob(job);
     setIsModalOpen(true);
   };
@@ -32,21 +50,9 @@ const CompanyJobsPage = () => {
   };
 
   useEffect(() => {
-    const fetchJobs = async () => {
-      try {
-        const response = await axios.get(`${BASE_URL}/jobs/company/${companyInfo.id}`, {
-          withCredentials: true,
-        });
-        setJobs(response.data);
-        console.log('Fetched jobs:', response.data);
-      } catch (error) {
-        console.error('Error fetching jobs:', error);
-      } finally {
-        setLoadingJobs(false);
-      }
-    };
+    if (!user) return;
     fetchJobs();
-  }, [companyInfo?.id]);
+  }, [companyInfo?.id, user?._id]);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -216,6 +222,7 @@ const CompanyJobsPage = () => {
           onClose={closeModal}
           job={selectedJob}
           jobId={selectedJob._id}
+          onApplicationSuccess={fetchJobs} // Pass the callback
         />
       )}
     </div>
