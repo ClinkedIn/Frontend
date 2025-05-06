@@ -7,6 +7,8 @@ import Form from "../../../components/myProfile/Forms/Form";
 import SkillEndorsements from "../../../components/myProfile/SkillEndorsements";
 import ConnectButton from "../../../components/Network/ConnectButton";
 import FollowButton from "../../../components/Network/FollowButton";
+import { useNavigate } from "react-router-dom";
+
 interface Skill {
   skillName: string;
   endorsements?: Array<{
@@ -144,7 +146,7 @@ const UserProfileView = () => {
   const [privacyNotice, setPrivacyNotice] = useState("");
   const [error, setError] = useState("");
   const [notFound, setNotFound] = useState(false);
-
+  const navigate = useNavigate();
   const [basicProfile, setBasicProfile] = useState(null);
   const [basicProfileLoading, setBasicProfileLoading] = useState(true);
 
@@ -204,6 +206,13 @@ const UserProfileView = () => {
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
     fetchUserActivity(tab.toLowerCase());
+  };
+
+  // Message handler for each connection
+  const handleMessageApplicant = (userId: string, name: string, profilePicture: string) => {
+    navigate("/messaging", {
+      state: { _id: userId, fullName: name, profilePicture },
+    });
   };
 
   const handleFollow = async () => {

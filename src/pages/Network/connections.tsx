@@ -247,12 +247,12 @@ const Connections: React.FC = () => {
                     src={connection.profilePicture || "/Images/user.svg"}
                     alt={`${connection.firstName} ${connection.lastName}`}
                     className="w-12 h-12 rounded-full cursor-pointer"
-                    onClick={() => navigate(`/profile/${connection._id}`)}
+                    onClick={() => navigate(`/user/${connection._id}`)}
                   />
                   <div className="flex-1 min-w-0">
                     <p
                       className="font-medium cursor-pointer hover:underline truncate"
-                      onClick={() => navigate(`/profile/${connection._id}`)}
+                      onClick={() => navigate(`/user/${connection._id}`)}
                     >
                       {`${connection.firstName} ${connection.lastName}`}
                     </p>
