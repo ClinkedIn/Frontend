@@ -142,32 +142,45 @@ const CompanyAnalyticsPage = () => {
         }
     };
 
-    const combinedChartData = {
-        labels: analyticsData?.visitors.map(item => item.date) || [],
+    const allDates = [
+        ...new Set([
+          ...(analyticsData?.visitors?.map(item => item.date) || []),
+          ...(analyticsData?.followers?.map(item => item.date) || []),
+        ]),
+      ].sort(); // Sort dates to ensure chronological order
+      
+      const combinedChartData = {
+        labels: allDates,
         datasets: [
-            {
-                type: 'bar',
-                label: 'Followers',
-                data: analyticsData?.followers.map(item => item.count) || [],
-                borderColor: 'rgb(153, 102, 255)',
-                backgroundColor: 'rgba(153, 102, 255, 0.1)',
-                tension: 0.1,
-                fill: true,
-                pointRadius: 4,
-                pointHoverRadius: 6,
-                yAxisID: 'y',
-            },
-            {
-                type: 'bar',
-                label: 'Visitors',
-                data: analyticsData?.visitors.map(item => item.count) || [],
-                backgroundColor: 'rgba(75, 192, 192, 0.7)',
-                borderColor: 'rgb(75, 192, 192)',
-                borderWidth: 1,
-                yAxisID: 'y',
-            }
-        ]
-    };
+          {
+            type: 'bar',
+            label: 'Followers',
+            data: allDates.map(date => {
+              const follower = analyticsData?.followers?.find(item => item.date === date);
+              return follower ? follower.count : 0;
+            }),
+            borderColor: 'rgb(153, 102, 255)',
+            backgroundColor: 'rgba(153, 102, 255, 0.1)',
+            tension: 0.1,
+            fill: true,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            yAxisID: 'y',
+          },
+          {
+            type: 'bar',
+            label: 'Visitors',
+            data: allDates.map(date => {
+              const visitor = analyticsData?.visitors?.find(item => item.date === date);
+              return visitor ? visitor.count : 0;
+            }),
+            backgroundColor: 'rgba(75, 192, 192, 0.7)',
+            borderColor: 'rgb(75, 192, 192)',
+            borderWidth: 1,
+            yAxisID: 'y',
+          },
+        ],
+      };
 
     return (
         <div className="bg-white p-6 rounded-lg shadow">
