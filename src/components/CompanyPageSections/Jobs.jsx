@@ -6,6 +6,45 @@ import { FaSpinner, FaBriefcase, FaMapMarkerAlt, FaClock, FaMoneyBillWave } from
 import { MdWork } from 'react-icons/md';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa6';
 import Applyjob from '../../components/CompanyPageSections/applyjob';
+/**
+ * Company Jobs Page component that displays available job positions for a company.
+ * Includes job details, application functionality, and filtering based on user application status.
+ *
+ * @component
+ * @returns {JSX.Element} The rendered CompanyJobsPage component
+ *
+ * @example
+ * return <CompanyJobsPage />
+ *
+ * @property {Object} companyInfo - Company information from outlet context
+ * @property {Array} jobs - Array of job listings
+ * @property {boolean} loadingJobs - Loading state for jobs data
+ * @property {Object|null} user - Current user data
+ * @property {string|null} expandedJobId - ID of the currently expanded job
+ * @property {boolean} isModalOpen - State for application modal visibility
+ * @property {Object|null} selectedJob - Currently selected job for application
+ *
+ * @method fetchJobs
+ * Fetches jobs for the company, filtered by user application status
+ * @async
+ * @returns {Promise<void>}
+ *
+ * @method openModal
+ * Opens the job application modal for a specific job
+ * @param {Object} job - The job object to apply for
+ * @returns {void}
+ *
+ * @method closeModal
+ * Closes the job application modal
+ * @returns {void}
+ *
+ * @method toggleJobDetails
+ * Toggles the expanded view for a job's details
+ * @param {string} jobId - ID of the job to expand/collapse
+ * @returns {void}
+ *
+ * @see Applyjob - The job application modal component used
+ */
 
 const CompanyJobsPage = () => {
   const { companyInfo } = useOutletContext();

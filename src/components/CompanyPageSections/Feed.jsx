@@ -9,6 +9,8 @@ import PostMenu from '../PostMenu.jsx';
 import PostReactions from '../PostReactions';
 import CommentSection from '../CommentSection';
 import CreatePostModal from '../PostCreation.jsx';
+
+
 const CompanyFeedPage = ()=> {
     const {companyInfo}  = useOutletContext();
     const [loadingPoasts, setLoadingPosts] = useState(true);

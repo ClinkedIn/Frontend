@@ -28,7 +28,36 @@ ChartJS.register(
   Tooltip,
   Legend
 );
-
+/**
+ * Company Analytics Page component that displays various analytics data for a company.
+ * This includes visitor and follower statistics presented in line and bar charts,
+ * with controls for date range selection and refresh intervals.
+ *
+ * @component
+ * @returns {JSX.Element} The rendered CompanyAnalyticsPage component
+ *
+ * @example
+ * return <CompanyAnalyticsPage />
+ *
+ * @property {Object} companyInfo - Company information from the outlet context
+ * @property {Date} startDate - Start date for the analytics data range (default: 30 days ago)
+ * @property {Date} endDate - End date for the analytics data range (default: current date)
+ * @property {string} interval - Time interval for grouping data ('day', 'week', or 'month')
+ * @property {Object|null} analyticsData - The fetched analytics data
+ * @property {boolean} loading - Loading state indicator
+ * @property {string|null} error - Error message if data fetching fails
+ * @property {boolean} autoRefresh - Flag for automatic refresh of data
+ * @property {number} refreshInterval - Interval in seconds for automatic refresh
+ *
+ * @method fetchAnalytics
+ * Fetches analytics data from the API based on current filters
+ * @async
+ * @returns {Promise<void>}
+ *
+ * @method handleRefresh
+ * Manually triggers a refresh of the analytics data
+ * @returns {void}
+ */
 const CompanyAnalyticsPage = () => {
     const { companyInfo } = useOutletContext();
     const [startDate, setStartDate] = useState(new Date(new Date().setDate(new Date().getDate() - 30)));

@@ -3,6 +3,56 @@ import axios from 'axios';
 import { BASE_URL } from '../../constants';
 import { FiUser, FiMail, FiPhone, FiX } from 'react-icons/fi';
 import toast from 'react-hot-toast';
+/**
+ * A modal component for applying to a job with multi-step form functionality.
+ * Handles user contact information and job screening questions.
+ *
+ * @component
+ * @param {Object} props - Component props
+ * @param {boolean} props.isOpen - Controls the visibility of the modal
+ * @param {function} props.onClose - Callback to close the modal
+ * @param {Object} props.job - Job object containing details and screening questions
+ * @param {string} props.jobId - ID of the job being applied to
+ * @param {function} props.onApplicationSuccess - Callback triggered after successful application
+ * @returns {JSX.Element} The rendered Applyjob modal component
+ *
+ * @example
+ * <Applyjob
+ *   isOpen={isModalOpen}
+ *   onClose={closeModal}
+ *   job={selectedJob}
+ *   jobId={selectedJobId}
+ *   onApplicationSuccess={refreshJobs}
+ * />
+ *
+ * @property {number} step - Current form step (1 for contact info, 2 for questions)
+ * @property {string} email - Applicant's email address
+ * @property {string} countryCode - Country code for phone number
+ * @property {string} phoneNumber - Applicant's phone number
+ * @property {Object|null} user - Current user data
+ * @property {Object} answers - Answers to screening questions
+ * @property {boolean} isSubmitting - Form submission state
+ *
+ * @method fetchUser
+ * Fetches current user data from API
+ * @async
+ * @returns {Promise<void>}
+ *
+ * @method handleAnswerChange
+ * Updates answers state when screening questions are answered
+ * @param {number} index - Question index
+ * @param {string} value - Answer value
+ * @returns {void}
+ *
+ * @method validateForm
+ * Validates email and phone number format
+ * @returns {boolean} True if form is valid, false otherwise
+ *
+ * @method handleSubmit
+ * Submits the job application with all collected data
+ * @async
+ * @returns {Promise<void>}
+ */
 
 const Applyjob = ({ isOpen, onClose, job, jobId, onApplicationSuccess }) => {
   const [step, setStep] = useState(1);

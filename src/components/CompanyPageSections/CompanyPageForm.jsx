@@ -1,7 +1,56 @@
 
 import { FaPlus,FaUpload } from "react-icons/fa6";
 
-
+/**
+ * A form component for creating or editing company information.
+ * Includes fields for company details, logo upload, and validation handling.
+ *
+ * @component
+ * @param {Object} props - Component props
+ * @param {Object} props.errors - Validation error messages
+ * @param {string} props.companyName - Company name value
+ * @param {function} props.setCompanyName - Company name setter
+ * @param {string} props.tagline - Company tagline value
+ * @param {function} props.setTagline - Tagline setter
+ * @param {string} props.industry - Company industry value
+ * @param {function} props.setIndustry - Industry setter
+ * @param {string} props.organizationType - Organization type value
+ * @param {function} props.setOrganizationType - Organization type setter
+ * @param {string} props.organizationSize - Organization size value
+ * @param {function} props.setOrganizationSize - Organization size setter
+ * @param {string} props.website - Company website value
+ * @param {function} props.setWebsite - Website setter
+ * @param {boolean} props.checkbox - Checkbox value
+ * @param {function} props.setCheckbox - Checkbox setter
+ * @param {string} props.companyAddress - Company address value
+ * @param {function} props.setCompanyAddress - Address setter
+ * @param {string} props.logoPreview - Logo preview URL
+ * @param {function} props.setLogoPreview - Logo preview setter
+ * @param {File} props.logo - Logo file object
+ * @param {function} props.setLogo - Logo setter
+ * @param {string} props.location - Company location value
+ * @param {function} props.setCompanyLocation - Location setter
+ * @param {ReactNode} props.children - Child components
+ * @returns {JSX.Element} The rendered company form
+ *
+ * @example
+ * <CompanyForm
+ *   errors={formErrors}
+ *   companyName={companyData.name}
+ *   setCompanyName={setCompanyName}
+ *   // ...other props
+ * />
+ *
+ * @method handleOnChngeLogo
+ * Handles logo file selection and creates preview
+ * @param {Event} e - File input change event
+ * @returns {void}
+ *
+ * @method handleResetLogo
+ * Resets the logo selection
+ * @param {Event} e - Click event
+ * @returns {void}
+ */
 
 const CompanyForm = ({ errors,companyName, setCompanyName, tagline, setTagline, industry, setIndustry, organizationType, setOrganizationType, organizationSize, setOrganizationSize, website, setWebsite, checkbox, setCheckbox, companyAddress, setCompanyAddress, logoPreview, setLogoPreview,logo,setLogo,location,setCompanyLocation ,children}) =>{
 
