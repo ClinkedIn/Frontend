@@ -1,754 +1,570 @@
-
-
 import { useOutletContext } from 'react-router-dom';
-import { useEffect,useState,useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { BASE_URL } from '../../constants';
-import Main from '../Main';
+// import Main from '../Main'; // Main component was not used in the provided structure
 import PostMenu from '../PostMenu.jsx';
 import PostReactions from '../PostReactions';
 import CommentSection from '../CommentSection';
 import CreatePostModal from '../PostCreation.jsx';
 
-const CompanyFeedPage = ()=> {
-    const {companyInfo}  = useOutletContext();
-    const [loadingPoasts, setLoadingPosts] = useState(true);
+const CompanyFeedPage = () => {
+    const { companyInfo } = useOutletContext();
+    const [loadingPoasts, setLoadingPosts] = useState(true); // Typo: loadingPoasts -> loadingPosts
     const [posts, setPosts] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [postContent, setPostContent] = useState('');
+    // const [loading, setLoading] = useState(true); // This seems redundant with loadingPosts
+    // const [error, setError] = useState(null); // Not used for UI updates
+    // const [postContent, setPostContent] = useState(''); // Primarily for modal, modal manages its own state
     const [isPostModalOpen, setIsPostModalOpen] = useState(false);
     const [userReactions, setUserReactions] = useState({});
     const [expandedComments, setExpandedComments] = useState({});
     const [comments, setComments] = useState({});
     const [loadingComments, setLoadingComments] = useState({});
-    const [expandedReplies, setExpandedReplies] = useState({});
-    const [replies, setReplies] = useState({});
-    const [user,setUser] = useState()
+    // const [expandedReplies, setExpandedReplies] = useState({}); // Not used
+    // const [replies, setReplies] = useState({}); // Not used
+    const [user, setUser] = useState();
     const [inlinePostText, setInlinePostText] = useState('');
     const [inlinePostAttachment, setInlinePostAttachment] = useState(null);
     const inlineAttachmentInputRef = useRef(null);
+
     const reactionTypes = [
         { type: 'like', emoji: '👍', label: 'Like' },
         { type: 'celebrate', emoji: '👏', label: 'Celebrate' },
         { type: 'support', emoji: '❤️', label: 'Support' },
         { type: 'insightful', emoji: '💡', label: 'Insightful' },
         { type: 'funny', emoji: '😄', label: 'Funny' }
-      ];
-      const handleAddComment = async (postId, commentText, attachment = null, taggedUsers = [], parentComment = null, attachmentUrl = null) => {
-        try {
-          const endpoint =  `${BASE_URL}/comments`;
-          console.log(`Posting comment to ${endpoint}:`, commentText);
-          
-          // Use FormData to support file uploads
-          const formData = new FormData();
-          
-          // Required parameters
-          formData.append('postId', postId);
-          formData.append('commentContent', commentText);
-          
-          // Add attachment file if provided (using 'file' as the field name per API spec)
-          if (attachment) {
-            formData.append('file', attachment);
-          }
-          
-          // Add attachment URL if provided
-          if (attachmentUrl) {
-            formData.append('commentAttachment', attachmentUrl);
-          }
-          
-          // Add tagged users if any
-          if (taggedUsers && taggedUsers.length > 0) {
-            formData.append('taggedUsers', JSON.stringify(taggedUsers));
-          }
-          
-          // Add parent comment ID for replies
-          if (parentComment) {
-            formData.append('parentComment', parentComment);
-          }
-          
-          // Log what we're sending
-          console.log("Sending comment:");
-          console.log("- Post ID:", postId);
-          console.log("- Content:", commentText);
-          console.log("- File attachment:", attachment ? "Yes" : "No");
-          console.log("- URL attachment:", attachmentUrl);
-          console.log("- Tagged users:", taggedUsers.length > 0 ? taggedUsers : "None");
-          console.log("- Parent comment:", parentComment || "None (top-level comment)");
-          
-          const response = await axios.post(endpoint, formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-          });
-          
-          console.log(`Comment posted successfully:`, response.data);
-          
-          // If we receive the comment in the response, add it to our comment list
-          if (response.data && response.data.comment) {
-            setComments(prev => {
-              const existingComments = prev[postId] || [];
-              
-              // If it's a reply and we're showing replies, handle accordingly
-              if (parentComment) {
-                // Find parent comment and increment its reply count
-                return {
-                  ...prev,
-                  [postId]: existingComments.map(comment => 
-                    comment._id === parentComment 
-                      ? {
-                          ...comment, 
-                          replyCount: (comment.replyCount || 0) + 1,
-                          // If we're tracking replies in-memory, could add to replies array too
-                          replies: [...(comment.replies || []), response.data.comment]
-                        }
-                      : comment
-                  )
-                };
-              }
-              
-              // For top-level comments, add to the beginning of the array
-              return {
-                ...prev,
-                [postId]: [response.data.comment, ...existingComments]
-              };
-            });
-          } else {
-            // If API doesn't return the comment object, just refresh comments
-            await fetchComments(postId);
-          }
-          
-          // Update comment count in posts
-          setPosts(posts.map(post => {
-            if ((post.id === postId || post.postId === postId)) {
-              return {
-                ...post,
-                commentCount: (post.commentCount || 0) + 1,
-                metrics: post.metrics ? {
-                  ...post.metrics,
-                  comments: (post.metrics.comments || 0) + 1
-                } : undefined
-              };
-            }
-            return post;
-          }));
-          
-          return response.data;
-          
-        } catch (err) {
-          console.error(`Error posting comment:`, err);
-          
-          //error handling
-          if (err.response) {
-            console.error('Comment error response:', err.response.data);
-            console.error('Status code:', err.response.status);
-            alert(`Failed to post comment: ${err.response.data.message || 'Server error'}`);
-          } else if (err.request) {
-            console.error('No response received:', err.request);
-            alert('Failed to post comment: No response from server');
-          } else {
-            console.error('Error setting up request:', err.message);
-            alert(`Failed to post comment: ${err.message}`);
-          }
-          throw err;
+    ];
+
+    // --- Handler for inline file input change ---
+    const handleInlineFileChange = (e) => {
+        if (e.target.files && e.target.files[0]) {
+            setInlinePostAttachment(e.target.files[0]);
+        } else {
+            setInlinePostAttachment(null);
         }
-      };
-      useEffect(() => {
+    };
+
+    // --- Generic Post Creation Logic (called by inline form handler & modal) ---
+    const handleCreatePost = async (postData) => {
+        if (!companyInfo || !companyInfo.id) {
+            console.error("Company information is missing, cannot create post.");
+            alert("Error: Company information is not available to associate the post with.");
+            return;
+        }
+        // Ensure postData is provided and has content
+        if (!postData || (!postData.text?.trim() && (!postData.files || postData.files.length === 0))) {
+            alert("Post content (text or attachment) cannot be empty.");
+            return;
+        }
+
+        try {
+            const formData = new FormData();
+            formData.append('description', postData.text || ""); // Ensure description is at least empty string
+
+            if (postData.files && postData.files.length > 0) {
+                for (let i = 0; i < postData.files.length; i++) {
+                    formData.append('files', postData.files[i]);
+                }
+            }
+
+            formData.append('whoCanSee', 'anyone');
+            formData.append('whoCanComment', 'anyone');
+
+            const response = await axios.post(
+                `${BASE_URL}/companies/${companyInfo.id}/post`,
+                formData,
+                {
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                    withCredentials: true,
+                }
+            );
+
+            console.log("Post creation successful:", response.data);
+            const newPostFromApi = response.data.post;
+
+            if (newPostFromApi) {
+                setPosts(prevPosts => [newPostFromApi, ...prevPosts]);
+            } else {
+                console.warn("Post object not found in API response. Consider re-fetching posts.");
+            }
+
+            // If the modal called this function, close the modal.
+            // The modal's onSubmit handler will be responsible for clearing modal-specific state.
+            if (isPostModalOpen) {
+                setIsPostModalOpen(false);
+            }
+            // Do NOT clear inline form state here. The caller (handleAttemptInlinePost) will do that.
+
+        } catch (err) {
+            console.error('Error creating post:', err);
+            if (err.response) {
+                console.error('Server response error data:', err.response.data);
+                console.error('Server response error status:', err.response.status);
+                alert(`Failed to create post: ${err.response.data.message || 'Server error'}`);
+            } else if (err.request) {
+                console.error('No response received from server:', err.request);
+                alert('Failed to create post: No response from server. Please check your connection.');
+            } else {
+                console.error('Error setting up post request:', err.message);
+                alert(`Failed to create post: ${err.message}`);
+            }
+        }
+    };
+
+
+    // --- Handler for the INLINE post form submission ---
+    const handleAttemptInlinePost = async () => {
+        if (!inlinePostText.trim() && !inlinePostAttachment) {
+            alert("Please add some content or an attachment to post.");
+            return;
+        }
+
+        const postDataForApi = {
+            text: inlinePostText,
+            files: inlinePostAttachment ? [inlinePostAttachment] : [],
+        };
+
+        await handleCreatePost(postDataForApi); // Call the generic post creation function
+
+        // Clear the inline form fields after attempting to post
+        setInlinePostText('');
+        setInlinePostAttachment(null);
+        if (inlineAttachmentInputRef.current) {
+            inlineAttachmentInputRef.current.value = ""; // Clear the file input field visually
+        }
+    };
+
+
+    // --- Other handlers (handleAddComment, fetchUser, etc.) ---
+    const handleAddComment = async (postId, commentText, attachment = null, taggedUsers = [], parentComment = null, attachmentUrl = null) => {
+        try {
+            const endpoint = `${BASE_URL}/comments`;
+            const formData = new FormData();
+            formData.append('postId', postId);
+            formData.append('commentContent', commentText);
+            if (attachment) formData.append('file', attachment);
+            if (attachmentUrl) formData.append('commentAttachment', attachmentUrl);
+            if (taggedUsers && taggedUsers.length > 0) formData.append('taggedUsers', JSON.stringify(taggedUsers));
+            if (parentComment) formData.append('parentComment', parentComment);
+
+            const response = await axios.post(endpoint, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+                 withCredentials: true,
+            });
+
+            if (response.data && response.data.comment) {
+                setComments(prev => {
+                    const existingComments = prev[postId] || [];
+                    if (parentComment) {
+                        return {
+                            ...prev,
+                            [postId]: existingComments.map(comment =>
+                                comment._id === parentComment
+                                    ? { ...comment, replyCount: (comment.replyCount || 0) + 1, replies: [...(comment.replies || []), response.data.comment] }
+                                    : comment
+                            )
+                        };
+                    }
+                    return { ...prev, [postId]: [response.data.comment, ...existingComments] };
+                });
+            } else {
+                await fetchComments(postId);
+            }
+
+            setPosts(currentPosts => currentPosts.map(post => {
+                if ((post.id === postId || post.postId === postId)) {
+                    const newCommentCount = (post.commentCount || (post.metrics?.comments || 0)) + 1;
+                    return {
+                        ...post,
+                        commentCount: newCommentCount, // Ensure this exists or is initialized
+                        metrics: post.metrics ? { ...post.metrics, comments: newCommentCount } : { comments: newCommentCount }
+                    };
+                }
+                return post;
+            }));
+            return response.data;
+        } catch (err) {
+            console.error(`Error posting comment:`, err);
+            if (err.response) alert(`Failed to post comment: ${err.response.data.message || 'Server error'}`);
+            else if (err.request) alert('Failed to post comment: No response from server');
+            else alert(`Failed to post comment: ${err.message}`);
+            throw err;
+        }
+    };
+
+    useEffect(() => {
         const fetchUser = async () => {
             try {
-                const response = await axios.get(`${BASE_URL}/user/me`, {
-                    withCredentials: true,
-                });
-                setUser(response.data.user); 
-                console.log("User data:", response.data.user);
+                const response = await axios.get(`${BASE_URL}/user/me`, { withCredentials: true });
+                setUser(response.data.user);
             } catch (error) {
                 console.error("Error fetching user:", error);
             }
         }
         fetchUser();
-    },[])
-      
-      const handleReactToComment = async (postId, commentId, reactionType = 'like', isRemove = false) => {
+    }, []);
+
+    const handleReactToComment = async (postId, commentId, reactionType = 'like', isRemove = false) => {
         try {
-          const endpoint =  `${BASE_URL}/comments/${commentId}/${reactionType.toLowerCase()}`;
-          console.log(`${isRemove ? 'Removing' : 'Sending'} ${reactionType} reaction to comment ${commentId}`);
-          
-          let response;
-          
-          if (isRemove) {
-            response = await axios.delete(endpoint);
-          } else {
-            response = await axios.post(endpoint);
-          }
-          
-          console.log(`Comment reaction response:`, response.data);
-          
-          // Refresh comments for this post to get updated reaction counts
-          fetchComments(postId);
-          
+            const endpoint = `${BASE_URL}/comments/${commentId}/${reactionType.toLowerCase()}`;
+            if (isRemove) await axios.delete(endpoint, { withCredentials: true });
+            else await axios.post(endpoint, {}, { withCredentials: true }); // Added empty object for POST body
+            fetchComments(postId);
         } catch (err) {
-          console.error(`Error reacting to comment:`, err);
-          
-          if (err.response) {
-            console.error('Comment reaction error:', err.response.data);
-            console.error('Status code:', err.response.status);
-          }
+            console.error(`Error reacting to comment:`, err.response || err);
         }
-      };
-      const fetchReplies = async (commentId) => {
+    };
+
+    // fetchReplies not used, can be removed or implemented if needed for threaded replies UI
+    // const fetchReplies = async (commentId) => { ... };
+
+    const handleReact = async (postId, reactionType = 'like', isRemove = false) => {
         try {
-          const endpoint = `${BASE_URL}/comments/${commentId}/replies`;
-          const response = await axios.get(endpoint);
-          setReplies(prev => ({
-            ...prev,
-            [commentId]: response.data.replies || []
-          }));
-        } catch (err) {
-          console.error('Error fetching replies:', err);
-        }
-      };
-      
-      const handleReact = async (postId, reactionType = 'like', isRemove = false) => {
-        try {
-          const postIdToUse = postId.toString();
-          const endpoint = `${BASE_URL}/posts/${postIdToUse}/Like`;
-          console.log(`${isRemove ? 'Removing' : 'Sending'} ${reactionType} reaction to: ${endpoint}`);
-          
-          let response;
-          
-          if (isRemove) {
-            // Remove the reaction using DELETE method
-            response = await axios.delete(endpoint);
-            console.log(`Reaction removed response:`, response.data);
-            
-            // Update user reactions state to remove the reaction
-            setUserReactions(prev => {
-              const updated = { ...prev };
-              delete updated[postIdToUse];
-              return updated;
-            });
-            
-          } else {
-            // Add the reaction using POST method
-            response = await axios.post(endpoint, {
-              impressionType: reactionType.toLowerCase()
-            });
-            console.log(`Reaction added response:`, response.data);
-            
-            // Update user reactions state to track the reaction type
-            setUserReactions(prev => ({
-              ...prev,
-              [postIdToUse]: reactionType
-            }));
-          }
-          
-          // Update the post in the UI
-          if (response.data) {
-            // If the API returns the updated post
-            if (response.data.post) {
-              setPosts(
-                posts.map((post) => (post.id === postId || post.postId === postId) ? response.data.post : post)
-              );
+            const postIdToUse = postId.toString();
+            const endpoint = `${BASE_URL}/posts/${postIdToUse}/Like`; // Assuming /Like handles various reaction types based on body
+            let response;
+            if (isRemove) {
+                response = await axios.delete(endpoint, { withCredentials: true });
+                setUserReactions(prev => { const updated = { ...prev }; delete updated[postIdToUse]; return updated; });
             } else {
-              // If API just returns success but not the updated post, update locally
-              setPosts(
-                posts.map((post) => {
-                  if (post.id === postId || post.postId === postId) {
-                    // Simple if-check for metrics update
-                    let likeDelta = 0;
-                    if (!isRemove && !post.isLiked) {
-                      likeDelta = 1; // Add a like if not already liked
-                    } else if (isRemove && post.isLiked) {
-                      likeDelta = -1; // Remove a like if already liked
-                    }
-                    
-                    return { 
-                      ...post, 
-                      isLiked: !isRemove,
-                      userReaction: isRemove ? null : { type: reactionType },
-                      // Use the delta only if needed
-                      metrics: post.metrics ? {
-                        ...post.metrics,
-                        likes: post.metrics.likes + likeDelta
-                      } : undefined,
-                      impressionCounts: post.impressionCounts ? {
-                        ...post.impressionCounts,
-                        total: post.impressionCounts.total + likeDelta,
-                        [reactionType.toLowerCase()]: (post.impressionCounts[reactionType.toLowerCase()] || 0) + likeDelta
-                      } : undefined
-                    };
-                  }
-                  return post;
-                })
-              );
+                response = await axios.post(endpoint, { impressionType: reactionType.toLowerCase() }, { withCredentials: true });
+                setUserReactions(prev => ({ ...prev, [postIdToUse]: reactionType }));
             }
-          }
+
+            if (response.data) {
+                if (response.data.post) { // If API returns the full updated post
+                    setPosts(currentPosts => currentPosts.map((p) => (p.id === postId || p.postId === postId) ? response.data.post : p));
+                } else { // Optimistic update if API only returns success/counts
+                    setPosts(currentPosts => currentPosts.map(p => {
+                        if (p.id === postId || p.postId === postId) {
+                            const currentIsLiked = p.isLiked || (userReactions[postIdToUse] && userReactions[postIdToUse] !== null);
+                            const oldReactionType = p.userReaction?.type;
+                            let newMetrics = { ...(p.metrics || { likes: 0 }) };
+                            let newImpressionCounts = { ...(p.impressionCounts || { total: 0 }) };
+
+                            // Initialize reaction types if not present
+                            reactionTypes.forEach(rt => {
+                                newImpressionCounts[rt.type] = newImpressionCounts[rt.type] || 0;
+                            });
+
+                            if (isRemove) { // Removing current reaction
+                                if (currentIsLiked && oldReactionType) {
+                                    newMetrics.likes = Math.max(0, newMetrics.likes - 1);
+                                    newImpressionCounts[oldReactionType] = Math.max(0, newImpressionCounts[oldReactionType] - 1);
+                                    newImpressionCounts.total = Math.max(0, newImpressionCounts.total - 1);
+                                }
+                            } else { // Adding or changing reaction
+                                if (currentIsLiked && oldReactionType && oldReactionType !== reactionType) { // Changing reaction
+                                    newImpressionCounts[oldReactionType] = Math.max(0, newImpressionCounts[oldReactionType] - 1);
+                                    newImpressionCounts[reactionType]++;
+                                    // Total likes and metrics.likes unchanged as one reaction is swapped for another
+                                } else if (!currentIsLiked) { // Adding new reaction
+                                    newMetrics.likes++;
+                                    newImpressionCounts[reactionType]++;
+                                    newImpressionCounts.total++;
+                                }
+                            }
+                            return { ...p, isLiked: !isRemove, userReaction: isRemove ? null : { type: reactionType }, metrics: newMetrics, impressionCounts: newImpressionCounts };
+                        }
+                        return p;
+                    }));
+                }
+            }
         } catch (err) {
-          console.error(`Error ${isRemove ? 'removing' : 'adding'} ${reactionType} reaction:`, err);
-          
-          if (err.response) {
-            console.error('Reaction error response:', err.response.data);
-            console.error('Status code:', err.response.status);
-          }
+            console.error(`Error reacting to post:`, err.response || err);
         }
-      };
-      const handleHidePost = (postId) => {
-        setPosts(posts.filter(post => post.id !== postId && post.postId !== postId));
-      };
-      const handleSavePost = async (postId) => {
+    };
+    const handleHidePost = (postId) => setPosts(currentPosts => currentPosts.filter(p => (p.id || p.postId) !== postId));
+    const handleSavePost = async (postId) => {
         try {
-          await axios.post(`${BASE_URL}/posts/${postId}/save`);
-          console.log(`Post ${postId} saved`);
-          alert(`Post saved successfully!`);
+            await axios.post(`${BASE_URL}/posts/${postId}/save`, {}, { withCredentials: true });
+            alert(`Post saved successfully!`);
+            setPosts(currentPosts => currentPosts.map(p => ((p.id === postId || p.postId === postId) ? { ...p, isSaved: true } : p)));
         } catch (error) {
-          console.error('Error saving post:', error);
-          alert('Failed to save post. Please try again.');
+            alert('Failed to save post.');
+            console.error('Error saving post:', error.response || error);
         }
-      };
-      const handleReportPost = async (postId) => {
+    };
+    const handleReportPost = async (postId) => {
         try {
-          await axios.post(`${BASE_URL}/posts/${postId}/report`, {
-            reason: 'inappropriate'
-          });
-          console.log(`Post ${postId} reported`);
-          alert(`Post reported. Thank you for helping keep LinkedIn safe.`);
+            await axios.post(`${BASE_URL}/posts/${postId}/report`, { reason: 'inappropriate' }, { withCredentials: true });
+            alert(`Post reported.`);
         } catch (error) {
-          console.error('Error reporting post:', error);
-          alert('Failed to report post. Please try again.');
+            alert('Failed to report post.');
+            console.error('Error reporting post:', error.response || error);
         }
-      };
-      const toggleComments = async (postId) => {
+    };
+
+    const toggleComments = async (postId) => {
         const isExpanded = expandedComments[postId];
-        
-        setExpandedComments(prev => ({
-          ...prev,
-          [postId]: !isExpanded
-        }));
-        
-        // If expanding comments and we don't have them yet, fetch them
-        if (!isExpanded && !comments[postId]) {
-          await fetchComments(postId);
+        setExpandedComments(prev => ({ ...prev, [postId]: !isExpanded }));
+        if (!isExpanded && (!comments[postId] || comments[postId].length === 0)) { // Fetch if not expanded and no comments loaded
+            await fetchComments(postId);
         }
-      };
-      const fetchComments = async (postId) => {
+    };
+
+    const fetchComments = async (postId) => {
+        setLoadingComments(prev => ({ ...prev, [postId]: true }));
         try {
-          setLoadingComments(prev => ({ ...prev, [postId]: true }));
-          
-          const endpoint = `${BASE_URL}/comments/${postId}/post`;
-          console.log(`Fetching comments for post ${postId} from ${endpoint}`);
-          
-          const response = await axios.get(endpoint);
-          console.log(`Comments response for post ${postId}:`, response.data);
-          
-          if (response.data && response.data.comments) {
-            setComments(prev => ({
-              ...prev,
-              [postId]: response.data.comments
-            }));
-          }
+            const response = await axios.get(`${BASE_URL}/comments/${postId}/post`, { withCredentials: true });
+            setComments(prev => ({ ...prev, [postId]: response.data.comments || [] }));
         } catch (err) {
-          console.error(`Error fetching comments for post ${postId}:`, err);
-          
-          if (err.response) {
-            console.error('Comments error response:', err.response.data);
-            console.error('Status code:', err.response.status);
-          }
+            console.error(`Error fetching comments for post ${postId}:`, err.response || err);
         } finally {
-          setLoadingComments(prev => ({ ...prev, [postId]: false }));
+            setLoadingComments(prev => ({ ...prev, [postId]: false }));
         }
-      };
+    };
+
     const formatDate = (dateString) => {
+        if (!dateString) return 'some time ago';
         const date = new Date(dateString);
         const now = new Date();
         const diffInSeconds = Math.floor((now - date) / 1000);
-        
-        if (diffInSeconds < 60) {
-          return 'Just now';
-        } else if (diffInSeconds < 3600) {
-          return `${Math.floor(diffInSeconds / 60)}m ago`;
-        } else if (diffInSeconds < 86400) {
-          return `${Math.floor(diffInSeconds / 3600)}h ago`;
-        } else {
-          return date.toLocaleDateString();
-        }
-      };
-    useEffect(() => {
-        const fetchPosts = async () => {
-            try {
-                const response = await axios.get(`${BASE_URL}/companies/${companyInfo.id}/post`,{
-                    withCredentials: true,
-                });
-                setPosts(response.data.posts);
-                console.log('Posts data:', response.data.posts);
-            } catch (error) {
-                console.error('Error fetching posts:', error);
-            } finally {
-                setLoadingPosts(false);
-            }
-        };
-
-        fetchPosts();
-    }, [companyInfo?.id]);
-  const handleInlineFileChange = (e) => {
-      if (e.target.files && e.target.files[0]) {
-        setInlinePostAttachment(e.target.files[0]);
-      } else {
-        setInlinePostAttachment(null); 
-      }
+        if (diffInSeconds < 5) return 'Just now';
+        if (diffInSeconds < 60) return `${diffInSeconds}s ago`;
+        if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+        if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+        if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+        return date.toLocaleDateString();
     };
 
-const handleCreatePost = async (postData) => { 
-    if (!companyInfo || !companyInfo.id) {
-        console.error("Company information is missing, cannot create post.");
-        alert("Error: Company information is not available to associate the post with.");
-        return; 
-    }
-
-    try {
-        const formData = new FormData();
-        formData.append('description', postData.text); 
-
-        if (postData.files && postData.files.length > 0) {
-            for (let i = 0; i < postData.files.length; i++) {
-                formData.append('files', postData.files[i]); 
-            }
-        }
-        
-        
-        formData.append('whoCanSee', 'anyone');     
-        formData.append('whoCanComment', 'anyone'); 
-
-        
-        const response = await axios.post(
-            `${BASE_URL}/companies/${companyInfo.id}/post`, 
-            formData,
-            {
-                headers: { 'Content-Type': 'multipart/form-data' },
-                withCredentials: true, 
-            }
-        );
-
-        console.log("Post creation successful:", response.data);
-        setInlinePostAttachment(null);
-        setInlinePostText("")
-        
-        const newPostFromApi = response.data.post; 
-
-        if (newPostFromApi) {
-           
-            setPosts(prevPosts => [newPostFromApi, ...prevPosts]);
-        } else {
-            console.warn("Post object not found in API response. Consider re-fetching posts.");
-           
-        }
-
-        if (isPostModalOpen) { 
-            setIsPostModalOpen(false);
-        }
-        
-    } catch (err) {
-        console.error('Error creating post:', err);
-        if (err.response) {
-            console.error('Server response error data:', err.response.data);
-            console.error('Server response error status:', err.response.status);
-            alert(`Failed to create post: ${err.response.data.message || 'Server error'}`);
-        } else if (err.request) {
-            console.error('No response received from server:', err.request);
-            alert('Failed to create post: No response from server. Please check your connection.');
-        } else {
-            console.error('Error setting up post request:', err.message);
-            alert(`Failed to create post: ${err.message}`);
-        }
-    }
-};
-
-   if(loadingPoasts){
-    return(
-        <div className="mt-4 bg-white justify-center flex   w-full rounded-lg shadow-lg p-4 ">
-            <h1 className="text-2xl  ">Loading Posts....</h1>
-        </div>
-    )
-   }
-  if(posts.length===0){
-     return(
-
-        <div className="w-full">
-          <div className='grid-area-main'>
-            <div className="overflow-hidden text-center mb-2 bg-white rounded-md border-none shadow-[0_0_0_1px_rgba(0,0,0,0.15),0_0_0_rgba(0,0,0,0.20)]">
-              <div className="flex flex-col text-[#958b7b] bg-white"> 
-                <div className="flex items-start p-3"> 
-                  <img
-                    src={companyInfo.logo || "/Images/CompanyLogo.png"} 
-                    alt="user"
-                    className="w-12 h-12 rounded-full mr-3 shrink-0" 
-                  />
-                  <div className="flex-grow">
-                    <textarea
-                      value={inlinePostText} 
-                      onChange={(e) => setInlinePostText(e.target.value)} 
-                      placeholder={`What's on your mind, ${companyInfo.name || 'Company'}?`}
-                      className="w-full p-2 border border-[rgba(0,0,0,0.15)] rounded-md resize-none focus:ring-2 focus:ring-blue-500 outline-none"
-                      rows="3"
-                    ></textarea>
-                    <div className="flex items-center justify-between mt-2">
-                      <div>
-                        <label
-                          htmlFor="inlineAttachmentInput"
-                          className="cursor-pointer text-sm text-blue-600 hover:text-blue-800 py-1 px-2 rounded-md hover:bg-gray-100 transition-colors"
-                        >
-                          {inlinePostAttachment ? inlinePostAttachment.name : "Add Attachment"}
-                        </label>
-                        <input
-                          type="file"
-                          id="inlineAttachmentInput"
-                          className="hidden"
-                          onChange={handleInlineFileChange} 
-                          ref={inlineAttachmentInputRef} 
-                          accept="image/*,video/*,audio/*,.pdf,.doc,.docx,,.ppt,.pptx,.txt,.zip,.rar,.7z,"
-                        />
-                      </div>
-                      <button
-                        onClick={handleCreatePost} 
-                        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm py-2 px-4 rounded-full transition-colors"
-                      >
-                        Post
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <h1 className="text-2xl flex justify-center mt-4">No Posts Found</h1>
-          </div>
-        </div>
-     )
-    }
-
-   return(
-    <div className="mt-4  flex flex-col justify-center   w-full rounded-lg  ">
-        <div className='grid-area-main'>
-          {/* Create Post Form */}
-        
-          <div className="w-full">
-          <div className='grid-area-main'>
-            <div className="overflow-hidden text-center mb-2 bg-white rounded-md border-none shadow-[0_0_0_1px_rgba(0,0,0,0.15),0_0_0_rgba(0,0,0,0.20)]">
-              <div className="flex flex-col text-[#958b7b] bg-white"> 
-                <div className="flex items-start p-3"> 
-                  <img
-                    src={companyInfo.logo || "/Images/CompanyLogo.png"} 
-                    alt="user"
-                    className="w-12 h-12 rounded-full mr-3 shrink-0" 
-                  />
-                  <div className="flex-grow">
-                    <textarea
-                      value={inlinePostText} 
-                      onChange={(e) => setInlinePostText(e.target.value)} 
-                      placeholder={`What's on your mind, ${companyInfo.name || 'Company'}?`}
-                      className="w-full p-2 border border-[rgba(0,0,0,0.15)] rounded-md resize-none focus:ring-2 focus:ring-blue-500 outline-none"
-                      rows="3"
-                    ></textarea>
-                    <div className="flex items-center justify-between mt-2">
-                      <div>
-                        <label
-                          htmlFor="inlineAttachmentInput"
-                          className="cursor-pointer text-sm text-blue-600 hover:text-blue-800 py-1 px-2 rounded-md hover:bg-gray-100 transition-colors"
-                        >
-                          {inlinePostAttachment ? inlinePostAttachment.name : "Add Attachment"}
-                        </label>
-                        <input
-                          type="file"
-                          id="inlineAttachmentInput"
-                          className="hidden"
-                          onChange={handleInlineFileChange} 
-                          ref={inlineAttachmentInputRef} 
-                          accept="image/*,video/*,audio/*,.pdf,.doc,.docx,,.ppt,.pptx,.txt,.zip,.rar,.7z,"
-                        />
-                      </div>
-                      <button
-                        onClick={handleCreatePost} 
-                        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm py-2 px-4 rounded-full transition-colors"
-                      >
-                        Post
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-          
-        {posts.map((post) => (
-          <article key={post.companyId.id || post.postId} className="overflow-visible p-0 mb-2 bg-white rounded-md border-none shadow-[0_0_0_1px_rgba(0,0,0,0.15),0_0_0_rgba(0,0,0,0.20)]">
-            <div className="p-3 pr-10 pb-0 flex justify-between items-start relative">
-              <a href="/feed" className="overflow-hidden flex">
-                <img 
-                  src={post.companyId?.logo || "/Images/CompanyLogo.png"} 
-                  alt="user" 
-                  className="w-12 h-12 rounded-full mr-2.5" 
-                />
-                <div className="text-start">
-                  <h6 className="text-base text-black font-semibold">
-                    {post.companyId?.name || `${post.firstName} ${post.lastName}`}
-                  </h6>
-                  <span className="text-sm text-[rgba(0,0,0,0.6)] block">
-                    {post.author?.headline || post.headline}
-                  </span>
-                  <span className="text-sm text-[rgba(0,0,0,0.6)] block">
-                    {formatDate(post.timestamp || post.createdAt)}
-                  </span>
-                </div>
-              </a>
-              
-              <PostMenu
-                postId={post.id || post.postId}
-                onHide={handleHidePost}
-                onSave={handleSavePost}
-                onReport={handleReportPost}
-                isSaved={post.isSaved}
-              />
-            </div>
-            <div className="text-base text-start p-0 mt-2 pl-4 pr-4 text-[rgba(0,0,0,0.9)] overflow-hidden">
-              {post.content?.text || post.description}
-            </div>
-            
-            {/* Handle different media formats */}
-            {(post.content?.files && post.content.files.length > 0) && (
-              <div className="w-full relative bg-[#f9fafb] mt-2">
-                <div className="aspect-[16/9] relative overflow-hidden">
-                  <img 
-                    src={post.content.files[0].url} 
-                    alt={post.content.files[0].alt || "Post image"} 
-                    className="absolute inset-0 w-full h-full object-cover"
-                    loading="lazy"
-                  />
-                </div>
-              </div>
-            )}
-            
-            {(post.attachments && post.attachments.length > 0) && (
-              <div className="w-full relative bg-[#f9fafb] mt-2">
-                <div className="aspect-[16/9] relative overflow-hidden">
-                  <img 
-                    src={post.attachments[0]} 
-                    alt="Post attachment" 
-                    className="absolute inset-0 w-full h-full object-cover"
-                    loading="lazy"
-                  />
-                </div>
-              </div>
-            )}
-            
-            {/* Updated metrics section with reaction emojis */}
-            <ul className="flex justify-between mx-4 p-2 border-b border-[#e9e5df] text-sm overflow-auto">
-              <li className="flex items-center cursor-pointer hover:text-[#0a66c2] hover:underline">
-                <div className="flex items-center">
-                  {/* Handle different reaction formats */}
-                  {post.reactions && post.reactions.length > 0 && (
-                    <div className="flex -space-x-1 mr-1">
-                      {post.reactions.slice(0, 3).map((reaction, index) => (
-                        <span key={index} className="inline-block w-4 h-4 text-xs">
-                          {reaction.type === 'like' && '👍'}
-                          {reaction.type === 'celebrate' && '👏'}
-                          {reaction.type === 'support' && '❤️'}
-                          {reaction.type === 'insightful' && '💡'}
-                          {reaction.type === 'funny' && '😄'}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  
-                  {/* Handle impression counts format */}
-                  {post.impressionCounts && (
-                    <div className="flex -space-x-1 mr-1">
-                      {post.impressionCounts.like > 0 && <span className="inline-block w-4 h-4 text-xs">👍</span>}
-                      {post.impressionCounts.celebrate > 0 && <span className="inline-block w-4 h-4 text-xs">👏</span>}
-                      {post.impressionCounts.support > 0 && <span className="inline-block w-4 h-4 text-xs">❤️</span>}
-                      {post.impressionCounts.insightful > 0 && <span className="inline-block w-4 h-4 text-xs">💡</span>}
-                      {post.impressionCounts.funny > 0 && <span className="inline-block w-4 h-4 text-xs">😄</span>}
-                    </div>
-                  )}
-                  
-                  {/* Display count based on available data */}
-                  <span>
-                    {post.metrics?.likes || post.impressionCounts?.total || 0}
-                  </span>
-                </div>
-              </li>
-              <li 
-                className="flex items-center cursor-pointer hover:text-[#0a66c2] hover:underline"
-                onClick={() => toggleComments(post.id || post.postId)}
-              >
-                <p>{post.metrics?.comments || post.commentCount || 0} comments</p>
-              </li>
-              
-              {/* Show reposts if available */}
-              {(post.repostCount > 0) && (
-                <li className="flex items-center cursor-pointer hover:text-[#0a66c2] hover:underline">
-                  <p>{post.repostCount} reposts</p>
-                </li>
-              )}
-            </ul>
-            
-            {/* Updated post action buttons with PostReactions component */}
-            <div className="p-0 px-4 flex justify-between min-h-[40px] overflow-hidden">
-              <PostReactions 
-                postId={post.id || post.postId}
-                onReact={handleReact}
-                reactionTypes={reactionTypes}
-                isLiked={post.isLiked ? true : false}
-                currentReaction={
-                  userReactions[post.id || post.postId] || 
-                  (post.userReaction ? post.userReaction.type : 'like')
+    useEffect(() => {
+        if (companyInfo?.id) { // Ensure companyInfo and its id are available
+            const fetchPosts = async () => {
+                setLoadingPosts(true); // Set loading true at the start of fetch
+                try {
+                    const response = await axios.get(`${BASE_URL}/companies/${companyInfo.id}/post`, {
+                        withCredentials: true,
+                    });
+                    setPosts(response.data.posts || []); // Ensure posts is an array
+                } catch (error) {
+                    console.error('Error fetching posts:', error.response || error);
+                    setPosts([]); // Set to empty array on error to prevent issues with .map
+                } finally {
+                    setLoadingPosts(false);
                 }
-              />
-              
-              <button 
-                onClick={() => toggleComments(post.id || post.postId)}
-                className="outline-none text-[rgba(0,0,0,0.6)] p-3 px-6 bg-transparent flex items-center cursor-pointer gap-1.25 rounded-md transition duration-200 hover:bg-[rgba(0,0,0,0.08)] font-semibold"
-              >
-                <img src="/Images/comment.svg" alt="comment" />
-                <span>Comment</span>
-              </button>
-              <button className="outline-none text-[rgba(0,0,0,0.6)] p-3 px-6 bg-transparent flex items-center cursor-pointer gap-1.25 rounded-md transition duration-200 hover:bg-[rgba(0,0,0,0.08)] font-semibold">
-                <img src="/Images/share.svg" alt="share" />
-                <span>Share</span>
-              </button>
-              <button className="outline-none text-[rgba(0,0,0,0.6)] p-3 px-6 bg-transparent flex items-center cursor-pointer gap-1.25 rounded-md transition duration-200 hover:bg-[rgba(0,0,0,0.08)] font-semibold">
-                <img src="/Images/send.svg" alt="send" />
-                <span>Send</span>
-              </button>
+            };
+            fetchPosts();
+        } else {
+            setLoadingPosts(false); // If no companyInfo.id, not loading
+            setPosts([]); // And no posts
+        }
+    }, [companyInfo?.id]); // Depend on companyInfo.id
+
+    // --- JSX Rendering ---
+    if (loadingPoasts) { // Typo: loadingPoasts
+        return (
+            <div className="mt-4 bg-white justify-center flex w-full rounded-lg shadow-lg p-4">
+                <h1 className="text-2xl">Loading Posts....</h1>
             </div>
-            
-            {/* Comment Section - Only show when expanded */}
-            {expandedComments[post.id || post.postId] && (
-              <div className="border-t border-[#e9e5df] p-4">
-                {loadingComments[post.id || post.postId] ? (
-                  <div className="text-center py-4">Loading comments...</div>
-                ) : (
-                  <CommentSection 
-                    postId={post.id || post.postId}
-                    comments={comments[post.id || post.postId] || []}
-                    authorInfo={user}
-                    onAddComment={handleAddComment}
-                    onReactToComment={(commentId, reactionType, isRemove) => 
-                      handleReactToComment(post.id || post.postId, commentId, reactionType, isRemove)
+        );
+    }
+
+    // Inline Post Creation Area (this will be shown if no posts, or always at the top)
+    const inlinePostCreationArea = (
+        <div className="overflow-hidden text-center mb-2 bg-white rounded-md border-none shadow-[0_0_0_1px_rgba(0,0,0,0.15),0_0_0_rgba(0,0,0,0.20)]">
+            <div className="flex flex-col text-[#958b7b] bg-white">
+                <div className="flex items-start p-3">
+                    <img
+                        src={companyInfo?.logo || "/Images/CompanyLogo.png"} // Added optional chaining for companyInfo
+                        alt="company logo"
+                        className="w-12 h-12 rounded-full mr-3 shrink-0"
+                    />
+                    <div className="flex-grow">
+                        <textarea
+                            value={inlinePostText}
+                            onChange={(e) => setInlinePostText(e.target.value)}
+                            placeholder={`What's on your mind, ${companyInfo?.name || 'Company'}?`} // Optional chaining
+                            className="w-full p-2 border border-[rgba(0,0,0,0.15)] rounded-md resize-none focus:ring-2 focus:ring-blue-500 outline-none"
+                            rows="3"
+                        ></textarea>
+                        <div className="flex items-center justify-between mt-2">
+                            <div>
+                                <label
+                                    htmlFor="inlineAttachmentInput"
+                                    className="cursor-pointer text-sm text-blue-600 hover:text-blue-800 py-1 px-2 rounded-md hover:bg-gray-100 transition-colors inline-flex items-center"
+                                >
+                                     <img src="/Images/photo-icon.svg" alt="attach" className="w-4 h-4 inline mr-1" />
+                                    {inlinePostAttachment ? inlinePostAttachment.name.substring(0,20) + (inlinePostAttachment.name.length > 20 ? "..." : "") : "Attach"}
+                                </label>
+                                <input
+                                    type="file"
+                                    id="inlineAttachmentInput"
+                                    className="hidden"
+                                    onChange={handleInlineFileChange}
+                                    ref={inlineAttachmentInputRef}
+                                    accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.ppt,.pptx,.txt,.zip,.rar,.7z"
+                                />
+                            </div>
+                            <button
+                                onClick={handleAttemptInlinePost} // CORRECTED: Call the intermediary handler
+                                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm py-2 px-3 rounded-full transition-colors"
+                            >
+                                Post
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {/* Optional: Modal trigger buttons can be here if desired, or removed if inline is primary */}
+                {/* <hr className="my-2" /> ... modal trigger buttons ... */}
+            </div>
+        </div>
+    );
+
+
+    if (posts.length === 0) {
+        return (
+            <div className="w-full mt-4"> {/* Added mt-4 for consistency */}
+                <div className='grid-area-main'>
+                    {companyInfo && user && inlinePostCreationArea} {/* Show create area if user and company info exists */}
+                    <h1 className="text-2xl flex justify-center mt-4 p-4 bg-white rounded-lg shadow-lg">No Posts Yet. Be the first to share!</h1>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="mt-4 flex flex-col justify-center w-full rounded-lg">
+            <div className='grid-area-main'>
+                {companyInfo && user && inlinePostCreationArea} {/* Show create area if user and company info exists */}
+
+                {posts.map((post) => {
+                    // Normalize post data access
+                    const postId = post.postId || post.id; // Prefer postId from backend response, fallback to id
+                    if (!postId) {
+                        console.warn("Post missing ID, skipping render:", post);
+                        return null; // Don't render post without an ID
                     }
-                    reactionTypes={reactionTypes}
-                    formatDate={formatDate}
-                  />
-                )}
-              </div>
-            )}
-          </article>
-        ))}
-       
-      </div>
+                    // Determine author details (could be company or an individual user who posted if API supports it)
+                    const authorName = post.companyId?.name || `${post.firstName || ''} ${post.lastName || ''}`.trim() || 'Unknown Author';
+                    const authorLogo = post.companyId?.logo || post.author?.profilePictureUrl || "/Images/CompanyLogo.png";
+                    const authorHeadline = post.author?.headline || post.companyId?.tagline || post.headline || ''; // post.headline for older posts
+                    const postDescription = post.postDescription || post.content?.text || post.description || ""; // Use postDescription from API
+                    const displayAttachments = post.attachments  || []; // Use attachments from API
 
-    </div>
-   )
+                    return (
+                        <article key={postId} className="overflow-visible p-0 mb-2 bg-white rounded-md border-none shadow-[0_0_0_1px_rgba(0,0,0,0.15),0_0_0_rgba(0,0,0,0.20)]">
+                            <div className="p-3 pr-10 pb-0 flex justify-between items-start relative">
+                                <a href={post.companyId ? `/company/${post.companyId.id}` : (post.author ? `/profile/${post.author.id}` : "#")} className="overflow-hidden flex mr-2">
+                                    <img
+                                        src={authorLogo}
+                                        alt={authorName}
+                                        className="w-12 h-12 rounded-full mr-2.5"
+                                    />
+                                    <div className="text-start">
+                                        <h6 className="text-base text-black font-semibold">{authorName}</h6>
+                                        <span className="text-sm text-[rgba(0,0,0,0.6)] block">{authorHeadline}</span>
+                                        <span className="text-sm text-[rgba(0,0,0,0.6)] block">{formatDate(post.createdAt || post.timestamp)}</span>
+                                    </div>
+                                </a>
+                                <PostMenu
+                                    postId={postId}
+                                    onHide={() => handleHidePost(postId)}
+                                    onSave={() => handleSavePost(postId)}
+                                    onReport={() => handleReportPost(postId)}
+                                    isSaved={post.isSaved}
+                                />
+                            </div>
+                            <div className="text-base text-start p-0 mt-2 px-4 text-[rgba(0,0,0,0.9)] overflow-hidden break-words whitespace-pre-wrap">
+                                {postDescription}
+                            </div>
 
+                            {(displayAttachments.length > 0) && (
+                                <div className="w-full relative bg-[#f9fafb] mt-2 p-2">
+                                    {/* Simple display for now, could be a carousel for multiple files */}
+                                    {displayAttachments.map((att, index) => (
+                                        <div key={index} className="aspect-video relative overflow-hidden mb-1 last:mb-0"> {/* Changed to aspect-video */}
+                                             {att.type && att.type.startsWith('video/') ? (
+                                                <video controls src={att.url} className="absolute inset-0 w-full h-full object-contain" />
+                                            ) : (
+                                                <img
+                                                    src={att}
+                                                    alt={att.alt || `Attachment ${index + 1}`}
+                                                    className="absolute inset-0 w-full h-full object-contain" // object-contain is often better
+                                                    loading="lazy"
+                                                />
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
 
+                            <ul className="flex justify-between mx-4 p-2 border-b border-[#e9e5df] text-sm overflow-auto">
+                                <li className="flex items-center cursor-pointer hover:text-[#0a66c2] hover:underline">
+                                    <div className="flex items-center">
+                                        {(post.impressionCounts && Object.values(post.impressionCounts).some(val => val > 0)) && (
+                                            <div className="flex -space-x-1 mr-1">
+                                                {reactionTypes.map(rt => post.impressionCounts[rt.type] > 0 && (
+                                                    <span key={rt.type} className="inline-block w-4 h-4 text-xs">{rt.emoji}</span>
+                                                ))}
+                                            </div>
+                                        )}
+                                        <span>{post.impressionCounts?.total || post.metrics?.likes || 0}</span>
+                                    </div>
+                                </li>
+                                <li
+                                    className="flex items-center cursor-pointer hover:text-[#0a66c2] hover:underline"
+                                    onClick={() => toggleComments(postId)}
+                                >
+                                    <p>{post.commentCount || post.metrics?.comments || 0} comments</p>
+                                </li>
+                                {(post.repostCount > 0) && (
+                                    <li className="flex items-center cursor-pointer hover:text-[#0a66c2] hover:underline">
+                                        <p>{post.repostCount} reposts</p>
+                                    </li>
+                                )}
+                            </ul>
 
+                            <div className="p-0 px-2 sm:px-4 flex justify-around sm:justify-between min-h-[40px] overflow-hidden flex-wrap">
+                                <PostReactions
+                                    postId={postId}
+                                    onReact={handleReact}
+                                    reactionTypes={reactionTypes}
+                                    isLiked={post.isLiked || (userReactions[postId] ? true : false)}
+                                    currentReaction={userReactions[postId] || post.userReaction?.type || 'like'}
+                                />
+                                <button onClick={() => toggleComments(postId)} className="outline-none text-[rgba(0,0,0,0.6)] p-2 sm:p-3 sm:px-4 md:px-6 bg-transparent flex items-center cursor-pointer gap-1.25 rounded-md transition duration-200 hover:bg-[rgba(0,0,0,0.08)] font-semibold text-xs sm:text-sm">
+                                    <img src="/Images/comment.svg" alt="comment" className="w-4 h-4 sm:w-auto sm:h-auto" />
+                                    <span>Comment</span>
+                                </button>
+                                <button className="outline-none text-[rgba(0,0,0,0.6)] p-2 sm:p-3 sm:px-4 md:px-6 bg-transparent flex items-center cursor-pointer gap-1.25 rounded-md transition duration-200 hover:bg-[rgba(0,0,0,0.08)] font-semibold text-xs sm:text-sm">
+                                    <img src="/Images/share.svg" alt="share" className="w-4 h-4 sm:w-auto sm:h-auto"/>
+                                    <span>Share</span>
+                                </button>
+                                <button className="outline-none text-[rgba(0,0,0,0.6)] p-2 sm:p-3 sm:px-4 md:px-6 bg-transparent flex items-center cursor-pointer gap-1.25 rounded-md transition duration-200 hover:bg-[rgba(0,0,0,0.08)] font-semibold text-xs sm:text-sm">
+                                    <img src="/Images/send.svg" alt="send" className="w-4 h-4 sm:w-auto sm:h-auto"/>
+                                    <span>Send</span>
+                                </button>
+                            </div>
+
+                            {expandedComments[postId] && (
+                                <div className="border-t border-[#e9e5df] p-4">
+                                    {loadingComments[postId] ? (
+                                        <div className="text-center py-4">Loading comments...</div>
+                                    ) : (
+                                        <CommentSection
+                                            postId={postId}
+                                            comments={comments[postId] || []}
+                                            authorInfo={user}
+                                            onAddComment={handleAddComment}
+                                            onReactToComment={(commentId, reactionType, isRemove) => handleReactToComment(postId, commentId, reactionType, isRemove)}
+                                            reactionTypes={reactionTypes}
+                                            formatDate={formatDate}
+                                        />
+                                    )}
+                                </div>
+                            )}
+                        </article>
+                    )
+                })}
+                 <CreatePostModal
+                    isOpen={isPostModalOpen}
+                    onClose={() => setIsPostModalOpen(false)}
+                    onSubmit={handleCreatePost} // Modal will pass its own postData object
+                    authorInfo={user} // Or companyInfo depending on who is seen as author in modal
+                />
+            </div>
+        </div>
+    );
 }
 export default CompanyFeedPage;
