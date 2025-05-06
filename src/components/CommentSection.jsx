@@ -15,6 +15,9 @@ const CommentSection = ({
   reactionTypes,
   formatDate
 }) => {
+
+  //optimistic like UI logic
+  /*
   // Add local comments state to manage UI updates directly
   const [localComments, setLocalComments] = useState(comments);
 
@@ -22,6 +25,7 @@ const CommentSection = ({
   useEffect(() => {
     setLocalComments(comments);
   }, [comments]);
+  */
 
   // Input & reply states
   const [commentText, setCommentText] = useState('');
@@ -31,17 +35,32 @@ const CommentSection = ({
   const [parentCommentId, setParentCommentId] = useState(null);
   const [replyingTo, setReplyingTo] = useState(null);
 
+  const [likeLoading, setLikeLoading] = useState({});
+
+    /*
   // Optimistic likes & per‑comment loading
   const [optimisticLikes, setOptimisticLikes] = useState({});
-  const [likeLoading, setLikeLoading] = useState({});
+  
+
+
+  // Clear optimistic flags when the real comments prop changes (keep this)
+  useEffect(() => {
+    setOptimisticLikes({});
+    setOptimisticReplyLikes({});
+  }, [comments]); // Note: This depends on the 'comments' prop, not 'localComments'
+  */
 
   // Replies state
   const [expandedReplies, setExpandedReplies] = useState({});
   const [replies, setReplies] = useState({});
   const [loadingReplies, setLoadingReplies] = useState({});
 
+  /*
   // Optimistic likes for replies
   const [optimisticReplyLikes, setOptimisticReplyLikes] = useState({});
+  
+  */
+
   const [replyLikeLoading, setReplyLikeLoading] = useState({});
 
   // Edit/delete states
@@ -72,11 +91,7 @@ const CommentSection = ({
     if (replyingTo && textareaRef.current) textareaRef.current.focus();
   }, [replyingTo]);
 
-  // Clear optimistic flags when the real comments prop changes (keep this)
-  useEffect(() => {
-    setOptimisticLikes({});
-    setOptimisticReplyLikes({});
-  }, [comments]); // Note: This depends on the 'comments' prop, not 'localComments'
+  
 
   // File select
   const handleFileSelect = e => {
@@ -147,62 +162,28 @@ const CommentSection = ({
   };
 
   // Like logic for parent comments
-  const handleLikeClick = async comment => {
+  const handleLikeClick = async (comment, reactionType = 'like', isRemove = false) => {
+    console.log('handleLikeClick:', { comment, reactionType, isRemove });
     const id = comment._id;
     if (likeLoading[id]) return;
-
-    const isLikedNow = optimisticLikes[id]?.isLiked
-      ?? (comment.isLiked?.like === true);
-
-    // Optimistic UI update for parent comment like
-    setLocalComments(prev => prev.map(c => {
-      if (c._id === id) {
-        const currentTotal = c.impressionCounts?.total || 0;
-        return {
-          ...c,
-          isLiked: { like: !isLikedNow }, // Simplified optimistic update
-          impressionCounts: {
-            ...c.impressionCounts,
-            total: isLikedNow ? Math.max(0, currentTotal - 1) : currentTotal + 1
-          }
-        };
-      }
-      return c;
-    }));
-    setOptimisticLikes(prev => ({ // Keep separate optimistic state for revert logic if needed
-      ...prev,
-      [id]: {
-        isLiked: !isLikedNow,
-        count: isLikedNow
-          ? Math.max(0, (comment.impressionCounts?.total || 0) - 1)
-          : (comment.impressionCounts?.total || 0) + 1
-      }
-    }));
+  
     setLikeLoading(prev => ({ ...prev, [id]: true }));
-
+  
     try {
-      if (isLikedNow) {
+      if (isRemove) {
         await axios.delete(`${BASE_URL}/comments/${id}/like`, { withCredentials: true });
       } else {
         await axios.post(
           `${BASE_URL}/comments/${id}/like`,
-          { impressionType: 'like' },
+          { impressionType: reactionType },
           { withCredentials: true }
         );
       }
-      // Notify parent, but local UI is already updated optimistically
-      onReactToComment(postId, id, 'like', isLikedNow);
+      // Trigger parent to re-fetch comments from backend
+      onReactToComment(postId, id, reactionType, isRemove);
     } catch (err) {
       console.error('Comment reaction error:', err);
-      // Revert optimistic UI update on error (except 400 which might be "already liked/unliked")
-      if (err.response?.status !== 400) {
-        setLocalComments(prev => prev.map(c => c._id === id ? comment : c)); // Revert to original comment data
-        setOptimisticLikes(prev => {
-          const copy = { ...prev };
-          delete copy[id];
-          return copy;
-        });
-      }
+      // Optionally show error to user
     } finally {
       setLikeLoading(prev => ({ ...prev, [id]: false }));
     }
@@ -511,8 +492,8 @@ const CommentSection = ({
 
       {/* Existing comments - use localComments */}
       <div className="space-y-4">
-        {localComments.length > 0 ? (
-          localComments.map(comment => (
+        {comments.length > 0 ? (
+          comments.map(comment => (
             <div key={comment._id} className="comment flex">
               <img
                 src={comment.profilePicture || '/Images/default-profile.png'} // Added fallback
@@ -591,18 +572,16 @@ const CommentSection = ({
                       <CommentReaction
                         commentId={comment._id}
                         onReact={(reactionType, isRemove) =>
-                          onReactToComment(postId, comment._id, reactionType, isRemove)
+                          handleLikeClick(comment, isRemove, comment.isLiked.like)  //swapped isRemove and reactionType
                         }
                         reactionTypes={reactionTypes}
                         isLiked={comment.isLiked?.like}
                         currentReaction={comment.isLiked?.type || 'like'}
                       />
                       {/* Display count only if > 0 */}
-                      {(comment.impressionCounts?.total || 0) > 0 && (
-                        <span className="ml-1">
-                          • {comment.impressionCounts?.total}
-                        </span>
-                      )}
+                      <span className="ml-1">
+                          • {comment.impressionCounts?.total ?? 0}
+                      </span>
                     </div>
 
                   {/* Reply button */}
@@ -739,20 +718,18 @@ const CommentSection = ({
 
                               {/* Like button for reply */}
                               <div className="flex items-center">
-                                <CommentReaction
-                                  commentId={reply._id}
+                              <CommentReaction
+                                  commentId={comment._id}
                                   onReact={(reactionType, isRemove) =>
-                                    onReactToComment(postId, reply._id, reactionType, isRemove)
+                                    handleLikeClick(comment, isRemove, comment.isLiked.like)  //swapped isRemove and reactionType
                                   }
                                   reactionTypes={reactionTypes}
-                                  isLiked={reply.isLiked?.like}
-                                  currentReaction={reply.isLiked?.type || 'like'}
+                                  isLiked={comment.isLiked?.like}
+                                  currentReaction={comment.isLiked?.type || 'like'}
                                 />
-                                {(reply.impressionCounts?.total || 0) > 0 && (
-                                  <span className="ml-1">
-                                    • {reply.impressionCounts?.total}
-                                  </span>
-                                )}
+                                <span className="ml-1">
+                                  • {comment.impressionCounts?.total ?? 0}
+                                </span>
                               </div>
 
                               {/* Edit/Delete buttons for reply */}

@@ -8,6 +8,7 @@ import { BASE_URL } from "../constants";
 import { useLocation } from 'react-router-dom';
 import Leftside from './LeftSide';
 import SinglePostView from './SinglePostView.jsx';
+import ReportPostModal from './ReportPostModal.jsx';
 
 // Set axios defaults to include credentials with all requests
 axios.defaults.withCredentials = true;
@@ -110,6 +111,10 @@ const Main = ({ showSavedPosts, onShowSavedPosts, onShowAllPosts }) => {
   const [editingPostId, setEditingPostId] = useState(null);
   const [editContent, setEditContent] = useState('');
 
+  // Add these new state variables for the report modal
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [reportingPostId, setReportingPostId] = useState(null);
+
   //saved posts
   //const [showSavedPosts, setShowSavedPosts] = useState(false);
   const [savedPosts, setSavedPosts] = useState([]);
@@ -122,6 +127,69 @@ const Main = ({ showSavedPosts, onShowSavedPosts, onShowAllPosts }) => {
     }
     // eslint-disable-next-line
   }, [showSavedPosts]);
+
+
+
+  /**
+   * Opens the report modal for a specific post
+   * 
+   * @param {string} postId - The ID of the post to report
+   */
+  const handleOpenReportModal = (postId) => {
+    setReportingPostId(postId);
+    setIsReportModalOpen(true);
+  };
+
+
+  /**
+   * Reports a post by sending a request to the server with a specified reason.
+   *
+   * @async
+   * @function handleReportPost
+   * @param {string} reason - The reason for reporting the post
+   * @returns {Promise<void>} Resolves when the report request is successfully sent.
+   * @throws Will log an error and display an alert if the report request fails.
+   */
+  const handleReportPost = async (reason) => {
+    try {
+      await axios.post(`${API_ENDPOINT}/${reportingPostId}/report`, {
+        "policy": "Misinformation",
+        "dontWantToSee": "I'm not interested in this topic"
+      });
+      console.log(`Post ${reportingPostId} reported with reason: ${reason}`);
+      alert(`Post reported. Thank you for helping keep LinkedIn safe.`);
+    } catch (error) {
+      console.error("Error reporting post:", error);
+      alert("Failed to report post. Please try again.");
+      throw error; // Rethrow to be handled by the modal
+    }
+  };
+
+
+  //getting posts helper function
+  function getPostDisplayInfo(post) {
+    if (post.userId) {
+      // User post
+      return {
+        name: `${post.firstName || ''} ${post.lastName || ''}`.trim(),
+        headline: post.headline || '',
+        profilePicture: post.profilePicture || "/Images/default-profile.svg",
+      };
+    } else if (post.companyId) {
+      // Company post
+      return {
+        name: post.companyId.name || '',
+        headline: post.companyId.industry || '',
+        profilePicture: post.companyId.logo || "/Images/default-profile.svg",
+      };
+    }
+    // Fallback
+    return {
+      name: "Unknown",
+      headline: "",
+      profilePicture: "/Images/default-profile.svg",
+    };
+  }
 
   
   const location = useLocation();
@@ -639,59 +707,10 @@ const handleDeleteComment = async (postId, commentId) => {
    * @returns {Promise<void>} - A promise that resolves when the state is updated.
    */
   // Add this to your existing handleReactToComment function in Main.jsx
-const handleReactToComment = async (postId, commentId, reactionType = 'like', isRemove = false) => {
-  try {
-    // This function can handle both comments and replies the same way
-    // The CommentSection component already makes the API call
-    
-    // Update local state for comments
-    setComments(prevComments => {
-      const postComments = [...(prevComments[postId] || [])];
-      
-      // First check if this is a top-level comment
-      let foundInComments = false;
-      
-      const updatedPostComments = postComments.map(comment => {
-        if (comment._id === commentId) {
-          foundInComments = true;
-          // Handle reaction counts for the comment
-          return updateReactionCounts(comment, reactionType, isRemove);
-        }
-        
-        // Check if this is a reply within this comment
-        if (comment.replies && comment.replies.length > 0) {
-          const updatedReplies = comment.replies.map(reply => {
-            if (reply._id === commentId) {
-              foundInComments = true;
-              // Handle reaction counts for the reply
-              return updateReactionCounts(reply, reactionType, isRemove);
-            }
-            return reply;
-          });
-          
-          return {
-            ...comment,
-            replies: updatedReplies
-          };
-        }
-        
-        return comment;
-      });
-      
-      if (foundInComments) {
-        return {
-          ...prevComments,
-          [postId]: updatedPostComments,
-        };
-      }
-      
-      return prevComments;
-    });
-    
-  } catch (err) {
-    console.error('Error updating reaction state:', err);
-  }
-};
+  const handleReactToComment = async (postId, commentId, reactionType = 'like', isRemove = false) => {
+    // Always re-fetch comments from backend after a reaction
+    await fetchComments(postId);
+  };
 
 // Helper function to update reaction counts
 const updateReactionCounts = (item, reactionType, isRemove) => {
@@ -998,30 +1017,7 @@ const fetchReplies = async (commentId) => {
     }
   };
 
-  /**
-   * Reports a post by sending a request to the server with a specified reason.
-   *
-   * @async
-   * @function handleReportPost
-   * @param {string} postId - The unique identifier of the post to be reported.
-   * @returns {Promise<void>} Resolves when the report request is successfully sent.
-   * @throws Will log an error and display an alert if the report request fails.
-   */
-  const handleReportPost = async (postId) => {
-    try {
-      await axios.post(`${API_ENDPOINT}/${postId}/report`, {
-        reason: "inappropriate",
-      });
-      console.log(`Post ${postId} reported`);
-      alert(`Post reported. Thank you for helping keep LinkedIn safe.`);
-    } catch (error) {
-      console.error("Error reporting post:", error);
-      alert("Failed to report post. Please try again.");
-    }
-  };
-
-
- 
+  
   // Format date for display
   /**
    * Formats a given date string into a human-readable relative time format.
@@ -1147,67 +1143,69 @@ const fetchReplies = async (commentId) => {
         showSavedPosts && savedPostsLoading ? (
           <div className="text-center py-4">Loading saved posts...</div>
         ) : (
-        (showSavedPosts ? savedPosts : posts).map((post) => (
-          <article key={post.id || post.postId} className="overflow-visible p-0 mb-2 bg-white rounded-md border-none shadow-[0_0_0_1px_rgba(0,0,0,0.15),0_0_0_rgba(0,0,0,0.20)]">
-            <div className="p-3 pr-10 pb-0 flex justify-between items-start relative">
-              <a href="/feed" className="overflow-hidden flex">
-                <img
-                  src={post.author?.profileImage || post.profilePicture}
-                  alt="user"
-                  className="w-12 h-12 rounded-full mr-2.5"
-                />
-                <div className="text-start">
-                  <h6 className="text-base text-black font-semibold">
-                    {post.author?.name || `${post.firstName} ${post.lastName}`}
-                  </h6>
-                  <span className="text-sm text-[rgba(0,0,0,0.6)] block">
-                    {post.author?.headline || post.headline}
-                  </span>
-                  <span className="text-sm text-[rgba(0,0,0,0.6)] block">
-                    {formatDate(post.timestamp || post.createdAt)}
-                  </span>
-                </div>
-              </a>
-
-              <PostMenu
-                postId={post.id || post.postId}
-                onHide={handleHidePost}
-                onSave={handleSavePost}
-                onReport={handleReportPost}
-                onDelete={handleDeletePost}  // New prop
-                onEdit={handleEditPost}
-                isPostOwner={true}  // Set this based on user authentication
-                isSaved={post.isSaved}
-              />
-            </div>
-            <div className="text-base text-start p-0 pl-4 pr-4 text-[rgba(0,0,0,0.9)] overflow-hidden">
-              {editingPostId === (post.id || post.postId) ? (
-                <div>
-                  <textarea
-                    className="w-full border rounded p-2 mb-2"
-                    value={editContent}
-                    onChange={e => setEditContent(e.target.value)}
-                    rows={4}
+          (showSavedPosts ? savedPosts : posts).map((post) => {
+            const display = getPostDisplayInfo(post);
+            return (
+              <article key={post.id || post.postId} className="overflow-visible p-0 mb-2 bg-white rounded-md border-none shadow-[0_0_0_1px_rgba(0,0,0,0.15),0_0_0_rgba(0,0,0,0.20)]">
+                <div className="p-3 pr-10 pb-0 flex justify-between items-start relative">
+                  <a href="/feed" className="overflow-hidden flex">
+                    <img
+                      src={display.profilePicture}
+                      alt="user"
+                      className="w-12 h-12 rounded-full mr-2.5"
+                    />
+                    <div className="text-start">
+                      <h6 className="text-base text-black font-semibold">
+                        {display.name}
+                      </h6>
+                      <span className="text-sm text-[rgba(0,0,0,0.6)] block">
+                        {display.headline}
+                      </span>
+                      <span className="text-sm text-[rgba(0,0,0,0.6)] block">
+                        {formatDate(post.timestamp || post.createdAt)}
+                      </span>
+                    </div>
+                  </a>
+          
+                  <PostMenu
+                    postId={post.id || post.postId}
+                    onHide={handleHidePost}
+                    onSave={handleSavePost}
+                    onReport={() => handleOpenReportModal(post.id || post.postId)}
+                    onDelete={handleDeletePost}
+                    onEdit={handleEditPost}
+                    isPostOwner={true}
+                    isSaved={post.isSaved}
                   />
-                  <div className="flex gap-2">
-                    <button
-                      className="bg-blue-600 text-white px-4 py-1 rounded"
-                      onClick={() => handleEditPostSave(post.id || post.postId)}
-                    >
-                      Save
-                    </button>
-                    <button
-                      className="bg-gray-300 px-4 py-1 rounded"
-                      onClick={handleEditPostCancel}
-                    >
-                      Cancel
-                    </button>
-                  </div>
                 </div>
-              ) : (
-                post.content?.text || post.postDescription
-              )}
-            </div>
+                <div className="text-base text-start p-0 pl-4 pr-4 text-[rgba(0,0,0,0.9)] overflow-hidden">
+                  {editingPostId === (post.id || post.postId) ? (
+                    <div>
+                      <textarea
+                        className="w-full border rounded p-2 mb-2"
+                        value={editContent}
+                        onChange={e => setEditContent(e.target.value)}
+                        rows={4}
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          className="bg-blue-600 text-white px-4 py-1 rounded"
+                          onClick={() => handleEditPostSave(post.id || post.postId)}
+                        >
+                          Save
+                        </button>
+                        <button
+                          className="bg-gray-300 px-4 py-1 rounded"
+                          onClick={handleEditPostCancel}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    post.content?.text || post.postDescription
+                  )}
+                </div>
             
             {/* Handle different media formats */}
             {/* Handle content.files with multiple media support */}
@@ -1471,11 +1469,7 @@ const fetchReplies = async (commentId) => {
               </button>
               <button className="outline-none text-[rgba(0,0,0,0.6)] p-3 px-6 bg-transparent flex items-center cursor-pointer gap-1.25 rounded-md transition duration-200 hover:bg-[rgba(0,0,0,0.08)] font-semibold">
                 <img src="/Images/share.svg" alt="share" />
-                <span>Share</span>
-              </button>
-              <button className="outline-none text-[rgba(0,0,0,0.6)] p-3 px-6 bg-transparent flex items-center cursor-pointer gap-1.25 rounded-md transition duration-200 hover:bg-[rgba(0,0,0,0.08)] font-semibold">
-                <img src="/Images/send.svg" alt="send" />
-                <span>Send</span>
+                <span>Repost</span>
               </button>
             </div>
 
@@ -1491,9 +1485,7 @@ const fetchReplies = async (commentId) => {
                     authorInfo={authorInfo}
                     onAddComment={handleAddComment}
                     onDeleteComment={handleDeleteComment}
-                    onReactToComment={(commentId, reactionType, isRemove) => 
-                      handleReactToComment(post.id || post.postId, commentId, reactionType, isRemove)
-                    }
+                    onReactToComment={handleReactToComment}
                     reactionTypes={reactionTypes}
                     formatDate={formatDate}
                     onLoadReplies={fetchReplies}
@@ -1503,7 +1495,10 @@ const fetchReplies = async (commentId) => {
               </div>
             )}
           </article>
-        )))}
+            );
+          })
+        )
+      }
       </div>
 
       {/* Post Creation Modal */}
@@ -1512,6 +1507,12 @@ const fetchReplies = async (commentId) => {
         onClose={() => setIsPostModalOpen(false)}
         onSubmit={handleCreatePost}
         authorInfo={authorInfo}
+      />
+
+      <ReportPostModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        onSubmit={handleReportPost}
       />
     </div>
   );
