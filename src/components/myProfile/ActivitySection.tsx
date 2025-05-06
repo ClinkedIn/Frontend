@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 
 interface UserActivity {
@@ -19,7 +19,6 @@ interface UserActivity {
     funny: number;
     total: number;
   };
-  commentCount: number;
   repostCount: number;
   createdAt: string;
   updatedAt: string;
@@ -44,14 +43,6 @@ interface UserActivity {
   reposterHeadline?: string;
   repostDescription?: string;
   repostDate?: string;
-  commentId?: string;
-  commentText?: string;
-  commentDate?: string;
-  commenterId?: string;
-  commenterFirstName?: string;
-  commenterLastName?: string;
-  commenterProfilePicture?: string;
-  commenterHeadline?: string;
 }
 
 interface Pagination {
@@ -74,6 +65,7 @@ interface ActivitySectionProps {
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+// Create API instance outside component to prevent recreation on each render
 const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
@@ -83,52 +75,57 @@ const ActivitySection: React.FC<ActivitySectionProps> = ({ userId }) => {
   const [activities, setActivities] = useState<UserActivity[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [filter, setFilter] = useState("all");
 
-  const fetchActivities = async (page = 1, activityFilter = "all") => {
-    if (!userId) {
-      setError("User ID is missing");
-      setIsLoading(false);
-      return;
-    }
+  // Use useCallback to memoize the fetch function
+  const fetchActivities = useCallback(
+    async (page = 1) => {
+      if (!userId) {
+        setIsLoading(false);
+        return;
+      }
 
-    try {
-      setIsLoading(true);
-      setError(null);
+      try {
+        setIsLoading(true);
 
-      const response = await api.get<UserActivityResponse>(
-        `/user/${userId}/user-activity`,
-        {
-          params: {
-            page,
-            limit: 10,
-            filter: activityFilter,
-          },
-        }
-      );
-      setActivities(response.data.posts);
-      setPagination(response.data.pagination);
-      setIsLoading(false);
-    } catch (err: any) {
-      console.error("Error fetching user activities:", err);
-      setError(err.response?.data?.message || "Failed to load user activities");
-      setIsLoading(false);
-    }
-  };
+        const response = await api.get<UserActivityResponse>(
+          `/user/${userId}/user-activity`,
+          {
+            params: {
+              page,
+              limit: 10,
+              filter: "posts", // Only fetch posts, no comments
+            },
+          }
+        );
+
+        // Filter out any invalid or incomplete activities
+        const validActivities = response.data.posts.filter(
+          (activity) =>
+            !!activity &&
+            !!activity.activityType &&
+            (activity.activityType === "post" ||
+              activity.activityType === "repost")
+        );
+
+        setActivities(validActivities);
+        setPagination(response.data.pagination);
+      } catch (err) {
+        console.error("Error fetching user activities:", err);
+        setActivities([]);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [userId]
+  );
 
   useEffect(() => {
-    fetchActivities(currentPage, filter);
-  }, [userId, currentPage, filter]);
+    fetchActivities(currentPage);
+  }, [fetchActivities, currentPage]);
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
-  };
-
-  const handleFilterChange = (newFilter: string) => {
-    setFilter(newFilter);
-    setCurrentPage(1); // Reset to first page when changing filters
   };
 
   const formatDate = (dateString: string) => {
@@ -152,12 +149,103 @@ const ActivitySection: React.FC<ActivitySectionProps> = ({ userId }) => {
     }
   };
 
+  const renderPagination = () => {
+    if (!pagination || pagination.pages <= 1) return null;
+
+    // Calculate which page numbers to show
+    let pageNumbers: number[] = [];
+    const totalPages = pagination.pages;
+
+    if (totalPages <= 5) {
+      // If 5 or fewer pages, show all
+      pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
+    } else {
+      // Always include first and last page
+      pageNumbers.push(1);
+
+      // Add ellipsis indicator if needed
+      if (currentPage > 3) {
+        pageNumbers.push(-1); // -1 represents ellipsis
+      }
+
+      // Add pages around current page
+      for (
+        let i = Math.max(2, currentPage - 1);
+        i <= Math.min(totalPages - 1, currentPage + 1);
+        i++
+      ) {
+        pageNumbers.push(i);
+      }
+
+      // Add ellipsis indicator if needed
+      if (currentPage < totalPages - 2) {
+        pageNumbers.push(-2); // -2 represents ellipsis
+      }
+
+      // Add last page if not already included
+      if (totalPages > 1) {
+        pageNumbers.push(totalPages);
+      }
+    }
+
+    return (
+      <div className="mt-4 flex justify-center">
+        <div className="flex items-center space-x-2">
+          {pagination.hasPrevPage && (
+            <button
+              className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+              onClick={() => handlePageChange(currentPage - 1)}
+            >
+              Previous
+            </button>
+          )}
+
+          {pageNumbers.map((page, index) =>
+            page < 0 ? (
+              <span key={`ellipsis-${index}`} className="px-2">
+                ...
+              </span>
+            ) : (
+              <button
+                key={page}
+                className={`px-3 py-1 rounded ${
+                  page === currentPage
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-200 hover:bg-gray-300"
+                }`}
+                onClick={() => handlePageChange(page)}
+              >
+                {page}
+              </button>
+            )
+          )}
+
+          {pagination.hasNextPage && (
+            <button
+              className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+              onClick={() => handlePageChange(currentPage + 1)}
+            >
+              Next
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   const renderActivityItem = (activity: UserActivity) => {
+    // Skip rendering if essential data is missing
+    if (
+      !activity ||
+      !activity.activityType ||
+      !["post", "repost"].includes(activity.activityType)
+    ) {
+      return null;
+    }
+
     return (
       <div
-        key={`${activity.activityType}-${activity.postId}-${
-          activity.commentId || ""
-        }`}
+        key={`${activity.activityType}-${activity.postId || ""}`}
         className="border-b border-gray-200 py-4"
       >
         <div className="flex items-start">
@@ -176,7 +264,6 @@ const ActivitySection: React.FC<ActivitySectionProps> = ({ userId }) => {
               <span className="text-gray-500 text-sm ml-2">
                 {activity.activityType === "post" && "posted"}
                 {activity.activityType === "repost" && "reposted"}
-                {activity.activityType === "comment" && "commented on a post"}
                 <span className="mx-1">•</span>
                 {formatDate(activity.activityDate)}
               </span>
@@ -185,43 +272,17 @@ const ActivitySection: React.FC<ActivitySectionProps> = ({ userId }) => {
               {activity.headline}
             </div>
 
-            {activity.activityType === "comment" && activity.commentText && (
-              <div className="mt-2 p-3 bg-gray-50 rounded-md">
-                {activity.commentText}
-              </div>
-            )}
-
-            {(activity.activityType === "post" ||
-              activity.activityType === "repost") && (
-              <div className="mt-2">
-                {activity.postDescription}
-                {activity.attachments && activity.attachments.length > 0 && (
-                  <div className="mt-2">
-                    <img
-                      src={
-                        activity.attachments[0] || "/api/placeholder/400/300"
-                      }
-                      alt="Post attachment"
-                      className="rounded-md max-w-full h-auto max-h-60 object-contain"
-                    />
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div className="mt-2 flex items-center text-sm text-gray-500">
-              <span className="mr-4">
-                <i className="far fa-thumbs-up mr-1"></i>
-                {activity.impressionCounts.total}
-              </span>
-              <span className="mr-4">
-                <i className="far fa-comment mr-1"></i>
-                {activity.commentCount}
-              </span>
-              <span>
-                <i className="fas fa-retweet mr-1"></i>
-                {activity.repostCount}
-              </span>
+            <div className="mt-2">
+              {activity.postDescription}
+              {activity.attachments && activity.attachments.length > 0 && (
+                <div className="mt-2">
+                  <img
+                    src={activity.attachments[0] || "/api/placeholder/400/300"}
+                    alt="Post attachment"
+                    className="rounded-md max-w-full h-auto max-h-60 object-contain"
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -232,57 +293,7 @@ const ActivitySection: React.FC<ActivitySectionProps> = ({ userId }) => {
   return (
     <div className="bg-white rounded-lg shadow">
       <div className="p-4 border-b border-gray-200">
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl font-medium">Activity</h2>
-          <div className="flex gap-2 text-sm">
-            <button
-              className={`px-3 py-1 rounded-full ${
-                filter === "all"
-                  ? "bg-blue-100 text-blue-600"
-                  : "hover:bg-gray-100"
-              }`}
-              onClick={() => handleFilterChange("all")}
-            >
-              All
-            </button>
-            <button
-              className={`px-3 py-1 rounded-full ${
-                filter === "posts"
-                  ? "bg-blue-100 text-blue-600"
-                  : "hover:bg-gray-100"
-              }`}
-              onClick={() => handleFilterChange("posts")}
-            >
-              Posts
-            </button>
-            <button
-              className={`px-3 py-1 rounded-full ${
-                filter === "comments"
-                  ? "bg-blue-100 text-blue-600"
-                  : "hover:bg-gray-100"
-              }`}
-              onClick={() => handleFilterChange("comments")}
-            >
-              Comments
-            </button>
-            <button
-              className={`px-3 py-1 rounded-full ${
-                filter === "reposts"
-                  ? "bg-blue-100 text-blue-600"
-                  : "hover:bg-gray-100"
-              }`}
-              onClick={() => handleFilterChange("reposts")}
-            >
-              Reposts
-            </button>
-          </div>
-        </div>
-        {pagination && (
-          <div className="text-sm text-gray-500 mt-1">
-            {pagination.total}{" "}
-            {pagination.total === 1 ? "follower" : "followers"}
-          </div>
-        )}
+        <h2 className="text-xl font-medium">Activity</h2>
       </div>
 
       <div className="p-4">
@@ -290,65 +301,17 @@ const ActivitySection: React.FC<ActivitySectionProps> = ({ userId }) => {
           <div className="py-8 text-center text-gray-500">
             <p>Loading activities...</p>
           </div>
-        ) : error ? (
-          <div className="py-8 text-center text-red-500">
-            <p>{error}</p>
-            <button
-              className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-              onClick={() => fetchActivities(currentPage, filter)}
-            >
-              Try Again
-            </button>
-          </div>
         ) : activities.length === 0 ? (
           <div className="py-8 text-center text-gray-500">
             <p>No activities found.</p>
           </div>
         ) : (
-          <div>
-            {activities.map(renderActivityItem)}
-
-            {pagination && pagination.pages > 1 && (
-              <div className="mt-4 flex justify-center">
-                <div className="flex space-x-2">
-                  {pagination.hasPrevPage && (
-                    <button
-                      className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
-                      onClick={() => handlePageChange(currentPage - 1)}
-                    >
-                      Previous
-                    </button>
-                  )}
-
-                  {Array.from(
-                    { length: pagination.pages },
-                    (_, i) => i + 1
-                  ).map((page) => (
-                    <button
-                      key={page}
-                      className={`px-3 py-1 rounded ${
-                        page === currentPage
-                          ? "bg-blue-600 text-white"
-                          : "bg-gray-200 hover:bg-gray-300"
-                      }`}
-                      onClick={() => handlePageChange(page)}
-                    >
-                      {page}
-                    </button>
-                  ))}
-
-                  {pagination.hasNextPage && (
-                    <button
-                      className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
-                      onClick={() => handlePageChange(currentPage + 1)}
-                    >
-                      Next
-                    </button>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
+          <>
+            {activities
+              .filter((activity) => !!activity)
+              .map(renderActivityItem)}
+            {renderPagination()}
+          </>
         )}
       </div>
     </div>
