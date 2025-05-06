@@ -40,15 +40,22 @@ const Applyjob = ({ isOpen, onClose, job, jobId, onApplicationSuccess }) => {
   };
 
   const validateForm = () => {
-    if (!email || !phoneNumber) {
-      toast.error('Please fill in all required fields');
-      return false;
-    } else if (phoneNumber.length > 10) {
-      toast.error('Please enter a valid number');
-      return false;
-    }
-    return true;
-  };
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const phoneRegex = /^\d{10}$/; 
+
+        if (!email || !phoneNumber) {
+        toast.error('Please fill in all required fields');
+        return false;
+        } else if (!emailRegex.test(email)) {
+        toast.error('Please enter a valid email address');
+        return false;
+        } else if (!phoneRegex.test(phoneNumber)) {
+        toast.error('Please enter a valid 10-digit phone number');
+        return false;
+        }
+
+        return true;
+    };
 
   const handleSubmit = async () => {
     if (!validateForm()) return;

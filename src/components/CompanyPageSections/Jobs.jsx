@@ -83,7 +83,7 @@ const CompanyJobsPage = () => {
       <div className="mt-4 bg-white w-full rounded-lg shadow-lg p-8 text-center">
         <div className="flex flex-col items-center gap-4">
           <MdWork className="text-gray-400 text-6xl" />
-          <h1 className="text-2xl text-gray-600">No Jobs Available</h1>
+          <h1 className="text-2xl text-gray-600">No Jobs Available For You</h1>
           <p className="text-gray-500">Check back later for new opportunities</p>
         </div>
       </div>
