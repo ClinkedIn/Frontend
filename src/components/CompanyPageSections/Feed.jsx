@@ -513,54 +513,7 @@ const CompanyFeedPage = ()=> {
     <div className="mt-4  flex flex-col justify-center   w-full rounded-lg  ">
         <div className='grid-area-main'>
           {/* Create Post Form */}
-        <div className="overflow-hidden text-center mb-2 bg-white rounded-md border-none shadow-[0_0_0_1px_rgba(0,0,0,0.15),0_0_0_rgba(0,0,0,0.20)]">
-          <div className="flex flex-col text-[#958b7b] mb-2 bg-white">
-            <div className="flex items-center p-2 pl-4 pr-4">
-              <img
-                src={companyInfo.logo || "/Images/CompanyLogo.png"}
-                alt="user"
-                className="w-12 h-12 rounded-full mr-2"
-              />
-              <button
-                onClick={() => setIsPostModalOpen(true)}
-                className="text-[rgba(0,0,0,0.6)] outline-none min-h-[48px] leading-1.5 text-sm font-semibold flex items-center p-2 pl-4 flex-grow border border-[rgba(0,0,0,0.15)] rounded-[35px] cursor-pointer hover:bg-[rgba(0,0,0,0.08)] text-left"
-              >
-                Start a post
-              </button>
-            </div>
-
-            <div className="flex justify-around flex-wrap p-1 pb-1">
-              <button 
-                onClick={() => setIsPostModalOpen(true)}
-                className="text-[rgba(0,0,0,0.6)] outline-none border-none bg-transparent min-h-[48px] leading-1.5 text-sm font-semibold flex items-center transition duration-200 p-2 hover:bg-[rgba(0,0,0,0.08)] rounded-md"
-              >
-                <img src="/Images/photo-icon.svg" alt="pic" className="mr-2.5 ml-[-0.5rem]" />
-                <span>Photo</span>
-              </button>
-              <button 
-                onClick={() => setIsPostModalOpen(true)}
-                className="text-[rgba(0,0,0,0.6)] outline-none border-none bg-transparent min-h-[48px] leading-1.5 text-sm font-semibold flex items-center transition duration-200 p-2 hover:bg-[rgba(0,0,0,0.08)] rounded-md"
-              >
-                <img src="/Images/vedio-icon.svg" alt="vedio" className="mr-2.5 ml-[-0.5rem]" />
-                <span>Video</span>
-              </button>
-              <button
-                onClick={() => setIsPostModalOpen(true)}
-                className="text-[rgba(0,0,0,0.6)] outline-none border-none bg-transparent min-h-[48px] leading-1.5 text-sm font-semibold flex items-center transition duration-200 p-2 hover:bg-[rgba(0,0,0,0.08)] rounded-md"
-              >
-                <img src="/Images/job-icon.svg" alt="job" className="mr-2.5 ml-[-0.5rem]" />
-                <span>Job</span>
-              </button>
-              <button
-                onClick={() => setIsPostModalOpen(true)}
-                className="text-[rgba(0,0,0,0.6)] outline-none border-none bg-transparent min-h-[48px] leading-1.5 text-sm font-semibold flex items-center transition duration-200 p-2 hover:bg-[rgba(0,0,0,0.08)] rounded-md"
-              >
-                <img src="/Images/article-icon.svg" alt="article" className="mr-2.5 ml-[-0.5rem]" />
-                <span>Write article</span>
-              </button>
-            </div>
-          </div>
-        </div>
+          
         {posts.map((post) => (
           <article key={post.companyId.id || post.postId} className="overflow-visible p-0 mb-2 bg-white rounded-md border-none shadow-[0_0_0_1px_rgba(0,0,0,0.15),0_0_0_rgba(0,0,0,0.20)]">
             <div className="p-3 pr-10 pb-0 flex justify-between items-start relative">
