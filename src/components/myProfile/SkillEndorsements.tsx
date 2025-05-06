@@ -79,7 +79,7 @@ const SkillEndorsements: React.FC<SkillEndorsementsProps> = ({
     setLoading(true);
     try {
       await axios.post(
-        `${API_BASE_URL}/api/user/skills/endorsements/add-endorsement`,
+        `${API_BASE_URL}/user/skills/endorsements/add-endorsement`,
         {
           skillOwnerId,
           skillName,

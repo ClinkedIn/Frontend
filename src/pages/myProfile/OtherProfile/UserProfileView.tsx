@@ -6,7 +6,6 @@ import adPhoto from "../../../../public/Images/linkedInAd.png";
 import Form from "../../../components/myProfile/Forms/Form";
 import SkillEndorsements from "../../../components/myProfile/SkillEndorsements";
 import ConnectButton from "../../../components/Network/ConnectButton";
-import FollowButton from "../../../components/Network/FollowButton";
 import { useNavigate } from "react-router-dom";
 
 interface Skill {
@@ -140,7 +139,6 @@ const UserProfileView = () => {
   const [message, setMessage] = useState<MessageState | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [canViewProfile, setCanViewProfile] = useState(true); // Default to true, API will tell us if we can't view
-  const [activeTab, setActiveTab] = useState("all");
   const [endorsingSkill, setEndorsingSkill] = useState<string | null>(null);
   const [activeSkill, setActiveSkill] = useState<Skill | null>(null);
   const [privacyNotice, setPrivacyNotice] = useState("");
@@ -203,13 +201,12 @@ const UserProfileView = () => {
     }
   };
 
-  const handleTabChange = (tab: string) => {
-    setActiveTab(tab);
-    fetchUserActivity(tab.toLowerCase());
-  };
-
   // Message handler for each connection
-  const handleMessageApplicant = (userId: string, name: string, profilePicture: string) => {
+  const handleMessageApplicant = (
+    userId: string,
+    name: string,
+    profilePicture: string
+  ) => {
     navigate("/messaging", {
       state: { _id: userId, fullName: name, profilePicture },
     });
@@ -271,6 +268,10 @@ const UserProfileView = () => {
     if (!dateString) return "";
     return new Date(dateString).toLocaleDateString();
   };
+  const uniqueUserActivity = userActivity.filter(
+    (item, index, self) =>
+      index === self.findIndex((a) => a.postId === item.postId)
+  );
 
   const EndorserCard = ({
     endorser,
@@ -664,17 +665,17 @@ const UserProfileView = () => {
     return hasUserEndorsedSkill(skill);
   };
 
-  // const FollowButton = () => {
-  //   return (
-  //     <button
-  //       onClick={handleFollow}
-  //       disabled={isProcessing}
-  //       className="bg-white cursor-pointer text-[#0073b1] border-[#0073b1] border-2 px-4 py-1 rounded-full hover:bg-[#EAF4FD] hover:[border-width:2px] box-border font-medium text-sm transition-all duration-150"
-  //     >
-  //       {isProcessing ? "Processing..." : isFollowing ? "Following" : "Follow"}
-  //     </button>
-  //   );
-  // };
+  const FollowButton = () => {
+    return (
+      <button
+        onClick={handleFollow}
+        disabled={isProcessing}
+        className="bg-white cursor-pointer text-[#0073b1] border-[#0073b1] border-2 px-4 py-1 rounded-full hover:bg-[#EAF4FD] hover:[border-width:2px] box-border font-medium text-sm transition-all duration-150"
+      >
+        {isProcessing ? "Processing..." : isFollowing ? "Following" : "Follow"}
+      </button>
+    );
+  };
 
   const SkillEndorsementSection = () => (
     <div className="bg-white shadow-sm rounded-lg overflow-hidden">
@@ -810,13 +811,6 @@ const UserProfileView = () => {
                   </p>
                 </div>
               )}
-
-              <div className="flex items-center justify-between mt-4 text-sm text-gray-500">
-                <div className="flex items-center space-x-4">
-                  <span>{activity.impressionCounts?.total || 0} reactions</span>
-                  <span>{activity.commentCount || 0} comments</span>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -866,19 +860,16 @@ const UserProfileView = () => {
 
         <div className="pt-16 px-8 flex flex-col md:flex-row md:items-center md:justify-between pb-10">
           <div>
-            {/* Always show name with fallback */}
             <h1 className="text-2xl font-bold">
               {profile?.firstName && profile?.lastName
                 ? `${profile.firstName} ${profile.lastName}`
                 : "LinkedIn User"}
             </h1>
 
-            {/* Conditionally show job title */}
             {profile?.lastJobTitle && (
               <p className="text-gray-600">{profile.lastJobTitle}</p>
             )}
 
-            {/* Conditionally show location */}
             {profile?.location && (
               <p className="text-gray-500 text-sm flex items-center mt-1">
                 <svg
@@ -908,7 +899,22 @@ const UserProfileView = () => {
 
           {!isRestricted && (
             <div className="mt-4 md:mt-0 flex space-x-3">
-              <ConnectButton userId={profile._id} />
+              {userProfile?.connectionList?.includes(currentUserId) ? (
+                <button
+                  onClick={() =>
+                    handleMessageApplicant(
+                      profile._id,
+                      `${profile.firstName} ${profile.lastName}`,
+                      profile.profilePicture
+                    )
+                  }
+                  className="px-4 py-1.5 border border-blue-500 text-blue-600 rounded-full text-sm font-semibold hover:bg-blue-50 transition-colors"
+                >
+                  Message
+                </button>
+              ) : (
+                <ConnectButton userId={profile._id} />
+              )}
               <FollowButton userId={profile._id} />
             </div>
           )}
@@ -1013,7 +1019,6 @@ const UserProfileView = () => {
     );
   }
 
-  // Not Found state
   if (notFound) {
     return (
       <>
@@ -1137,7 +1142,22 @@ const UserProfileView = () => {
                 </div>
 
                 <div className="mt-4 md:mt-0 flex space-x-3">
-                  <ConnectButton userId={userProfile._id} />
+                  {userProfile?.connectionList?.includes(currentUserId) ? (
+                    <button
+                      onClick={() =>
+                        handleMessageApplicant(
+                          userProfile._id,
+                          `${userProfile.firstName} ${userProfile.lastName}`,
+                          userProfile.profilePicture
+                        )
+                      }
+                      className="px-4 py-1.5 border border-blue-500 text-blue-600 rounded-full text-sm font-semibold hover:bg-blue-50 transition-colors"
+                    >
+                      Message
+                    </button>
+                  ) : (
+                    <ConnectButton userId={userProfile._id} />
+                  )}
                   <FollowButton userId={userProfile._id} />
                 </div>
               </div>
@@ -1151,14 +1171,13 @@ const UserProfileView = () => {
                   {userProfile?.about?.description || "No bio available"}
                 </p>
 
-                {/* Fix 3: Contact information display */}
                 <div className="mt-4 text-sm text-gray-600 space-y-2">
-                  {userProfile?.location && (
+                  {/* {userProfile?.location && (
                     <p className="flex items-center">
                       <span className="mr-2">📍</span>
                       <span>{userProfile.location}</span>
                     </p>
-                  )}
+                  )} */}
                   {userProfile?.phone && (
                     <p className="flex items-center">
                       <span className="mr-2">📞</span>
@@ -1346,55 +1365,9 @@ const UserProfileView = () => {
               <div className="p-6">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-xl font-semibold">Activity</h2>
-                  <div className="text-sm text-gray-500">
-                    {userProfile.followers?.length || 0} followers
-                  </div>
                 </div>
 
                 <div className="mb-4">
-                  <div className="flex space-x-2 mb-4">
-                    <button
-                      onClick={() => handleTabChange("all")}
-                      className={`px-4 py-2 rounded-full ${
-                        activeTab === "all"
-                          ? "bg-blue-100 text-blue-700"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                    >
-                      All
-                    </button>
-                    <button
-                      onClick={() => handleTabChange("posts")}
-                      className={`px-4 py-2 rounded-full ${
-                        activeTab === "posts"
-                          ? "bg-blue-100 text-blue-700"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                    >
-                      Posts
-                    </button>
-                    <button
-                      onClick={() => handleTabChange("comments")}
-                      className={`px-4 py-2 rounded-full ${
-                        activeTab === "comments"
-                          ? "bg-blue-100 text-blue-700"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                    >
-                      Comments
-                    </button>
-                    <button
-                      onClick={() => handleTabChange("reposts")}
-                      className={`px-4 py-2 rounded-full ${
-                        activeTab === "reposts"
-                          ? "bg-blue-100 text-blue-700"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                    >
-                      Reposts
-                    </button>
-                  </div>
-
                   {activityLoading ? (
                     <div className="space-y-4">
                       {[1, 2, 3].map((index) => (
@@ -1413,7 +1386,7 @@ const UserProfileView = () => {
                     </div>
                   ) : userActivity.length > 0 ? (
                     <div className="space-y-4">
-                      {userActivity.map((activity) => (
+                      {uniqueUserActivity.map((activity) => (
                         <ActivityCard
                           key={activity.postId}
                           activity={activity}

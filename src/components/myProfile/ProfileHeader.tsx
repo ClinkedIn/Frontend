@@ -189,9 +189,12 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     setUpdateError(null);
 
     try {
+      const skills = userData?.about?.skills || [];
+      const limitedSkills = skills.slice(0, 5);
+
       const aboutPayload: AboutInfo = {
         description: aboutText.trim(),
-        skills: userData?.about?.skills || [],
+        skills: limitedSkills,
       };
 
       const aboutSuccess = await onUpdateAbout(aboutPayload);
@@ -245,24 +248,6 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           </div>
         </div>
       </div>
-
-      {updateError && (
-        <div className="mx-8 mt-2 p-2 bg-red-100 text-red-700 rounded flex items-center">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5 mr-2"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              fillRule="evenodd"
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-              clipRule="evenodd"
-            />
-          </svg>
-          {updateError}
-        </div>
-      )}
 
       <div className="bg-white pt-20 px-8 pb-4">
         <div className="flex justify-between items-start mb-4">
