@@ -323,7 +323,7 @@ const Header = ({ notifications, pendingInvitationsCount }) => {
         {/* Logo */}
         <a
           href="/feed"
-          className="flex-shrink-0 absolute left-2 top-1/2 transform -translate-y-1/2 md:static md:translate-y-0 md:left-0 ml-23"
+          className="flex-shrink-0 absolute left-2 top-1/2 transform -translate-y-1/2 md:static md:translate-y-0 md:left-0"
           style={{ zIndex: 10 }}
         >
           <img src="/Images/blue-lockedin.png" alt="Logo" className="w-12 h-12 min-w-12" />
@@ -407,7 +407,7 @@ const Header = ({ notifications, pendingInvitationsCount }) => {
         {/* Mobile Search Dropdown */}
         {showResults && (
           <div className="fixed inset-0 z-50 flex items-start justify-center md:hidden" style={{ background: "none" }}>
-            <div className="bg-white rounded-lg shadow-lg mt-4 w-11/12 max-w-md p-4 relative">
+            <div className="bg-white rounded-lg shadow-lg mt-12 w-11/12 max-w-md p-4 relative">
               <button
                 className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
                 onClick={() => setShowResults(false)}
@@ -466,7 +466,7 @@ const Header = ({ notifications, pendingInvitationsCount }) => {
         {showResults && userResults.length > 0 && currentPath !== "jobs" && (
           <div
             ref={searchRef}
-            className="absolute left-0 right-0 mt-2 w-full max-w-xl bg-white border border-gray-200 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto mx-auto"
+            className="absolute left-28 mt-2 w-94 bg-white border border-gray-200 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto mx-auto hidden md:block"
             style={{ top: "100%" }}
           >
             <ul>

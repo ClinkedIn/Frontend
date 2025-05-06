@@ -11,6 +11,7 @@ import { FiUserMinus } from "react-icons/fi";
 import { BsFillPeopleFill } from "react-icons/bs";
 import ConnectButton from '../../components/Network/ConnectButton'; // <-- Import ConnectButton
 import { motion, AnimatePresence } from "framer-motion";
+import { Dialog } from "@headlessui/react";
 
 // Define the related user interface
 interface RelatedUser {
@@ -256,61 +257,103 @@ const Network: React.FC = () => {
 
         {/* People you may know in a card */}
         <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
-            <h2 className="text-lg font-semibold mb-2">People you may know</h2>
-            <button
-              className="text-gray-800 font-semibold px-4 py-2 rounded hover:bg-gray-100 transition duration-300 mt-2 sm:mt-4"
-              onClick={() => setShowAllUsers(!showAllUsers)}
-            >
-              Show all
-            </button>
-          </div>
-          {isLoading ? (
-            <p className="text-gray-600">Loading...</p>
-          ) : relatedUsers.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {(showAllUsers ? relatedUsers : relatedUsers.slice(0, 8))
-                .filter(user => !connectedUserIds.includes(user._id)) // <-- Filter out connected users
-                .map((user) => (
-                  <div
-                    key={user._id}
-                    className="bg-white rounded-lg shadow-sm p-4"
-                  >
-                    <div className="flex flex-col items-center justify-center h-48">
-                      <img
-                        src={user.profilePicture || "/Images/user.svg"}
-                        alt={`${user.firstName} ${user.lastName}`}
-                        className="w-16 h-16 rounded-full mb-2 cursor-pointer"
-                        onClick={() => navigate(`/user/${user._id}`)}
-                      />
-                      <p
-                        className="text-sm font-medium cursor-pointer hover:underline"
-                        onClick={() => navigate(`/user/${user._id}`)}
-                      >
-                        {`${user.firstName} ${user.lastName}`}
-                      </p>
-                      <p
-                        className="text-xs text-gray-500 line-clamp-2 mb-2"
-                        style={{ maxHeight: '2rem' }}
-                      >
-                        {user.lastJobTitle}
-                      </p>
-                      <p className="text-xs text-gray-500 mb-2">
-                        You have{' '}
-                        <span className="text-xs font-normal">
-                          {user.commonConnectionsCount} mutual connections
-                        </span>
-                      </p>
-                      <ConnectButton userId={user._id} />
-                    </div>
-                  </div>
-                ))}
-            </div>
-          ) : (
-            <p className="text-gray-600">No people to show based on your recent activity.</p>
-          )}
-        </div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
+        <h2 className="text-lg font-semibold mb-2">People you may know</h2>
+        <button
+          className="text-gray-800 font-semibold px-4 py-2 rounded hover:bg-gray-100 transition duration-300 mt-2 sm:mt-4"
+          onClick={() => setShowAllUsers(true)} // Show modal on click
+        >
+          Show all
+        </button>
       </div>
+
+      {isLoading ? (
+        <p className="text-gray-600">Loading...</p>
+      ) : relatedUsers.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {/* Filter out connected users, and limit to the first 8 users */}
+          {relatedUsers
+            .filter(user => !connectedUserIds.includes(user._id))
+            .slice(0, 8)
+            .map((user) => (
+              <div key={user._id} className="bg-white rounded-lg shadow-sm p-4">
+                <div className="flex flex-col items-center justify-center h-48">
+                  <img
+                    src={user.profilePicture || '/Images/user.svg'}
+                    alt={`${user.firstName} ${user.lastName}`}
+                    className="w-16 h-16 rounded-full mb-2 cursor-pointer"
+                    onClick={() => navigate(`/user/${user._id}`)}
+                  />
+                  <p
+                    className="text-sm font-medium cursor-pointer hover:underline"
+                    onClick={() => navigate(`/user/${user._id}`)}
+                  >
+                    {`${user.firstName} ${user.lastName}`}
+                  </p>
+                  <p className="text-xs text-gray-500 line-clamp-2 mb-2" style={{ maxHeight: '2rem' }}>
+                    {user.lastJobTitle}
+                  </p>
+                  <p className="text-xs text-gray-500 mb-2">
+                    You have{' '}
+                    <span className="text-xs font-normal">{user.commonConnectionsCount} mutual connections</span>
+                  </p>
+                  <ConnectButton userId={user._id} />
+                </div>
+              </div>
+            ))}
+        </div>
+      ) : (
+        <p className="text-gray-600">No people to show based on your recent activity.</p>
+      )}
+
+      {/* Modal for showing all users using Dialog */}
+      <Dialog open={showAllUsers} onClose={() => setShowAllUsers(false)} className="relative z-50">
+        <div className="fixed inset-0 bg-black/30" aria-hidden="true" /> {/* Overlay with light black background */}
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+        <Dialog.Panel className="bg-white max-w-5xl w-full max-h-[80vh] overflow-y-auto rounded-xl p-6 shadow-lg">
+          <Dialog.Title className="text-lg font-bold mb-4">People You May Know</Dialog.Title>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {relatedUsers
+              .filter(user => !connectedUserIds.includes(user._id))
+              .map((user) => (
+                <div key={user._id} className="bg-white rounded-lg shadow-sm p-4">
+                  <div className="flex flex-col items-center justify-center h-48">
+                    <img
+                      src={user.profilePicture || '/Images/user.svg'}
+                      alt={`${user.firstName} ${user.lastName}`}
+                      className="w-16 h-16 rounded-full mb-2 cursor-pointer"
+                      onClick={() => navigate(`/user/${user._id}`)}
+                    />
+                    <p
+                      className="text-sm font-medium cursor-pointer hover:underline"
+                      onClick={() => navigate(`/user/${user._id}`)}
+                    >
+                      {`${user.firstName} ${user.lastName}`}
+                    </p>
+                    <p className="text-xs text-gray-500 line-clamp-2 mb-2" style={{ maxHeight: '2rem' }}>
+                      {user.lastJobTitle}
+                    </p>
+                    <p className="text-xs text-gray-500 mb-2">
+                      You have{' '}
+                      <span className="text-xs font-normal">{user.commonConnectionsCount} mutual connections</span>
+                    </p>
+                    <ConnectButton userId={user._id} />
+                  </div>
+                </div>
+              ))}
+          </div>
+
+          <button
+            className="mt-6 w-full text-center text-sm text-gray-600 hover:text-gray-800"
+            onClick={() => setShowAllUsers(false)}
+          >
+            Close
+          </button>
+        </Dialog.Panel>
+        </div>
+      </Dialog>
+    </div>
+    </div>
     </div>
   );
 };

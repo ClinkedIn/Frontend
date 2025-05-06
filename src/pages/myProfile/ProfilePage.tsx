@@ -14,6 +14,7 @@ import SkillsForm from "../../components/myProfile/Forms/SkillsForm";
 import ResumeForm from "../../components/myProfile/Forms/ResumeForm";
 import AddSectionForm from "../../components/myProfile/Forms/AddSectionForm";
 import ActivitySection from "../../components/myProfile/ActivitySection";
+import PeopleYouMayKnow from "../../components/myProfile/PeopleYouMayKnow";
 import adPhoto from "../../../public/Images/linkedInAd.png";
 import { useNavigate } from "react-router-dom";
 
@@ -113,35 +114,6 @@ const API_ROUTES = {
 const handleAdClick = () => {
   const navigate = useNavigate();
   navigate("/premium");
-};
-
-const PeopleYouMayKnow = () => {
-  return (
-    <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-4 mt-20">
-      <div className="p-3 border-b">
-        <h3 className="text-base font-medium">People you may know</h3>
-      </div>
-      <div className="p-3">
-        {[1, 2, 3].map((item) => (
-          <div key={item} className="flex items-center mb-3 last:mb-0">
-            <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
-            <div className="ml-2 flex-1">
-              <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-              <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-            </div>
-            <button className="bg-white cursor-pointer text-[#0073b1] border-[#0073b1] border-2 px-4 py-1 rounded-full hover:bg-[#EAF4FD] hover:[border-width:2px] box-border font-medium text-sm transition-all duration-150">
-              Connect
-            </button>
-          </div>
-        ))}
-        <div className="mt-2 text-center">
-          <a href="#" className="text-sm text-gray-500 hover:underline">
-            Show more
-          </a>
-        </div>
-      </div>
-    </div>
-  );
 };
 
 const SubscriptionAd = () => {
@@ -655,9 +627,9 @@ const LinkedInProfile: React.FC = () => {
           </div>
 
           <div className="hidden lg:block lg:w-1/4">
-            <div className="mt-8">
-              <PeopleYouMayKnow />
-            </div>
+          <div className="space-y-6 mt-18">
+          <PeopleYouMayKnow /> 
+          </div>
 
             <div className="mt-4">
               <SubscriptionAd />
