@@ -303,14 +303,28 @@ const handleEditPostCancel = () => {
 
 
 
-  const fetchSavedPosts = async (page = 1, limit = 10) => {
+  // Updated fetchSavedPosts function with sorting
+const fetchSavedPosts = async (page = 1, limit = 10) => {
   setSavedPostsLoading(true);
   try {
     const response = await axios.get(
       `${BASE_URL}/user/saved-posts`,
       { withCredentials: true }
     );
-    setSavedPosts(response.data.posts || []);
+    
+    // Get the posts from the response
+    const posts = response.data.posts || [];
+    
+    // Sort posts by createdAt/timestamp in descending order (newest first)
+    const sortedPosts = [...posts].sort((a, b) => {
+      // Use createdAt or timestamp depending on what's available
+      const dateA = new Date(a.createdAt || a.timestamp);
+      const dateB = new Date(b.createdAt || b.timestamp);
+      return dateB - dateA; // For newest first (descending)
+      // Use dateA - dateB for oldest first (ascending)
+    });
+    
+    setSavedPosts(sortedPosts);
   } catch (err) {
     console.error("Error fetching saved posts:", err);
     setSavedPosts([]);
