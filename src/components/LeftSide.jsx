@@ -74,17 +74,7 @@ const Leftside = ({ onShowSavedPosts, onShowAllPosts }) => {
         </div>
         
 
-        {/* Premium Section */}
-        <div className="border-b border-[rgba(0,0,0,0.08)] py-3 px-3 text-left">
-          <a href="/premium/products" className="text-xs text-[rgba(0,0,0,0.6)] hover:text-[rgba(0,0,0,0.9)]">
-            <span className="flex items-start">
-              <img src="/Images/linkedin.png" alt="Premium" className="w-4 h-4 mr-1" />
-              Access exclusive tools & insights
-              <br />
-              <span className="font-semibold text-[#915907] ml-5 mt-1">Try Premium for free</span>
-            </span>
-          </a>
-        </div>
+        
 
         {/* My Items Section */}
         <button

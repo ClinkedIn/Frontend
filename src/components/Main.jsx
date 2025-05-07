@@ -775,6 +775,49 @@ const fetchReplies = async (commentId) => {
     console.error("Error fetching replies:", err);
   }
 };
+
+
+
+/**
+ * Handles reposting a post by sending a POST request to the repost endpoint.
+ * 
+ * @async
+ * @function handleRepost
+ * @param {string} postId - The ID of the post to be reposted
+ * @returns {Promise<void>}
+ */
+const handleRepost = async (postId) => {
+  try {
+    // Send request to repost endpoint
+    const response = await axios.post(`${API_ENDPOINT}/${postId}/repost`);
+    console.log("Repost response:", response.data);
+    
+    // If the backend returns the reposted post, add it to the posts list
+    if (response.data && response.data.post) {
+      // Add the newly reposted post to the top of the feed
+      setPosts(prevPosts => [response.data.post, ...prevPosts]);
+      alert("Post reposted successfully!");
+    } else {
+      // If no post is returned but request succeeded, refresh all posts
+      fetchPosts();
+      alert("Post reposted successfully!");
+    }
+  } catch (error) {
+    console.error("Error reposting post:", error);
+    
+    if (error.response) {
+      if (error.response.status === 400) {
+        alert("You can't repost this content.");
+      } else if (error.response.status === 409) {
+        alert("You've already reposted this post.");
+      } else {
+        alert(`Failed to repost: ${error.response.data.message || "Unknown error"}`);
+      }
+    } else {
+      alert("Failed to repost. Please check your connection and try again.");
+    }
+  }
+};
   
   // Handle creating a new post
   /**
@@ -815,6 +858,7 @@ const fetchReplies = async (commentId) => {
       // Add privacy settings
       formData.append("whoCanSee", "anyone");
       formData.append("whoCanComment", "anyone");
+
 
       // Log form data for debugging
       console.log("Sending post with description:", postData.text);
@@ -1166,6 +1210,15 @@ const fetchReplies = async (commentId) => {
                       </span>
                     </div>
                   </a>
+
+                  {post.isRepost && (
+                      <div className="text-sm text-[rgba(0,0,0,0.6)] pl-14 pb-2 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 mr-1">
+                          <path fillRule="evenodd" d="M4.755 10.059a7.5 7.5 0 0112.548-3.364l1.903 1.903h-3.183a.75.75 0 100 1.5h4.992a.75.75 0 00.75-.75V4.356a.75.75 0 00-1.5 0v3.18l-1.9-1.9A9 9 0 003.306 9.67a.75.75 0 101.45.388zm15.408 3.352a.75.75 0 00-.919.53 7.5 7.5 0 01-12.548 3.364l-1.902-1.903h3.183a.75.75 0 000-1.5H2.984a.75.75 0 00-.75.75v4.992a.75.75 0 001.5 0v-3.18l1.9 1.9a9 9 0 0015.059-4.035.75.75 0 00-.53-.918z" clipRule="evenodd" />
+                        </svg>
+                        <span>Reposted</span>
+                      </div>
+                    )}
           
                   <PostMenu
                     postId={post.id || post.postId}
@@ -1174,7 +1227,7 @@ const fetchReplies = async (commentId) => {
                     onReport={() => handleOpenReportModal(post.id || post.postId)}
                     onDelete={handleDeletePost}
                     onEdit={handleEditPost}
-                    isPostOwner={true}
+                    isPostOwner={post.isMine}
                     isSaved={post.isSaved}
                   />
                 </div>
@@ -1467,7 +1520,10 @@ const fetchReplies = async (commentId) => {
                 <img src="/Images/comment.svg" alt="comment" />
                 <span>Comment</span>
               </button>
-              <button className="outline-none text-[rgba(0,0,0,0.6)] p-3 px-6 bg-transparent flex items-center cursor-pointer gap-1.25 rounded-md transition duration-200 hover:bg-[rgba(0,0,0,0.08)] font-semibold">
+              <button 
+                onClick={() => handleRepost(post.id || post.postId)}
+                className="outline-none text-[rgba(0,0,0,0.6)] p-3 px-6 bg-transparent flex items-center cursor-pointer gap-1.25 rounded-md transition duration-200 hover:bg-[rgba(0,0,0,0.08)] font-semibold"
+              >
                 <img src="/Images/share.svg" alt="share" />
                 <span>Repost</span>
               </button>
