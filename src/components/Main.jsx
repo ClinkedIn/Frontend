@@ -9,6 +9,7 @@ import { useLocation } from 'react-router-dom';
 import Leftside from './LeftSide';
 import SinglePostView from './SinglePostView.jsx';
 import ReportPostModal from './ReportPostModal.jsx';
+import ReactedUsersModal from "./ReactedUsersModal.jsx";
 
 // Set axios defaults to include credentials with all requests
 axios.defaults.withCredentials = true;
@@ -110,6 +111,19 @@ const Main = ({ showSavedPosts, onShowSavedPosts, onShowAllPosts }) => {
   const [editingComment, setEditingComment] = useState(null);
   const [editingPostId, setEditingPostId] = useState(null);
   const [editContent, setEditContent] = useState('');
+
+//showing users liking a post
+const [showReactionsModal, setShowReactionsModal] = useState(false);
+const [selectedPostForReactions, setSelectedPostForReactions] = useState(null);
+const [selectedReactionType, setSelectedReactionType] = useState(null);
+
+
+const handleShowReactedUsers = (postId, reactionType = null, e) => {
+  if (e) e.stopPropagation(); // Prevent propagation if called from nested elements
+  setSelectedPostForReactions(postId);
+  setSelectedReactionType(reactionType);
+  setShowReactionsModal(true);
+};
 
   // Add these new state variables for the report modal
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
@@ -1434,7 +1448,10 @@ const handleRepost = async (postId) => {
             
             {/* Updated metrics section with reaction emojis */}
             <ul className="flex justify-between mx-4 p-2 border-b border-[#e9e5df] text-sm overflow-auto">
-              <li className="flex items-center cursor-pointer hover:text-[#0a66c2] hover:underline">
+              <li 
+                onClick={() => handleShowReactedUsers(post.id || post.postId)}
+                className="flex items-center cursor-pointer hover:text-[#0a66c2] hover:underline"
+              >
                 <div className="flex items-center">
                   {/* Handle different reaction formats */}
                   {post.reactions && post.reactions.length > 0 && (
@@ -1443,6 +1460,7 @@ const handleRepost = async (postId) => {
                         <span
                           key={index}
                           className="inline-block w-4 h-4 text-xs"
+                          onClick={(e) => handleShowReactedUsers(post.id || post.postId, reaction.type, e)}
                         >
                           {reaction.type === "like" && "👍"}
                           {reaction.type === "celebrate" && "👏"}
@@ -1458,19 +1476,34 @@ const handleRepost = async (postId) => {
                   {post.impressionCounts && (
                     <div className="flex -space-x-1 mr-1">
                       {post.impressionCounts.like > 0 && (
-                        <span className="inline-block w-4 h-4 text-xs">👍</span>
+                        <span 
+                          className="inline-block w-4 h-4 text-xs"
+                          onClick={(e) => handleShowReactedUsers(post.id || post.postId, 'like', e)}
+                        >👍</span>
                       )}
                       {post.impressionCounts.celebrate > 0 && (
-                        <span className="inline-block w-4 h-4 text-xs">👏</span>
+                        <span 
+                          className="inline-block w-4 h-4 text-xs"
+                          onClick={(e) => handleShowReactedUsers(post.id || post.postId, 'celebrate', e)}
+                        >👏</span>
                       )}
                       {post.impressionCounts.support > 0 && (
-                        <span className="inline-block w-4 h-4 text-xs">❤️</span>
+                        <span 
+                          className="inline-block w-4 h-4 text-xs"
+                          onClick={(e) => handleShowReactedUsers(post.id || post.postId, 'support', e)}
+                        >❤️</span>
                       )}
                       {post.impressionCounts.insightful > 0 && (
-                        <span className="inline-block w-4 h-4 text-xs">💡</span>
+                        <span 
+                          className="inline-block w-4 h-4 text-xs"
+                          onClick={(e) => handleShowReactedUsers(post.id || post.postId, 'insightful', e)}
+                        >💡</span>
                       )}
                       {post.impressionCounts.funny > 0 && (
-                        <span className="inline-block w-4 h-4 text-xs">😄</span>
+                        <span 
+                          className="inline-block w-4 h-4 text-xs"
+                          onClick={(e) => handleShowReactedUsers(post.id || post.postId, 'funny', e)}
+                        >😄</span>
                       )}
                     </div>
                   )}
@@ -1569,6 +1602,13 @@ const handleRepost = async (postId) => {
         isOpen={isReportModalOpen}
         onClose={() => setIsReportModalOpen(false)}
         onSubmit={handleReportPost}
+      />
+
+      <ReactedUsersModal
+        isOpen={showReactionsModal}
+        onClose={() => setShowReactionsModal(false)}
+        postId={selectedPostForReactions}
+        reactionType={selectedReactionType}
       />
     </div>
   );
