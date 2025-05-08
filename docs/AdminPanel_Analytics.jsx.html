@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: AdminPanel/Analytics.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: AdminPanel/Analytics.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import { useState, useEffect } from "react";
+import {
+  LineChart,
+  BarChart,
+  PieChart,
+  Pie,
+  Cell,
+  Line,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
+import {
+  Activity,
+  Users,
+  UserPlus,
+  FileText,
+  Briefcase,
+  MessageSquare,
+  UserCheck,
+  Clock,
+  Zap,
+  PieChartIcon,
+  Building,
+  Briefcase as BriefcaseIcon,
+  Shield,
+  Monitor,
+  Sun,
+  Moon,
+  Globe,
+  Lock,
+  BarChart as BarChartIcon,
+  GitBranch,
+} from "lucide-react";
+
+/**
+ * @typedef {Object} UserStats
+ * @property {number} totalUsers - Total number of users registered on the platform
+ * @property {number} activeUsers - Number of users active in the last 30 days
+ * @property {number} premiumUsers - Number of users with premium subscriptions
+ * @property {number} averageConnections - Average number of connections per user
+ * @property {Array&lt;{_id: string, count: number}>} employmentTypeCounts - Distribution of users by employment type
+ * @property {Array&lt;{_id: string, count: number}>} usersByProfilePrivacy - Distribution of users by profile privacy setting
+ * @property {Array&lt;{_id: string, count: number}>} usersByDefaultMode - Distribution of users by UI theme preference
+ * @property {Array&lt;{_id: string, count: number}>} usersByConnectionRequestPrivacy - Distribution of users by connection request privacy setting
+ */
+
+/**
+ * @typedef {Object} PostStats
+ * @property {number} totalPosts - Total number of posts created on the platform
+ * @property {number} totalImpressions - Total number of post impressions
+ * @property {Object} averageEngagement - Average engagement metrics per post
+ * @property {number} averageEngagement.impressions - Average impressions per post
+ * @property {number} averageEngagement.comments - Average comments per post
+ * @property {number} averageEngagement.reposts - Average reposts per post
+ */
+
+/**
+ * @typedef {Object} JobStats
+ * @property {number} totalJobs - Total number of jobs posted on the platform
+ * @property {number} averageApplications - Average number of applications per job
+ * @property {Array&lt;{_id: string, count: number}>} jobsByWorkplaceType - Distribution of jobs by workplace type
+ * @property {Array&lt;{_id: string, count: number}>} jobsByType - Distribution of jobs by employment type
+ */
+
+/**
+ * @typedef {Object} CompanyStats
+ * @property {number} totalCompanies - Total number of companies registered on the platform
+ * @property {number} activeCompanies - Number of companies active in the last 30 days
+ * @property {number} averageFollowers - Average number of followers per company
+ * @property {Array&lt;{_id: string, count: number}>} companiesBySize - Distribution of companies by size
+ * @property {Array&lt;{_id: string, count: number}>} companiesByIndustry - Distribution of companies by industry
+ */
+
+/**
+ * @typedef {Object} AnalyticsData
+ * @property {UserStats} userStats - Statistics related to platform users
+ * @property {PostStats} postStats - Statistics related to posts and content
+ * @property {JobStats} jobStats - Statistics related to job listings
+ * @property {CompanyStats} companyStats - Statistics related to companies
+ */
+
+/**
+ * AdminDashboard component for visualizing platform analytics and metrics
+ * 
+ * This component displays comprehensive analytics about platform usage including:
+ * - User statistics (total users, active users, subscription types)
+ * - Content engagement metrics (posts, impressions)
+ * - Job and company statistics
+ * - Various distribution charts for user settings and preferences
+ * 
+ * The component fetches data from the admin analytics API endpoint and refreshes
+ * at regular intervals. It also includes real-time simulation updates for certain metrics.
+ * 
+ * @returns {JSX.Element} The AdminDashboard component with analytics visualizations
+ */
+export default function AdminDashboard() {
+  /** @type {[boolean, React.Dispatch&lt;React.SetStateAction&lt;boolean>>]} Loading state indicator */
+  const [loading, setLoading] = useState(true);
+  
+  /** @type {[AnalyticsData|null, React.Dispatch&lt;React.SetStateAction&lt;AnalyticsData|null>>]} Analytics data from API */
+  const [analyticsData, setAnalyticsData] = useState(null);
+  
+  /** @type {[string|null, React.Dispatch&lt;React.SetStateAction&lt;string|null>>]} Error message if API request fails */
+  const [error, setError] = useState(null);
+
+  /**
+   * Fetches analytics data from the API
+   * 
+   * @async
+   * @function fetchAnalytics
+   * @returns {Promise&lt;void>}
+   */
+  useEffect(() => {
+    const BASE_URL =
+      import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+
+    const fetchAnalytics = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`${BASE_URL}/admin/analytics/overview`, {
+          credentials: "include",
+        });
+
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        if (result.status === "success") {
+          setAnalyticsData(result.data);
+        } else {
+          throw new Error("API returned unsuccessful status");
+        }
+      } catch (err) {
+        console.error("Failed to fetch analytics:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAnalytics();
+
+    // Refresh data every 5 minutes
+    const refreshInterval = setInterval(fetchAnalytics, 5 * 60 * 1000);
+
+    return () => clearInterval(refreshInterval);
+  }, []);
+
+  /**
+   * Simulates real-time updates to certain metrics
+   * 
+   * In a production environment, this would be replaced with WebSocket connections
+   * or server-sent events for true real-time updates.
+   * 
+   * @function simulateRealTimeUpdates
+   * @returns {void}
+   */
+  useEffect(() => {
+    if (!analyticsData) return;
+
+    const interval = setInterval(() => {
+      setAnalyticsData((prevData) => ({
+        ...prevData,
+        userStats: {
+          ...prevData.userStats,
+          activeUsers:
+            prevData.userStats.activeUsers + Math.floor(Math.random() * 3) - 1,
+        },
+        postStats: {
+          ...prevData.postStats,
+          totalImpressions:
+            prevData.postStats.totalImpressions + Math.floor(Math.random() * 5),
+        },
+      }));
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [analyticsData]);
+
+  // Loading state
+  if (loading &amp;&amp; !analyticsData) {
+    return (
+      &lt;div className="flex items-center justify-center min-h-screen">
+        &lt;div className="text-center">
+          &lt;div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500 mx-auto">&lt;/div>
+          &lt;p className="mt-4 text-gray-600">Loading dashboard data...&lt;/p>
+        &lt;/div>
+      &lt;/div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      &lt;div className="flex items-center justify-center min-h-screen">
+        &lt;div className="bg-red-50 p-6 rounded-lg border border-red-200 max-w-xl">
+          &lt;h2 className="text-xl font-semibold text-red-700 mb-2">
+            Error Loading Data
+          &lt;/h2>
+          &lt;p className="text-red-600">{error}&lt;/p>
+          &lt;button
+            className="mt-4 bg-red-100 hover:bg-red-200 text-red-800 font-medium py-2 px-4 rounded"
+            onClick={() => window.location.reload()}
+          >
+            Retry
+          &lt;/button>
+        &lt;/div>
+      &lt;/div>
+    );
+  }
+
+  // No data available
+  if (!analyticsData) {
+    return null;
+  }
+
+  // Prepare data for charts
+  const { userStats, postStats, jobStats, companyStats } = analyticsData;
+
+  /**
+   * Data prepared for subscription distribution pie chart
+   * @type {Array&lt;{name: string, users: number}>}
+   */
+  const subscriptionData = [
+    { name: "Premium", users: userStats.premiumUsers },
+    { name: "Free", users: userStats.totalUsers - userStats.premiumUsers },
+  ];
+
+  /**
+   * Data prepared for employment type bar chart
+   * @type {Array&lt;{name: string, count: number}>}
+   */
+  const employmentData = userStats.employmentTypeCounts.map((item) => ({
+    name: item._id,
+    count: item.count,
+  }));
+
+  /**
+   * Data prepared for workplace type pie chart
+   * @type {Array&lt;{name: string, value: number}>}
+   */
+  const workplaceData = jobStats.jobsByWorkplaceType.map((item) => ({
+    name: item._id,
+    value: item.count,
+  }));
+
+  /**
+   * Data prepared for company size distribution
+   * @type {Array&lt;{name: string, value: number}>}
+   */
+  const companySizeData = companyStats.companiesBySize.map((item) => ({
+    name: item._id,
+    value: item.count,
+  }));
+
+  /**
+   * Data prepared for profile privacy settings distribution
+   * @type {Array&lt;{name: string, value: number}>}
+   */
+  const privacyData = userStats.usersByProfilePrivacy.map((item) => ({
+    name:
+      item._id === "public"
+        ? "Public"
+        : item._id === "connectionsOnly"
+        ? "Connections Only"
+        : "Private",
+    value: item.count,
+  }));
+
+  /**
+   * Data prepared for UI theme preference distribution
+   * @type {Array&lt;{name: string, value: number}>}
+   */
+  const themePreferenceData = userStats.usersByDefaultMode.map((item) => ({
+    name: item._id === "dark" ? "Dark Mode" : "Light Mode",
+    value: item.count,
+  }));
+
+  /**
+   * Data prepared for connection request privacy settings distribution
+   * @type {Array&lt;{name: string, value: number}>}
+   */
+  const connectionPrivacyData = userStats.usersByConnectionRequestPrivacy.map(
+    (item) => ({
+      name: item._id === "everyone" ? "Anyone" : "Connections Only",
+      value: item.count,
+    })
+  );
+
+  /**
+   * Data prepared for job types distribution
+   * @type {Array&lt;{name: string, count: number}>}
+   */
+  const jobTypesData = jobStats.jobsByType.map((item) => ({
+    name: item._id,
+    count: item.count,
+  }));
+
+  /**
+   * Data prepared for top 10 company industries
+   * @type {Array&lt;{name: string, count: number}>}
+   */
+  const companyIndustryData = companyStats.companiesByIndustry
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 10)
+    .map((item) => ({
+      name: item._id,
+      count: item.count,
+    }));
+
+  /**
+   * Color palette for charts
+   * @type {string[]}
+   */
+  const CHART_COLORS = [
+    "#3b82f6",
+    "#10b981",
+    "#f59e0b",
+    "#ef4444",
+    "#8b5cf6",
+    "#ec4899",
+    "#14b8a6",
+    "#6366f1",
+    "#d946ef",
+    "#f97316",
+  ];
+
+  return (
+    &lt;div className="bg-gray-50 min-h-screen">
+      {/* Header */}
+      &lt;header className="bg-white shadow">
+        &lt;div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+          &lt;h1 className="text-3xl font-bold text-gray-900">
+            Platform Analytics
+          &lt;/h1>
+          &lt;p className="text-gray-500 mt-1">
+            Comprehensive overview of platform metrics
+          &lt;/p>
+        &lt;/div>
+      &lt;/header>
+
+      &lt;main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+        {/* Metrics Overview */}
+        &lt;div className="mb-8">
+          &lt;h2 className="text-xl font-semibold text-gray-800 mb-4">
+            Key Metrics
+          &lt;/h2>
+          &lt;div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            &lt;MetricCard
+              icon={&lt;Users className="text-blue-500" />}
+              title="Total Users"
+              value={userStats.totalUsers}
+            />
+            &lt;MetricCard
+              icon={&lt;UserCheck className="text-green-500" />}
+              title="Active Users"
+              value={userStats.activeUsers}
+              highlight={true}
+            />
+            &lt;MetricCard
+              icon={&lt;Shield className="text-purple-500" />}
+              title="Premium Users"
+              value={userStats.premiumUsers}
+            />
+            &lt;MetricCard
+              icon={&lt;GitBranch className="text-indigo-500" />}
+              title="Avg Connections"
+              value={userStats.averageConnections}
+            />
+          &lt;/div>
+        &lt;/div>
+
+        {/* Post &amp; Job Metrics */}
+        &lt;div className="mb-8">
+          &lt;h2 className="text-xl font-semibold text-gray-800 mb-4">
+            Content &amp; Engagement
+          &lt;/h2>
+          &lt;div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            &lt;MetricCard
+              icon={&lt;FileText className="text-yellow-500" />}
+              title="Total Posts"
+              value={postStats.totalPosts}
+            />
+            &lt;MetricCard
+              icon={&lt;Activity className="text-red-500" />}
+              title="Total Impressions"
+              value={postStats.totalImpressions}
+              highlight={true}
+            />
+            &lt;MetricCard
+              icon={&lt;BriefcaseIcon className="text-pink-500" />}
+              title="Total Jobs"
+              value={jobStats.totalJobs}
+            />
+            &lt;MetricCard
+              icon={&lt;MessageSquare className="text-orange-500" />}
+              title="Avg Job Applications"
+              value={jobStats.averageApplications}
+            />
+          &lt;/div>
+        &lt;/div>
+
+        {/* Company Metrics */}
+        &lt;div className="mb-8">
+          &lt;h2 className="text-xl font-semibold text-gray-800 mb-4">
+            Company Metrics
+          &lt;/h2>
+          &lt;div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            &lt;MetricCard
+              icon={&lt;Building className="text-blue-500" />}
+              title="Total Companies"
+              value={companyStats.totalCompanies}
+            />
+            &lt;MetricCard
+              icon={&lt;Building className="text-green-500" />}
+              title="Active Companies"
+              value={companyStats.activeCompanies}
+              highlight={true}
+            />
+            &lt;MetricCard
+              icon={&lt;Users className="text-purple-500" />}
+              title="Avg Followers"
+              value={companyStats.averageFollowers}
+            />
+            &lt;MetricCard
+              icon={&lt;Zap className="text-indigo-500" />}
+              title="Avg Engagement"
+              value={postStats.averageEngagement.impressions.toFixed(1)}
+            />
+          &lt;/div>
+        &lt;/div>
+
+        {/* User Distribution Charts */}
+        &lt;div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          {/* Subscription Distribution */}
+          &lt;div className="bg-white p-6 rounded-lg shadow">
+            &lt;h2 className="text-xl font-semibold text-gray-800 mb-4">
+              &lt;Shield className="inline-block mr-2" size={20} />
+              User Subscription Distribution
+            &lt;/h2>
+            &lt;ResponsiveContainer width="100%" height={300}>
+              &lt;PieChart>
+                &lt;Pie
+                  data={subscriptionData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="users"
+                  nameKey="name"
+                  label={({ name, percent }) =>
+                    `${name}: ${(percent * 100).toFixed(0)}%`
+                  }
+                >
+                  {subscriptionData.map((entry, index) => (
+                    &lt;Cell
+                      key={`cell-${index}`}
+                      fill={CHART_COLORS[index % CHART_COLORS.length]}
+                    />
+                  ))}
+                &lt;/Pie>
+                &lt;Tooltip formatter={(value) => value.toLocaleString()} />
+                &lt;Legend />
+              &lt;/PieChart>
+            &lt;/ResponsiveContainer>
+          &lt;/div>
+
+          {/* UI Theme Preference */}
+          &lt;div className="bg-white p-6 rounded-lg shadow">
+            &lt;h2 className="text-xl font-semibold text-gray-800 mb-4">
+              &lt;Sun className="inline-block mr-2" size={20} />
+              &lt;Moon className="inline-block mr-2" size={20} />
+              UI Theme Preference
+            &lt;/h2>
+            &lt;ResponsiveContainer width="100%" height={300}>
+              &lt;PieChart>
+                &lt;Pie
+                  data={themePreferenceData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="value"
+                  nameKey="name"
+                  label={({ name, percent }) =>
+                    `${name}: ${(percent * 100).toFixed(0)}%`
+                  }
+                >
+                  {themePreferenceData.map((entry, index) => (
+                    &lt;Cell
+                      key={`cell-${index}`}
+                      fill={entry.name === "Dark Mode" ? "#1e293b" : "#f8fafc"}
+                      stroke={
+                        entry.name === "Light Mode" ? "#94a3b8" : undefined
+                      }
+                    />
+                  ))}
+                &lt;/Pie>
+                &lt;Tooltip formatter={(value) => value.toLocaleString()} />
+                &lt;Legend />
+              &lt;/PieChart>
+            &lt;/ResponsiveContainer>
+          &lt;/div>
+        &lt;/div>
+
+        {/* Privacy Settings Charts */}
+        &lt;div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          {/* Profile Privacy */}
+          &lt;div className="bg-white p-6 rounded-lg shadow">
+            &lt;h2 className="text-xl font-semibold text-gray-800 mb-4">
+              &lt;Lock className="inline-block mr-2" size={20} />
+              Profile Privacy Settings
+            &lt;/h2>
+            &lt;ResponsiveContainer width="100%" height={300}>
+              &lt;PieChart>
+                &lt;Pie
+                  data={privacyData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="value"
+                  nameKey="name"
+                  label={({ name, percent }) =>
+                    `${name}: ${(percent * 100).toFixed(0)}%`
+                  }
+                >
+                  {privacyData.map((entry, index) => (
+                    &lt;Cell
+                      key={`cell-${index}`}
+                      fill={CHART_COLORS[index % CHART_COLORS.length]}
+                    />
+                  ))}
+                &lt;/Pie>
+                &lt;Tooltip formatter={(value) => value.toLocaleString()} />
+                &lt;Legend />
+              &lt;/PieChart>
+            &lt;/ResponsiveContainer>
+          &lt;/div>
+
+          {/* Connection Request Privacy */}
+          &lt;div className="bg-white p-6 rounded-lg shadow">
+            &lt;h2 className="text-xl font-semibold text-gray-800 mb-4">
+              &lt;Globe className="inline-block mr-2" size={20} />
+              Connection Request Privacy
+            &lt;/h2>
+            &lt;ResponsiveContainer width="100%" height={300}>
+              &lt;PieChart>
+                &lt;Pie
+                  data={connectionPrivacyData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="value"
+                  nameKey="name"
+                  label={({ name, percent }) =>
+                    `${name}: ${(percent * 100).toFixed(0)}%`
+                  }
+                >
+                  {connectionPrivacyData.map((entry, index) => (
+                    &lt;Cell
+                      key={`cell-${index}`}
+                      fill={CHART_COLORS[index % CHART_COLORS.length]}
+                    />
+                  ))}
+                &lt;/Pie>
+                &lt;Tooltip formatter={(value) => value.toLocaleString()} />
+                &lt;Legend />
+              &lt;/PieChart>
+            &lt;/ResponsiveContainer>
+          &lt;/div>
+        &lt;/div>
+
+        {/* Job Distribution Charts */}
+        &lt;div className="mb-8">
+          &lt;h2 className="text-xl font-semibold text-gray-800 mb-4">
+            &lt;Briefcase className="inline-block mr-2" size={20} />
+            Job Distribution
+          &lt;/h2>
+
+          &lt;div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            {/* Job Types */}
+            &lt;div className="bg-white p-6 rounded-lg shadow">
+              &lt;h3 className="text-lg font-semibold text-gray-800 mb-4">
+                Job Types
+              &lt;/h3>
+              &lt;ResponsiveContainer width="100%" height={300}>
+                &lt;BarChart data={jobTypesData}>
+                  &lt;CartesianGrid strokeDasharray="3 3" />
+                  &lt;XAxis dataKey="name" />
+                  &lt;YAxis />
+                  &lt;Tooltip formatter={(value) => value.toLocaleString()} />
+                  &lt;Bar dataKey="count" name="Jobs" fill="#8b5cf6">
+                    {jobTypesData.map((entry, index) => (
+                      &lt;Cell
+                        key={`cell-${index}`}
+                        fill={CHART_COLORS[index % CHART_COLORS.length]}
+                      />
+                    ))}
+                  &lt;/Bar>
+                &lt;/BarChart>
+              &lt;/ResponsiveContainer>
+            &lt;/div>
+
+            {/* Workplace Types */}
+            &lt;div className="bg-white p-6 rounded-lg shadow">
+              &lt;h3 className="text-lg font-semibold text-gray-800 mb-4">
+                Workplace Types
+              &lt;/h3>
+              &lt;ResponsiveContainer width="100%" height={300}>
+                &lt;PieChart>
+                  &lt;Pie
+                    data={workplaceData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    outerRadius={100}
+                    fill="#8884d8"
+                    dataKey="value"
+                    nameKey="name"
+                    label={({ name, percent }) =>
+                      `${name}: ${(percent * 100).toFixed(0)}%`
+                    }
+                  >
+                    {workplaceData.map((entry, index) => (
+                      &lt;Cell
+                        key={`cell-${index}`}
+                        fill={CHART_COLORS[index % CHART_COLORS.length]}
+                      />
+                    ))}
+                  &lt;/Pie>
+                  &lt;Tooltip formatter={(value) => value.toLocaleString()} />
+                  &lt;Legend />
+                &lt;/PieChart>
+              &lt;/ResponsiveContainer>
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+
+        {/* Employment and Company Data */}
+        &lt;div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          {/* Employment Types */}
+          &lt;div className="bg-white p-6 rounded-lg shadow">
+            &lt;h2 className="text-xl font-semibold text-gray-800 mb-4">
+              &lt;BarChartIcon className="inline-block mr-2" size={20} />
+              Employment Types
+            &lt;/h2>
+            &lt;ResponsiveContainer width="100%" height={350}>
+              &lt;BarChart data={employmentData} layout="vertical">
+                &lt;CartesianGrid strokeDasharray="3 3" />
+                &lt;XAxis type="number" />
+                &lt;YAxis dataKey="name" type="category" width={100} />
+                &lt;Tooltip formatter={(value) => value.toLocaleString()} />
+                &lt;Bar dataKey="count" name="Users" fill="#3b82f6">
+                  {employmentData.map((entry, index) => (
+                    &lt;Cell
+                      key={`cell-${index}`}
+                      fill={CHART_COLORS[index % CHART_COLORS.length]}
+                    />
+                  ))}
+                &lt;/Bar>
+              &lt;/BarChart>
+            &lt;/ResponsiveContainer>
+          &lt;/div>
+
+          {/* Company Size Distribution */}
+          &lt;div className="bg-white p-6 rounded-lg shadow">
+            &lt;h2 className="text-xl font-semibold text-gray-800 mb-4">
+              &lt;Building className="inline-block mr-2" size={20} />
+              Company Size Distribution
+            &lt;/h2>
+            &lt;ResponsiveContainer width="100%" height={350}>
+              &lt;BarChart data={companySizeData} layout="vertical">
+                &lt;CartesianGrid strokeDasharray="3 3" />
+                &lt;XAxis type="number" />
+                &lt;YAxis dataKey="name" type="category" width={100} />
+                &lt;Tooltip formatter={(value) => value.toLocaleString()} />
+                &lt;Bar dataKey="value" name="Companies" fill="#10b981">
+                  {companySizeData.map((entry, index) => (
+                    &lt;Cell
+                      key={`cell-${index}`}
+                      fill={CHART_COLORS[index % CHART_COLORS.length]}
+                    />
+                  ))}
+                &lt;/Bar>
+              &lt;/BarChart>
+            &lt;/ResponsiveContainer>
+          &lt;/div>
+        &lt;/div>
+
+        {/* Top Industries */}
+        &lt;div className="bg-white p-6 rounded-lg shadow mb-8">
+          &lt;h2 className="text-xl font-semibold text-gray-800 mb-4">
+            &lt;Building className="inline-block mr-2" size={20} />
+            Top Industries
+          &lt;/h2>
+          &lt;ResponsiveContainer width="100%" height={400}>
+            &lt;BarChart data={companyIndustryData} layout="vertical">
+              &lt;CartesianGrid strokeDasharray="3 3" />
+              &lt;XAxis type="number" />
+              &lt;YAxis dataKey="name" type="category" width={150} />
+              &lt;Tooltip formatter={(value) => value.toLocaleString()} />
+              &lt;Bar dataKey="count" name="Companies" fill="#f59e0b">
+                {companyIndustryData.map((entry, index) => (
+                  &lt;Cell
+                    key={`cell-${index}`}
+                    fill={CHART_COLORS[index % CHART_COLORS.length]}
+                  />
+                ))}
+              &lt;/Bar>
+            &lt;/BarChart>
+          &lt;/ResponsiveContainer>
+        &lt;/div>
+
+        {/* Post Engagement */}
+        &lt;div className="bg-white p-6 rounded-lg shadow mb-8">
+          &lt;h2 className="text-xl font-semibold text-gray-800 mb-4">
+            &lt;Activity className="inline-block mr-2" size={20} />
+            Post Engagement Metrics
+          &lt;/h2>
+          &lt;div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            &lt;div className="bg-blue-50 p-6 rounded-lg">
+              &lt;h3 className="text-lg font-medium text-blue-700">
+                Average Impressions
+              &lt;/h3>
+              &lt;p className="text-3xl font-bold text-blue-800 mt-2">
+                {postStats.averageEngagement.impressions}
+              &lt;/p>
+              &lt;p className="text-sm text-blue-600 mt-1">Per post&lt;/p>
+            &lt;/div>
+            &lt;div className="bg-green-50 p-6 rounded-lg">
+              &lt;h3 className="text-lg font-medium text-green-700">
+                Average Comments
+              &lt;/h3>
+              &lt;p className="text-3xl font-bold text-green-800 mt-2">
+                {postStats.averageEngagement.comments}
+              &lt;/p>
+              &lt;p className="text-sm text-green-600 mt-1">Per post&lt;/p>
+            &lt;/div>
+            &lt;div className="bg-purple-50 p-6 rounded-lg">
+              &lt;h3 className="text-lg font-medium text-purple-700">
+                Average Reposts
+              &lt;/h3>
+              &lt;p className="text-3xl font-bold text-purple-800 mt-2">
+                {postStats.averageEngagement.reposts}
+              &lt;/p>
+              &lt;p className="text-sm text-purple-600 mt-1">Per post&lt;/p>
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+      &lt;/main>
+    &lt;/div>
+  );
+}
+
+/**
+ * MetricCard component for displaying individual metric values with icons
+ *
+ * @component
+ * @param {Object} props - Component props
+ * @param {JSX.Element} props.icon - The icon element to display
+ * @param {string} props.title - The title of the metric
+ * @param {number|string} props.value - The value of the metric to display
+ * @param {boolean} [props.highlight=false] - Whether to highlight the card with a colored border
+ * @returns {JSX.Element} The MetricCard component
+ */
+function MetricCard({ icon, title, value, highlight = false }) {
+  return (
+    &lt;div
+      className={`bg-white rounded-lg shadow p-6 ${
+        highlight ? "border-l-4 border-blue-500" : ""
+      }`}
+    >
+      &lt;div className="flex items-center">
+        &lt;div className="p-3 rounded-full bg-gray-100 mr-4">{icon}&lt;/div>
+        &lt;div>
+          &lt;p className="text-sm font-medium text-gray-600">{title}&lt;/p>
+          &lt;p className="text-2xl font-semibold text-gray-900">{value}&lt;/p>
+        &lt;/div>
+      &lt;/div>
+    &lt;/div>
+  );
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#JobListing">JobListing</a></li><li><a href="global.html#MetricCard">MetricCard</a></li><li><a href="global.html#ReportedPosts">ReportedPosts</a></li><li><a href="global.html#SubscriptionPlans">SubscriptionPlans</a></li><li><a href="global.html#SubscriptionStatus">SubscriptionStatus</a></li><li><a href="global.html#fetchAnalytics">fetchAnalytics</a></li><li><a href="global.html#fetchJobs">fetchJobs</a></li><li><a href="global.html#fetchReportedPosts">fetchReportedPosts</a></li><li><a href="global.html#fetchSubscriptionDetails">fetchSubscriptionDetails</a></li><li><a href="global.html#filterAndSearchPosts">filterAndSearchPosts</a></li><li><a href="global.html#formatDate">formatDate</a></li><li><a href="global.html#getStatusBadge">getStatusBadge</a></li><li><a href="global.html#getStatusColor">getStatusColor</a></li><li><a href="global.html#handleApprove">handleApprove</a></li><li><a href="global.html#handleCancelSubscription">handleCancelSubscription</a></li><li><a href="global.html#handleDelete">handleDelete</a></li><li><a href="global.html#handleReject">handleReject</a></li><li><a href="global.html#handleResolveFlag">handleResolveFlag</a></li><li><a href="global.html#handleSort">handleSort</a></li><li><a href="global.html#handleStatusChange">handleStatusChange</a></li><li><a href="global.html#handleSubscribe">handleSubscribe</a></li><li><a href="global.html#renderFeature">renderFeature</a></li><li><a href="global.html#simulateRealTimeUpdates">simulateRealTimeUpdates</a></li><li><a href="global.html#useEffect">useEffect</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Thu May 08 2025 23:54:44 GMT+0300 (Eastern European Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
