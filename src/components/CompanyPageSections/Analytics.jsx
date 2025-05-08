@@ -74,6 +74,8 @@ const CompanyAnalyticsPage = () => {
     const fetchAnalytics = async () => {
         try {
             setLoading(true);
+             if (companyInfo?.id){
+
             const response = await axios.get(
                 `${BASE_URL}/companies/${companyInfo.id}/analytics`,
                 {
@@ -88,11 +90,12 @@ const CompanyAnalyticsPage = () => {
             setAnalyticsData(response.data.analytics);
             console.log(response.data)
             setError(null);
+             setLoading(false);
+        }
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to fetch analytics');
-        } finally {
             setLoading(false);
-        }
+        } 
     };
 
     useEffect(() => {

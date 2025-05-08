@@ -46,9 +46,6 @@ const CompanyProfileMemberViewPage = () => {
             console.log(" followers:", user?.following );
             const isUserFollowing = user?.following?.some((follower) => follower?.entity === companyId && follower?.entityType === "Company");
             setIsFollowing(isUserFollowing);
-            const isAdmin = user?.adminInCompanies.some((CompanyId) => CompanyId === companyId );
-            setIsAdmin(isAdmin);
-            console.log("isAdmin:", isAdmin);
         }
 
       }, [user?._id]);
@@ -92,6 +89,7 @@ const CompanyProfileMemberViewPage = () => {
                 `${BASE_URL}/companies/${companyId}`
             );
             setCompanyInfo(response.data.company);
+            setIsAdmin(response.data.userRelationship ==='admin')
             setIsOwner(response.data.userRelationship==='owner');
             console.log("Company info:", response.data.company); 
         } catch (error) {

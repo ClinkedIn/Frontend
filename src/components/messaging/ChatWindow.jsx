@@ -314,6 +314,8 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
         return;
     }
 
+
+
     // --- Corrected collection name to 'users' ---
     const userDocRef = doc(db, 'user', currentUser._id); // Reference to the CURRENT user's document
     const currentlyBlocked = isBlockedByYou;
@@ -324,6 +326,10 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
       if (currentlyBlocked) {
         // --- UNBLOCK ---
         // Use updateDoc, assuming doc exists if unblocking
+        const response = await axios.patch(`${BASE_URL}/messages/unblock-user/${otherUserId}`,{
+          withCredentials:true
+        })
+        console.log(response.data)
         await updateDoc(userDocRef, {
           blockedUsers: arrayRemove(otherUserId)
         });
