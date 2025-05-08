@@ -177,7 +177,7 @@ const JobListing = () => {
 
   const handleDelete = async (id) => {
     try {
-      const response = await fetch(`${BASE_URL}/jobs/${id}`, {
+      const response = await fetch(`${BASE_URL}/admin/jobs/${id}`, {
         method: "DELETE",
         credentials: "include",
       });
@@ -383,7 +383,6 @@ const JobListing = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          
         </div>
 
         {/* Jobs Table */}
@@ -431,7 +430,7 @@ const JobListing = () => {
                             )}
                           </div>
                           <div className="text-sm font-medium text-gray-500">
-                            {job.company.name}
+                            {job.company ? job.company.name : "Unknown Company"}
                           </div>
                           <div className="text-sm text-gray-500">
                             {job.industry} • {job.location} •{" "}
@@ -475,8 +474,6 @@ const JobListing = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-3">
-                        
-
                         <button
                           onClick={() => handleDelete(job.id)}
                           className="text-red-600 hover:text-red-900"
