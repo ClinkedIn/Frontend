@@ -222,10 +222,10 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
         msgs.push(messageData);
 
         // Mark message as read by current user 
-        if (messageData.senderId !== currentUser._id && !messageData.readBy?.includes(currentUser._id)) {
+        if (messageData.senderId !== currentUser._id && messageData.readBy[currentUser._id]===false) {
            const messageDocRef = doc(messagesColRef, messageDoc.id);
            updateDoc(messageDocRef, {
-             readBy: arrayUnion(currentUser._id)
+            [`readBy.${currentUser._id}`]: true,
            }).catch(err => console.error("Error updating read receipt:", err));
         }
       });
