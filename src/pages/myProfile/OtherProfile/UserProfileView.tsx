@@ -153,6 +153,8 @@ const UserProfileView = () => {
   >("connect");
   const [canSendRequest, setCanSendRequest] = useState<boolean>(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [confirmRemoveId, setConfirmRemoveId] = useState<string | null>(null);
+  const [confirmRemoveName, setConfirmRemoveName] = useState<string>("");
 
   const openEndorsementModal = (skill: Skill) => {
     setActiveSkill(skill);
@@ -695,18 +697,44 @@ const UserProfileView = () => {
     return hasUserEndorsedSkill(skill);
   };
 
+  const handleRemoveConnection = async (connectionId: string) => {
+    try {
+      await api.delete(`/user/connections/${connectionId}`);
+      setUserProfile((prev) =>
+        prev
+          ? {
+              ...prev,
+              connectionList: prev.connectionList?.filter(
+                (id) => id !== connectionId
+              ),
+            }
+          : null
+      );
+      setCanSendRequest(true);
+
+      showMessage("Connection removed successfully", "success");
+
+      setConnectionState("connect");
+    } catch (error) {
+      console.error("Error removing connection:", error);
+      showMessage("Failed to remove connection", "error");
+    } finally {
+      setConfirmRemoveId(null);
+      setConfirmRemoveName("");
+    }
+  };
   const ConnectButton = () => {
     if (!canSendRequest) return null;
 
     const handleConnect = async () => {
       try {
-        if (connectionState === "pending" || connectionState === "connected") {
-          await api.delete(`/user/connections/${userId}`);
-          setConnectionState("connect");
-          showMessage("Connection removed", "success");
+        if (connectionState === "connected") {
+          setConfirmRemoveId(userProfile?._id);
+          setConfirmRemoveName(
+            `${userProfile?.firstName} ${userProfile?.lastName}`
+          );
         } else {
           await api.post(`/user/connections/request/${userId}`);
-          setConnectionState("pending");
           showMessage("Connection request sent", "success");
         }
       } catch (err) {
@@ -714,16 +742,17 @@ const UserProfileView = () => {
         showMessage("Failed to update connection", "error");
       }
     };
+    const isDisabled = connectionState === "pending";
 
     return (
       <button
         onClick={handleConnect}
-        disabled={connectionState !== "connect"}
+        disabled={isDisabled}
         className={`px-4 py-1.5 rounded-full text-sm font-semibold border transition-colors ${
           connectionState === "connected"
             ? "bg-white cursor-pointer text-[#0073b1] border-[#0073b1] border-2 px-4 py-1 rounded-full hover:bg-[#EAF4FD] hover:[border-width:2px] box-border font-medium text-sm transition-all duration-150"
             : connectionState === "pending"
-            ? "border-gray-300 text-gray-400 bg-gray-100 "
+            ? "border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed"
             : "bg-white cursor-pointer text-[#0073b1] border-[#0073b1] border-2 px-4 py-1 rounded-full hover:bg-[#EAF4FD] hover:[border-width:2px] box-border font-medium text-sm transition-all duration-150"
         }`}
       >
@@ -1516,6 +1545,43 @@ const UserProfileView = () => {
                 )}
               </div>
             </Form>
+          )}
+
+          {confirmRemoveId && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+              <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
+                <button
+                  className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-2xl"
+                  onClick={() => setConfirmRemoveId(null)}
+                  aria-label="Close"
+                >
+                  &times;
+                </button>
+                <h2 className="text-xl font-semibold mb-2">
+                  Remove Connection
+                </h2>
+                <p className="mb-6">
+                  Are you sure you want to remove{" "}
+                  <span className="font-semibold">{confirmRemoveName}</span> as
+                  a connection? Don't worry, {confirmRemoveName.split(" ")[0]}{" "}
+                  won't be notified.
+                </p>
+                <div className="flex justify-end space-x-2">
+                  <button
+                    className="px-4 py-2 rounded border border-gray-300 text-gray-700 hover:bg-gray-100"
+                    onClick={() => setConfirmRemoveId(null)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="px-4 py-2 rounded bg-red-600 text-white font-semibold hover:bg-red-700"
+                    onClick={() => handleRemoveConnection(confirmRemoveId)}
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            </div>
           )}
 
           <div className="hidden lg:block lg:w-1/4">
