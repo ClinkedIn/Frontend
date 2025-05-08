@@ -28,9 +28,15 @@ interface BlockButtonProps {
   userId: string;
   initialBlocked?: boolean;
   userName?: string;
+  className?: string;
 }
 
-const BlockButton: React.FC<BlockButtonProps> = ({ userId, initialBlocked = false, userName = "this user" }) => {
+const BlockButton: React.FC<BlockButtonProps> = ({
+  userId,
+  initialBlocked = false,
+  userName = "this user",
+  className = "",
+}) => {
   const [isBlocked, setIsBlocked] = useState(initialBlocked);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -38,7 +44,11 @@ const BlockButton: React.FC<BlockButtonProps> = ({ userId, initialBlocked = fals
   const handleBlock = async () => {
     setLoading(true);
     try {
-      await axios.post(`${BASE_URL}/user/block/${userId}`, {}, { withCredentials: true });
+      await axios.post(
+        `${BASE_URL}/user/block/${userId}`,
+        {},
+        { withCredentials: true }
+      );
       setIsBlocked(true);
     } catch (error) {
       // Optionally handle error
@@ -50,7 +60,9 @@ const BlockButton: React.FC<BlockButtonProps> = ({ userId, initialBlocked = fals
   const handleUnblock = async () => {
     setLoading(true);
     try {
-      await axios.delete(`${BASE_URL}/user/block/${userId}`, { withCredentials: true });
+      await axios.delete(`${BASE_URL}/user/block/${userId}`, {
+        withCredentials: true,
+      });
       setIsBlocked(false);
       setShowModal(false);
     } catch (error) {
@@ -64,11 +76,13 @@ const BlockButton: React.FC<BlockButtonProps> = ({ userId, initialBlocked = fals
     <>
       {!isBlocked ? (
         <button
-          className="px-4 py-1.5 border border-red-500 bg-red-600 text-white rounded-full text-sm font-semibold hover:bg-red-700 transition-colors flex items-center"
+          className={`px-4 py-1 border border-red-500 bg-red-600 text-white text-sm font-semibold hover:bg-red-700 transition-colors flex items-center ${className}`}
           onClick={handleBlock}
           disabled={loading}
         >
-          {loading ? "Blocking..." : (
+          {loading ? (
+            "Blocking..."
+          ) : (
             <>
               <IoMdCloseCircle className="mr-1 text-lg" />
               Block
@@ -78,7 +92,7 @@ const BlockButton: React.FC<BlockButtonProps> = ({ userId, initialBlocked = fals
       ) : (
         <>
           <button
-            className="px-4 py-1.5 border border-red-500 bg-white text-red-600 rounded-full text-sm font-semibold hover:bg-red-50 transition-colors flex items-center"
+            className={`px-4 py-1 border border-red-500 bg-red-600 text-white text-sm font-semibold hover:bg-red-700 transition-colors flex items-center ${className}`}
             onClick={() => setShowModal(true)}
             disabled={loading}
           >
@@ -102,7 +116,8 @@ const BlockButton: React.FC<BlockButtonProps> = ({ userId, initialBlocked = fals
                 {/* Modal Body */}
                 <div className="px-6 pb-6">
                   <p className="mb-8 text-gray-700">
-                    Are you sure you want to unblock {userName}? They will be able to interact with you again.
+                    Are you sure you want to unblock {userName}? They will be
+                    able to interact with you again.
                   </p>
                   <div className="flex justify-end space-x-2">
                     <button

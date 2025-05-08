@@ -565,25 +565,75 @@
 import React, { useState, useEffect } from "react";
 import { Clock, AlertCircle, CheckCircle, XCircle } from "lucide-react";
 
+/**
+ * SubscriptionPlans component for displaying and managing subscription plans
+ *
+ * @component
+ * @example
+ * // Usage in a React application
+ * import SubscriptionPlans from './components/SubscriptionBasedPayment/subscriptionPlans';
+ *
+ * function App() {
+ *   return (
+ *     <div className="app">
+ *       <SubscriptionPlans />
+ *     </div>
+ *   );
+ * }
+ *
+ * @returns {JSX.Element} Rendered component with subscription management UI
+ */
 const SubscriptionPlans = () => {
+  /**
+   * @typedef {Object} SubscriptionData
+   * @property {string} type - The subscription type ('free' or 'premium')
+   * @property {string} status - Subscription status ('active', 'canceled', 'past_due', etc.)
+   * @property {Date} currentPeriodEnd - Date when the current billing period ends
+   * @property {string} renewalAmount - Formatted renewal amount (e.g., "$20.00")
+   * @property {string[]} features - List of premium features
+   * @property {Date} expiryDate - Date when the subscription expires
+   */
+
+  /** @type {[boolean, function]} State for premium status */
   const [isPremium, setIsPremium] = useState(false);
+
+  /** @type {[boolean, function]} State for loading indicator */
   const [loading, setLoading] = useState(true);
+
+  /** @type {[string|null, function]} State for error messages */
   const [error, setError] = useState(null);
-  const [currentPlan, setCurrentPlan] = useState("free"); // 'free' or 'premium'
+
+  /** @type {[string, function]} State for current plan type */
+  const [currentPlan, setCurrentPlan] = useState("free");
+
+  /** @type {[SubscriptionData|null, function]} State for subscription details */
   const [subscriptionData, setSubscriptionData] = useState(null);
+
+  /** @type {[string, function]} State for active tab selection */
   const [activeTab, setActiveTab] = useState("status"); // 'status' or 'plans'
 
+  /** Base URL for API calls from environment variables */
   const BASE_URL =
     import.meta.env.VITE_API_BASE_URL || "https://your-api-url.com";
 
+  /**
+   * Fetch subscription details from server on component mount
+   */
   useEffect(() => {
     fetchSubscriptionDetails();
   }, []);
 
+  /**
+   * Fetches user subscription details from API
+   *
+   * @async
+   * @function fetchSubscriptionDetails
+   * @returns {Promise<void>}
+   * @throws {Error} When API call fails
+   */
   const fetchSubscriptionDetails = async () => {
     setLoading(true);
     try {
-      // Replace with your actual API endpoint
       const response = await fetch(`${BASE_URL}/user/me`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -597,14 +647,12 @@ const SubscriptionPlans = () => {
 
       const data = await response.json();
 
-      // Update premium status
       setIsPremium(data.user.isPremium);
       setCurrentPlan(data.user.isPremium ? "premium" : "free");
 
-      // Create subscription data object
       const subData = {
         type: data.user.isPremium ? "premium" : "free",
-        status: data.user.subscription?.status || "active", // or 'inactive', 'canceled', 'past_due'
+        status: data.user.subscription?.status || "active",
         currentPeriodEnd:
           data.user.subscription?.currentPeriodEnd ||
           new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
@@ -628,6 +676,14 @@ const SubscriptionPlans = () => {
     }
   };
 
+  /**
+   * Initiates subscription process by creating a Stripe checkout session
+   *
+   * @async
+   * @function handleSubscribe
+   * @returns {Promise<void>}
+   * @throws {Error} When checkout session creation fails
+   */
   const handleSubscribe = async () => {
     setLoading(true);
     setError(null);
@@ -651,10 +707,8 @@ const SubscriptionPlans = () => {
       const data = await response.json();
 
       if (response.status === 200) {
-        // Successful checkout session creation
         window.location.href = data.url;
       } else if (response.status === 400) {
-        // User already has an active subscription
         setCurrentPlan(data.subscription.planType);
         setSubscriptionData({
           ...subscriptionData,
@@ -663,7 +717,6 @@ const SubscriptionPlans = () => {
         });
         setError(data.message);
       } else {
-        // Handle 500 or other errors
         throw new Error(data.error || "Failed to create checkout session");
       }
     } catch (err) {
@@ -674,6 +727,14 @@ const SubscriptionPlans = () => {
     }
   };
 
+  /**
+   * Cancels user's current subscription
+   *
+   * @async
+   * @function handleCancelSubscription
+   * @returns {Promise<void>}
+   * @throws {Error} When subscription cancellation fails
+   */
   const handleCancelSubscription = async () => {
     setLoading(true);
     setError(null);
@@ -695,7 +756,6 @@ const SubscriptionPlans = () => {
 
       await response.json();
 
-      // Update the UI to reflect cancellation
       setCurrentPlan("free");
       setIsPremium(false);
       setSubscriptionData({
@@ -704,7 +764,6 @@ const SubscriptionPlans = () => {
         status: "canceled",
       });
 
-      // Refresh data from server
       fetchSubscriptionDetails();
       alert("Your subscription has been canceled successfully.");
     } catch (err) {
@@ -715,6 +774,13 @@ const SubscriptionPlans = () => {
     }
   };
 
+  /**
+   * Formats a date string to a localized date format
+   *
+   * @function formatDate
+   * @param {string|Date} date - Date to format
+   * @returns {string} Formatted date string
+   */
   const formatDate = (date) => {
     if (!date) return "";
     return new Date(date).toLocaleDateString("en-US", {
@@ -724,6 +790,13 @@ const SubscriptionPlans = () => {
     });
   };
 
+  /**
+   * Returns CSS class based on subscription status
+   *
+   * @function getStatusColor
+   * @param {string} status - Subscription status
+   * @returns {string} CSS class string for the status badge
+   */
   const getStatusColor = (status) => {
     switch (status) {
       case "active":
@@ -737,6 +810,14 @@ const SubscriptionPlans = () => {
     }
   };
 
+  /**
+   * Renders a feature item with checkmark or x icon
+   *
+   * @function renderFeature
+   * @param {string} text - Feature description text
+   * @param {boolean} included - Whether the feature is included in the plan
+   * @returns {JSX.Element} Rendered feature item
+   */
   const renderFeature = (text, included) => (
     <div className="flex items-center mb-2">
       {included ? (
@@ -750,7 +831,6 @@ const SubscriptionPlans = () => {
     </div>
   );
 
-  // Loading state
   if (loading && !subscriptionData) {
     return (
       <div className="bg-white shadow rounded-lg p-6 animate-pulse">
@@ -761,7 +841,6 @@ const SubscriptionPlans = () => {
     );
   }
 
-  // Error state
   if (error && !subscriptionData) {
     return (
       <div className="bg-red-50 shadow rounded-lg p-6">
@@ -778,7 +857,6 @@ const SubscriptionPlans = () => {
 
   return (
     <div className="max-w-6xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-      {/* Tab Navigation */}
       <div className="border-b border-gray-200 mb-6">
         <nav className="flex space-x-8">
           <button
@@ -804,7 +882,6 @@ const SubscriptionPlans = () => {
         </nav>
       </div>
 
-      {/* Error notification */}
       {error && (
         <div className="mb-6 bg-red-50 p-4 rounded-md">
           <div className="flex">
@@ -818,7 +895,6 @@ const SubscriptionPlans = () => {
         </div>
       )}
 
-      {/* STATUS TAB */}
       {activeTab === "status" && subscriptionData && (
         <div className="bg-white shadow rounded-lg overflow-hidden">
           <div className="border-b border-gray-200 px-6 py-5">
@@ -909,7 +985,6 @@ const SubscriptionPlans = () => {
         </div>
       )}
 
-      {/* PLANS TAB */}
       {activeTab === "plans" && (
         <>
           <div className="text-center mb-8">
@@ -922,7 +997,6 @@ const SubscriptionPlans = () => {
           </div>
 
           <div className="mt-8 grid gap-8 lg:grid-cols-2">
-            {/* Free Plan */}
             <div
               className={`bg-white rounded-lg shadow-lg overflow-hidden ${
                 currentPlan === "free" ? "ring-2 ring-indigo-600" : ""
@@ -981,7 +1055,6 @@ const SubscriptionPlans = () => {
               </div>
             </div>
 
-            {/* Premium Plan */}
             <div
               className={`bg-white rounded-lg shadow-lg overflow-hidden ${
                 currentPlan === "premium" ? "ring-2 ring-indigo-600" : ""

@@ -111,12 +111,12 @@ const API_ROUTES = {
   contactInfo: `${API_BASE_URL}/user/contact-info`,
 };
 
-const handleAdClick = () => {
-  const navigate = useNavigate();
-  navigate("/premium");
-};
-
 const SubscriptionAd = () => {
+  const navigate = useNavigate();
+
+  const handleAdClick = () => {
+    navigate("/Subscription-Plans");
+  };
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
       <div className="p-3 border-b">
@@ -627,9 +627,9 @@ const LinkedInProfile: React.FC = () => {
           </div>
 
           <div className="hidden lg:block lg:w-1/4">
-          <div className="space-y-6 mt-18">
-          <PeopleYouMayKnow /> 
-          </div>
+            <div className="space-y-6 mt-18">
+              <PeopleYouMayKnow />
+            </div>
 
             <div className="mt-4">
               <SubscriptionAd />
