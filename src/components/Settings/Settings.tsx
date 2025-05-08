@@ -1,3 +1,29 @@
+/**
+ * ConnectionPrivacy component for managing connection-related privacy settings.
+ * 
+ * @component
+ * @param {Object} props - Component props
+ * @param {Object} props.currentSettings - Current privacy settings object
+ * @param {Function} props.onSave - Callback function to save updated settings
+ * 
+ * @returns {JSX.Element} Rendered connection privacy settings form
+ * 
+ * @example
+ * <ConnectionPrivacy 
+ *   currentSettings={privacySettings}
+ *   onSave={handleSaveSettings}
+ * />
+ * 
+ * @description
+ * This component allows users to control:
+ * - Who can see their connections list
+ * - Connection request notification preferences
+ * - Profile visibility to connections
+ * - Who can send connection requests
+ * - Auto-accept settings for connection requests
+ * - Email notifications for connection activity
+ */
+
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";

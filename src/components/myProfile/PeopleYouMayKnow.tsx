@@ -1,13 +1,42 @@
+/**
+ * Component that displays connection suggestions based on user's network and profile.
+ * 
+ * @component
+ * @returns {JSX.Element} Rendered connection suggestions interface
+ * 
+ * @example
+ * <PeopleYouMayKnow />
+ * 
+ * @description
+ * The PeopleYouMayKnow component:
+ * - Fetches personalized connection recommendations from the API
+ * - Filters out existing connections and pending requests
+ * - Displays user cards with profile information and mutual connections
+ * - Provides quick connect/ignore actions
+ * - Shows industry and company information where available
+ * - Supports pagination for viewing more suggestions
+ * - Includes a modal view for seeing all recommendations
+ * 
+ * @dependencies
+ * - React hooks (useState, useEffect)
+ * - axios for API requests
+ * - ConnectButton component for connection actions
+ * - Headless UI for modal dialog
+ */
+
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { BASE_URL } from "../../constants";
 import ConnectButton from "../Network/ConnectButton";
 import { Dialog } from "@headlessui/react";
+import { useNavigate } from "react-router-dom";
 
 const PeopleYouMayKnow: React.FC = () => {
   const [relatedUsers, setRelatedUsers] = useState<any[]>([]);
   const [connections, setConnections] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
+
+  const navigate = useNavigate();
 
   // Fetch related users and connections
   useEffect(() => {
@@ -34,23 +63,27 @@ const PeopleYouMayKnow: React.FC = () => {
   );
 
   const renderUserCard = (user: any) => (
-    <div key={user._id} className="flex items-start space-x-3">
-      <img
-        src={user.profilePicture}
-        alt={`${user.firstName} ${user.lastName}`}
-        className="w-12 h-12 rounded-full object-cover"
-      />
-      <div className="flex flex-col flex-1">
-        <p className="font-semibold text-sm leading-tight">
-          {user.firstName} {user.lastName}
-        </p>
-        <p className="text-xs text-gray-600 mt-1">{user.lastJobTitle}</p>
-        <div className="mt-2">
-          <ConnectButton userId={user._id} />
-        </div>
+  <div key={user._id} className="flex items-start space-x-3">
+    <img
+      src={user.profilePicture}
+      alt={`${user.firstName} ${user.lastName}`}
+      className="w-12 h-12 rounded-full object-cover cursor-pointer"
+      onClick={() => navigate(`/user/${user._id}`)}
+    />
+    <div className="flex flex-col flex-1">
+      <p
+        className="font-semibold text-sm leading-tight cursor-pointer hover:underline"
+        onClick={() => navigate(`/user/${user._id}`)}
+      >
+        {user.firstName} {user.lastName}
+      </p>
+      <p className="text-xs text-gray-600 mt-1">{user.lastJobTitle}</p>
+      <div className="mt-2">
+        <ConnectButton userId={user._id} />
       </div>
     </div>
-  );
+  </div>
+);
 
   return (
     <div className="bg-white rounded-lg shadow p-4">
