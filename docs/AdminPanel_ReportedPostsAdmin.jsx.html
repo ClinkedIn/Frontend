@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: AdminPanel/ReportedPostsAdmin.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: AdminPanel/ReportedPostsAdmin.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { useState, useEffect } from "react";
+import {
+  ChevronDown,
+  ChevronUp,
+  Filter,
+  Search,
+  MoreVertical,
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  Clock,
+} from "lucide-react";
+import { data } from "react-router-dom";
+import { BASE_URL } from "../../constants";
+
+/**
+ * @typedef {Object} PostAuthor
+ * @property {string} id - The unique identifier of the post author
+ * @property {string} name - The display name of the post author
+ * @property {string} avatar - URL to the author's profile picture
+ * @property {string} position - The position or role of the author
+ */
+
+/**
+ * @typedef {Object} Reporter
+ * @property {string} id - The unique identifier of the reporter
+ * @property {string} name - The display name of the reporter
+ * @property {string} avatar - URL to the reporter's profile picture
+ */
+
+/**
+ * @typedef {Object} ReportedPost
+ * @property {string} id - The unique identifier of the report
+ * @property {string} postId - The unique identifier of the reported post
+ * @property {string} postContent - The content of the reported post
+ * @property {PostAuthor} postAuthor - Information about the post author
+ * @property {Reporter} reporter - Information about the user who reported the post
+ * @property {string} reason - The reason for reporting the post
+ * @property {string} details - Additional details provided by the reporter
+ * @property {string} reportedAt - ISO date string when the post was reported
+ * @property {string} status - Current status of the report ('pending', 'actioned', 'dismissed', 'reviewed')
+ * @property {string} [moderatedAt] - ISO date string when the post was last moderated
+ */
+
+/**
+ * ReportedPosts component for administrators to review and moderate content reported by users
+ *
+ * This component provides a UI for administrators to:
+ * - View a list of posts reported by users
+ * - Filter reports by status (all, pending, actioned, dismissed)
+ * - Search for specific reports
+ * - Take moderation actions (approve or dismiss reports)
+ *
+ * @returns {JSX.Element} The ReportedPosts component
+ */
+const ReportedPosts = () => {
+  /** @type {[ReportedPost[], React.Dispatch&lt;React.SetStateAction&lt;ReportedPost[]>>]} All reports fetched from API */
+  const [reportedPosts, setReportedPosts] = useState([]);
+
+  /** @type {[ReportedPost[], React.Dispatch&lt;React.SetStateAction&lt;ReportedPost[]>>]} Filtered reports based on search and status */
+  const [filteredPosts, setFilteredPosts] = useState([]);
+
+  /** @type {[boolean, React.Dispatch&lt;React.SetStateAction&lt;boolean>>]} Loading state indicator */
+  const [isLoading, setIsLoading] = useState(true);
+
+  /** @type {[string|null, React.Dispatch&lt;React.SetStateAction&lt;string|null>>]} Error message if API request fails */
+  const [error, setError] = useState(null);
+
+  /** @type {[string, React.Dispatch&lt;React.SetStateAction&lt;string>>]} Current search term */
+  const [searchTerm, setSearchTerm] = useState("");
+
+  /** @type {[string, React.Dispatch&lt;React.SetStateAction&lt;string>>]} Current status filter ('all', 'pending', 'actioned', 'dismissed') */
+  const [statusFilter, setStatusFilter] = useState("all");
+
+  /**
+   * @type {[Object, React.Dispatch&lt;React.SetStateAction&lt;Object>>]}
+   * Configuration for sorting posts
+   * @property {string} key - The property key to sort by
+   * @property {string} direction - The sort direction ('asc' or 'desc')
+   */
+  const [sortConfig, setSortConfig] = useState({
+    key: "createdAt",
+    direction: "desc",
+  });
+
+  /** @type {[string|null, React.Dispatch&lt;React.SetStateAction&lt;string|null>>]} ID of currently active dropdown menu */
+  const [activeDropdown, setActiveDropdown] = useState(null);
+
+  /**
+   * Fetches reported posts data from the API
+   *
+   * @async
+   * @function fetchReportedPosts
+   * @returns {Promise&lt;void>}
+   */
+  useEffect(() => {
+    const fetchReportedPosts = async () => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const response = await fetch(`${BASE_URL}/admin/reports`, {
+          method: "GET",
+          credentials: "include",
+        });
+
+        if (!response.ok) {
+          throw new Error(`API request failed with status ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        if (result.status === "success" &amp;&amp; Array.isArray(result.data)) {
+          // Transform the API data to match our component's expected format
+          const transformedData = result.data.map((dataitem) => ({
+            id: dataitem.report._id,
+            postId: dataitem.report.reportedId,
+            postContent: dataitem.report.policy, // Using policy as content placeholder
+
+            postAuthor: {
+              id: dataitem.report?.reportedId || "unknown",
+              // Add proper null checks for all nested properties
+              name: dataitem.reportedUser
+                ? `${dataitem.reportedUser.firstName || ""} ${
+                    dataitem.reportedUser.lastName || ""
+                  }`.trim() || "Unknown User"
+                : dataitem.reportedPost &amp;&amp; dataitem.reportedPost.userId
+                ? `${dataitem.reportedPost.userId.firstName || ""} ${
+                    dataitem.reportedPost.userId.lastName || ""
+                  }`.trim() || "Unknown User"
+                : "Unknown User",
+              avatar:
+                dataitem.reportedPost &amp;&amp; dataitem.reportedPost.userId
+                  ? dataitem.reportedPost.userId.profilePicture ||
+                    "/api/placeholder/40/40"
+                  : dataitem.reportedUser
+                  ? dataitem.reportedUser.profilePicture ||
+                    "/api/placeholder/40/40"
+                  : "/api/placeholder/40/40",
+              position: dataitem.report?.reportedType || "Unknown",
+            },
+            reporter: {
+              id: dataitem.report.userId._id,
+              name: `${dataitem.report.userId.firstName} ${dataitem.report.userId.lastName}`,
+              avatar:
+                dataitem.report.userId.profilePicture ||
+                "/api/placeholder/40/40",
+            },
+            reason: dataitem.report.policy,
+            details:
+              dataitem.report.dontWantToSee ||
+              dataitem.report.moderationReason ||
+              "No additional details provided",
+            reportedAt: dataitem.report.createdAt,
+            status: mapStatusValue(dataitem.report.status),
+            moderatedAt: dataitem.report.moderatedAt,
+          }));
+
+          setReportedPosts(transformedData);
+          setFilteredPosts(transformedData);
+        } else {
+          throw new Error("Invalid response format from API");
+        }
+      } catch (error) {
+        console.error("Error fetching reported posts:", error);
+        setError(error.message);
+
+        alert("Failed to load reported posts. Please try again later.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchReportedPosts();
+  }, []);
+
+  /**
+   * Maps API status values to the component's internal status values
+   *
+   * @param {string} apiStatus - The status value from the API
+   * @returns {string} The mapped status value for the component
+   */
+  const mapStatusValue = (apiStatus) => {
+    switch (apiStatus) {
+      case "pending":
+        return "pending";
+      case "approved":
+        return "actioned";
+      case "rejected":
+        return "dismissed";
+      default:
+        return "reviewed";
+    }
+  };
+
+  /**
+   * Filters and searches the reported posts based on status filter and search term
+   * Also applies sorting based on the current sort configuration
+   *
+   * @function filterAndSearchPosts
+   * @returns {void}
+   */
+  useEffect(() => {
+    let result = [...reportedPosts];
+
+    // Apply status filter
+    if (statusFilter !== "all") {
+      result = result.filter((post) => post.status === statusFilter);
+    }
+
+    // Apply search filter
+    if (searchTerm) {
+      const search = searchTerm.toLowerCase();
+      result = result.filter(
+        (post) =>
+          (post.postContent &amp;&amp;
+            post.postContent.toLowerCase().includes(search)) ||
+          (post.postAuthor.name &amp;&amp;
+            post.postAuthor.name.toLowerCase().includes(search)) ||
+          (post.reporter.name &amp;&amp;
+            post.reporter.name.toLowerCase().includes(search)) ||
+          (post.reason &amp;&amp; post.reason.toLowerCase().includes(search)) ||
+          (post.details &amp;&amp; post.details.toLowerCase().includes(search))
+      );
+    }
+
+    // Apply sorting
+    // result.sort((a, b) => {
+    //   if (a[sortConfig.key] &lt; b[sortConfig.key]) {
+    //     return sortConfig.direction === "asc" ? -1 : 1;
+    //   }
+    //   if (a[sortConfig.key] > b[sortConfig.key]) {
+    //     return sortConfig.direction === "asc" ? 1 : -1;
+    //   }
+    //   return 0;
+    // });
+
+    setFilteredPosts(result);
+  }, [reportedPosts, statusFilter, searchTerm, sortConfig]);
+
+  /**
+   * Handles changing the sort configuration
+   *
+   * @function handleSort
+   * @param {string} key - The property key to sort by
+   * @returns {void}
+   */
+  const handleSort = (key) => {
+    let direction = "asc";
+    if (sortConfig.key === key &amp;&amp; sortConfig.direction === "asc") {
+      direction = "desc";
+    }
+    setSortConfig({ key, direction });
+  };
+
+  /**
+   * Updates the status of a reported post
+   *
+   * @async
+   * @function handleStatusChange
+   * @param {string} postId - The ID of the report to update
+   * @param {string} newStatus - The new status to set ('actioned', 'dismissed', 'pending')
+   * @returns {Promise&lt;void>}
+   */
+  const handleStatusChange = async (postId, newStatus) => {
+    setIsLoading(true);
+
+    try {
+      // Map our component status values back to API status values
+      const apiStatus =
+        newStatus === "actioned"
+          ? "approved"
+          : newStatus === "dismissed"
+          ? "rejected"
+          : "pending";
+
+      // API call to update status
+      const response = await fetch(`${BASE_URL}/admin/reports/${postId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          action: apiStatus,
+          reason:
+            apiStatus === "rejected"
+              ? "Content reviewed and rejected"
+              : apiStatus === "approved"
+              ? "Violation confirmed and action taken"
+              : apiStatus === "reviewed"
+              ? "Content reviewed and approved"
+              : "Content under review",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to update status: ${response.statusText}`);
+      }
+
+      // Update local state
+      setReportedPosts(
+        reportedPosts.map((post) =>
+          post.id === postId ? { ...post, status: newStatus } : post
+        )
+      );
+    } catch (error) {
+      console.error("Error updating post status:", error);
+      alert("Failed to update status. Please try again.");
+    } finally {
+      setIsLoading(false);
+      // Close dropdown after action
+      setActiveDropdown(null);
+    }
+  };
+
+  /**
+   * Generates a status badge UI element based on the report status
+   *
+   * @function getStatusBadge
+   * @param {string} status - The status of the report ('pending', 'actioned', 'dismissed')
+   * @returns {JSX.Element} A styled badge component indicating the status
+   */
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case "pending":
+        return (
+          &lt;span className="px-2 py-1 text-xs font-medium bg-yellow-50 text-yellow-700 border border-yellow-200 rounded-full flex items-center">
+            &lt;Clock className="mr-1 h-3 w-3" /> Pending
+          &lt;/span>
+        );
+      case "actioned":
+        return (
+          &lt;span className="px-2 py-1 text-xs font-medium bg-green-50 text-green-700 border border-green-200 rounded-full flex items-center">
+            &lt;CheckCircle className="mr-1 h-3 w-3" /> Actioned
+          &lt;/span>
+        );
+      case "dismissed":
+        return (
+          &lt;span className="px-2 py-1 text-xs font-medium bg-gray-50 text-gray-700 border border-gray-200 rounded-full flex items-center">
+            &lt;XCircle className="mr-1 h-3 w-3" /> Dismissed
+          &lt;/span>
+        );
+      default:
+        return (
+          &lt;span className="px-2 py-1 text-xs font-medium bg-gray-50 text-gray-700 border border-gray-200 rounded-full">
+            {status}
+          &lt;/span>
+        );
+    }
+  };
+
+  /**
+   * Formats a date string to a human-readable format
+   *
+   * @function formatDate
+   * @param {string} dateString - ISO date string to format
+   * @returns {string} Formatted date string
+   */
+  const formatDate = (dateString) => {
+    if (!dateString) return "Unknown date";
+
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(date);
+  };
+
+  return (
+    &lt;div className="bg-gray-50 min-h-screen">
+      {/* Content */}
+      &lt;div className="max-w-6xl mx-auto">
+        &lt;div className="bg-gray-50">
+          &lt;div className="px-6 py-5 border-b border-gray-200">
+            &lt;h1 className="text-xl font-medium text-gray-900">
+              Reported Content
+            &lt;/h1>
+            &lt;p className="mt-1 text-sm text-gray-500">
+              Review and moderate content that has been flagged by users
+            &lt;/p>
+          &lt;/div>
+
+          {/* Filters and search */}
+          &lt;div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+            &lt;div className="flex flex-col md:flex-row gap-4">
+              &lt;div className="relative flex-1">
+                &lt;div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  &lt;Search className="h-5 w-5 text-gray-400" />
+                &lt;/div>
+                &lt;input
+                  type="text"
+                  className="pl-10 block w-full rounded-md border border-gray-300 py-2 text-sm placeholder-gray-500 focus:outline-none focus:ring-[#0a66c2] focus:border-[#0a66c2]"
+                  placeholder="Search reported content..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              &lt;/div>
+
+              &lt;div className="inline-flex rounded-md shadow-sm">
+                &lt;button
+                  type="button"
+                  className={`inline-flex items-center px-4 py-2 text-sm font-medium rounded-l-md border ${
+                    statusFilter === "all"
+                      ? "bg-[#0a66c2] text-white border-[#0a66c2]"
+                      : "bg-white text-gray-700 hover:bg-gray-50"
+                  }`}
+                  onClick={() => setStatusFilter("all")}
+                >
+                  All
+                &lt;/button>
+                &lt;button
+                  type="button"
+                  className={`inline-flex items-center px-4 py-2 text-sm font-medium border-t border-b border-r ${
+                    statusFilter === "pending"
+                      ? "bg-[#0a66c2] text-white border-[#0a66c2]"
+                      : "bg-white text-gray-700 hover:bg-gray-50"
+                  }`}
+                  onClick={() => setStatusFilter("pending")}
+                >
+                  Pending
+                &lt;/button>
+                &lt;button
+                  type="button"
+                  className={`inline-flex items-center px-4 py-2 text-sm font-medium border-t border-b border-r ${
+                    statusFilter === "actioned"
+                      ? "bg-[#0a66c2] text-white border-[#0a66c2]"
+                      : "bg-white text-gray-700 hover:bg-gray-50"
+                  }`}
+                  onClick={() => setStatusFilter("actioned")}
+                >
+                  Actioned
+                &lt;/button>
+                &lt;button
+                  type="button"
+                  className={`inline-flex items-center px-4 py-2 text-sm font-medium rounded-r-md border-t border-b border-r ${
+                    statusFilter === "dismissed"
+                      ? "bg-[#0a66c2] text-white border-[#0a66c2]"
+                      : "bg-white text-gray-700 hover:bg-gray-50"
+                  }`}
+                  onClick={() => setStatusFilter("dismissed")}
+                >
+                  Dismissed
+                &lt;/button>
+              &lt;/div>
+            &lt;/div>
+
+            {/* Results count */}
+            &lt;div className="mt-4 text-sm text-gray-500">
+              Showing {filteredPosts.length} of {reportedPosts.length} reports
+            &lt;/div>
+          &lt;/div>
+
+          {/* Error state */}
+          {error &amp;&amp; !isLoading &amp;&amp; (
+            &lt;div className="py-16 flex flex-col items-center justify-center">
+              &lt;div className="rounded-full bg-red-100 p-4">
+                &lt;AlertTriangle className="h-8 w-8 text-red-500" />
+              &lt;/div>
+              &lt;h3 className="mt-4 text-lg font-medium text-gray-900">
+                Error loading reports
+              &lt;/h3>
+              &lt;p className="mt-1 text-sm text-gray-500 max-w-sm text-center">
+                {error}
+              &lt;/p>
+              &lt;button
+                className="mt-4 px-4 py-2 bg-[#0a66c2] text-white rounded-md"
+                onClick={() => window.location.reload()}
+              >
+                Try Again
+              &lt;/button>
+            &lt;/div>
+          )}
+
+          {/* Loading state */}
+          {isLoading &amp;&amp; (
+            &lt;div className="py-16 flex justify-center items-center">
+              &lt;div className="w-12 h-12 border-4 border-[#0a66c2] border-t-transparent rounded-full animate-spin">&lt;/div>
+            &lt;/div>
+          )}
+
+          {/* Empty state */}
+          {!isLoading &amp;&amp; !error &amp;&amp; filteredPosts.length === 0 &amp;&amp; (
+            &lt;div className="py-16 flex flex-col items-center justify-center">
+              &lt;div className="rounded-full bg-gray-100 p-4">
+                &lt;AlertTriangle className="h-8 w-8 text-gray-400" />
+              &lt;/div>
+              &lt;h3 className="mt-4 text-lg font-medium text-gray-900">
+                No reported content found
+              &lt;/h3>
+              &lt;p className="mt-1 text-sm text-gray-500 max-w-sm text-center">
+                Try adjusting your search or filter to find what you're looking
+                for.
+              &lt;/p>
+            &lt;/div>
+          )}
+
+          {/* Reports list */}
+          {!isLoading &amp;&amp; !error &amp;&amp; filteredPosts.length > 0 &amp;&amp; (
+            &lt;div className="overflow-y-auto">
+              &lt;ul className="divide-y divide-gray-200">
+                {filteredPosts.map((post) => (
+                  &lt;li key={post.id} className="px-6 py-4 hover:bg-[#f3f9ff]">
+                    &lt;div className="flex flex-col md:flex-row md:items-start gap-4">
+                      {/* Post content */}
+                      &lt;div className="flex-1">
+                        &lt;div className="flex items-start">
+                          &lt;img
+                            src={post.postAuthor.avatar}
+                            alt=""
+                            className="h-12 w-12 rounded-full border border-gray-200"
+                          />
+                          &lt;div className="ml-3">
+                            &lt;div className="flex items-center">
+                              &lt;p className="text-sm font-medium text-gray-900">
+                                {post.postAuthor.name}
+                              &lt;/p>
+                              &lt;span className="mx-1 text-gray-500">•&lt;/span>
+                              &lt;p className="text-xs text-gray-500">
+                                {formatDate(post.reportedAt)}
+                              &lt;/p>
+                            &lt;/div>
+                            &lt;p className="text-xs text-gray-500">
+                              {post.postAuthor.position}
+                            &lt;/p>
+                            &lt;p className="mt-2 text-sm text-gray-700">
+                              {post.postContent ||
+                                "No content preview available"}
+                            &lt;/p>
+                            {post.moderatedAt &amp;&amp; (
+                              &lt;p className="mt-1 text-xs text-gray-500">
+                                Last moderated: {formatDate(post.moderatedAt)}
+                              &lt;/p>
+                            )}
+                          &lt;/div>
+                        &lt;/div>
+                      &lt;/div>
+
+                      {/* Report details */}
+                      &lt;div className="bg-gray-50 rounded-lg p-4 md:w-64">
+                        &lt;div className="flex items-center justify-between mb-3">
+                          &lt;h4 className="text-xs font-medium text-gray-500 uppercase">
+                            Report Details
+                          &lt;/h4>
+                          {getStatusBadge(post.status)}
+                        &lt;/div>
+
+                        &lt;div className="mb-3">
+                          &lt;h5 className="text-xs font-medium text-gray-500">
+                            Reported By
+                          &lt;/h5>
+                          &lt;div className="flex items-center mt-1">
+                            &lt;img
+                              src={post.reporter.avatar}
+                              alt=""
+                              className="h-6 w-6 rounded-full border border-gray-200"
+                            />
+                            &lt;span className="ml-2 text-sm font-medium text-gray-900">
+                              {post.reporter.name}
+                            &lt;/span>
+                          &lt;/div>
+                        &lt;/div>
+
+                        &lt;div className="mb-3">
+                          &lt;h5 className="text-xs font-medium text-gray-500">
+                            Reason
+                          &lt;/h5>
+                          &lt;p className="text-sm font-medium text-gray-900 mt-1">
+                            {post.reason}
+                          &lt;/p>
+                          &lt;p className="text-xs text-gray-500 mt-1">
+                            {post.details}
+                          &lt;/p>
+                        &lt;/div>
+
+                        &lt;div className="flex flex-col gap-2 mt-4">
+                          &lt;button
+                            onClick={() =>
+                              handleStatusChange(post.id, "actioned")
+                            }
+                            className="w-full px-3 py-1.5 text-sm font-medium text-white bg-[#0a66c2] rounded-full hover:bg-[#084b8a] focus:outline-none"
+                            disabled={isLoading}
+                          >
+                            Take Action
+                          &lt;/button>
+                          &lt;button
+                            onClick={() =>
+                              handleStatusChange(post.id, "dismissed")
+                            }
+                            className="w-full px-3 py-1.5 text-sm font-medium text-[#0a66c2] bg-white border border-[#0a66c2] rounded-full hover:bg-[#f3f9ff] focus:outline-none"
+                            disabled={isLoading}
+                          >
+                            Dismiss
+                          &lt;/button>
+                        &lt;/div>
+                      &lt;/div>
+                    &lt;/div>
+                  &lt;/li>
+                ))}
+              &lt;/ul>
+            &lt;/div>
+          )}
+        &lt;/div>
+      &lt;/div>
+    &lt;/div>
+  );
+};
+
+export default ReportedPosts;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#JobListing">JobListing</a></li><li><a href="global.html#MetricCard">MetricCard</a></li><li><a href="global.html#ReportedPosts">ReportedPosts</a></li><li><a href="global.html#SubscriptionPlans">SubscriptionPlans</a></li><li><a href="global.html#SubscriptionStatus">SubscriptionStatus</a></li><li><a href="global.html#fetchAnalytics">fetchAnalytics</a></li><li><a href="global.html#fetchJobs">fetchJobs</a></li><li><a href="global.html#fetchReportedPosts">fetchReportedPosts</a></li><li><a href="global.html#fetchSubscriptionDetails">fetchSubscriptionDetails</a></li><li><a href="global.html#filterAndSearchPosts">filterAndSearchPosts</a></li><li><a href="global.html#formatDate">formatDate</a></li><li><a href="global.html#getStatusBadge">getStatusBadge</a></li><li><a href="global.html#getStatusColor">getStatusColor</a></li><li><a href="global.html#handleApprove">handleApprove</a></li><li><a href="global.html#handleCancelSubscription">handleCancelSubscription</a></li><li><a href="global.html#handleDelete">handleDelete</a></li><li><a href="global.html#handleReject">handleReject</a></li><li><a href="global.html#handleResolveFlag">handleResolveFlag</a></li><li><a href="global.html#handleSort">handleSort</a></li><li><a href="global.html#handleStatusChange">handleStatusChange</a></li><li><a href="global.html#handleSubscribe">handleSubscribe</a></li><li><a href="global.html#renderFeature">renderFeature</a></li><li><a href="global.html#simulateRealTimeUpdates">simulateRealTimeUpdates</a></li><li><a href="global.html#useEffect">useEffect</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Thu May 08 2025 23:54:44 GMT+0300 (Eastern European Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

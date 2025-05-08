@@ -1,0 +1,23 @@
+{
+  "source": {
+    "include": [
+      "src/components/AdminPanel", 
+      "src/components/SubscriptionBasedPayment"
+    ],
+    "includePattern": "\\.(jsx|js)$"
+  },
+  "plugins": ["plugins/markdown", "node_modules/jsdoc-babel"],
+  "babel": {
+    "extensions": ["jsx"],
+    "presets": ["@babel/preset-react"]
+  },
+  "templates": {
+    "better-docs": {
+      "name": "LinkedUp Components Documentation"
+    }
+  },
+  "opts": {
+    "destination": "./docs",
+    "recurse": true
+  }
+}
