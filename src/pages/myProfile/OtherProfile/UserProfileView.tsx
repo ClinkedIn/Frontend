@@ -147,6 +147,10 @@ const UserProfileView = () => {
   const navigate = useNavigate();
   const [basicProfile, setBasicProfile] = useState(null);
   const [basicProfileLoading, setBasicProfileLoading] = useState(true);
+  const [connectionState, setConnectionState] = useState<
+    "connect" | "pending" | "connected"
+  >("connect");
+  const [canSendRequest, setCanSendRequest] = useState<boolean>(false);
 
   const openEndorsementModal = (skill: Skill) => {
     setActiveSkill(skill);
@@ -201,7 +205,24 @@ const UserProfileView = () => {
     }
   };
 
-  // Message handler for each connection
+  useEffect(() => {
+    const fetchPendingRequests = async () => {
+      try {
+        const response = await api.get(`/user/connections/MyBendingRequests`);
+        const pendingIds = response.data.pendingRequests;
+        if (pendingIds.includes(userId)) {
+          setConnectionState("pending");
+        }
+      } catch (error) {
+        console.error("Error fetching pending requests", error);
+      }
+    };
+
+    if (userId) {
+      fetchPendingRequests();
+    }
+  }, [userId]);
+
   const handleMessageApplicant = (
     userId: string,
     name: string,
@@ -624,6 +645,22 @@ const UserProfileView = () => {
         setCanViewProfile(true);
         setPrivacyNotice("");
 
+        setCanSendRequest(response.data.canSendConnectionRequest);
+        const isConnected = user.connectionList?.includes(currentId);
+        if (isConnected) {
+          setConnectionState("connected");
+        } else {
+          // Check if already sent pending request
+          const pendingResponse = await api.get(
+            "/user/connections/MyBendingRequests"
+          );
+          if (pendingResponse.data.pendingRequests.includes(userId)) {
+            setConnectionState("pending");
+          } else {
+            setConnectionState("connect");
+          }
+        }
+
         if (user.profilePrivacySettings === "private") {
           setCanViewProfile(false);
           setPrivacyNotice("This profile is private. Connect to view more.");
@@ -663,6 +700,39 @@ const UserProfileView = () => {
 
   const isSkillEndorsed = (skill: Skill): boolean => {
     return hasUserEndorsedSkill(skill);
+  };
+
+  const ConnectButton = () => {
+    if (!canSendRequest) return null;
+
+    const handleConnect = async () => {
+      try {
+        await api.post(`/user/connections/request/${userId}`);
+        setConnectionState("pending");
+      } catch (err) {
+        console.error("Error sending connection request:", err);
+      }
+    };
+
+    return (
+      <button
+        onClick={handleConnect}
+        disabled={connectionState !== "connect"}
+        className={`px-4 py-1.5 rounded-full text-sm font-semibold border transition-colors ${
+          connectionState === "connected"
+            ? "bg-white cursor-pointer text-[#0073b1] border-[#0073b1] border-2 px-4 py-1 rounded-full hover:bg-[#EAF4FD] hover:[border-width:2px] box-border font-medium text-sm transition-all duration-150"
+            : connectionState === "pending"
+            ? "border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed "
+            : "bg-white cursor-pointer text-[#0073b1] border-[#0073b1] border-2 px-4 py-1 rounded-full hover:bg-[#EAF4FD] hover:[border-width:2px] box-border font-medium text-sm transition-all duration-150"
+        }`}
+      >
+        {connectionState === "connected"
+          ? "Connected"
+          : connectionState === "pending"
+          ? "Pending"
+          : "Connect"}
+      </button>
+    );
   };
 
   const FollowButton = () => {
@@ -899,23 +969,9 @@ const UserProfileView = () => {
 
           {!isRestricted && (
             <div className="mt-4 md:mt-0 flex space-x-3">
-              {userProfile?.connectionList?.includes(currentUserId) ? (
-                <button
-                  onClick={() =>
-                    handleMessageApplicant(
-                      profile._id,
-                      `${profile.firstName} ${profile.lastName}`,
-                      profile.profilePicture
-                    )
-                  }
-                  className="px-4 py-1.5 border border-blue-500 text-blue-600 rounded-full text-sm font-semibold hover:bg-blue-50 transition-colors"
-                >
-                  Message
-                </button>
-              ) : (
-                <ConnectButton userId={profile._id} />
-              )}
-              <FollowButton userId={profile._id} />
+              <ConnectButton />
+
+              <FollowButton />
             </div>
           )}
         </div>
@@ -1142,23 +1198,9 @@ const UserProfileView = () => {
                 </div>
 
                 <div className="mt-4 md:mt-0 flex space-x-3">
-                  {userProfile?.connectionList?.includes(currentUserId) ? (
-                    <button
-                      onClick={() =>
-                        handleMessageApplicant(
-                          userProfile._id,
-                          `${userProfile.firstName} ${userProfile.lastName}`,
-                          userProfile.profilePicture
-                        )
-                      }
-                      className="px-4 py-1.5 border border-blue-500 text-blue-600 rounded-full text-sm font-semibold hover:bg-blue-50 transition-colors"
-                    >
-                      Message
-                    </button>
-                  ) : (
-                    <ConnectButton userId={userProfile._id} />
-                  )}
-                  <FollowButton userId={userProfile._id} />
+                  <ConnectButton />
+
+                  <FollowButton />
                 </div>
               </div>
             </div>
@@ -1172,12 +1214,6 @@ const UserProfileView = () => {
                 </p>
 
                 <div className="mt-4 text-sm text-gray-600 space-y-2">
-                  {/* {userProfile?.location && (
-                    <p className="flex items-center">
-                      <span className="mr-2">📍</span>
-                      <span>{userProfile.location}</span>
-                    </p>
-                  )} */}
                   {userProfile?.phone && (
                     <p className="flex items-center">
                       <span className="mr-2">📞</span>
