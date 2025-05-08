@@ -112,12 +112,12 @@ const BlockedUsers: React.FC = () => {
                     src={user.profilePicture || "/Images/user.svg"}
                     alt={`${user.firstName} ${user.lastName}`}
                     className="w-12 h-12 rounded-full cursor-pointer"
-                    onClick={() => navigate(`/profile/${user._id}`)}
+                    onClick={() => navigate(`/user/${user._id}`)}
                   />
                   <div className="flex-1 min-w-0">
                     <p
                       className="font-medium cursor-pointer hover:underline truncate"
-                      onClick={() => navigate(`/profile/${user._id}`)}
+                      onClick={() => navigate(`/user/${user._id}`)}
                     >
                       {`${user.firstName} ${user.lastName}`}
                     </p>

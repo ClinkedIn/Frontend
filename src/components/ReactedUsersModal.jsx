@@ -1,3 +1,33 @@
+/**
+ * Modal component that displays users who have reacted to a post.
+ * 
+ * @component
+ * @param {Object} props - Component props
+ * @param {boolean} props.isOpen - Controls visibility of the modal
+ * @param {Function} props.onClose - Callback function to close the modal
+ * @param {string} props.postId - ID of the post to fetch reactions for
+ * @param {string|null} props.reactionType - Optional filter for specific reaction types
+ * 
+ * @returns {JSX.Element|null} Rendered modal showing users who reacted or null if closed
+ * 
+ * @example
+ * <ReactedUsersModal
+ *   isOpen={showReactionsModal}
+ *   onClose={() => setShowReactionsModal(false)}
+ *   postId="12345"
+ *   reactionType="like"
+ * />
+ * 
+ * @description
+ * This modal component:
+ * - Fetches users who reacted to a specific post from the API
+ * - Can filter reactions by type (like, celebrate, support, etc.)
+ * - Displays user profile pictures, names, and headlines
+ * - Shows loading states while fetching data
+ * - Handles error states if the API request fails
+ */
+
+
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { BASE_URL } from "../constants";

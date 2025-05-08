@@ -1,3 +1,33 @@
+/**
+ * The Main component serves as the primary feed container for displaying posts and managing post interactions.
+ * 
+ * @component
+ * @param {Object} props - Component props
+ * @param {boolean} props.showSavedPosts - Flag to determine if saved posts should be displayed
+ * @param {Function} props.onShowSavedPosts - Callback to show saved posts
+ * @param {Function} props.onShowAllPosts - Callback to show all posts in the feed
+ * 
+ * @returns {JSX.Element} Rendered feed component
+ * 
+ * @example
+ * <Main 
+ *   showSavedPosts={false} 
+ *   onShowSavedPosts={() => setShowSavedPosts(true)}
+ *   onShowAllPosts={() => setShowSavedPosts(false)} 
+ * />
+ * 
+ * @description
+ * The Main component manages:
+ * - Post retrieval and display in chronological order
+ * - Creating, editing, and deleting posts
+ * - Post interactions: likes, reactions, comments, and reposts
+ * - Viewing saved posts
+ * - Reporting inappropriate content
+ * - Media attachments display (images, videos, documents)
+ * - Comment sections with nested replies
+ * - User reaction viewing
+ */
+
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import PostMenu from "./PostMenu.jsx";

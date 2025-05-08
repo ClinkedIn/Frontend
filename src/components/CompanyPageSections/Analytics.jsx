@@ -6,28 +6,30 @@ import { Line, Bar } from 'react-chartjs-2';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-} from 'chart.js';
-
-// Register ChartJS components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-);
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    BarController,  // <--- IMPORT THIS
+    BarElement,
+    Title,
+    Tooltip,
+    Legend
+  } from 'chart.js';
+  
+  // Register ChartJS components
+  ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    BarController, // <--- ADD IT HERE
+    BarElement,
+    Title,
+    Tooltip,
+    Legend
+  );
 /**
  * Company Analytics Page component that displays various analytics data for a company.
  * This includes visitor and follower statistics presented in line and bar charts,

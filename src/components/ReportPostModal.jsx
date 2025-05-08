@@ -1,3 +1,29 @@
+/**
+ * Modal component for reporting inappropriate post content.
+ * 
+ * @component
+ * @param {Object} props - Component props
+ * @param {boolean} props.isOpen - Controls visibility of the modal
+ * @param {Function} props.onClose - Callback function to close the modal
+ * @param {Function} props.onSubmit - Callback function that handles the report submission
+ * 
+ * @returns {JSX.Element|null} Rendered modal for reporting posts or null if closed
+ * 
+ * @example
+ * <ReportPostModal
+ *   isOpen={isReportModalOpen}
+ *   onClose={() => setIsReportModalOpen(false)}
+ *   onSubmit={handleReportPost}
+ * />
+ * 
+ * @description
+ * This modal component allows users to:
+ * - Report posts that violate platform guidelines
+ * - Provide a detailed reason for the report
+ * - Submit reports to backend moderation services
+ * - View submission status and confirmation
+ */
+
 import React, { useState } from 'react';
 
 /**
