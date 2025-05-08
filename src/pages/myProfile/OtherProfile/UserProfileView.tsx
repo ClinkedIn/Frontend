@@ -7,6 +7,7 @@ import Form from "../../../components/myProfile/Forms/Form";
 import SkillEndorsements from "../../../components/myProfile/SkillEndorsements";
 import ConnectButton from "../../../components/Network/ConnectButton";
 import { useNavigate } from "react-router-dom";
+import BlockButton from "../../../components/Network/BlockButton";
 
 interface Skill {
   skillName: string;
@@ -151,6 +152,7 @@ const UserProfileView = () => {
     "connect" | "pending" | "connected"
   >("connect");
   const [canSendRequest, setCanSendRequest] = useState<boolean>(false);
+  const [showMenu, setShowMenu] = useState(false);
 
   const openEndorsementModal = (skill: Skill) => {
     setActiveSkill(skill);
@@ -494,11 +496,9 @@ const UserProfileView = () => {
 
       if (error.response?.status === 403) {
         if (error.response.data?.user) {
-          // Return whatever basic profile info we can get
           return error.response.data.user;
         }
 
-        // If no user info but we have a message, return minimal profile
         if (error.response.data?.message) {
           return {
             _id: userId,
@@ -509,7 +509,6 @@ const UserProfileView = () => {
         }
       }
 
-      // In case of other errors, return minimal profile info
       return {
         _id: userId,
         firstName: "LinkedIn",
@@ -518,7 +517,6 @@ const UserProfileView = () => {
       };
     }
   };
-  // Effect for fetching basic profile info when needed
   useEffect(() => {
     const getBasicInfo = async () => {
       if (!userId || canViewProfile) return;
@@ -562,7 +560,6 @@ const UserProfileView = () => {
           const isCurrentUserConnected =
             user.connectionList?.includes(currentId);
 
-          // Check if privacy settings restrict viewing
           if (user.profilePrivacySettings === "private") {
             setCanViewProfile(false);
             setPrivacyNotice("This profile is private. Connect to view more.");
@@ -575,7 +572,6 @@ const UserProfileView = () => {
               "Only connections can view this profile. Send a connection request to see more."
             );
           } else {
-            // Only fetch activity if we can view the profile
             await fetchUserActivity();
           }
         } catch (error: any) {
@@ -585,14 +581,12 @@ const UserProfileView = () => {
           } else if (error.response?.status === 403) {
             setCanViewProfile(false);
 
-            // Capture the privacy message from the error response
             if (error.response.data?.message) {
               setPrivacyNotice(error.response.data.message);
             } else {
               setPrivacyNotice("This profile has restricted access.");
             }
 
-            // Get basic profile info even for restricted profiles
             const basicInfo = await fetchBasicProfileInfo(userId);
             if (basicInfo) {
               setBasicProfile(basicInfo);
@@ -650,7 +644,6 @@ const UserProfileView = () => {
         if (isConnected) {
           setConnectionState("connected");
         } else {
-          // Check if already sent pending request
           const pendingResponse = await api.get(
             "/user/connections/MyBendingRequests"
           );
@@ -707,10 +700,18 @@ const UserProfileView = () => {
 
     const handleConnect = async () => {
       try {
-        await api.post(`/user/connections/request/${userId}`);
-        setConnectionState("pending");
+        if (connectionState === "pending" || connectionState === "connected") {
+          await api.delete(`/user/connections/${userId}`);
+          setConnectionState("connect");
+          showMessage("Connection removed", "success");
+        } else {
+          await api.post(`/user/connections/request/${userId}`);
+          setConnectionState("pending");
+          showMessage("Connection request sent", "success");
+        }
       } catch (err) {
-        console.error("Error sending connection request:", err);
+        console.error("Connection request error:", err);
+        showMessage("Failed to update connection", "error");
       }
     };
 
@@ -722,7 +723,7 @@ const UserProfileView = () => {
           connectionState === "connected"
             ? "bg-white cursor-pointer text-[#0073b1] border-[#0073b1] border-2 px-4 py-1 rounded-full hover:bg-[#EAF4FD] hover:[border-width:2px] box-border font-medium text-sm transition-all duration-150"
             : connectionState === "pending"
-            ? "border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed "
+            ? "border-gray-300 text-gray-400 bg-gray-100 "
             : "bg-white cursor-pointer text-[#0073b1] border-[#0073b1] border-2 px-4 py-1 rounded-full hover:bg-[#EAF4FD] hover:[border-width:2px] box-border font-medium text-sm transition-all duration-150"
         }`}
       >
@@ -892,7 +893,6 @@ const UserProfileView = () => {
     return (
       <div className="bg-white shadow-sm rounded-lg overflow-hidden">
         <div className="relative">
-          {/* Cover photo with consistent fallback */}
           <div
             className="w-full h-48 bg-gray-200 bg-cover bg-center"
             style={{
@@ -902,7 +902,6 @@ const UserProfileView = () => {
             }}
           ></div>
 
-          {/* Profile picture with consistent fallback */}
           <div className="absolute bottom-0 transform translate-y-1/2 left-8">
             <div className="w-24 h-24 rounded-full border-4 border-white overflow-hidden bg-gray-200 flex items-center justify-center">
               {profile?.profilePicture ? (
@@ -967,13 +966,25 @@ const UserProfileView = () => {
             )}
           </div>
 
-          {!isRestricted && (
+          {/* {!isRestricted && (
             <div className="mt-4 md:mt-0 flex space-x-3">
               <ConnectButton />
-
               <FollowButton />
+              <BlockButton userId={userProfile?._id} />
+              <button
+                className="bg-white cursor-pointer text-[#0073b1] border-[#0073b1] border-2 px-4 py-1 rounded-full hover:bg-[#EAF4FD] hover:[border-width:2px] box-border font-medium text-sm transition-all duration-150"
+                onClick={() =>
+                  handleMessageApplicant(
+                    userProfile?._id,
+                    `${userProfile?.firstName} ${userProfile?.lastName}`,
+                    userProfile?.profilePicture
+                  )
+                }
+              >
+                Message
+              </button>
             </div>
-          )}
+          )} */}
         </div>
 
         {isRestricted && privacyNotice && (
@@ -1199,8 +1210,37 @@ const UserProfileView = () => {
 
                 <div className="mt-4 md:mt-0 flex space-x-3">
                   <ConnectButton />
-
                   <FollowButton />
+
+                  <button
+                    className="bg-white cursor-pointer text-[#0073b1] border-[#0073b1] border-2 px-4 py-1 rounded-full hover:bg-[#EAF4FD] hover:[border-width:2px] box-border font-medium text-sm transition-all duration-150"
+                    onClick={() =>
+                      handleMessageApplicant(
+                        userProfile?._id,
+                        `${userProfile?.firstName} ${userProfile?.lastName}`,
+                        userProfile?.profilePicture
+                      )
+                    }
+                  >
+                    Message
+                  </button>
+
+                  <div className="relative">
+                    <button
+                      className="px-3 py-1 rounded-full hover:bg-gray-100"
+                      onClick={() => setShowMenu(!showMenu)}
+                    >
+                      ⋯
+                    </button>
+                    {showMenu && (
+                      <div className="absolute right-0 mt-2 w-32 bg-white border rounded shadow-lg z-50">
+                        <BlockButton
+                          userId={userProfile?._id}
+                          className="w-full justify-center"
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
