@@ -13,20 +13,86 @@ import {
 import { data } from "react-router-dom";
 import { BASE_URL } from "../../constants";
 
+/**
+ * @typedef {Object} PostAuthor
+ * @property {string} id - The unique identifier of the post author
+ * @property {string} name - The display name of the post author
+ * @property {string} avatar - URL to the author's profile picture
+ * @property {string} position - The position or role of the author
+ */
+
+/**
+ * @typedef {Object} Reporter
+ * @property {string} id - The unique identifier of the reporter
+ * @property {string} name - The display name of the reporter
+ * @property {string} avatar - URL to the reporter's profile picture
+ */
+
+/**
+ * @typedef {Object} ReportedPost
+ * @property {string} id - The unique identifier of the report
+ * @property {string} postId - The unique identifier of the reported post
+ * @property {string} postContent - The content of the reported post
+ * @property {PostAuthor} postAuthor - Information about the post author
+ * @property {Reporter} reporter - Information about the user who reported the post
+ * @property {string} reason - The reason for reporting the post
+ * @property {string} details - Additional details provided by the reporter
+ * @property {string} reportedAt - ISO date string when the post was reported
+ * @property {string} status - Current status of the report ('pending', 'actioned', 'dismissed', 'reviewed')
+ * @property {string} [moderatedAt] - ISO date string when the post was last moderated
+ */
+
+/**
+ * ReportedPosts component for administrators to review and moderate content reported by users
+ *
+ * This component provides a UI for administrators to:
+ * - View a list of posts reported by users
+ * - Filter reports by status (all, pending, actioned, dismissed)
+ * - Search for specific reports
+ * - Take moderation actions (approve or dismiss reports)
+ *
+ * @returns {JSX.Element} The ReportedPosts component
+ */
 const ReportedPosts = () => {
+  /** @type {[ReportedPost[], React.Dispatch<React.SetStateAction<ReportedPost[]>>]} All reports fetched from API */
   const [reportedPosts, setReportedPosts] = useState([]);
+
+  /** @type {[ReportedPost[], React.Dispatch<React.SetStateAction<ReportedPost[]>>]} Filtered reports based on search and status */
   const [filteredPosts, setFilteredPosts] = useState([]);
+
+  /** @type {[boolean, React.Dispatch<React.SetStateAction<boolean>>]} Loading state indicator */
   const [isLoading, setIsLoading] = useState(true);
+
+  /** @type {[string|null, React.Dispatch<React.SetStateAction<string|null>>]} Error message if API request fails */
   const [error, setError] = useState(null);
+
+  /** @type {[string, React.Dispatch<React.SetStateAction<string>>]} Current search term */
   const [searchTerm, setSearchTerm] = useState("");
+
+  /** @type {[string, React.Dispatch<React.SetStateAction<string>>]} Current status filter ('all', 'pending', 'actioned', 'dismissed') */
   const [statusFilter, setStatusFilter] = useState("all");
+
+  /**
+   * @type {[Object, React.Dispatch<React.SetStateAction<Object>>]}
+   * Configuration for sorting posts
+   * @property {string} key - The property key to sort by
+   * @property {string} direction - The sort direction ('asc' or 'desc')
+   */
   const [sortConfig, setSortConfig] = useState({
     key: "createdAt",
     direction: "desc",
   });
+
+  /** @type {[string|null, React.Dispatch<React.SetStateAction<string|null>>]} ID of currently active dropdown menu */
   const [activeDropdown, setActiveDropdown] = useState(null);
 
-  // Fetch data from the API
+  /**
+   * Fetches reported posts data from the API
+   *
+   * @async
+   * @function fetchReportedPosts
+   * @returns {Promise<void>}
+   */
   useEffect(() => {
     const fetchReportedPosts = async () => {
       setIsLoading(true);
@@ -59,14 +125,17 @@ const ReportedPosts = () => {
                     dataitem.reportedUser.lastName || ""
                   }`.trim() || "Unknown User"
                 : dataitem.reportedPost && dataitem.reportedPost.userId
-                  ? `${dataitem.reportedPost.userId.firstName || ""} ${
-                      dataitem.reportedPost.userId.lastName || ""
-                    }`.trim() || "Unknown User"
-                  : "Unknown User",
-              avatar: dataitem.reportedPost && dataitem.reportedPost.userId
-                ? dataitem.reportedPost.userId.profilePicture || "/api/placeholder/40/40"
-                : dataitem.reportedUser
-                  ? dataitem.reportedUser.profilePicture || "/api/placeholder/40/40"
+                ? `${dataitem.reportedPost.userId.firstName || ""} ${
+                    dataitem.reportedPost.userId.lastName || ""
+                  }`.trim() || "Unknown User"
+                : "Unknown User",
+              avatar:
+                dataitem.reportedPost && dataitem.reportedPost.userId
+                  ? dataitem.reportedPost.userId.profilePicture ||
+                    "/api/placeholder/40/40"
+                  : dataitem.reportedUser
+                  ? dataitem.reportedUser.profilePicture ||
+                    "/api/placeholder/40/40"
                   : "/api/placeholder/40/40",
               position: dataitem.report?.reportedType || "Unknown",
             },
@@ -105,7 +174,12 @@ const ReportedPosts = () => {
     fetchReportedPosts();
   }, []);
 
-  // Map API status values to our component's status values
+  /**
+   * Maps API status values to the component's internal status values
+   *
+   * @param {string} apiStatus - The status value from the API
+   * @returns {string} The mapped status value for the component
+   */
   const mapStatusValue = (apiStatus) => {
     switch (apiStatus) {
       case "pending":
@@ -119,7 +193,13 @@ const ReportedPosts = () => {
     }
   };
 
-  // Apply filters and search
+  /**
+   * Filters and searches the reported posts based on status filter and search term
+   * Also applies sorting based on the current sort configuration
+   *
+   * @function filterAndSearchPosts
+   * @returns {void}
+   */
   useEffect(() => {
     let result = [...reportedPosts];
 
@@ -158,6 +238,13 @@ const ReportedPosts = () => {
     setFilteredPosts(result);
   }, [reportedPosts, statusFilter, searchTerm, sortConfig]);
 
+  /**
+   * Handles changing the sort configuration
+   *
+   * @function handleSort
+   * @param {string} key - The property key to sort by
+   * @returns {void}
+   */
   const handleSort = (key) => {
     let direction = "asc";
     if (sortConfig.key === key && sortConfig.direction === "asc") {
@@ -166,7 +253,15 @@ const ReportedPosts = () => {
     setSortConfig({ key, direction });
   };
 
-  // Update status of reported post
+  /**
+   * Updates the status of a reported post
+   *
+   * @async
+   * @function handleStatusChange
+   * @param {string} postId - The ID of the report to update
+   * @param {string} newStatus - The new status to set ('actioned', 'dismissed', 'pending')
+   * @returns {Promise<void>}
+   */
   const handleStatusChange = async (postId, newStatus) => {
     setIsLoading(true);
 
@@ -177,9 +272,7 @@ const ReportedPosts = () => {
           ? "approved"
           : newStatus === "dismissed"
           ? "rejected"
-          : // : newStatus === "reviewed"
-            // ? "reviewed"
-            "pending";
+          : "pending";
 
       // API call to update status
       const response = await fetch(`${BASE_URL}/admin/reports/${postId}`, {
@@ -221,6 +314,13 @@ const ReportedPosts = () => {
     }
   };
 
+  /**
+   * Generates a status badge UI element based on the report status
+   *
+   * @function getStatusBadge
+   * @param {string} status - The status of the report ('pending', 'actioned', 'dismissed')
+   * @returns {JSX.Element} A styled badge component indicating the status
+   */
   const getStatusBadge = (status) => {
     switch (status) {
       case "pending":
@@ -250,6 +350,13 @@ const ReportedPosts = () => {
     }
   };
 
+  /**
+   * Formats a date string to a human-readable format
+   *
+   * @function formatDate
+   * @param {string} dateString - ISO date string to format
+   * @returns {string} Formatted date string
+   */
   const formatDate = (dateString) => {
     if (!dateString) return "Unknown date";
 

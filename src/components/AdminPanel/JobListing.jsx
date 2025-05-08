@@ -26,14 +26,60 @@ import { BASE_URL } from "../../constants";
 
 const API_BASE_URL = BASE_URL;
 
+/**
+ * @typedef {Object} Job
+ * @property {string} id - Unique identifier for the job
+ * @property {string} title - Job title
+ * @property {Object} company - Company offering the job
+ * @property {string} location - Geographic location of the job
+ * @property {string} status - Current status of the job ('active', 'pending', 'inactive')
+ * @property {boolean} flagged - Whether the job has been flagged for review
+ * @property {string} date - Date when the job was posted
+ * @property {string} reason - Reason why the job was flagged (if applicable)
+ * @property {number} applicantCount - Number of job applicants
+ * @property {number} acceptedCount - Number of accepted applicants
+ * @property {number} rejectedCount - Number of rejected applicants
+ * @property {string} workplaceType - Type of workplace (e.g., 'Remote', 'On-site', 'Hybrid')
+ * @property {string} jobType - Type of job (e.g., 'Full-time', 'Part-time', 'Contract')
+ * @property {string} industry - Industry sector of the job
+ * @property {boolean} isActive - Whether the job is currently active
+ */
+
+/**
+ * JobListing component for administrators to manage job postings
+ *
+ * This component provides a UI for administrators to:
+ * - View all job postings with filtering options (all, active, pending, inactive, flagged)
+ * - Search for jobs by title, industry, or location
+ * - Manage job statuses (approve, reject)
+ * - Remove jobs from the platform
+ * - Handle flagged jobs that require special attention
+ *
+ * @returns {JSX.Element} The JobListing component
+ */
 const JobListing = () => {
+  /** @type {[Job[], React.Dispatch<React.SetStateAction<Job[]>>]} All jobs fetched from API */
   const [jobs, setJobs] = useState([]);
+
+  /** @type {[boolean, React.Dispatch<React.SetStateAction<boolean>>]} Loading state indicator */
   const [isLoading, setIsLoading] = useState(true);
+
+  /** @type {[string|null, React.Dispatch<React.SetStateAction<string|null>>]} Error message if API request fails */
   const [error, setError] = useState(null);
+
+  /** @type {[string, React.Dispatch<React.SetStateAction<string>>]} Current active tab ('all', 'active', 'pending', 'inactive', 'flagged') */
   const [activeTab, setActiveTab] = useState("all");
+
+  /** @type {[string, React.Dispatch<React.SetStateAction<string>>]} Current search term for filtering jobs */
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Fetch jobs from API
+  /**
+   * Fetches job data from the API and transforms it for display
+   *
+   * @async
+   * @function fetchJobs
+   * @returns {Promise<void>}
+   */
   useEffect(() => {
     const fetchJobs = async () => {
       try {
@@ -99,7 +145,11 @@ const JobListing = () => {
     fetchJobs();
   }, []);
 
-  // Filter jobs based on active tab and search term
+  /**
+   * Filters jobs based on active tab and search term
+   *
+   * @type {Job[]} Filtered array of jobs based on current filters
+   */
   const filteredJobs = jobs.filter((job) => {
     const matchesSearch =
       job.title.toLowerCase().includes(searchTerm.toLowerCase().trimEnd()) ||
@@ -123,7 +173,14 @@ const JobListing = () => {
     return matchesSearch;
   });
 
-  // Handler functions that will make API calls
+  /**
+   * Approves a job listing, updating its status to 'active'
+   *
+   * @async
+   * @function handleApprove
+   * @param {string} id - ID of the job to approve
+   * @returns {Promise<void>}
+   */
   const handleApprove = async (id) => {
     try {
       const response = await fetch(`${BASE_URL}/jobs/${id}/approve`, {
@@ -150,6 +207,14 @@ const JobListing = () => {
     }
   };
 
+  /**
+   * Rejects a job listing, updating its status to 'inactive'
+   *
+   * @async
+   * @function handleReject
+   * @param {string} id - ID of the job to reject
+   * @returns {Promise<void>}
+   */
   const handleReject = async (id) => {
     try {
       const response = await fetch(`${BASE_URL}/jobs/${id}/reject`, {
@@ -175,6 +240,14 @@ const JobListing = () => {
     }
   };
 
+  /**
+   * Permanently deletes a job listing from the platform
+   *
+   * @async
+   * @function handleDelete
+   * @param {string} id - ID of the job to delete
+   * @returns {Promise<void>}
+   */
   const handleDelete = async (id) => {
     try {
       const response = await fetch(`${BASE_URL}/admin/jobs/${id}`, {
@@ -195,6 +268,14 @@ const JobListing = () => {
     }
   };
 
+  /**
+   * Resolves a flag on a job listing
+   *
+   * @async
+   * @function handleResolveFlag
+   * @param {string} id - ID of the job to resolve flag for
+   * @returns {Promise<void>}
+   */
   const handleResolveFlag = async (id) => {
     try {
       const response = await fetch(`${BASE_URL}/jobs/${id}/resolve-flag`, {
