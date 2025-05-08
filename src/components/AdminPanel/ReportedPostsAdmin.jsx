@@ -53,21 +53,21 @@ const ReportedPosts = () => {
 
             postAuthor: {
               id: dataitem.report?.reportedId || "unknown",
-              // Add null check here
+              // Add proper null checks for all nested properties
               name: dataitem.reportedUser
                 ? `${dataitem.reportedUser.firstName || ""} ${
                     dataitem.reportedUser.lastName || ""
                   }`.trim() || "Unknown User"
-                : dataitem.reportedPost
-                ? `${dataitem.reportedPost.userId.firstName || ""} ${
-                    dataitem.reportedPost.userId.lastName || ""
-                  }`.trim() || "Unknown User"
-                : "Unknown User",
-              avatar: dataitem.reportedPost
-                ? dataitem.reportedPost.userId.profilePicture
+                : dataitem.reportedPost && dataitem.reportedPost.userId
+                  ? `${dataitem.reportedPost.userId.firstName || ""} ${
+                      dataitem.reportedPost.userId.lastName || ""
+                    }`.trim() || "Unknown User"
+                  : "Unknown User",
+              avatar: dataitem.reportedPost && dataitem.reportedPost.userId
+                ? dataitem.reportedPost.userId.profilePicture || "/api/placeholder/40/40"
                 : dataitem.reportedUser
-                ? dataitem.reportedUser.profilePicture
-                : "/api/placeholder/40/40",
+                  ? dataitem.reportedUser.profilePicture || "/api/placeholder/40/40"
+                  : "/api/placeholder/40/40",
               position: dataitem.report?.reportedType || "Unknown",
             },
             reporter: {
