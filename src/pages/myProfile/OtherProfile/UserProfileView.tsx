@@ -7,6 +7,7 @@ import Form from "../../../components/myProfile/Forms/Form";
 import SkillEndorsements from "../../../components/myProfile/SkillEndorsements";
 import ConnectButton from "../../../components/Network/ConnectButton";
 import { useNavigate } from "react-router-dom";
+import BlockButton from "../../../components/Network/BlockButton";
 
 interface Skill {
   skillName: string;
@@ -147,6 +148,13 @@ const UserProfileView = () => {
   const navigate = useNavigate();
   const [basicProfile, setBasicProfile] = useState(null);
   const [basicProfileLoading, setBasicProfileLoading] = useState(true);
+  const [connectionState, setConnectionState] = useState<
+    "connect" | "pending" | "connected"
+  >("connect");
+  const [canSendRequest, setCanSendRequest] = useState<boolean>(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const [confirmRemoveId, setConfirmRemoveId] = useState<string | null>(null);
+  const [confirmRemoveName, setConfirmRemoveName] = useState<string>("");
 
   const openEndorsementModal = (skill: Skill) => {
     setActiveSkill(skill);
@@ -201,7 +209,24 @@ const UserProfileView = () => {
     }
   };
 
-  // Message handler for each connection
+  useEffect(() => {
+    const fetchPendingRequests = async () => {
+      try {
+        const response = await api.get(`/user/connections/MyBendingRequests`);
+        const pendingIds = response.data.pendingRequests;
+        if (pendingIds.includes(userId)) {
+          setConnectionState("pending");
+        }
+      } catch (error) {
+        console.error("Error fetching pending requests", error);
+      }
+    };
+
+    if (userId) {
+      fetchPendingRequests();
+    }
+  }, [userId]);
+
   const handleMessageApplicant = (
     userId: string,
     name: string,
@@ -473,11 +498,9 @@ const UserProfileView = () => {
 
       if (error.response?.status === 403) {
         if (error.response.data?.user) {
-          // Return whatever basic profile info we can get
           return error.response.data.user;
         }
 
-        // If no user info but we have a message, return minimal profile
         if (error.response.data?.message) {
           return {
             _id: userId,
@@ -488,7 +511,6 @@ const UserProfileView = () => {
         }
       }
 
-      // In case of other errors, return minimal profile info
       return {
         _id: userId,
         firstName: "LinkedIn",
@@ -497,7 +519,6 @@ const UserProfileView = () => {
       };
     }
   };
-  // Effect for fetching basic profile info when needed
   useEffect(() => {
     const getBasicInfo = async () => {
       if (!userId || canViewProfile) return;
@@ -541,7 +562,6 @@ const UserProfileView = () => {
           const isCurrentUserConnected =
             user.connectionList?.includes(currentId);
 
-          // Check if privacy settings restrict viewing
           if (user.profilePrivacySettings === "private") {
             setCanViewProfile(false);
             setPrivacyNotice("This profile is private. Connect to view more.");
@@ -554,7 +574,6 @@ const UserProfileView = () => {
               "Only connections can view this profile. Send a connection request to see more."
             );
           } else {
-            // Only fetch activity if we can view the profile
             await fetchUserActivity();
           }
         } catch (error: any) {
@@ -564,14 +583,12 @@ const UserProfileView = () => {
           } else if (error.response?.status === 403) {
             setCanViewProfile(false);
 
-            // Capture the privacy message from the error response
             if (error.response.data?.message) {
               setPrivacyNotice(error.response.data.message);
             } else {
               setPrivacyNotice("This profile has restricted access.");
             }
 
-            // Get basic profile info even for restricted profiles
             const basicInfo = await fetchBasicProfileInfo(userId);
             if (basicInfo) {
               setBasicProfile(basicInfo);
@@ -624,6 +641,21 @@ const UserProfileView = () => {
         setCanViewProfile(true);
         setPrivacyNotice("");
 
+        setCanSendRequest(response.data.canSendConnectionRequest);
+        const isConnected = user.connectionList?.includes(currentId);
+        if (isConnected) {
+          setConnectionState("connected");
+        } else {
+          const pendingResponse = await api.get(
+            "/user/connections/MyBendingRequests"
+          );
+          if (pendingResponse.data.pendingRequests.includes(userId)) {
+            setConnectionState("pending");
+          } else {
+            setConnectionState("connect");
+          }
+        }
+
         if (user.profilePrivacySettings === "private") {
           setCanViewProfile(false);
           setPrivacyNotice("This profile is private. Connect to view more.");
@@ -663,6 +695,74 @@ const UserProfileView = () => {
 
   const isSkillEndorsed = (skill: Skill): boolean => {
     return hasUserEndorsedSkill(skill);
+  };
+
+  const handleRemoveConnection = async (connectionId: string) => {
+    try {
+      await api.delete(`/user/connections/${connectionId}`);
+      setUserProfile((prev) =>
+        prev
+          ? {
+              ...prev,
+              connectionList: prev.connectionList?.filter(
+                (id) => id !== connectionId
+              ),
+            }
+          : null
+      );
+      setCanSendRequest(true);
+
+      showMessage("Connection removed successfully", "success");
+
+      setConnectionState("connect");
+    } catch (error) {
+      console.error("Error removing connection:", error);
+      showMessage("Failed to remove connection", "error");
+    } finally {
+      setConfirmRemoveId(null);
+      setConfirmRemoveName("");
+    }
+  };
+  const ConnectButton = () => {
+    if (!canSendRequest) return null;
+
+    const handleConnect = async () => {
+      try {
+        if (connectionState === "connected") {
+          setConfirmRemoveId(userProfile?._id);
+          setConfirmRemoveName(
+            `${userProfile?.firstName} ${userProfile?.lastName}`
+          );
+        } else {
+          await api.post(`/user/connections/request/${userId}`);
+          showMessage("Connection request sent", "success");
+        }
+      } catch (err) {
+        console.error("Connection request error:", err);
+        showMessage("Failed to update connection", "error");
+      }
+    };
+    const isDisabled = connectionState === "pending";
+
+    return (
+      <button
+        onClick={handleConnect}
+        disabled={isDisabled}
+        className={`px-4 py-1.5 rounded-full text-sm font-semibold border transition-colors ${
+          connectionState === "connected"
+            ? "bg-white cursor-pointer text-[#0073b1] border-[#0073b1] border-2 px-4 py-1 rounded-full hover:bg-[#EAF4FD] hover:[border-width:2px] box-border font-medium text-sm transition-all duration-150"
+            : connectionState === "pending"
+            ? "border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed"
+            : "bg-white cursor-pointer text-[#0073b1] border-[#0073b1] border-2 px-4 py-1 rounded-full hover:bg-[#EAF4FD] hover:[border-width:2px] box-border font-medium text-sm transition-all duration-150"
+        }`}
+      >
+        {connectionState === "connected"
+          ? "Connected"
+          : connectionState === "pending"
+          ? "Pending"
+          : "Connect"}
+      </button>
+    );
   };
 
   const FollowButton = () => {
@@ -822,7 +922,6 @@ const UserProfileView = () => {
     return (
       <div className="bg-white shadow-sm rounded-lg overflow-hidden">
         <div className="relative">
-          {/* Cover photo with consistent fallback */}
           <div
             className="w-full h-48 bg-gray-200 bg-cover bg-center"
             style={{
@@ -832,7 +931,6 @@ const UserProfileView = () => {
             }}
           ></div>
 
-          {/* Profile picture with consistent fallback */}
           <div className="absolute bottom-0 transform translate-y-1/2 left-8">
             <div className="w-24 h-24 rounded-full border-4 border-white overflow-hidden bg-gray-200 flex items-center justify-center">
               {profile?.profilePicture ? (
@@ -897,27 +995,25 @@ const UserProfileView = () => {
             )}
           </div>
 
-          {!isRestricted && (
+          {/* {!isRestricted && (
             <div className="mt-4 md:mt-0 flex space-x-3">
-              {userProfile?.connectionList?.includes(currentUserId) ? (
-                <button
-                  onClick={() =>
-                    handleMessageApplicant(
-                      profile._id,
-                      `${profile.firstName} ${profile.lastName}`,
-                      profile.profilePicture
-                    )
-                  }
-                  className="px-4 py-1.5 border border-blue-500 text-blue-600 rounded-full text-sm font-semibold hover:bg-blue-50 transition-colors"
-                >
-                  Message
-                </button>
-              ) : (
-                <ConnectButton userId={profile._id} />
-              )}
-              <FollowButton userId={profile._id} />
+              <ConnectButton />
+              <FollowButton />
+              <BlockButton userId={userProfile?._id} />
+              <button
+                className="bg-white cursor-pointer text-[#0073b1] border-[#0073b1] border-2 px-4 py-1 rounded-full hover:bg-[#EAF4FD] hover:[border-width:2px] box-border font-medium text-sm transition-all duration-150"
+                onClick={() =>
+                  handleMessageApplicant(
+                    userProfile?._id,
+                    `${userProfile?.firstName} ${userProfile?.lastName}`,
+                    userProfile?.profilePicture
+                  )
+                }
+              >
+                Message
+              </button>
             </div>
-          )}
+          )} */}
         </div>
 
         {isRestricted && privacyNotice && (
@@ -1142,23 +1238,38 @@ const UserProfileView = () => {
                 </div>
 
                 <div className="mt-4 md:mt-0 flex space-x-3">
-                  {userProfile?.connectionList?.includes(currentUserId) ? (
+                  <ConnectButton />
+                  <FollowButton />
+
+                  <button
+                    className="bg-white cursor-pointer text-[#0073b1] border-[#0073b1] border-2 px-4 py-1 rounded-full hover:bg-[#EAF4FD] hover:[border-width:2px] box-border font-medium text-sm transition-all duration-150"
+                    onClick={() =>
+                      handleMessageApplicant(
+                        userProfile?._id,
+                        `${userProfile?.firstName} ${userProfile?.lastName}`,
+                        userProfile?.profilePicture
+                      )
+                    }
+                  >
+                    Message
+                  </button>
+
+                  <div className="relative">
                     <button
-                      onClick={() =>
-                        handleMessageApplicant(
-                          userProfile._id,
-                          `${userProfile.firstName} ${userProfile.lastName}`,
-                          userProfile.profilePicture
-                        )
-                      }
-                      className="px-4 py-1.5 border border-blue-500 text-blue-600 rounded-full text-sm font-semibold hover:bg-blue-50 transition-colors"
+                      className="px-3 py-1 rounded-full hover:bg-gray-100"
+                      onClick={() => setShowMenu(!showMenu)}
                     >
-                      Message
+                      ⋯
                     </button>
-                  ) : (
-                    <ConnectButton userId={userProfile._id} />
-                  )}
-                  <FollowButton userId={userProfile._id} />
+                    {showMenu && (
+                      <div className="absolute right-0 mt-2 w-32 bg-white border rounded shadow-lg z-50">
+                        <BlockButton
+                          userId={userProfile?._id}
+                          className="w-full justify-center"
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -1172,12 +1283,6 @@ const UserProfileView = () => {
                 </p>
 
                 <div className="mt-4 text-sm text-gray-600 space-y-2">
-                  {/* {userProfile?.location && (
-                    <p className="flex items-center">
-                      <span className="mr-2">📍</span>
-                      <span>{userProfile.location}</span>
-                    </p>
-                  )} */}
                   {userProfile?.phone && (
                     <p className="flex items-center">
                       <span className="mr-2">📞</span>
@@ -1440,6 +1545,43 @@ const UserProfileView = () => {
                 )}
               </div>
             </Form>
+          )}
+
+          {confirmRemoveId && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+              <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
+                <button
+                  className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-2xl"
+                  onClick={() => setConfirmRemoveId(null)}
+                  aria-label="Close"
+                >
+                  &times;
+                </button>
+                <h2 className="text-xl font-semibold mb-2">
+                  Remove Connection
+                </h2>
+                <p className="mb-6">
+                  Are you sure you want to remove{" "}
+                  <span className="font-semibold">{confirmRemoveName}</span> as
+                  a connection? Don't worry, {confirmRemoveName.split(" ")[0]}{" "}
+                  won't be notified.
+                </p>
+                <div className="flex justify-end space-x-2">
+                  <button
+                    className="px-4 py-2 rounded border border-gray-300 text-gray-700 hover:bg-gray-100"
+                    onClick={() => setConfirmRemoveId(null)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="px-4 py-2 rounded bg-red-600 text-white font-semibold hover:bg-red-700"
+                    onClick={() => handleRemoveConnection(confirmRemoveId)}
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            </div>
           )}
 
           <div className="hidden lg:block lg:w-1/4">
