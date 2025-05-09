@@ -1,3 +1,32 @@
+/**
+ * Network page that serves as the container for all connection-related features.
+ * 
+ * @component
+ * @returns {JSX.Element} Rendered network page layout with all network components
+ * 
+ * @example
+ * // In a router configuration
+ * <Route path="/network" element={<Network />} />
+ * 
+ * @description
+ * The Network page includes:
+ * - Connection statistics dashboard
+ * - Connection request management section
+ * - People You May Know recommendations
+ * - Connection filtering and search tools
+ * - Industry-based connection exploration
+ * - Invitation management tools
+ * - Connection privacy setting shortcuts
+ * - Company connection exploration tools
+ * - Event and group connection suggestions
+ * 
+ * @dependencies
+ * - React
+ * - axios for API requests
+ * - React Router for navigation
+ * - Headless UI for modal dialogs
+ */
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';

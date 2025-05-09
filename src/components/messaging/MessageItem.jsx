@@ -152,7 +152,7 @@ const formatTimestamp = (ts) => {
 return (
 // Add group class for hover effect on menu button
 
-message.text !=="" && message.mediaUrl !==[] &&
+message.text !=="" && message.mediaUrl.length !==0 &&
 (<div className={`group flex gap-2 my-1 ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>
   {/* Avatar (only for other messages) */}
   {!isOwnMessage && (

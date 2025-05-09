@@ -1,14 +1,65 @@
 import React, { useState, useEffect } from "react";
 import { Clock, AlertCircle } from "lucide-react";
 
+/**
+ * @typedef {Object} SubscriptionDetails
+ * @property {string} type - The subscription type ('free' or 'premium')
+ * @property {string} status - Subscription status ('active', 'canceled', 'past_due', 'inactive')
+ * @property {Date} currentPeriodEnd - Date when the current billing period ends
+ * @property {string} renewalAmount - Formatted renewal amount (e.g., "$20.00")
+ * @property {string[]} features - List of premium features included in the subscription
+ */
+
+/**
+ * SubscriptionStatus component for displaying the user's current subscription details
+ * 
+ * This component fetches and displays a user's subscription information, including:
+ * - Current plan type (free or premium)
+ * - Subscription status
+ * - Renewal date (for premium plans)
+ * - Premium features (for premium plans)
+ * - Renewal amount (for active premium plans)
+ * 
+ * It handles loading and error states, and provides appropriate UI for each subscription type.
+ * 
+ * @component
+ * @example
+ * // Usage in a React application
+ * import SubscriptionStatus from './components/SubscriptionBasedPayment/SubscriptionStatus';
+ * 
+ * function ProfilePage() {
+ *   return (
+ *     <div>
+ *       <h1>My Profile</h1>
+ *       <SubscriptionStatus />
+ *     </div>
+ *   );
+ * }
+ * 
+ * @returns {JSX.Element} Rendered component showing subscription status and details
+ */
 const SubscriptionStatus = () => {
+  /** @type {[SubscriptionDetails|null, React.Dispatch<React.SetStateAction<SubscriptionDetails|null>>]} State for subscription data */
   const [subscription, setSubscription] = useState(null);
+  
+  /** @type {[boolean, React.Dispatch<React.SetStateAction<boolean>>]} State for premium subscription status */
   const [isPremium, setIsPremium] = useState(false);
+  
+  /** @type {[boolean, React.Dispatch<React.SetStateAction<boolean>>]} State for loading indicator */
   const [loading, setLoading] = useState(true);
+  
+  /** @type {[string|null, React.Dispatch<React.SetStateAction<string|null>>]} State for error messages */
   const [error, setError] = useState(null);
+  
+  /** Base URL for API calls from environment variables */
   const BASE_URL =
     import.meta.env.VITE_API_BASE_URL || "https://your-api-url.com";
 
+  /**
+   * Fetches user's subscription details on component mount
+   * 
+   * @function useEffect
+   */
   useEffect(() => {
     const fetchSubscriptionDetails = async () => {
       try {
@@ -38,6 +89,42 @@ const SubscriptionStatus = () => {
     fetchSubscriptionDetails();
   }, [BASE_URL]);
 
+  /**
+   * Formats a date to a human-readable string
+   * 
+   * @function formatDate
+   * @param {Date|string} date - The date to format
+   * @returns {string} Formatted date string (e.g., "May 8, 2025")
+   */
+  const formatDate = (date) => {
+    return new Date(date).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  /**
+   * Returns CSS class based on subscription status
+   * 
+   * @function getStatusColor
+   * @param {string} status - Subscription status ('active', 'canceled', 'past_due', etc.)
+   * @returns {string} CSS class string for the status badge
+   */
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "active":
+        return "bg-green-100 text-green-800";
+      case "canceled":
+        return "bg-yellow-100 text-yellow-800";
+      case "past_due":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  // Render loading state
   if (loading) {
     return (
       <div className="bg-white shadow rounded-lg p-6 animate-pulse">
@@ -48,6 +135,7 @@ const SubscriptionStatus = () => {
     );
   }
 
+  // Render error state
   if (error) {
     return (
       <div className="bg-red-50 shadow rounded-lg p-6">
@@ -78,27 +166,6 @@ const SubscriptionStatus = () => {
 
   // Use actual subscription data in production
   const subData = subscription || mockSubscription;
-
-  const formatDate = (date) => {
-    return new Date(date).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "active":
-        return "bg-green-100 text-green-800";
-      case "canceled":
-        return "bg-yellow-100 text-yellow-800";
-      case "past_due":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
 
   return (
     <div className="bg-white m-4 shadow rounded-lg overflow-hidden">

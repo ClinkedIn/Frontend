@@ -1,3 +1,35 @@
+/**
+ * FollowButton component for following or unfollowing users.
+ * 
+ * @component
+ * @param {Object} props - Component props
+ * @param {string} props.userId - ID of the user to follow/unfollow
+ * @param {boolean} [props.initialFollowing=false] - Initial following status
+ * @param {Function} [props.onFollowChange] - Callback triggered when following status changes
+ * @param {string} [props.size="md"] - Button size ('sm', 'md', 'lg')
+ * @param {boolean} [props.showIcon=true] - Whether to show the follow/unfollow icon
+ * @param {string} [props.className] - Additional CSS classes to apply
+ * 
+ * @returns {JSX.Element} Rendered follow/unfollow button
+ * 
+ * @example
+ * <FollowButton
+ *   userId="12345"
+ *   initialFollowing={false}
+ *   onFollowChange={(isFollowing) => console.log(`Now following: ${isFollowing}`)}
+ *   size="md"
+ * />
+ * 
+ * @description
+ * The FollowButton component:
+ * - Toggles between Follow and Following states
+ * - Sends appropriate API requests to follow/unfollow users
+ * - Shows loading state during API operations
+ * - Provides hover states for better user feedback
+ * - Updates parent components via callbacks when status changes
+ * - Supports different sizes for various UI placements
+ */
+
 import React, { useState } from "react";
 import axios from "axios";
 import { BASE_URL } from "../../constants";

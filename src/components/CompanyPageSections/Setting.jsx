@@ -86,7 +86,13 @@ const CompanySettingPage = () => {
    * @function fetchAdmins
    * @returns {Promise<void>}
    */
-  const fetchAdmins = useCallback(async () => {
+
+
+  /**
+   * Effect to fetch admins when component mounts or companyInfo changes
+   */
+  useEffect(() => {
+      const fetchAdmins = async() => {
     if (!companyInfo || !companyInfo.id) return;
     setLoadingAdmins(true);
     try {
@@ -102,14 +108,9 @@ const CompanySettingPage = () => {
     } finally {
       setLoadingAdmins(false);
     }
-  }, [companyInfo]);
-
-  /**
-   * Effect to fetch admins when component mounts or companyInfo changes
-   */
-  useEffect(() => {
+  }
     fetchAdmins();
-  }, [fetchAdmins]);
+  }, []);
 
   /**
    * Effect to handle user search with debouncing
@@ -168,7 +169,11 @@ const CompanySettingPage = () => {
           { withCredentials: true }
       );
       toast.success(`${user.firstName} ${user.lastName} added as admin`);
-      fetchAdmins();
+      const adminsResponse = await axios.get(
+      `${BASE_URL}/companies/${companyInfo.id}/admin`, 
+      { withCredentials: true }
+    );
+    setAdmins(adminsResponse.data.admins || []);
       setSearchTerm("");
       setUserResults([]);
       setShowResults(false);
@@ -192,12 +197,22 @@ const CompanySettingPage = () => {
     if (!companyInfo || !companyInfo.id || !admin.id) return;
     setRemovingAdmin(admin.id);
     try {
-      await axios.delete(`${BASE_URL}/companies/${companyInfo.id}`, {
-        data: { userId: admin.id },
-        withCredentials: true,
-      });
-      toast.success(`${admin.firstName} ${admin.lastName} removed from admins`);
-      fetchAdmins();
+      const response = await axios.delete(
+      `${BASE_URL}/companies/${companyInfo.id}/admin`,
+      { 
+        data: { userId: admin.id },  // Send userId in request body
+        withCredentials: true 
+      }
+    );
+    console.log("response", response.data);
+    toast.success(`${admin.firstName} ${admin.lastName} removed from admins`);
+    
+    // Refresh the admins list
+    const adminsResponse = await axios.get(
+      `${BASE_URL}/companies/${companyInfo.id}/admin`, 
+      { withCredentials: true }
+    );
+    setAdmins(adminsResponse.data.admins || []);
     } catch (error) {
       console.error("Error removing admin:", error);
       toast.error("Failed to remove admin");
@@ -217,9 +232,10 @@ const CompanySettingPage = () => {
     if (!companyInfo || !companyInfo.id) return;
     setDeleting(true);
     try {
-      await axios.delete(`${BASE_URL}/companies/${companyInfo.id}`, {
+      const response = await axios.delete(`${BASE_URL}/companies/${companyInfo.id}`, {
         withCredentials: true,
       });
+      console.log("deletingcompany ",response.data)
       toast.success("Company deleted successfully");
       navigate("/feed");
     } catch (error) {

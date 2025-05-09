@@ -6,28 +6,30 @@ import { Line, Bar } from 'react-chartjs-2';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-} from 'chart.js';
-
-// Register ChartJS components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-);
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    BarController,  // <--- IMPORT THIS
+    BarElement,
+    Title,
+    Tooltip,
+    Legend
+  } from 'chart.js';
+  
+  // Register ChartJS components
+  ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    BarController, // <--- ADD IT HERE
+    BarElement,
+    Title,
+    Tooltip,
+    Legend
+  );
 /**
  * Company Analytics Page component that displays various analytics data for a company.
  * This includes visitor and follower statistics presented in line and bar charts,
@@ -72,6 +74,8 @@ const CompanyAnalyticsPage = () => {
     const fetchAnalytics = async () => {
         try {
             setLoading(true);
+             if (companyInfo?.id){
+
             const response = await axios.get(
                 `${BASE_URL}/companies/${companyInfo.id}/analytics`,
                 {
@@ -86,11 +90,12 @@ const CompanyAnalyticsPage = () => {
             setAnalyticsData(response.data.analytics);
             console.log(response.data)
             setError(null);
+             setLoading(false);
+        }
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to fetch analytics');
-        } finally {
             setLoading(false);
-        }
+        } 
     };
 
     useEffect(() => {

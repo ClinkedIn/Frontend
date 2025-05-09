@@ -37,36 +37,84 @@ import {
   GitBranch,
 } from "lucide-react";
 
+/**
+ * @typedef {Object} UserStats
+ * @property {number} totalUsers - Total number of users registered on the platform
+ * @property {number} activeUsers - Number of users active in the last 30 days
+ * @property {number} premiumUsers - Number of users with premium subscriptions
+ * @property {number} averageConnections - Average number of connections per user
+ * @property {Array<{_id: string, count: number}>} employmentTypeCounts - Distribution of users by employment type
+ * @property {Array<{_id: string, count: number}>} usersByProfilePrivacy - Distribution of users by profile privacy setting
+ * @property {Array<{_id: string, count: number}>} usersByDefaultMode - Distribution of users by UI theme preference
+ * @property {Array<{_id: string, count: number}>} usersByConnectionRequestPrivacy - Distribution of users by connection request privacy setting
+ */
+
+/**
+ * @typedef {Object} PostStats
+ * @property {number} totalPosts - Total number of posts created on the platform
+ * @property {number} totalImpressions - Total number of post impressions
+ * @property {Object} averageEngagement - Average engagement metrics per post
+ * @property {number} averageEngagement.impressions - Average impressions per post
+ * @property {number} averageEngagement.comments - Average comments per post
+ * @property {number} averageEngagement.reposts - Average reposts per post
+ */
+
+/**
+ * @typedef {Object} JobStats
+ * @property {number} totalJobs - Total number of jobs posted on the platform
+ * @property {number} averageApplications - Average number of applications per job
+ * @property {Array<{_id: string, count: number}>} jobsByWorkplaceType - Distribution of jobs by workplace type
+ * @property {Array<{_id: string, count: number}>} jobsByType - Distribution of jobs by employment type
+ */
+
+/**
+ * @typedef {Object} CompanyStats
+ * @property {number} totalCompanies - Total number of companies registered on the platform
+ * @property {number} activeCompanies - Number of companies active in the last 30 days
+ * @property {number} averageFollowers - Average number of followers per company
+ * @property {Array<{_id: string, count: number}>} companiesBySize - Distribution of companies by size
+ * @property {Array<{_id: string, count: number}>} companiesByIndustry - Distribution of companies by industry
+ */
+
+/**
+ * @typedef {Object} AnalyticsData
+ * @property {UserStats} userStats - Statistics related to platform users
+ * @property {PostStats} postStats - Statistics related to posts and content
+ * @property {JobStats} jobStats - Statistics related to job listings
+ * @property {CompanyStats} companyStats - Statistics related to companies
+ */
+
+/**
+ * AdminDashboard component for visualizing platform analytics and metrics
+ * 
+ * This component displays comprehensive analytics about platform usage including:
+ * - User statistics (total users, active users, subscription types)
+ * - Content engagement metrics (posts, impressions)
+ * - Job and company statistics
+ * - Various distribution charts for user settings and preferences
+ * 
+ * The component fetches data from the admin analytics API endpoint and refreshes
+ * at regular intervals. It also includes real-time simulation updates for certain metrics.
+ * 
+ * @returns {JSX.Element} The AdminDashboard component with analytics visualizations
+ */
 export default function AdminDashboard() {
+  /** @type {[boolean, React.Dispatch<React.SetStateAction<boolean>>]} Loading state indicator */
   const [loading, setLoading] = useState(true);
-  /**
-   * useState hook to manage analytics data for the Admin Panel.
-   * 
-   * @typedef {Object} AnalyticsData
-   * @property {number} totalUsers - Total number of users on the platform.
-   * @property {number} activeUsers - Number of currently active users.
-   * @property {number} newSignups - Number of new signups.
-   * @property {number} postsCreated - Total number of posts created.
-   * @property {number} activeCompanies - Number of active companies.
-   * @property {number} avgJobsPerCompany - Average number of jobs per company.
-   * @property {number} activeUsersNow - Number of users currently active now.
-   * @property {number} messagesPerMin - Number of messages sent per minute.
-   * @property {number} newConnectionsPerMin - Number of new connections made per minute.
-   * @property {Array<Object>} subscriptionPlans - Array of subscription plans with user counts.
-   * @property {string} subscriptionPlans[].name - Name of the subscription plan.
-   * @property {number} subscriptionPlans[].users - Number of users subscribed to the plan.
-   * @property {Array<Object>} activityTrend - Array of activity trends by day.
-   * @property {string} activityTrend[].name - Name of the day (e.g., 'Mon', 'Tue').
-   * @property {number} activityTrend[].users - Number of users active on the day.
-   * @property {number} activityTrend[].posts - Number of posts created on the day.
-   * @property {number} activityTrend[].messages - Number of messages sent on the day.
-   * 
-   * @type {[AnalyticsData, React.Dispatch<React.SetStateAction<AnalyticsData>>]}
-   */
+  
+  /** @type {[AnalyticsData|null, React.Dispatch<React.SetStateAction<AnalyticsData|null>>]} Analytics data from API */
   const [analyticsData, setAnalyticsData] = useState(null);
+  
+  /** @type {[string|null, React.Dispatch<React.SetStateAction<string|null>>]} Error message if API request fails */
   const [error, setError] = useState(null);
 
-  // Fetch data from API
+  /**
+   * Fetches analytics data from the API
+   * 
+   * @async
+   * @function fetchAnalytics
+   * @returns {Promise<void>}
+   */
   useEffect(() => {
     const BASE_URL =
       import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
@@ -105,7 +153,15 @@ export default function AdminDashboard() {
     return () => clearInterval(refreshInterval);
   }, []);
 
-  // For real-time simulation - you would replace this with websocket data in production
+  /**
+   * Simulates real-time updates to certain metrics
+   * 
+   * In a production environment, this would be replaced with WebSocket connections
+   * or server-sent events for true real-time updates.
+   * 
+   * @function simulateRealTimeUpdates
+   * @returns {void}
+   */
   useEffect(() => {
     if (!analyticsData) return;
 
@@ -168,31 +224,46 @@ export default function AdminDashboard() {
   // Prepare data for charts
   const { userStats, postStats, jobStats, companyStats } = analyticsData;
 
-  // Prepare subscription data for pie chart
+  /**
+   * Data prepared for subscription distribution pie chart
+   * @type {Array<{name: string, users: number}>}
+   */
   const subscriptionData = [
     { name: "Premium", users: userStats.premiumUsers },
     { name: "Free", users: userStats.totalUsers - userStats.premiumUsers },
   ];
 
-  // Prepare employment type data for bar chart
+  /**
+   * Data prepared for employment type bar chart
+   * @type {Array<{name: string, count: number}>}
+   */
   const employmentData = userStats.employmentTypeCounts.map((item) => ({
     name: item._id,
     count: item.count,
   }));
 
-  // Prepare workplace type data for pie chart
+  /**
+   * Data prepared for workplace type pie chart
+   * @type {Array<{name: string, value: number}>}
+   */
   const workplaceData = jobStats.jobsByWorkplaceType.map((item) => ({
     name: item._id,
     value: item.count,
   }));
 
-  // Prepare company size data for pie chart
+  /**
+   * Data prepared for company size distribution
+   * @type {Array<{name: string, value: number}>}
+   */
   const companySizeData = companyStats.companiesBySize.map((item) => ({
     name: item._id,
     value: item.count,
   }));
 
-  // Prepare profile privacy data for pie chart
+  /**
+   * Data prepared for profile privacy settings distribution
+   * @type {Array<{name: string, value: number}>}
+   */
   const privacyData = userStats.usersByProfilePrivacy.map((item) => ({
     name:
       item._id === "public"
@@ -203,13 +274,19 @@ export default function AdminDashboard() {
     value: item.count,
   }));
 
-  // Prepare UI theme preference data for pie chart
+  /**
+   * Data prepared for UI theme preference distribution
+   * @type {Array<{name: string, value: number}>}
+   */
   const themePreferenceData = userStats.usersByDefaultMode.map((item) => ({
     name: item._id === "dark" ? "Dark Mode" : "Light Mode",
     value: item.count,
   }));
 
-  // Prepare connection request privacy data for pie chart
+  /**
+   * Data prepared for connection request privacy settings distribution
+   * @type {Array<{name: string, value: number}>}
+   */
   const connectionPrivacyData = userStats.usersByConnectionRequestPrivacy.map(
     (item) => ({
       name: item._id === "everyone" ? "Anyone" : "Connections Only",
@@ -217,13 +294,19 @@ export default function AdminDashboard() {
     })
   );
 
-  // Prepare job types data for bar chart
+  /**
+   * Data prepared for job types distribution
+   * @type {Array<{name: string, count: number}>}
+   */
   const jobTypesData = jobStats.jobsByType.map((item) => ({
     name: item._id,
     count: item.count,
   }));
 
-  // Prepare company industry data for bar chart (top 10)
+  /**
+   * Data prepared for top 10 company industries
+   * @type {Array<{name: string, count: number}>}
+   */
   const companyIndustryData = companyStats.companiesByIndustry
     .sort((a, b) => b.count - a.count)
     .slice(0, 10)
@@ -232,7 +315,10 @@ export default function AdminDashboard() {
       count: item.count,
     }));
 
-  // Colors for charts
+  /**
+   * Color palette for charts
+   * @type {string[]}
+   */
   const CHART_COLORS = [
     "#3b82f6",
     "#10b981",
@@ -679,7 +765,17 @@ export default function AdminDashboard() {
   );
 }
 
-// Component for individual metric cards
+/**
+ * MetricCard component for displaying individual metric values with icons
+ *
+ * @component
+ * @param {Object} props - Component props
+ * @param {JSX.Element} props.icon - The icon element to display
+ * @param {string} props.title - The title of the metric
+ * @param {number|string} props.value - The value of the metric to display
+ * @param {boolean} [props.highlight=false] - Whether to highlight the card with a colored border
+ * @returns {JSX.Element} The MetricCard component
+ */
 function MetricCard({ icon, title, value, highlight = false }) {
   return (
     <div

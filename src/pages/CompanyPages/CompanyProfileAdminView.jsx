@@ -124,8 +124,10 @@ const CompanyProfileAdminViewPage = () => {
             const response = await axios.get(
                 `${BASE_URL}/companies/${companyId}`
             );
-            setCompanyInfo(response.data.company); 
-
+            setCompanyInfo(response.data); 
+            const IsAdmin = response.data.userRelationship ==='admin'
+            setIsAdmin(response.data.userRelationship);
+            console.log("isAdmin:", isAdmin);
             setCompanyName(response.data.company.name)
             setCompanyAddress(response.data.company.address)
             setWebsite(response.data.company.website)
@@ -155,7 +157,7 @@ const CompanyProfileAdminViewPage = () => {
                 setUser(response.data.user);
                 console.log("User data:", response.data.user);
                 
-                console.log("isAdmin:", isAdmin);
+               
             } catch (error) {
               console.error("Error fetching user:", error);
             }
@@ -164,16 +166,12 @@ const CompanyProfileAdminViewPage = () => {
           fetchUser();
       }, [user?._id]);
       useEffect(() => { 
-        if ( user?._id && companyInfo?.id) {
-            const isAdmin = user?.adminInCompanies.some((CompanyId) => CompanyId === companyId );
-            setIsAdmin(isAdmin);
-        };
-    },[user?._id, companyInfo?.id]);
-    useEffect(() => {
-        if (user?._id && isAdmin === false && isOwner === false) {
+
+       if (user?._id &&  companyInfo?.company.id && isAdmin === false && isOwner === false ) {
             navigate(`/company/${companyId}/Home`);
         }
-    }, [user?._id, isAdmin , isOwner]);
+    },[user?._id, companyInfo?.id]);
+
       const handleUpdatePage = async (e) => {
         e.preventDefault();
         if (!isValid()) return;
@@ -202,7 +200,7 @@ const CompanyProfileAdminViewPage = () => {
             });
             
             
-                setCompanyInfo(response.data.company); 
+                setCompanyInfo(response.data); 
                 setCompanyName(response.data.company.name)
                 setCompanyAddress(response.data.company.address)
                 setWebsite(response.data.company.website)
@@ -225,10 +223,10 @@ const CompanyProfileAdminViewPage = () => {
         }
     }
     useEffect(()=>{
-        if(!companyInfo)
+        if(!companyInfo?.company)
      fetchCompanyInfo();
-     console.log("companyInfo",companyInfo)
-    },[companyId]);
+     
+    },[companyInfo?.company.id]);
     if(errorFetchCompanyInfo){
         return(
             <div className=" bg-[#f4f2ee] min-h-screen  items-center flex flex-col   w-full rounded-lg shadow-lg p-4 ">
@@ -280,12 +278,12 @@ const CompanyProfileAdminViewPage = () => {
                     </div>
                 </div>
             </div>)
-            :(companyInfo && 
+            :(companyInfo?.company && 
             (<div className="lg:w-1/2 lg:h-3/4 md:w-3/4 max-[430px]:w-full ">
                 <div className="bg-white rounded-lg shadow-lg mt-16 relative"> 
                     <img src="/Images/card-bg.svg"  className="w-full h-30 rounded-t-lg" />
                     <div className="flex flex-column justify-between">
-                        <img src={ companyInfo.logo ? companyInfo.logo : "/Images/CompanyLogo.png"  }  className="w-28 h-28 -mt-10 ml-5  " />
+                        <img src={ companyInfo.company.logo ? companyInfo.company.logo : "/Images/CompanyLogo.png"  }  className="w-28 h-28 -mt-10 ml-5  " />
                         <button className="rounded-full  hover:bg-gray-100 m-4 p-4" 
                         onClick={()=>{setShowForm(true)}}>
                         < MdModeEdit size=" 24"/>
@@ -295,12 +293,12 @@ const CompanyProfileAdminViewPage = () => {
                     
 
                     <div className="px-5 pt-5">
-                        <h1 className="text-2xl">{companyInfo.name}</h1>
+                        <h1 className="text-2xl">{companyInfo.company.name}</h1>
                         <div className="flex gap-2">
-                            <p className="text-gray-500 text-sm">{companyInfo.industry}</p>
-                            <p className="text-gray-500 text-sm">{companyInfo.location}</p>
-                            <p className="text-gray-500 text-sm">{companyInfo.followersCount} followers</p>
-                            <p className="text-gray-500 text-sm">{companyInfo.organizationSize} employees</p>
+                            <p className="text-gray-500 text-sm">{companyInfo.company.industry}</p>
+                            <p className="text-gray-500 text-sm">{companyInfo.company.location}</p>
+                            <p className="text-gray-500 text-sm">{companyInfo.company.followersCount} followers</p>
+                            <p className="text-gray-500 text-sm">{companyInfo.company.organizationSize} employees</p>
                         </div>
                         <div className="flex gap-4 max-[430px]:flex-col max-[430px]:gap-0">
                             <button className="    mt-4 flex items-center justify-center gap-2 bg-[#0A66C2] text-white font-semibold py-2 px-8 rounded-full hover:bg-[#004182]" onClick={()=>{handleClickCreateButton()}}>
@@ -317,7 +315,7 @@ const CompanyProfileAdminViewPage = () => {
                     <InlineTabs activeTab={activeTab} Tabs={Tabs} handleTabClick={handleTabClick} />  
                 </div>
                 <div className="mt-4">
-                   <Outlet context={{companyInfo}}/>
+                   <Outlet context={companyInfo.company}/>
                 </div>
             </div>)
             )

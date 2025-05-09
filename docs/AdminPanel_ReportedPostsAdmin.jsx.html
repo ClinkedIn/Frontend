@@ -1,4 +1,32 @@
-import React, { useState, useEffect } from "react";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: AdminPanel/ReportedPostsAdmin.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: AdminPanel/ReportedPostsAdmin.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { useState, useEffect } from "react";
 import {
   ChevronDown,
   ChevronUp,
@@ -54,26 +82,26 @@ import { BASE_URL } from "../../constants";
  * @returns {JSX.Element} The ReportedPosts component
  */
 const ReportedPosts = () => {
-  /** @type {[ReportedPost[], React.Dispatch<React.SetStateAction<ReportedPost[]>>]} All reports fetched from API */
+  /** @type {[ReportedPost[], React.Dispatch&lt;React.SetStateAction&lt;ReportedPost[]>>]} All reports fetched from API */
   const [reportedPosts, setReportedPosts] = useState([]);
 
-  /** @type {[ReportedPost[], React.Dispatch<React.SetStateAction<ReportedPost[]>>]} Filtered reports based on search and status */
+  /** @type {[ReportedPost[], React.Dispatch&lt;React.SetStateAction&lt;ReportedPost[]>>]} Filtered reports based on search and status */
   const [filteredPosts, setFilteredPosts] = useState([]);
 
-  /** @type {[boolean, React.Dispatch<React.SetStateAction<boolean>>]} Loading state indicator */
+  /** @type {[boolean, React.Dispatch&lt;React.SetStateAction&lt;boolean>>]} Loading state indicator */
   const [isLoading, setIsLoading] = useState(true);
 
-  /** @type {[string|null, React.Dispatch<React.SetStateAction<string|null>>]} Error message if API request fails */
+  /** @type {[string|null, React.Dispatch&lt;React.SetStateAction&lt;string|null>>]} Error message if API request fails */
   const [error, setError] = useState(null);
 
-  /** @type {[string, React.Dispatch<React.SetStateAction<string>>]} Current search term */
+  /** @type {[string, React.Dispatch&lt;React.SetStateAction&lt;string>>]} Current search term */
   const [searchTerm, setSearchTerm] = useState("");
 
-  /** @type {[string, React.Dispatch<React.SetStateAction<string>>]} Current status filter ('all', 'pending', 'actioned', 'dismissed') */
+  /** @type {[string, React.Dispatch&lt;React.SetStateAction&lt;string>>]} Current status filter ('all', 'pending', 'actioned', 'dismissed') */
   const [statusFilter, setStatusFilter] = useState("all");
 
   /**
-   * @type {[Object, React.Dispatch<React.SetStateAction<Object>>]}
+   * @type {[Object, React.Dispatch&lt;React.SetStateAction&lt;Object>>]}
    * Configuration for sorting posts
    * @property {string} key - The property key to sort by
    * @property {string} direction - The sort direction ('asc' or 'desc')
@@ -83,7 +111,7 @@ const ReportedPosts = () => {
     direction: "desc",
   });
 
-  /** @type {[string|null, React.Dispatch<React.SetStateAction<string|null>>]} ID of currently active dropdown menu */
+  /** @type {[string|null, React.Dispatch&lt;React.SetStateAction&lt;string|null>>]} ID of currently active dropdown menu */
   const [activeDropdown, setActiveDropdown] = useState(null);
 
   /**
@@ -91,7 +119,7 @@ const ReportedPosts = () => {
    *
    * @async
    * @function fetchReportedPosts
-   * @returns {Promise<void>}
+   * @returns {Promise&lt;void>}
    */
   useEffect(() => {
     const fetchReportedPosts = async () => {
@@ -110,7 +138,7 @@ const ReportedPosts = () => {
 
         const result = await response.json();
 
-        if (result.status === "success" && Array.isArray(result.data)) {
+        if (result.status === "success" &amp;&amp; Array.isArray(result.data)) {
           // Transform the API data to match our component's expected format
           const transformedData = result.data.map((dataitem) => ({
             id: dataitem.report._id,
@@ -124,13 +152,13 @@ const ReportedPosts = () => {
                 ? `${dataitem.reportedUser.firstName || ""} ${
                     dataitem.reportedUser.lastName || ""
                   }`.trim() || "Unknown User"
-                : dataitem.reportedPost && dataitem.reportedPost.userId
+                : dataitem.reportedPost &amp;&amp; dataitem.reportedPost.userId
                 ? `${dataitem.reportedPost.userId.firstName || ""} ${
                     dataitem.reportedPost.userId.lastName || ""
                   }`.trim() || "Unknown User"
                 : "Unknown User",
               avatar:
-                dataitem.reportedPost && dataitem.reportedPost.userId
+                dataitem.reportedPost &amp;&amp; dataitem.reportedPost.userId
                   ? dataitem.reportedPost.userId.profilePicture ||
                     "/api/placeholder/40/40"
                   : dataitem.reportedUser
@@ -213,20 +241,20 @@ const ReportedPosts = () => {
       const search = searchTerm.toLowerCase();
       result = result.filter(
         (post) =>
-          (post.postContent &&
+          (post.postContent &amp;&amp;
             post.postContent.toLowerCase().includes(search)) ||
-          (post.postAuthor.name &&
+          (post.postAuthor.name &amp;&amp;
             post.postAuthor.name.toLowerCase().includes(search)) ||
-          (post.reporter.name &&
+          (post.reporter.name &amp;&amp;
             post.reporter.name.toLowerCase().includes(search)) ||
-          (post.reason && post.reason.toLowerCase().includes(search)) ||
-          (post.details && post.details.toLowerCase().includes(search))
+          (post.reason &amp;&amp; post.reason.toLowerCase().includes(search)) ||
+          (post.details &amp;&amp; post.details.toLowerCase().includes(search))
       );
     }
 
     // Apply sorting
     // result.sort((a, b) => {
-    //   if (a[sortConfig.key] < b[sortConfig.key]) {
+    //   if (a[sortConfig.key] &lt; b[sortConfig.key]) {
     //     return sortConfig.direction === "asc" ? -1 : 1;
     //   }
     //   if (a[sortConfig.key] > b[sortConfig.key]) {
@@ -247,7 +275,7 @@ const ReportedPosts = () => {
    */
   const handleSort = (key) => {
     let direction = "asc";
-    if (sortConfig.key === key && sortConfig.direction === "asc") {
+    if (sortConfig.key === key &amp;&amp; sortConfig.direction === "asc") {
       direction = "desc";
     }
     setSortConfig({ key, direction });
@@ -260,7 +288,7 @@ const ReportedPosts = () => {
    * @function handleStatusChange
    * @param {string} postId - The ID of the report to update
    * @param {string} newStatus - The new status to set ('actioned', 'dismissed', 'pending')
-   * @returns {Promise<void>}
+   * @returns {Promise&lt;void>}
    */
   const handleStatusChange = async (postId, newStatus) => {
     setIsLoading(true);
@@ -325,27 +353,27 @@ const ReportedPosts = () => {
     switch (status) {
       case "pending":
         return (
-          <span className="px-2 py-1 text-xs font-medium bg-yellow-50 text-yellow-700 border border-yellow-200 rounded-full flex items-center">
-            <Clock className="mr-1 h-3 w-3" /> Pending
-          </span>
+          &lt;span className="px-2 py-1 text-xs font-medium bg-yellow-50 text-yellow-700 border border-yellow-200 rounded-full flex items-center">
+            &lt;Clock className="mr-1 h-3 w-3" /> Pending
+          &lt;/span>
         );
       case "actioned":
         return (
-          <span className="px-2 py-1 text-xs font-medium bg-green-50 text-green-700 border border-green-200 rounded-full flex items-center">
-            <CheckCircle className="mr-1 h-3 w-3" /> Actioned
-          </span>
+          &lt;span className="px-2 py-1 text-xs font-medium bg-green-50 text-green-700 border border-green-200 rounded-full flex items-center">
+            &lt;CheckCircle className="mr-1 h-3 w-3" /> Actioned
+          &lt;/span>
         );
       case "dismissed":
         return (
-          <span className="px-2 py-1 text-xs font-medium bg-gray-50 text-gray-700 border border-gray-200 rounded-full flex items-center">
-            <XCircle className="mr-1 h-3 w-3" /> Dismissed
-          </span>
+          &lt;span className="px-2 py-1 text-xs font-medium bg-gray-50 text-gray-700 border border-gray-200 rounded-full flex items-center">
+            &lt;XCircle className="mr-1 h-3 w-3" /> Dismissed
+          &lt;/span>
         );
       default:
         return (
-          <span className="px-2 py-1 text-xs font-medium bg-gray-50 text-gray-700 border border-gray-200 rounded-full">
+          &lt;span className="px-2 py-1 text-xs font-medium bg-gray-50 text-gray-700 border border-gray-200 rounded-full">
             {status}
-          </span>
+          &lt;/span>
         );
     }
   };
@@ -371,37 +399,37 @@ const ReportedPosts = () => {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    &lt;div className="bg-gray-50 min-h-screen">
       {/* Content */}
-      <div className="max-w-6xl mx-auto">
-        <div className="bg-gray-50">
-          <div className="px-6 py-5 border-b border-gray-200">
-            <h1 className="text-xl font-medium text-gray-900">
+      &lt;div className="max-w-6xl mx-auto">
+        &lt;div className="bg-gray-50">
+          &lt;div className="px-6 py-5 border-b border-gray-200">
+            &lt;h1 className="text-xl font-medium text-gray-900">
               Reported Content
-            </h1>
-            <p className="mt-1 text-sm text-gray-500">
+            &lt;/h1>
+            &lt;p className="mt-1 text-sm text-gray-500">
               Review and moderate content that has been flagged by users
-            </p>
-          </div>
+            &lt;/p>
+          &lt;/div>
 
           {/* Filters and search */}
-          <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="relative flex-1">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Search className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
+          &lt;div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+            &lt;div className="flex flex-col md:flex-row gap-4">
+              &lt;div className="relative flex-1">
+                &lt;div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  &lt;Search className="h-5 w-5 text-gray-400" />
+                &lt;/div>
+                &lt;input
                   type="text"
                   className="pl-10 block w-full rounded-md border border-gray-300 py-2 text-sm placeholder-gray-500 focus:outline-none focus:ring-[#0a66c2] focus:border-[#0a66c2]"
                   placeholder="Search reported content..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
-              </div>
+              &lt;/div>
 
-              <div className="inline-flex rounded-md shadow-sm">
-                <button
+              &lt;div className="inline-flex rounded-md shadow-sm">
+                &lt;button
                   type="button"
                   className={`inline-flex items-center px-4 py-2 text-sm font-medium rounded-l-md border ${
                     statusFilter === "all"
@@ -411,8 +439,8 @@ const ReportedPosts = () => {
                   onClick={() => setStatusFilter("all")}
                 >
                   All
-                </button>
-                <button
+                &lt;/button>
+                &lt;button
                   type="button"
                   className={`inline-flex items-center px-4 py-2 text-sm font-medium border-t border-b border-r ${
                     statusFilter === "pending"
@@ -422,8 +450,8 @@ const ReportedPosts = () => {
                   onClick={() => setStatusFilter("pending")}
                 >
                   Pending
-                </button>
-                <button
+                &lt;/button>
+                &lt;button
                   type="button"
                   className={`inline-flex items-center px-4 py-2 text-sm font-medium border-t border-b border-r ${
                     statusFilter === "actioned"
@@ -433,8 +461,8 @@ const ReportedPosts = () => {
                   onClick={() => setStatusFilter("actioned")}
                 >
                   Actioned
-                </button>
-                <button
+                &lt;/button>
+                &lt;button
                   type="button"
                   className={`inline-flex items-center px-4 py-2 text-sm font-medium rounded-r-md border-t border-b border-r ${
                     statusFilter === "dismissed"
@@ -444,140 +472,140 @@ const ReportedPosts = () => {
                   onClick={() => setStatusFilter("dismissed")}
                 >
                   Dismissed
-                </button>
-              </div>
-            </div>
+                &lt;/button>
+              &lt;/div>
+            &lt;/div>
 
             {/* Results count */}
-            <div className="mt-4 text-sm text-gray-500">
+            &lt;div className="mt-4 text-sm text-gray-500">
               Showing {filteredPosts.length} of {reportedPosts.length} reports
-            </div>
-          </div>
+            &lt;/div>
+          &lt;/div>
 
           {/* Error state */}
-          {error && !isLoading && (
-            <div className="py-16 flex flex-col items-center justify-center">
-              <div className="rounded-full bg-red-100 p-4">
-                <AlertTriangle className="h-8 w-8 text-red-500" />
-              </div>
-              <h3 className="mt-4 text-lg font-medium text-gray-900">
+          {error &amp;&amp; !isLoading &amp;&amp; (
+            &lt;div className="py-16 flex flex-col items-center justify-center">
+              &lt;div className="rounded-full bg-red-100 p-4">
+                &lt;AlertTriangle className="h-8 w-8 text-red-500" />
+              &lt;/div>
+              &lt;h3 className="mt-4 text-lg font-medium text-gray-900">
                 Error loading reports
-              </h3>
-              <p className="mt-1 text-sm text-gray-500 max-w-sm text-center">
+              &lt;/h3>
+              &lt;p className="mt-1 text-sm text-gray-500 max-w-sm text-center">
                 {error}
-              </p>
-              <button
+              &lt;/p>
+              &lt;button
                 className="mt-4 px-4 py-2 bg-[#0a66c2] text-white rounded-md"
                 onClick={() => window.location.reload()}
               >
                 Try Again
-              </button>
-            </div>
+              &lt;/button>
+            &lt;/div>
           )}
 
           {/* Loading state */}
-          {isLoading && (
-            <div className="py-16 flex justify-center items-center">
-              <div className="w-12 h-12 border-4 border-[#0a66c2] border-t-transparent rounded-full animate-spin"></div>
-            </div>
+          {isLoading &amp;&amp; (
+            &lt;div className="py-16 flex justify-center items-center">
+              &lt;div className="w-12 h-12 border-4 border-[#0a66c2] border-t-transparent rounded-full animate-spin">&lt;/div>
+            &lt;/div>
           )}
 
           {/* Empty state */}
-          {!isLoading && !error && filteredPosts.length === 0 && (
-            <div className="py-16 flex flex-col items-center justify-center">
-              <div className="rounded-full bg-gray-100 p-4">
-                <AlertTriangle className="h-8 w-8 text-gray-400" />
-              </div>
-              <h3 className="mt-4 text-lg font-medium text-gray-900">
+          {!isLoading &amp;&amp; !error &amp;&amp; filteredPosts.length === 0 &amp;&amp; (
+            &lt;div className="py-16 flex flex-col items-center justify-center">
+              &lt;div className="rounded-full bg-gray-100 p-4">
+                &lt;AlertTriangle className="h-8 w-8 text-gray-400" />
+              &lt;/div>
+              &lt;h3 className="mt-4 text-lg font-medium text-gray-900">
                 No reported content found
-              </h3>
-              <p className="mt-1 text-sm text-gray-500 max-w-sm text-center">
+              &lt;/h3>
+              &lt;p className="mt-1 text-sm text-gray-500 max-w-sm text-center">
                 Try adjusting your search or filter to find what you're looking
                 for.
-              </p>
-            </div>
+              &lt;/p>
+            &lt;/div>
           )}
 
           {/* Reports list */}
-          {!isLoading && !error && filteredPosts.length > 0 && (
-            <div className="overflow-y-auto">
-              <ul className="divide-y divide-gray-200">
+          {!isLoading &amp;&amp; !error &amp;&amp; filteredPosts.length > 0 &amp;&amp; (
+            &lt;div className="overflow-y-auto">
+              &lt;ul className="divide-y divide-gray-200">
                 {filteredPosts.map((post) => (
-                  <li key={post.id} className="px-6 py-4 hover:bg-[#f3f9ff]">
-                    <div className="flex flex-col md:flex-row md:items-start gap-4">
+                  &lt;li key={post.id} className="px-6 py-4 hover:bg-[#f3f9ff]">
+                    &lt;div className="flex flex-col md:flex-row md:items-start gap-4">
                       {/* Post content */}
-                      <div className="flex-1">
-                        <div className="flex items-start">
-                          <img
+                      &lt;div className="flex-1">
+                        &lt;div className="flex items-start">
+                          &lt;img
                             src={post.postAuthor.avatar}
                             alt=""
                             className="h-12 w-12 rounded-full border border-gray-200"
                           />
-                          <div className="ml-3">
-                            <div className="flex items-center">
-                              <p className="text-sm font-medium text-gray-900">
+                          &lt;div className="ml-3">
+                            &lt;div className="flex items-center">
+                              &lt;p className="text-sm font-medium text-gray-900">
                                 {post.postAuthor.name}
-                              </p>
-                              <span className="mx-1 text-gray-500">•</span>
-                              <p className="text-xs text-gray-500">
+                              &lt;/p>
+                              &lt;span className="mx-1 text-gray-500">•&lt;/span>
+                              &lt;p className="text-xs text-gray-500">
                                 {formatDate(post.reportedAt)}
-                              </p>
-                            </div>
-                            <p className="text-xs text-gray-500">
+                              &lt;/p>
+                            &lt;/div>
+                            &lt;p className="text-xs text-gray-500">
                               {post.postAuthor.position}
-                            </p>
-                            <p className="mt-2 text-sm text-gray-700">
+                            &lt;/p>
+                            &lt;p className="mt-2 text-sm text-gray-700">
                               {post.postContent ||
                                 "No content preview available"}
-                            </p>
-                            {post.moderatedAt && (
-                              <p className="mt-1 text-xs text-gray-500">
+                            &lt;/p>
+                            {post.moderatedAt &amp;&amp; (
+                              &lt;p className="mt-1 text-xs text-gray-500">
                                 Last moderated: {formatDate(post.moderatedAt)}
-                              </p>
+                              &lt;/p>
                             )}
-                          </div>
-                        </div>
-                      </div>
+                          &lt;/div>
+                        &lt;/div>
+                      &lt;/div>
 
                       {/* Report details */}
-                      <div className="bg-gray-50 rounded-lg p-4 md:w-64">
-                        <div className="flex items-center justify-between mb-3">
-                          <h4 className="text-xs font-medium text-gray-500 uppercase">
+                      &lt;div className="bg-gray-50 rounded-lg p-4 md:w-64">
+                        &lt;div className="flex items-center justify-between mb-3">
+                          &lt;h4 className="text-xs font-medium text-gray-500 uppercase">
                             Report Details
-                          </h4>
+                          &lt;/h4>
                           {getStatusBadge(post.status)}
-                        </div>
+                        &lt;/div>
 
-                        <div className="mb-3">
-                          <h5 className="text-xs font-medium text-gray-500">
+                        &lt;div className="mb-3">
+                          &lt;h5 className="text-xs font-medium text-gray-500">
                             Reported By
-                          </h5>
-                          <div className="flex items-center mt-1">
-                            <img
+                          &lt;/h5>
+                          &lt;div className="flex items-center mt-1">
+                            &lt;img
                               src={post.reporter.avatar}
                               alt=""
                               className="h-6 w-6 rounded-full border border-gray-200"
                             />
-                            <span className="ml-2 text-sm font-medium text-gray-900">
+                            &lt;span className="ml-2 text-sm font-medium text-gray-900">
                               {post.reporter.name}
-                            </span>
-                          </div>
-                        </div>
+                            &lt;/span>
+                          &lt;/div>
+                        &lt;/div>
 
-                        <div className="mb-3">
-                          <h5 className="text-xs font-medium text-gray-500">
+                        &lt;div className="mb-3">
+                          &lt;h5 className="text-xs font-medium text-gray-500">
                             Reason
-                          </h5>
-                          <p className="text-sm font-medium text-gray-900 mt-1">
+                          &lt;/h5>
+                          &lt;p className="text-sm font-medium text-gray-900 mt-1">
                             {post.reason}
-                          </p>
-                          <p className="text-xs text-gray-500 mt-1">
+                          &lt;/p>
+                          &lt;p className="text-xs text-gray-500 mt-1">
                             {post.details}
-                          </p>
-                        </div>
+                          &lt;/p>
+                        &lt;/div>
 
-                        <div className="flex flex-col gap-2 mt-4">
-                          <button
+                        &lt;div className="flex flex-col gap-2 mt-4">
+                          &lt;button
                             onClick={() =>
                               handleStatusChange(post.id, "actioned")
                             }
@@ -585,8 +613,8 @@ const ReportedPosts = () => {
                             disabled={isLoading}
                           >
                             Take Action
-                          </button>
-                          <button
+                          &lt;/button>
+                          &lt;button
                             onClick={() =>
                               handleStatusChange(post.id, "dismissed")
                             }
@@ -594,19 +622,42 @@ const ReportedPosts = () => {
                             disabled={isLoading}
                           >
                             Dismiss
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </li>
+                          &lt;/button>
+                        &lt;/div>
+                      &lt;/div>
+                    &lt;/div>
+                  &lt;/li>
                 ))}
-              </ul>
-            </div>
+              &lt;/ul>
+            &lt;/div>
           )}
-        </div>
-      </div>
-    </div>
+        &lt;/div>
+      &lt;/div>
+    &lt;/div>
   );
 };
 
 export default ReportedPosts;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#JobListing">JobListing</a></li><li><a href="global.html#MetricCard">MetricCard</a></li><li><a href="global.html#ReportedPosts">ReportedPosts</a></li><li><a href="global.html#SubscriptionPlans">SubscriptionPlans</a></li><li><a href="global.html#SubscriptionStatus">SubscriptionStatus</a></li><li><a href="global.html#fetchAnalytics">fetchAnalytics</a></li><li><a href="global.html#fetchJobs">fetchJobs</a></li><li><a href="global.html#fetchReportedPosts">fetchReportedPosts</a></li><li><a href="global.html#fetchSubscriptionDetails">fetchSubscriptionDetails</a></li><li><a href="global.html#filterAndSearchPosts">filterAndSearchPosts</a></li><li><a href="global.html#formatDate">formatDate</a></li><li><a href="global.html#getStatusBadge">getStatusBadge</a></li><li><a href="global.html#getStatusColor">getStatusColor</a></li><li><a href="global.html#handleApprove">handleApprove</a></li><li><a href="global.html#handleCancelSubscription">handleCancelSubscription</a></li><li><a href="global.html#handleDelete">handleDelete</a></li><li><a href="global.html#handleReject">handleReject</a></li><li><a href="global.html#handleResolveFlag">handleResolveFlag</a></li><li><a href="global.html#handleSort">handleSort</a></li><li><a href="global.html#handleStatusChange">handleStatusChange</a></li><li><a href="global.html#handleSubscribe">handleSubscribe</a></li><li><a href="global.html#renderFeature">renderFeature</a></li><li><a href="global.html#simulateRealTimeUpdates">simulateRealTimeUpdates</a></li><li><a href="global.html#useEffect">useEffect</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Thu May 08 2025 23:54:44 GMT+0300 (Eastern European Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

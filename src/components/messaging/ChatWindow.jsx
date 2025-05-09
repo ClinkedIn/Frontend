@@ -222,10 +222,10 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
         msgs.push(messageData);
 
         // Mark message as read by current user 
-        if (messageData.senderId !== currentUser._id && !messageData.readBy?.includes(currentUser._id)) {
+        if (messageData.senderId !== currentUser._id && messageData.readBy[currentUser._id]===false) {
            const messageDocRef = doc(messagesColRef, messageDoc.id);
            updateDoc(messageDocRef, {
-             readBy: arrayUnion(currentUser._id)
+            [`readBy.${currentUser._id}`]: true,
            }).catch(err => console.error("Error updating read receipt:", err));
         }
       });
@@ -314,6 +314,8 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
         return;
     }
 
+
+
     // --- Corrected collection name to 'users' ---
     const userDocRef = doc(db, 'user', currentUser._id); // Reference to the CURRENT user's document
     const currentlyBlocked = isBlockedByYou;
@@ -324,21 +326,19 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
       if (currentlyBlocked) {
         // --- UNBLOCK ---
         // Use updateDoc, assuming doc exists if unblocking
-        await updateDoc(userDocRef, {
-          blockedUsers: arrayRemove(otherUserId)
-        });
+        const unblockResponse = await axios.patch(`${BASE_URL}/messages/unblock-user/${otherUserId}`,{
+          withCredentials:true
+        })
+        console.log(unblockResponse.data)
         setIsBlockedByYou(false); // Optimistic UI update
         console.log(`User ${otherUserId} unblocked successfully.`);
       } else {
         // --- BLOCK ---
         // Use setDoc with merge: true to create or update
-        await setDoc(userDocRef,
-          {
-            // Data to set/merge: only the blockedUsers field modification
-            blockedUsers: arrayUnion(otherUserId)
-          },
-          { merge: true } // Option to merge data
-        );
+        const blockResponse = await axios.patch(`${BASE_URL}/messages/block-user/${otherUserId}`,{
+          withCredentials:true
+        })
+        console.log(blockResponse.data)
         setIsBlockedByYou(true); // Optimistic UI update
         console.log(`User ${otherUserId} blocked successfully (doc created if needed).`);
       }

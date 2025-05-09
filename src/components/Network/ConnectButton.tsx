@@ -1,3 +1,33 @@
+/**
+ * Button component for sending, accepting, or managing connection requests.
+ * 
+ * @component
+ * @param {Object} props - Component props
+ * @param {string} props.userId - ID of the user to connect with
+ * @param {string} [props.connectionStatus] - Current connection status ('connected', 'pending', 'none')
+ * @param {Function} [props.onConnectionChange] - Callback function triggered after connection status changes
+ * @param {string} [props.size='md'] - Button size ('sm', 'md', 'lg')
+ * @param {string} [props.variant='primary'] - Visual variant ('primary', 'outline', 'text')
+ * 
+ * @returns {JSX.Element} Rendered connect button with appropriate state
+ * 
+ * @example
+ * <ConnectButton 
+ *   userId="1234567890"
+ *   connectionStatus="none"
+ *   onConnectionChange={(status) => console.log(`New status: ${status}`)}
+ * />
+ * 
+ * @description
+ * This button component:
+ * - Handles different connection states (Connect, Pending, Connected, etc.)
+ * - Sends connection requests to the API
+ * - Provides visual feedback based on connection status
+ * - Supports optional custom message with connection requests
+ * - Includes dropdown options for managing existing connections
+ * - Adapts to different UI sizes and variants for flexible placement
+ */
+
 import React, { useState } from "react";
 import axios from "axios";
 import { BASE_URL } from "../../constants";
@@ -27,25 +57,30 @@ const ConnectButton: React.FC<ConnectButtonProps> = ({
     connectionRequestPrivacy === "mutual" && !isMutual;
 
   const handleConnect = async () => {
-    if (state !== "connect" || loading || isRestrictedByPrivacy) return;
+  if (state !== "connect" || loading || isRestrictedByPrivacy) return;
 
-    setLoading(true);
-    try {
-      const response = await axios.post(
-        `${BASE_URL}/user/connections/request/${userId}`
-      );
-      console.log("Connection request sent:", response.data);
+  setLoading(true);
+  try {
+    // Send connection request
+    const response = await axios.post(
+      `${BASE_URL}/user/connections/request/${userId}`
+    );
+    console.log("Connection request sent:", response.data);
 
-      setState("pending");
-      if (onConnect) onConnect();
-    } catch (error:any) {
-      console.error("Error sending connection request:", error.response || error.message);
-      setErrorMessage("Failed to send connection request");
-      setState("error");
-    } finally {
-      setLoading(false);
-    }
-  };
+    // Automatically follow the user
+    await axios.post(`${BASE_URL}/user/follow/${userId}`);
+    console.log("User followed");
+
+    setState("pending");
+    if (onConnect) onConnect();
+  } catch (error: any) {
+    console.error("Error sending connection/follow request:", error.response || error.message);
+    setErrorMessage("Failed to send connection request");
+    setState("error");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const getButtonText = () => {
     if (isRestrictedByPrivacy) return "Connect (Restricted)";

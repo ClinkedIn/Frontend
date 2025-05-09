@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { BASE_URL } from "../constants";
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; // Add this import
+
 
 // Dummy user data - replace with real user data from your auth system
 const dummyUser = {
@@ -21,6 +23,12 @@ const Leftside = ({ onShowSavedPosts, onShowAllPosts }) => {
   const [isShowMore, setIsShowMore] = useState(false);
 
   const [activeView, setActiveView] = useState('feed'); // 'feed' or 'saved'
+  const navigate = useNavigate(); // Add this hook
+
+  //function to handle profile click
+  const handleProfileClick = () => {
+    navigate('/profile');
+  };
 
   const handleSavedPostsClick = () => {
     if (activeView === 'feed') {
@@ -58,7 +66,11 @@ const Leftside = ({ onShowSavedPosts, onShowAllPosts }) => {
         {/* Background and Profile Section */}
         <div className="border-b border-[rgba(0,0,0,0.08)] pb-2">
           <div className="bg-[url('/Images/card-bg.svg')] bg-center bg-cover h-[54px] -m-1"></div>
-          <a href="/in/saifwael" className="block relative">  
+          <button 
+            onClick={handleProfileClick}
+            className="block relative w-full text-center cursor-pointer"
+            style={{ background: 'none', border: 'none' }}
+          >  
             <img
               src={userData.user.profilePicture}
               className="w-[72px] h-[72px] box-border bg-white border-2 border-white -mt-9 mb-3 mx-auto rounded-full"
@@ -67,7 +79,7 @@ const Leftside = ({ onShowSavedPosts, onShowAllPosts }) => {
             <div className="text-base leading-6 text-[rgba(0,0,0,0.9)] font-semibold hover:underline">
               {displayName}
             </div>
-          </a>
+          </button>
           <p className="text-xs text-[rgba(0,0,0,0.6)] px-3 mt-1">
             {headline}
           </p>

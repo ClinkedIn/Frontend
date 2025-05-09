@@ -1,3 +1,23 @@
+/**
+ * Network component that displays user connections and connection suggestions.
+ * 
+ * @component
+ * @returns {JSX.Element} Rendered network page
+ * 
+ * @example
+ * <Network />
+ * 
+ * @description
+ * The Network component provides an interface for:
+ * - Viewing current connections
+ * - Discovering new connection suggestions (People You May Know)
+ * - Managing connection requests (pending, sent)
+ * - Viewing connections by industry, company, or education
+ * - Filtering and searching within connections
+ * - Expanding connection networks through mutual connections
+ * - Managing connection privacy settings
+ */
+
 import React, { useState } from "react";
 import axios from "axios";
 import { BASE_URL } from "../../constants";

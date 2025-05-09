@@ -78,11 +78,12 @@ const ConversationList = ({
                 {!loadingConversations &&  conversations.map(convo => {
                     const otherUserId = convo.participants.find(id => id !== currentUser._id);
                     let otherUserInfo = {}; 
-                    if(otherUserId && convo.fullName?.[otherUserId] && convo.profilePicture?.[otherUserId]) {
+                    let profile = convo.profilePicture?.[otherUserId] || null
+                    if(otherUserId && convo.fullName?.[otherUserId] ) {
                          otherUserInfo = {
                             _id : otherUserId,
                             fullName: convo.fullName[otherUserId] ,
-                            profilePicture: convo.profilePicture[otherUserId]
+                            profilePicture: profile
                         }
                     }
                     

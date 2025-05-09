@@ -1,4 +1,32 @@
-/*
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: AdminPanel/JobListing.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: AdminPanel/JobListing.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*
               login using :
               send this body :
               {
@@ -58,19 +86,19 @@ const API_BASE_URL = BASE_URL;
  * @returns {JSX.Element} The JobListing component
  */
 const JobListing = () => {
-  /** @type {[Job[], React.Dispatch<React.SetStateAction<Job[]>>]} All jobs fetched from API */
+  /** @type {[Job[], React.Dispatch&lt;React.SetStateAction&lt;Job[]>>]} All jobs fetched from API */
   const [jobs, setJobs] = useState([]);
 
-  /** @type {[boolean, React.Dispatch<React.SetStateAction<boolean>>]} Loading state indicator */
+  /** @type {[boolean, React.Dispatch&lt;React.SetStateAction&lt;boolean>>]} Loading state indicator */
   const [isLoading, setIsLoading] = useState(true);
 
-  /** @type {[string|null, React.Dispatch<React.SetStateAction<string|null>>]} Error message if API request fails */
+  /** @type {[string|null, React.Dispatch&lt;React.SetStateAction&lt;string|null>>]} Error message if API request fails */
   const [error, setError] = useState(null);
 
-  /** @type {[string, React.Dispatch<React.SetStateAction<string>>]} Current active tab ('all', 'active', 'pending', 'inactive', 'flagged') */
+  /** @type {[string, React.Dispatch&lt;React.SetStateAction&lt;string>>]} Current active tab ('all', 'active', 'pending', 'inactive', 'flagged') */
   const [activeTab, setActiveTab] = useState("all");
 
-  /** @type {[string, React.Dispatch<React.SetStateAction<string>>]} Current search term for filtering jobs */
+  /** @type {[string, React.Dispatch&lt;React.SetStateAction&lt;string>>]} Current search term for filtering jobs */
   const [searchTerm, setSearchTerm] = useState("");
 
   /**
@@ -78,7 +106,7 @@ const JobListing = () => {
    *
    * @async
    * @function fetchJobs
-   * @returns {Promise<void>}
+   * @returns {Promise&lt;void>}
    */
   useEffect(() => {
     const fetchJobs = async () => {
@@ -104,8 +132,8 @@ const JobListing = () => {
             company: job.companyId, // You might want to fetch company names separately
             location: job.jobLocation,
             status:
-              job.applicants.length > 0 &&
-              job.accepted.length === 0 &&
+              job.applicants.length > 0 &amp;&amp;
+              job.accepted.length === 0 &amp;&amp;
               job.rejected.length === 0
                 ? "pending"
                 : job.accepted.length > 0
@@ -114,11 +142,11 @@ const JobListing = () => {
                 ? "inactive"
                 : "pending",
             flagged: job.screeningQuestions.some(
-              (q) => q.mustHave && job.autoRejectMustHave
+              (q) => q.mustHave &amp;&amp; job.autoRejectMustHave
             ),
             date: new Date(job.createdAt).toISOString().split("T")[0],
             reason: job.screeningQuestions.some(
-              (q) => q.mustHave && job.autoRejectMustHave
+              (q) => q.mustHave &amp;&amp; job.autoRejectMustHave
             )
               ? "Must-have screening questions with auto-reject"
               : "",
@@ -153,22 +181,22 @@ const JobListing = () => {
   const filteredJobs = jobs.filter((job) => {
     const matchesSearch =
       job.title.toLowerCase().includes(searchTerm.toLowerCase().trimEnd()) ||
-      (job.industry &&
+      (job.industry &amp;&amp;
         job.industry
           .toLowerCase()
           .includes(searchTerm.toLowerCase().trimEnd())) ||
-      (job.location &&
+      (job.location &amp;&amp;
         job.location
           .toLowerCase()
           .includes(searchTerm.toLowerCase().trimEnd()));
 
     if (activeTab === "all") return matchesSearch;
-    if (activeTab === "active") return job.status === "active" && matchesSearch;
+    if (activeTab === "active") return job.status === "active" &amp;&amp; matchesSearch;
     if (activeTab === "pending")
-      return job.status === "pending" && matchesSearch;
+      return job.status === "pending" &amp;&amp; matchesSearch;
     if (activeTab === "inactive")
-      return job.status === "inactive" && matchesSearch;
-    if (activeTab === "flagged") return job.flagged && matchesSearch;
+      return job.status === "inactive" &amp;&amp; matchesSearch;
+    if (activeTab === "flagged") return job.flagged &amp;&amp; matchesSearch;
 
     return matchesSearch;
   });
@@ -179,7 +207,7 @@ const JobListing = () => {
    * @async
    * @function handleApprove
    * @param {string} id - ID of the job to approve
-   * @returns {Promise<void>}
+   * @returns {Promise&lt;void>}
    */
   const handleApprove = async (id) => {
     try {
@@ -213,7 +241,7 @@ const JobListing = () => {
    * @async
    * @function handleReject
    * @param {string} id - ID of the job to reject
-   * @returns {Promise<void>}
+   * @returns {Promise&lt;void>}
    */
   const handleReject = async (id) => {
     try {
@@ -246,7 +274,7 @@ const JobListing = () => {
    * @async
    * @function handleDelete
    * @param {string} id - ID of the job to delete
-   * @returns {Promise<void>}
+   * @returns {Promise&lt;void>}
    */
   const handleDelete = async (id) => {
     try {
@@ -274,7 +302,7 @@ const JobListing = () => {
    * @async
    * @function handleResolveFlag
    * @param {string} id - ID of the job to resolve flag for
-   * @returns {Promise<void>}
+   * @returns {Promise&lt;void>}
    */
   const handleResolveFlag = async (id) => {
     try {
@@ -301,100 +329,100 @@ const JobListing = () => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
+      &lt;div className="flex justify-center items-center h-screen">
+        &lt;div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500">&lt;/div>
+      &lt;/div>
     );
   }
 
   if (error) {
     return (
-      <div
+      &lt;div
         className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative m-4"
         role="alert"
       >
-        <strong className="font-bold">Error! </strong>
-        <span className="block sm:inline">Failed to load jobs: {error}</span>
-      </div>
+        &lt;strong className="font-bold">Error! &lt;/strong>
+        &lt;span className="block sm:inline">Failed to load jobs: {error}&lt;/span>
+      &lt;/div>
     );
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen">
-      <div className="max-w-7xl mx-auto p-4">
-        <header className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-          <p className="text-gray-600">
+    &lt;div className="bg-gray-50 min-h-screen">
+      &lt;div className="max-w-7xl mx-auto p-4">
+        &lt;header className="mb-6">
+          &lt;h1 className="text-2xl font-bold text-gray-900">Admin Dashboard&lt;/h1>
+          &lt;p className="text-gray-600">
             Manage job postings and flagged listings
-          </p>
-        </header>
+          &lt;/p>
+        &lt;/header>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white p-4 rounded-lg shadow">
-            <div className="flex items-center">
-              <div className="bg-green-100 p-3 rounded-full">
-                <CheckCircle className="h-6 w-6 text-green-600" />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-500">Active Jobs</p>
-                <p className="text-lg font-semibold text-gray-900">
+        &lt;div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          &lt;div className="bg-white p-4 rounded-lg shadow">
+            &lt;div className="flex items-center">
+              &lt;div className="bg-green-100 p-3 rounded-full">
+                &lt;CheckCircle className="h-6 w-6 text-green-600" />
+              &lt;/div>
+              &lt;div className="ml-3">
+                &lt;p className="text-sm font-medium text-gray-500">Active Jobs&lt;/p>
+                &lt;p className="text-lg font-semibold text-gray-900">
                   {jobs.filter((job) => job.status === "active").length}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow">
-            <div className="flex items-center">
-              <div className="bg-yellow-100 p-3 rounded-full">
-                <AlarmClock className="h-6 w-6 text-yellow-600" />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-500">
+                &lt;/p>
+              &lt;/div>
+            &lt;/div>
+          &lt;/div>
+          &lt;div className="bg-white p-4 rounded-lg shadow">
+            &lt;div className="flex items-center">
+              &lt;div className="bg-yellow-100 p-3 rounded-full">
+                &lt;AlarmClock className="h-6 w-6 text-yellow-600" />
+              &lt;/div>
+              &lt;div className="ml-3">
+                &lt;p className="text-sm font-medium text-gray-500">
                   Pending Review
-                </p>
-                <p className="text-lg font-semibold text-gray-900">
+                &lt;/p>
+                &lt;p className="text-lg font-semibold text-gray-900">
                   {jobs.filter((job) => job.status === "pending").length}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow">
-            <div className="flex items-center">
-              <div className="bg-gray-100 p-3 rounded-full">
-                <Archive className="h-6 w-6 text-gray-600" />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-500">
+                &lt;/p>
+              &lt;/div>
+            &lt;/div>
+          &lt;/div>
+          &lt;div className="bg-white p-4 rounded-lg shadow">
+            &lt;div className="flex items-center">
+              &lt;div className="bg-gray-100 p-3 rounded-full">
+                &lt;Archive className="h-6 w-6 text-gray-600" />
+              &lt;/div>
+              &lt;div className="ml-3">
+                &lt;p className="text-sm font-medium text-gray-500">
                   Inactive Jobs
-                </p>
-                <p className="text-lg font-semibold text-gray-900">
+                &lt;/p>
+                &lt;p className="text-lg font-semibold text-gray-900">
                   {jobs.filter((job) => job.status === "inactive").length}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow">
-            <div className="flex items-center">
-              <div className="bg-red-100 p-3 rounded-full">
-                <Flag className="h-6 w-6 text-red-600" />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-500">
+                &lt;/p>
+              &lt;/div>
+            &lt;/div>
+          &lt;/div>
+          &lt;div className="bg-white p-4 rounded-lg shadow">
+            &lt;div className="flex items-center">
+              &lt;div className="bg-red-100 p-3 rounded-full">
+                &lt;Flag className="h-6 w-6 text-red-600" />
+              &lt;/div>
+              &lt;div className="ml-3">
+                &lt;p className="text-sm font-medium text-gray-500">
                   Flagged Jobs
-                </p>
-                <p className="text-lg font-semibold text-gray-900">
+                &lt;/p>
+                &lt;p className="text-lg font-semibold text-gray-900">
                   {jobs.filter((job) => job.flagged).length}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+                &lt;/p>
+              &lt;/div>
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
 
         {/* Navigation Tabs */}
-        <div className="mb-6 border-b border-gray-200">
-          <nav className="flex space-x-8">
-            <button
+        &lt;div className="mb-6 border-b border-gray-200">
+          &lt;nav className="flex space-x-8">
+            &lt;button
               onClick={() => setActiveTab("all")}
               className={`py-4 px-1 font-medium text-sm ${
                 activeTab === "all"
@@ -403,8 +431,8 @@ const JobListing = () => {
               }`}
             >
               All Listings
-            </button>
-            <button
+            &lt;/button>
+            &lt;button
               onClick={() => setActiveTab("active")}
               className={`py-4 px-1 font-medium text-sm ${
                 activeTab === "active"
@@ -413,8 +441,8 @@ const JobListing = () => {
               }`}
             >
               Active
-            </button>
-            <button
+            &lt;/button>
+            &lt;button
               onClick={() => setActiveTab("pending")}
               className={`py-4 px-1 font-medium text-sm ${
                 activeTab === "pending"
@@ -423,8 +451,8 @@ const JobListing = () => {
               }`}
             >
               Pending Review
-            </button>
-            <button
+            &lt;/button>
+            &lt;button
               onClick={() => setActiveTab("inactive")}
               className={`py-4 px-1 font-medium text-sm ${
                 activeTab === "inactive"
@@ -433,8 +461,8 @@ const JobListing = () => {
               }`}
             >
               Inactive
-            </button>
-            <button
+            &lt;/button>
+            &lt;button
               onClick={() => setActiveTab("flagged")}
               className={`py-4 px-1 font-medium text-sm ${
                 activeTab === "flagged"
@@ -443,90 +471,90 @@ const JobListing = () => {
               }`}
             >
               Flagged{" "}
-              <span className="ml-1 px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-600">
+              &lt;span className="ml-1 px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-600">
                 {jobs.filter((job) => job.flagged).length}
-              </span>
-            </button>
-          </nav>
-        </div>
+              &lt;/span>
+            &lt;/button>
+          &lt;/nav>
+        &lt;/div>
 
         {/* Search and Controls */}
-        <div className="mb-6 flex justify-between">
-          <div className="relative w-1/2">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-4 w-4 text-gray-400" />
-            </div>
-            <input
+        &lt;div className="mb-6 flex justify-between">
+          &lt;div className="relative w-1/2">
+            &lt;div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              &lt;Search className="h-4 w-4 text-gray-400" />
+            &lt;/div>
+            &lt;input
               type="text"
               className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
               placeholder="Search jobs..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-          </div>
-        </div>
+          &lt;/div>
+        &lt;/div>
 
         {/* Jobs Table */}
-        <div className="bg-white shadow overflow-hidden border-b border-gray-200 rounded-lg mb-6">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th
+        &lt;div className="bg-white shadow overflow-hidden border-b border-gray-200 rounded-lg mb-6">
+          &lt;table className="min-w-full divide-y divide-gray-200">
+            &lt;thead className="bg-gray-50">
+              &lt;tr>
+                &lt;th
                   scope="col"
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
                   Job Details
-                </th>
-                <th
+                &lt;/th>
+                &lt;th
                   scope="col"
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
                   Status
-                </th>
-                <th
+                &lt;/th>
+                &lt;th
                   scope="col"
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
                   Date Posted
-                </th>
-                <th
+                &lt;/th>
+                &lt;th
                   scope="col"
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
                   Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+                &lt;/th>
+              &lt;/tr>
+            &lt;/thead>
+            &lt;tbody className="bg-white divide-y divide-gray-200">
               {filteredJobs.length > 0 ? (
                 filteredJobs.map((job) => (
-                  <tr key={job.id} className={job.flagged ? "bg-red-50" : ""}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-start">
-                        <div>
-                          <div className="text-sm font-medium text-gray-900 flex items-center">
+                  &lt;tr key={job.id} className={job.flagged ? "bg-red-50" : ""}>
+                    &lt;td className="px-6 py-4 whitespace-nowrap">
+                      &lt;div className="flex items-start">
+                        &lt;div>
+                          &lt;div className="text-sm font-medium text-gray-900 flex items-center">
                             {job.title}
-                            {job.flagged && (
-                              <Flag className="h-4 w-4 ml-2 text-red-500" />
+                            {job.flagged &amp;&amp; (
+                              &lt;Flag className="h-4 w-4 ml-2 text-red-500" />
                             )}
-                          </div>
-                          <div className="text-sm font-medium text-gray-500">
+                          &lt;/div>
+                          &lt;div className="text-sm font-medium text-gray-500">
                             {job.company ? job.company.name : "Unknown Company"}
-                          </div>
-                          <div className="text-sm text-gray-500">
+                          &lt;/div>
+                          &lt;div className="text-sm text-gray-500">
                             {job.industry} • {job.location} •{" "}
                             {job.workplaceType} • {job.jobType}
-                          </div>
-                          {job.flagged && (
-                            <div className="mt-1 text-xs text-red-600 bg-red-50 px-2 py-1 rounded">
+                          &lt;/div>
+                          {job.flagged &amp;&amp; (
+                            &lt;div className="mt-1 text-xs text-red-600 bg-red-50 px-2 py-1 rounded">
                               Flagged: {job.reason}
-                            </div>
+                            &lt;/div>
                           )}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
+                        &lt;/div>
+                      &lt;/div>
+                    &lt;/td>
+                    &lt;td className="px-6 py-4 whitespace-nowrap">
+                      &lt;span
                         className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
                         ${
                           job.status === "active"
@@ -541,47 +569,70 @@ const JobListing = () => {
                           : job.status === "pending"
                           ? "Pending Review"
                           : "Inactive"}
-                      </span>
-                      <div className="text-xs text-gray-500 mt-1">
+                      &lt;/span>
+                      &lt;div className="text-xs text-gray-500 mt-1">
                         {job.applicantCount} applicants • {job.acceptedCount}{" "}
                         accepted • {job.rejectedCount} rejected
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <div className="flex items-center">
-                        <AlarmClock className="h-4 w-4 mr-1 text-gray-400" />
+                      &lt;/div>
+                    &lt;/td>
+                    &lt;td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      &lt;div className="flex items-center">
+                        &lt;AlarmClock className="h-4 w-4 mr-1 text-gray-400" />
                         {job.date}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex space-x-3">
-                        <button
+                      &lt;/div>
+                    &lt;/td>
+                    &lt;td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      &lt;div className="flex space-x-3">
+                        &lt;button
                           onClick={() => handleDelete(job.id)}
                           className="text-red-600 hover:text-red-900"
                           title="Delete"
                         >
-                          <Trash2 className="h-5 w-5" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
+                          &lt;Trash2 className="h-5 w-5" />
+                        &lt;/button>
+                      &lt;/div>
+                    &lt;/td>
+                  &lt;/tr>
                 ))
               ) : (
-                <tr>
-                  <td
+                &lt;tr>
+                  &lt;td
                     colSpan="4"
                     className="px-6 py-4 text-center text-sm text-gray-500"
                   >
                     No jobs found matching your criteria.
-                  </td>
-                </tr>
+                  &lt;/td>
+                &lt;/tr>
               )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+            &lt;/tbody>
+          &lt;/table>
+        &lt;/div>
+      &lt;/div>
+    &lt;/div>
   );
 };
 
 export default JobListing;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#JobListing">JobListing</a></li><li><a href="global.html#MetricCard">MetricCard</a></li><li><a href="global.html#ReportedPosts">ReportedPosts</a></li><li><a href="global.html#SubscriptionPlans">SubscriptionPlans</a></li><li><a href="global.html#SubscriptionStatus">SubscriptionStatus</a></li><li><a href="global.html#fetchAnalytics">fetchAnalytics</a></li><li><a href="global.html#fetchJobs">fetchJobs</a></li><li><a href="global.html#fetchReportedPosts">fetchReportedPosts</a></li><li><a href="global.html#fetchSubscriptionDetails">fetchSubscriptionDetails</a></li><li><a href="global.html#filterAndSearchPosts">filterAndSearchPosts</a></li><li><a href="global.html#formatDate">formatDate</a></li><li><a href="global.html#getStatusBadge">getStatusBadge</a></li><li><a href="global.html#getStatusColor">getStatusColor</a></li><li><a href="global.html#handleApprove">handleApprove</a></li><li><a href="global.html#handleCancelSubscription">handleCancelSubscription</a></li><li><a href="global.html#handleDelete">handleDelete</a></li><li><a href="global.html#handleReject">handleReject</a></li><li><a href="global.html#handleResolveFlag">handleResolveFlag</a></li><li><a href="global.html#handleSort">handleSort</a></li><li><a href="global.html#handleStatusChange">handleStatusChange</a></li><li><a href="global.html#handleSubscribe">handleSubscribe</a></li><li><a href="global.html#renderFeature">renderFeature</a></li><li><a href="global.html#simulateRealTimeUpdates">simulateRealTimeUpdates</a></li><li><a href="global.html#useEffect">useEffect</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Thu May 08 2025 23:54:44 GMT+0300 (Eastern European Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
