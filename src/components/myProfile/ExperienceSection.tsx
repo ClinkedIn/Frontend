@@ -262,7 +262,7 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
 
     let toMonth = "",
       toYear = "";
-    if (experience.toDate) {
+    if (experience.toDate && experience.toDate !== "null") {
       const toDateInfo = extractDateInfo(experience.toDate);
       toMonth = toDateInfo.month;
       toYear = toDateInfo.year;
@@ -563,12 +563,13 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
           {experiences.map((exp, idx) => {
             const startYear = exp.fromDate
               ? new Date(exp.fromDate).getFullYear().toString()
-              : "";
+              : "Unknown";
+
             const endYear = exp.currentlyWorking
               ? "Present"
-              : exp.toDate
+              : exp.toDate && exp.toDate !== "null"
               ? new Date(exp.toDate).getFullYear().toString()
-              : "Present";
+              : "";
 
             return (
               <div key={idx} className="flex items-start group">

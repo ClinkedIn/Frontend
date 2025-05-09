@@ -122,6 +122,9 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
     companyName: "",
     fromMonth: "January",
     fromYear: new Date().getFullYear().toString(),
+    toMonth: "December",
+    toYear: new Date().getFullYear().toString(),
+    currentlyWorking: false,
     employmentType: "",
     location: "",
     description: "",
@@ -282,11 +285,12 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
 
   const prepareDataForSubmission = () => {
     const fromDate = formatDateForApi(formData.fromMonth, formData.fromYear);
-
-    let toDate;
-    if (!formData.currentlyWorking && formData.toMonth && formData.toYear) {
-      toDate = formatDateForApi(formData.toMonth, formData.toYear);
-    }
+    const toDate = formData.currentlyWorking
+      ? null
+      : formatDateForApi(
+          formData.toMonth || "December",
+          formData.toYear || new Date().getFullYear().toString()
+        );
 
     return {
       index: formData.index,
@@ -299,7 +303,6 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
       location: formData.location,
       locationType: formData.locationType,
       description: formData.description,
-      // media: formData.media || undefined,
       foundVia: formData.foundVia,
     };
   };

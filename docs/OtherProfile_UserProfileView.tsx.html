@@ -1,0 +1,1924 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> OtherProfile/UserProfileView.tsx</title>
+
+  <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="./build/entry.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,400,700|Inconsolata,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <link type="text/css" rel="stylesheet" href="https://jmblog.github.io/color-themes-for-google-code-prettify/themes/tomorrow-night.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/app.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/iframe.css">
+  <link type="text/css" rel="stylesheet" href="">
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+  
+</head>
+
+
+
+<body class="layout small-header">
+    <div id="stickyNavbarOverlay"></div>
+    
+
+<div class="top-nav">
+    <div class="inner">
+        <a id="hamburger" role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+        <div class="logo">
+            
+             
+                <a href="index.html">
+                    <h1 class="navbar-item">LinkedIn Clone Documentation</h1>
+                </a>
+            
+        </div>
+        <div class="menu">
+            
+            <div class="navigation">
+                <a
+                    href="index.html"
+                    class="link"
+                >
+                    Documentation
+                </a>
+                
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <div id="main">
+        <div
+            class="sidebar "
+            id="sidebarNav"
+        >
+            
+            <nav>
+                
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Interfaces</h3><ul><li><a href="Education.html">Education</a></li><li><a href="EducationFormData.html">EducationFormData</a></li><li><a href="ExperienceFormData.html">ExperienceFormData</a></li><li><a href="MessageState.html">MessageState</a></li><li><a href="Skill.html">Skill</a></li><li><a href="UserActivity.html">UserActivity</a></li><li><a href="UserProfile.html">UserProfile</a></li><li><a href="WorkExperience.html">WorkExperience</a></li></ul><h3>Global</h3><ul><li><a href="global.html#UserProfileView">UserProfileView</a></li></ul></div>
+                
+            </nav>
+        </div>
+        <div class="core" id="main-content-wrapper">
+            <div class="content">
+                <header class="page-title">
+                    <p>Source</p>
+                    <h1>OtherProfile/UserProfileView.tsx</h1>
+                </header>
+                
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import axios from "axios";
+import NavBar from "../../../components/UpperNavBar";
+import adPhoto from "../../../../public/Images/linkedInAd.png";
+import Form from "../../../components/myProfile/Forms/Form";
+import SkillEndorsements from "../../../components/myProfile/SkillEndorsements";
+import ConnectButton from "../../../components/Network/ConnectButton";
+import { useNavigate } from "react-router-dom";
+import BlockButton from "../../../components/Network/BlockButton";
+
+/**
+ * Interface representing a user's skill with optional endorsements
+ * @interface Skill
+ */
+interface Skill {
+  /** The name of the skill */
+  skillName: string;
+  /** Array of users who have endorsed this skill */
+  endorsements?: Array&lt;{
+    /** Unique identifier of the endorsing user */
+    userId: string;
+    /** Full name of the endorsing user */
+    name: string;
+    /** URL to the endorsing user's profile picture */
+    profilePicture?: string;
+    /** First name of the endorsing user */
+    firstName?: string;
+    /** Last name of the endorsing user */
+    lastName?: string;
+    /** Professional headline of the endorsing user */
+    headline?: string;
+  }>;
+}
+
+/**
+ * Interface representing a work experience entry
+ * @interface WorkExperience
+ */
+interface WorkExperience {
+  /** Job title/position held */
+  jobTitle: string;
+  /** Name of the company */
+  companyName: string;
+  /** Geographic location of the job */
+  location: string;
+  /** Start date of employment */
+  fromDate: string;
+  /** End date of employment, undefined if current position */
+  toDate?: string;
+  /** Job description */
+  description: string;
+  /** Skills utilized in this position */
+  skills?: string[];
+}
+
+/**
+ * Interface representing an education entry
+ * @interface Education
+ */
+interface Education {
+  /** Name of the educational institution */
+  school: string;
+  /** Type of degree earned */
+  degree: string;
+  /** Area of study */
+  fieldOfStudy?: string;
+  /** Start date of education */
+  startDate: string;
+  /** End date of education, undefined if ongoing */
+  endDate?: string;
+  /** Academic grade or GPA */
+  grade?: string;
+  /** Additional details about the education */
+  description?: string;
+}
+
+/**
+ * Interface representing a user's profile information
+ * @interface UserProfile
+ */
+interface UserProfile {
+  /** Unique identifier for the user */
+  _id: string;
+  /** User's first name */
+  firstName: string;
+  /** User's last name */
+  lastName: string;
+  /** URL to the user's profile picture */
+  profilePicture?: string;
+  /** URL to the user's cover image */
+  coverPicture?: string;
+  /** User's most recent job title */
+  lastJobTitle?: string;
+  /** User's geographic location */
+  location?: string;
+  /** User's biographical information */
+  about?: {
+    /** Textual description about the user */
+    description?: string;
+    /** List of user's skills */
+    skills?: string[];
+  };
+  /** User's email address */
+  email?: string;
+  /** URL to the user's resume */
+  resume?: string;
+  /** User's industry or professional field */
+  industry?: string;
+  /** List of users/entities following this user */
+  followers?: Array&lt;{ entity: string; entityType: string; followedAt: string }>;
+  /** List of user IDs that this user is connected to */
+  connectionList?: string[];
+  /** User's work history */
+  workExperience?: WorkExperience[];
+  /** User's educational background */
+  education?: Education[];
+  /** User's professional skills with endorsements */
+  skills?: Skill[];
+  /** Languages the user knows */
+  languages?: Array&lt;{ language: string; proficiency: string }>;
+  /** User's privacy configuration */
+  privacySettings?: {
+    /** Who can view the user's profile */
+    profileVisibility: "public" | "connections" | "private";
+  };
+  /** Profile visibility setting */
+  profilePrivacySettings?: "public" | "connectionsOnly" | "private";
+  /** User's phone number */
+  phone?: string;
+  /** User's website URL */
+  website?: string;
+}
+
+/**
+ * Interface for notification message state
+ * @interface MessageState
+ */
+interface MessageState {
+  /** Message content text */
+  content: string;
+  /** Type of message (success or error) */
+  type: "success" | "error";
+  /** Whether the message is visible */
+  visible: boolean;
+}
+
+/**
+ * Interface representing a user activity item
+ * @interface UserActivity
+ */
+interface UserActivity {
+  /** Unique identifier for the post */
+  postId: string;
+  /** ID of the user who created the post */
+  userId: string;
+  /** First name of the post creator */
+  firstName: string;
+  /** Last name of the post creator */
+  lastName: string;
+  /** Professional headline of the post creator */
+  headline: string;
+  /** URL to the post creator's profile picture */
+  profilePicture?: string;
+  /** Main text content of the post */
+  postDescription: string;
+  /** Array of media URLs attached to the post */
+  attachments?: string[];
+  /** Counts of different reaction types */
+  impressionCounts: {
+    like: number;
+    support: number;
+    celebrate: number;
+    love: number;
+    insightful: number;
+    funny: number;
+    total: number;
+  };
+  /** Number of comments on the post */
+  commentCount: number;
+  /** Number of times the post has been reshared */
+  repostCount: number;
+  /** Post creation timestamp */
+  createdAt: string;
+  /** Post last update timestamp */
+  updatedAt: string;
+  /** Users tagged in the post */
+  taggedUsers?: Array&lt;{
+    userId: string;
+    userType: string;
+    firstName: string;
+    lastName: string;
+    companyName: string | null;
+  }>;
+  /** Visibility setting for the post */
+  whoCanSee: string;
+  /** Comment permission setting */
+  whoCanComment: string;
+  /** Whether this is a reshared post */
+  isRepost: boolean;
+  /** Whether the current user has saved this post */
+  isSaved: boolean;
+  /** Type of activity (post, comment, repost) */
+  activityType: string;
+  /** Timestamp of the activity */
+  activityDate: string;
+  /** If repost, ID of the original post */
+  repostId?: string;
+  /** If repost, ID of the user who reshared */
+  reposterId?: string;
+  /** If repost, first name of the resharing user */
+  reposterFirstName?: string;
+  /** If repost, last name of the resharing user */
+  reposterLastName?: string;
+  /** If repost, profile picture of the resharing user */
+  reposterProfilePicture?: string;
+  /** If repost, headline of the resharing user */
+  reposterHeadline?: string;
+  /** If repost, additional comment by the resharing user */
+  repostDescription?: string;
+  /** If repost, timestamp of the reshare */
+  repostDate?: string;
+  /** If comment activity, ID of the comment */
+  commentId?: string;
+  /** If comment activity, text of the comment */
+  commentText?: string;
+  /** If comment activity, timestamp of the comment */
+  commentDate?: string;
+  /** If comment activity, ID of the commenting user */
+  commenterId?: string;
+  /** If comment activity, first name of the commenting user */
+  commenterFirstName?: string;
+  /** If comment activity, last name of the commenting user */
+  commenterLastName?: string;
+  /** If comment activity, profile picture of the commenting user */
+  commenterProfilePicture?: string;
+  /** If comment activity, headline of the commenting user */
+  commenterHeadline?: string;
+}
+
+/**
+ * Component for displaying another user's profile
+ * @returns {JSX.Element} The rendered UserProfileView component
+ */
+const UserProfileView = () => {
+  const { userId } = useParams&lt;{ userId: string }>();
+  const [userProfile, setUserProfile] = useState&lt;UserProfile | null>(null);
+  const [userActivity, setUserActivity] = useState&lt;UserActivity[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [activityLoading, setActivityLoading] = useState(true);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [message, setMessage] = useState&lt;MessageState | null>(null);
+  const [currentUserId, setCurrentUserId] = useState&lt;string | null>(null);
+  const [canViewProfile, setCanViewProfile] = useState(true); // Default to true, API will tell us if we can't view
+  const [endorsingSkill, setEndorsingSkill] = useState&lt;string | null>(null);
+  const [activeSkill, setActiveSkill] = useState&lt;Skill | null>(null);
+  const [privacyNotice, setPrivacyNotice] = useState("");
+  const [error, setError] = useState("");
+  const [notFound, setNotFound] = useState(false);
+  const navigate = useNavigate();
+  const [basicProfile, setBasicProfile] = useState(null);
+  const [basicProfileLoading, setBasicProfileLoading] = useState(true);
+  const [connectionState, setConnectionState] = useState&lt;
+    "connect" | "pending" | "connected"
+  >("connect");
+  const [canSendRequest, setCanSendRequest] = useState&lt;boolean>(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const [confirmRemoveId, setConfirmRemoveId] = useState&lt;string | null>(null);
+  const [confirmRemoveName, setConfirmRemoveName] = useState&lt;string>("");
+
+  /**
+   * Opens the endorsement modal for a specific skill
+   * @param {Skill} skill - The skill to display endorsements for
+   */
+  const openEndorsementModal = (skill: Skill) => {
+    setActiveSkill(skill);
+  };
+
+  /**
+   * Closes the endorsement modal
+   */
+  const closeEndorsementModal = () => {
+    setActiveSkill(null);
+  };
+
+  const api = axios.create({
+    baseURL: import.meta.env.VITE_API_BASE_URL,
+    withCredentials: true,
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error.response?.status === 401) {
+        window.location.href = "/login";
+      }
+      return Promise.reject(error);
+    }
+  );
+
+  /**
+   * Displays a notification message to the user
+   * @param {string} content - The message text to display
+   * @param {"success" | "error"} type - The type of message
+   */
+  const showMessage = (content: string, type: "success" | "error") => {
+    setMessage({
+      content,
+      type,
+      visible: true,
+    });
+  };
+
+  /**
+   * Fetches user activity data with optional filtering
+   * @param {string} filter - Filter to apply to the activity feed (default: "all")
+   * @returns {Promise&lt;void>}
+   */
+  const fetchUserActivity = async (filter = "all") => {
+    if (!userId || !canViewProfile) return;
+
+    try {
+      setActivityLoading(true);
+      const response = await api.get(
+        `/user/${userId}/user-activity?filter=${filter}&amp;page=1&amp;limit=5`
+      );
+
+      if (response.data &amp;&amp; response.data.posts) {
+        setUserActivity(response.data.posts);
+      }
+    } catch (error) {
+      console.error("Error fetching user activity:", error);
+    } finally {
+      setActivityLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const fetchPendingRequests = async () => {
+      try {
+        const response = await api.get(`/user/connections/MyBendingRequests`);
+        const pendingIds = response.data.pendingRequests;
+        if (pendingIds.includes(userId)) {
+          setConnectionState("pending");
+        }
+      } catch (error) {
+        console.error("Error fetching pending requests", error);
+      }
+    };
+
+    if (userId) {
+      fetchPendingRequests();
+    }
+  }, [userId]);
+
+  /**
+   * Navigates to the messaging page with the selected user
+   * @param {string} userId - The ID of the user to message
+   * @param {string} name - The name of the user to message
+   * @param {string} profilePicture - The profile picture URL of the user to message
+   */
+  const handleMessageApplicant = (
+    userId: string,
+    name: string,
+    profilePicture: string
+  ) => {
+    navigate("/messaging", {
+      state: { _id: userId, fullName: name, profilePicture },
+    });
+  };
+
+  /**
+   * Handles following or unfollowing the profile user
+   * @returns {Promise&lt;void>}
+   */
+  const handleFollow = async () => {
+    if (isProcessing || !userProfile || !currentUserId) return;
+
+    try {
+      setIsProcessing(true);
+
+      if (isFollowing) {
+        setIsFollowing(false);
+        await api.delete(`/user/follow/${userId}`);
+        showMessage("Unfollowed successfully", "success");
+
+        if (userProfile.followers) {
+          setUserProfile({
+            ...userProfile,
+            followers: userProfile.followers.filter(
+              (f) => f.entity !== currentUserId
+            ),
+          });
+        }
+      } else {
+        setIsFollowing(true);
+        await api.post(`/user/follow/${userId}`, {});
+        showMessage("Followed successfully", "success");
+
+        const newFollower = {
+          entity: currentUserId,
+          entityType: "user",
+          followedAt: new Date().toISOString(),
+        };
+
+        setUserProfile({
+          ...userProfile,
+          followers: [...(userProfile.followers || []), newFollower],
+        });
+      }
+    } catch (error) {
+      setIsFollowing(!isFollowing);
+
+      if (error.response?.status === 400) {
+        showMessage(
+          error.response.data.message || "Something went wrong",
+          "error"
+        );
+      } else {
+        console.error("Follow/unfollow error:", error);
+        showMessage("Action failed. Please try again.", "error");
+      }
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  /**
+   * Formats a date string to a localized date format
+   * @param {string} dateString - The date string to format
+   * @returns {string} The formatted date string
+   */
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return "";
+    return new Date(dateString).toLocaleDateString();
+  };
+
+  const uniqueUserActivity = userActivity.filter(
+    (item, index, self) =>
+      index === self.findIndex((a) => a.postId === item.postId)
+  );
+
+  /**
+   * Component to display a single endorser of a skill
+   * @param {Object} props - Component props
+   * @param {Skill["endorsements"][0]} props.endorser - The endorser data
+   * @returns {JSX.Element} The rendered EndorserCard component
+   */
+  const EndorserCard = ({
+    endorser,
+  }: {
+    endorser: Skill["endorsements"][0];
+  }) => {
+    const [userDetails, setUserDetails] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+      const fetchUserDetails = async () => {
+        try {
+          const response = await api.get(`/user/${endorser.userId}`);
+          setUserDetails(response.data?.user);
+        } catch (error) {
+          console.error("Error fetching user details:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchUserDetails();
+    }, [endorser.userId]);
+
+    return (
+      &lt;li className="flex items-center gap-3 p-3 bg-gray-50 rounded-md">
+        &lt;div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
+          {endorser.profilePicture || userDetails?.profilePicture ? (
+            &lt;img
+              src={endorser.profilePicture || userDetails?.profilePicture}
+              alt={`${endorser.name || userDetails?.firstName}'s profile`}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            &lt;div className="w-full h-full flex items-center justify-center">
+              &lt;svg
+                className="w-6 h-6 text-gray-400"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                &lt;path
+                  fillRule="evenodd"
+                  d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                  clipRule="evenodd"
+                >&lt;/path>
+              &lt;/svg>
+            &lt;/div>
+          )}
+        &lt;/div>
+
+        &lt;div className="flex-1 min-w-0">
+          &lt;h3 className="text-gray-800 font-medium truncate">
+            {endorser.firstName &amp;&amp; endorser.lastName
+              ? `${endorser.firstName} ${endorser.lastName}`
+              : endorser.name ||
+                userDetails?.firstName ||
+                `User ${endorser.userId.substring(0, 4)}`}
+          &lt;/h3>
+
+          {loading ? (
+            &lt;div className="h-4 bg-gray-200 rounded w-3/4 mt-1 animate-pulse">&lt;/div>
+          ) : (
+            &lt;p className="text-gray-500 text-sm truncate">
+              {userDetails?.lastJobTitle ||
+                userDetails?.headline ||
+                endorser.headline ||
+                "LinkedIn Member"}
+            &lt;/p>
+          )}
+        &lt;/div>
+      &lt;/li>
+    );
+  };
+
+  /**
+   * Handles endorsing or removing endorsement for a skill
+   * @param {string} skillName - The name of the skill to endorse/unendorse
+   * @returns {Promise&lt;void>}
+   */
+  const handleEndorseSkill = async (skillName: string) => {
+    if (isProcessing || !userProfile || !currentUserId) return;
+
+    try {
+      setIsProcessing(true);
+      setEndorsingSkill(skillName);
+
+      const skill = userProfile.skills.find((s) => s.skillName === skillName);
+      const hasEndorsed = hasUserEndorsedSkill(skill);
+
+      if (hasEndorsed) {
+        await api.delete(
+          `/user/skills/endorsements/remove-endorsement/${encodeURIComponent(
+            skillName
+          )}`,
+          { data: { skillOwnerId: userProfile._id } }
+        );
+
+        setUserProfile((prev) => ({
+          ...prev,
+          skills: prev.skills.map((s) =>
+            s.skillName === skillName
+              ? {
+                  ...s,
+                  endorsements: (s.endorsements || []).filter(
+                    (e) => e.userId !== currentUserId
+                  ),
+                }
+              : s
+          ),
+        }));
+      } else {
+        await api.post("/user/skills/endorsements/add-endorsement", {
+          skillOwnerId: userProfile._id,
+          skillName,
+        });
+
+        const response = await api.get("/user/me");
+        const currentUser = response.data.user;
+
+        setUserProfile((prev) => ({
+          ...prev,
+          skills: prev.skills.map((s) =>
+            s.skillName === skillName
+              ? {
+                  ...s,
+                  endorsements: [
+                    ...(s.endorsements || []),
+                    {
+                      userId: currentUserId,
+                      name: `${currentUser.firstName} ${currentUser.lastName}`,
+                      firstName: currentUser.firstName,
+                      lastName: currentUser.lastName,
+                      profilePicture: currentUser.profilePicture,
+                      headline:
+                        currentUser.headline || currentUser.lastJobTitle,
+                    },
+                  ],
+                }
+              : s
+          ),
+        }));
+      }
+    } catch (error) {
+      console.error("Error updating endorsement:", error);
+      showMessage(
+        error.response?.data?.message || "Failed to update endorsement",
+        "error"
+      );
+    } finally {
+      setEndorsingSkill(null);
+      setIsProcessing(false);
+    }
+  };
+
+  /**
+   * Checks if the current user has endorsed a specific skill
+   * @param {Skill} skill - The skill to check for endorsement
+   * @returns {boolean} True if the current user has endorsed the skill, false otherwise
+   */
+  const hasUserEndorsedSkill = (skill: Skill): boolean => {
+    if (!currentUserId || !skill?.endorsements) return false;
+    return skill.endorsements.some((e) => e.userId === currentUserId);
+  };
+
+  /**
+   * Formats a date as a relative time string (e.g., "5 minutes ago")
+   * @param {string} dateString - The date string to format
+   * @returns {string} The formatted relative time string
+   */
+  const formatRelativeTime = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (diffInSeconds &lt; 60) {
+      return `${diffInSeconds} seconds ago`;
+    }
+
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    if (diffInMinutes &lt; 60) {
+      return `${diffInMinutes} minute${diffInMinutes === 1 ? "" : "s"} ago`;
+    }
+
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours &lt; 24) {
+      return `${diffInHours} hour${diffInHours === 1 ? "" : "s"} ago`;
+    }
+
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays &lt; 7) {
+      return `${diffInDays} day${diffInDays === 1 ? "" : "s"} ago`;
+    }
+
+    const diffInWeeks = Math.floor(diffInDays / 7);
+    if (diffInWeeks &lt; 4) {
+      return `${diffInWeeks} week${diffInWeeks === 1 ? "" : "s"} ago`;
+    }
+
+    const diffInMonths = Math.floor(diffInDays / 30);
+    if (diffInMonths &lt; 12) {
+      return `${diffInMonths} month${diffInMonths === 1 ? "" : "s"} ago`;
+    }
+
+    const diffInYears = Math.floor(diffInDays / 365);
+    return `${diffInYears} year${diffInYears === 1 ? "" : "s"} ago`;
+  };
+
+  /**
+   * Fetches basic profile information for a user
+   * @param {string} userId - The ID of the user to fetch information for
+   * @returns {Promise&lt;Object|null>} Basic profile data or null if not found
+   */
+  const fetchBasicProfileInfo = async (userId: string) => {
+    try {
+      const response = await api.get(`/user/${userId}`);
+      return response.data?.user || null;
+    } catch (error: any) {
+      console.error("Error fetching basic profile info:", error);
+
+      if (error.response?.status === 403) {
+        if (error.response.data?.user) {
+          return error.response.data.user;
+        }
+
+        if (error.response.data?.message) {
+          return {
+            _id: userId,
+            firstName: "LinkedIn",
+            lastName: "User",
+            profilePrivacySettings: "private",
+          };
+        }
+      }
+
+      return {
+        _id: userId,
+        firstName: "LinkedIn",
+        lastName: "User",
+        profilePrivacySettings: "private",
+      };
+    }
+  };
+  useEffect(() => {
+    const getBasicInfo = async () => {
+      if (!userId || canViewProfile) return;
+
+      setBasicProfileLoading(true);
+      const basicInfo = await fetchBasicProfileInfo(userId);
+      setBasicProfile(basicInfo);
+      setBasicProfileLoading(false);
+    };
+
+    getBasicInfo();
+  }, [userId, canViewProfile]);
+
+  useEffect(() => {
+    const init = async () => {
+      if (!userId) return;
+
+      try {
+        setLoading(true);
+        const currentUserResponse = await api.get("/user/me");
+        if (!currentUserResponse.data || !currentUserResponse.data.user) {
+          return;
+        }
+        const currentId = currentUserResponse.data.user._id;
+        setCurrentUserId(currentId);
+
+        try {
+          const response = await api.get(`/user/${userId}`);
+          const user = response.data?.user;
+
+          if (!user) throw new Error("User not found");
+
+          const isFollowing = user.followers?.some(
+            (f) => f.entity === currentId
+          );
+          setIsFollowing(!!isFollowing);
+          setUserProfile(user);
+          setCanViewProfile(true);
+          setPrivacyNotice("");
+
+          const isCurrentUserConnected =
+            user.connectionList?.includes(currentId);
+
+          if (user.profilePrivacySettings === "private") {
+            setCanViewProfile(false);
+            setPrivacyNotice("This profile is private. Connect to view more.");
+          } else if (
+            user.profilePrivacySettings === "connectionsOnly" &amp;&amp;
+            !isCurrentUserConnected
+          ) {
+            setCanViewProfile(false);
+            setPrivacyNotice(
+              "Only connections can view this profile. Send a connection request to see more."
+            );
+          } else {
+            await fetchUserActivity();
+          }
+        } catch (error: any) {
+          if (error.response?.status === 404) {
+            setNotFound(true);
+            setError("User not found.");
+          } else if (error.response?.status === 403) {
+            setCanViewProfile(false);
+
+            if (error.response.data?.message) {
+              setPrivacyNotice(error.response.data.message);
+            } else {
+              setPrivacyNotice("This profile has restricted access.");
+            }
+
+            const basicInfo = await fetchBasicProfileInfo(userId);
+            if (basicInfo) {
+              setBasicProfile(basicInfo);
+            }
+          } else {
+            setError("Failed to load user profile.");
+          }
+        }
+      } catch (error) {
+        console.error("Error during initialization:", error);
+        showMessage("Failed to load user profile", "error");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    init();
+  }, [userId]);
+
+  useEffect(() => {
+    const fetchBasicInfo = async () => {
+      if (!userId || canViewProfile) return;
+
+      setBasicProfileLoading(true);
+      const basicInfo = await fetchBasicProfileInfo(userId);
+      setBasicProfile(basicInfo);
+      setBasicProfileLoading(false);
+    };
+
+    fetchBasicInfo();
+  }, [userId, canViewProfile]);
+
+  useEffect(() => {
+    const initializeProfile = async () => {
+      if (!userId) return;
+
+      try {
+        setLoading(true);
+        const currentUserResponse = await api.get("/user/me");
+        const currentId = currentUserResponse.data?.user?._id;
+        setCurrentUserId(currentId);
+
+        const response = await api.get(`/user/${userId}`);
+        const user = response.data?.user;
+
+        if (!user) throw new Error("User not found");
+
+        setUserProfile(user);
+        setIsFollowing(user.followers?.some((f) => f.entity === currentId));
+        setCanViewProfile(true);
+        setPrivacyNotice("");
+
+        setCanSendRequest(response.data.canSendConnectionRequest);
+        const isConnected = user.connectionList?.includes(currentId);
+        if (isConnected) {
+          setConnectionState("connected");
+        } else {
+          const pendingResponse = await api.get(
+            "/user/connections/MyBendingRequests"
+          );
+          if (pendingResponse.data.pendingRequests.includes(userId)) {
+            setConnectionState("pending");
+          } else {
+            setConnectionState("connect");
+          }
+        }
+
+        if (user.profilePrivacySettings === "private") {
+          setCanViewProfile(false);
+          setPrivacyNotice("This profile is private. Connect to view more.");
+        } else if (
+          user.profilePrivacySettings === "connectionsOnly" &amp;&amp;
+          !user.connectionList?.includes(currentId)
+        ) {
+          setCanViewProfile(false);
+          setPrivacyNotice(
+            "Only connections can view this profile. Send a connection request to see more."
+          );
+        } else {
+          await fetchUserActivity();
+        }
+      } catch (error: any) {
+        if (error.response?.status === 404) {
+          setNotFound(true);
+          setError("User not found.");
+        } else if (error.response?.status === 403) {
+          setCanViewProfile(false);
+          setPrivacyNotice(
+            error.response.data?.message ||
+              "This profile has restricted access."
+          );
+          const basicInfo = await fetchBasicProfileInfo(userId);
+          setBasicProfile(basicInfo);
+        } else {
+          setError("Failed to load user profile.");
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeProfile();
+  }, [userId]);
+
+  /**
+   * Checks if a skill has been endorsed by the current user
+   * @param {Skill} skill - The skill to check
+   * @returns {boolean} True if the skill is endorsed by the current user
+   */
+  const isSkillEndorsed = (skill: Skill): boolean => {
+    return hasUserEndorsedSkill(skill);
+  };
+
+  /**
+   * Handles removing a connection with another user
+   * @param {string} connectionId - ID of the connection to remove
+   * @returns {Promise&lt;void>}
+   */
+  const handleRemoveConnection = async (connectionId: string) => {
+    try {
+      await api.delete(`/user/connections/${connectionId}`);
+      setUserProfile((prev) =>
+        prev
+          ? {
+              ...prev,
+              connectionList: prev.connectionList?.filter(
+                (id) => id !== connectionId
+              ),
+            }
+          : null
+      );
+      setCanSendRequest(true);
+
+      showMessage("Connection removed successfully", "success");
+
+      setConnectionState("connect");
+    } catch (error) {
+      console.error("Error removing connection:", error);
+      showMessage("Failed to remove connection", "error");
+    } finally {
+      setConfirmRemoveId(null);
+      setConfirmRemoveName("");
+    }
+  };
+
+  /**
+   * Component to render the Connect button with appropriate state
+   * @returns {JSX.Element|null} The connect button component or null if cannot send request
+   */
+  const ConnectButton = () => {
+    if (!canSendRequest) return null;
+
+    const handleConnect = async () => {
+      try {
+        if (connectionState === "connected") {
+          setConfirmRemoveId(userProfile?._id);
+          setConfirmRemoveName(
+            `${userProfile?.firstName} ${userProfile?.lastName}`
+          );
+        } else {
+          await api.post(`/user/connections/request/${userId}`);
+          showMessage("Connection request sent", "success");
+        }
+      } catch (err) {
+        console.error("Connection request error:", err);
+        showMessage("Failed to update connection", "error");
+      }
+    };
+    const isDisabled = connectionState === "pending";
+
+    return (
+      &lt;button
+        onClick={handleConnect}
+        disabled={isDisabled}
+        className={`px-4 py-1.5 rounded-full text-sm font-semibold border transition-colors ${
+          connectionState === "connected"
+            ? "bg-white cursor-pointer text-[#0073b1] border-[#0073b1] border-2 px-4 py-1 rounded-full hover:bg-[#EAF4FD] hover:[border-width:2px] box-border font-medium text-sm transition-all duration-150"
+            : connectionState === "pending"
+            ? "border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed"
+            : "bg-white cursor-pointer text-[#0073b1] border-[#0073b1] border-2 px-4 py-1 rounded-full hover:bg-[#EAF4FD] hover:[border-width:2px] box-border font-medium text-sm transition-all duration-150"
+        }`}
+      >
+        {connectionState === "connected"
+          ? "Connected"
+          : connectionState === "pending"
+          ? "Pending"
+          : "Connect"}
+      &lt;/button>
+    );
+  };
+
+  /**
+   * Component to render the Follow button
+   * @returns {JSX.Element} The follow button component
+   */
+  const FollowButton = () => {
+    return (
+      &lt;button
+        onClick={handleFollow}
+        disabled={isProcessing}
+        className="bg-white cursor-pointer text-[#0073b1] border-[#0073b1] border-2 px-4 py-1 rounded-full hover:bg-[#EAF4FD] hover:[border-width:2px] box-border font-medium text-sm transition-all duration-150"
+      >
+        {isProcessing ? "Processing..." : isFollowing ? "Following" : "Follow"}
+      &lt;/button>
+    );
+  };
+
+  /**
+   * Component to render the Skills and Endorsement section
+   * @returns {JSX.Element} The skills endorsement section component
+   */
+  const SkillEndorsementSection = () => (
+    &lt;div className="bg-white shadow-sm rounded-lg overflow-hidden">
+      &lt;div className="p-6">
+        &lt;div className="flex justify-between items-center mb-4">
+          &lt;h2 className="text-xl font-semibold">Skills&lt;/h2>
+          {currentUserId === userId &amp;&amp; (
+            &lt;button className="text-gray-400 hover:text-gray-600">
+              &lt;svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                &lt;path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                />
+              &lt;/svg>
+            &lt;/button>
+          )}
+        &lt;/div>
+        {userProfile.skills &amp;&amp; userProfile.skills.length > 0 ? (
+          &lt;div className="space-y-4">
+            {userProfile.skills.map((skill, index) => (
+              &lt;div
+                key={index}
+                className="border-b border-gray-100 last:border-b-0 pb-3 last:pb-0"
+              >
+                &lt;div className="flex justify-between items-center">
+                  &lt;div>
+                    &lt;span className="font-medium">{skill.skillName}&lt;/span>
+                    &lt;SkillEndorsements
+                      skillName={skill.skillName}
+                      endorsements={skill.endorsements}
+                      onEndorse={async (skillName) => {
+                        await handleEndorseSkill(skillName);
+                        return true;
+                      }}
+                      onRemoveEndorse={async (skillName) => {
+                        await handleEndorseSkill(skillName);
+                        return true;
+                      }}
+                      currentUserId={currentUserId || ""}
+                      skillOwnerId={userProfile._id}
+                    />
+                  &lt;/div>
+                &lt;/div>
+              &lt;/div>
+            ))}
+          &lt;/div>
+        ) : (
+          &lt;p className="text-gray-500">No skills listed&lt;/p>
+        )}
+      &lt;/div>
+    &lt;/div>
+  );
+
+  /**
+   * Component to display a single activity item
+   * @param {Object} props - Component props
+   * @param {UserActivity} props.activity - The activity data to display
+   * @returns {JSX.Element} The rendered ActivityCard component
+   */
+  const ActivityCard = ({ activity }: { activity: UserActivity }) => {
+    const activityType = activity.activityType;
+
+    return (
+      &lt;div className="bg-white shadow-sm rounded-lg p-4 mb-4">
+        &lt;div className="flex items-start space-x-3">
+          &lt;div className="flex-shrink-0">
+            &lt;div className="w-12 h-12 rounded-full overflow-hidden">
+              {activity.profilePicture ? (
+                &lt;img
+                  src={activity.profilePicture}
+                  alt={`${activity.firstName}'s profile`}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                &lt;div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                  &lt;svg
+                    className="w-6 h-6 text-gray-400"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    &lt;path
+                      fillRule="evenodd"
+                      d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                      clipRule="evenodd"
+                    >&lt;/path>
+                  &lt;/svg>
+                &lt;/div>
+              )}
+            &lt;/div>
+          &lt;/div>
+
+          &lt;div className="flex-1">
+            &lt;div className="flex items-center justify-between mb-1">
+              &lt;div>
+                &lt;span className="font-medium">
+                  {activity.firstName} {activity.lastName}
+                &lt;/span>
+                {activityType === "repost" &amp;&amp; (
+                  &lt;span className="text-gray-500"> reposted this&lt;/span>
+                )}
+                {activityType === "comment" &amp;&amp; (
+                  &lt;span className="text-gray-500"> commented on a post&lt;/span>
+                )}
+                {activity.headline &amp;&amp; (
+                  &lt;p className="text-gray-500 text-sm">{activity.headline}&lt;/p>
+                )}
+              &lt;/div>
+              &lt;span className="text-gray-500 text-xs">
+                {formatRelativeTime(
+                  activity.activityDate || activity.createdAt
+                )}
+              &lt;/span>
+            &lt;/div>
+
+            &lt;div className="mt-2">
+              &lt;p className="text-gray-700">{activity.postDescription}&lt;/p>
+
+              {activity.attachments &amp;&amp; activity.attachments.length > 0 &amp;&amp; (
+                &lt;div className="mt-3">
+                  &lt;img
+                    src={activity.attachments[0]}
+                    alt="Post attachment"
+                    className="rounded-lg w-full h-auto max-h-96 object-cover"
+                  />
+                &lt;/div>
+              )}
+
+              {activityType === "comment" &amp;&amp; activity.commentText &amp;&amp; (
+                &lt;div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                  &lt;p className="text-gray-700 text-sm">
+                    {activity.commentText}
+                  &lt;/p>
+                &lt;/div>
+              )}
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+      &lt;/div>
+    );
+  };
+
+  /**
+   * Component to render the profile header
+   * @param {Object} props - Component props
+   * @param {Object} props.profile - The user profile data
+   * @param {boolean} [props.isRestricted=false] - Whether the profile has restricted view
+   * @returns {JSX.Element} The rendered ProfileHeader component
+   */
+  const ProfileHeader = ({ profile, isRestricted = false }) => {
+    return (
+      &lt;div className="bg-white shadow-sm rounded-lg overflow-hidden">
+        &lt;div className="relative">
+          &lt;div
+            className="w-full h-48 bg-gray-200 bg-cover bg-center"
+            style={{
+              backgroundImage: profile?.coverPicture
+                ? `url(${profile.coverPicture})`
+                : "none",
+            }}
+          >&lt;/div>
+
+          &lt;div className="absolute bottom-0 transform translate-y-1/2 left-8">
+            &lt;div className="w-24 h-24 rounded-full border-4 border-white overflow-hidden bg-gray-200 flex items-center justify-center">
+              {profile?.profilePicture ? (
+                &lt;img
+                  src={profile.profilePicture}
+                  alt={`${profile.firstName || "User"}'s profile`}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                &lt;svg
+                  className="w-12 h-12 text-gray-400"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  &lt;path
+                    fillRule="evenodd"
+                    d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                    clipRule="evenodd"
+                  >&lt;/path>
+                &lt;/svg>
+              )}
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+
+        &lt;div className="pt-16 px-8 flex flex-col md:flex-row md:items-center md:justify-between pb-10">
+          &lt;div>
+            &lt;h1 className="text-2xl font-bold">
+              {profile?.firstName &amp;&amp; profile?.lastName
+                ? `${profile.firstName} ${profile.lastName}`
+                : "LinkedIn User"}
+            &lt;/h1>
+
+            {profile?.lastJobTitle &amp;&amp; (
+              &lt;p className="text-gray-600">{profile.lastJobTitle}&lt;/p>
+            )}
+
+            {profile?.location &amp;&amp; (
+              &lt;p className="text-gray-500 text-sm flex items-center mt-1">
+                &lt;svg
+                  className="w-4 h-4 mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  &lt;path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                  >&lt;/path>
+                  &lt;path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                  >&lt;/path>
+                &lt;/svg>
+                {profile.location}
+              &lt;/p>
+            )}
+          &lt;/div>
+        &lt;/div>
+
+        {isRestricted &amp;&amp; privacyNotice &amp;&amp; (
+          &lt;div className="px-8 pb-6">
+            &lt;div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              &lt;p className="text-blue-800">
+                &lt;span>This profile has restricted access. &lt;/span>
+                &lt;span className="font-semibold">
+                  {privacyNotice || "Connect to view more details."}
+                &lt;/span>
+              &lt;/p>
+            &lt;/div>
+          &lt;/div>
+        )}
+      &lt;/div>
+    );
+  };
+
+  /**
+   * Renders a restricted profile view when the user cannot access full profile
+   * @description This component displays a limited view of a user profile when access is restricted due to privacy settings.
+   * It shows basic information and a privacy notice explaining why the full profile cannot be viewed.
+   * @returns {JSX.Element} The restricted profile view component
+   * @example
+   * // Usage within the component:
+   * if (!canViewProfile) {
+   *   return renderRestrictedProfile();
+   * }
+   */
+  const renderRestrictedProfile = () => {
+    if (basicProfileLoading) {
+      return (
+        &lt;>
+          &lt;NavBar />
+          &lt;div className="max-w-6xl mx-auto p-4">
+            &lt;div className="flex gap-6">
+              &lt;div className="w-full lg:w-3/4">
+                &lt;div className="animate-pulse flex flex-col space-y-4">
+                  &lt;div className="w-full h-48 bg-gray-200 rounded">&lt;/div>
+                  &lt;div className="flex items-center space-x-4">
+                    &lt;div className="rounded-full bg-gray-200 h-24 w-24">&lt;/div>
+                    &lt;div className="flex-1 space-y-2">
+                      &lt;div className="h-6 bg-gray-200 rounded w-3/4">&lt;/div>
+                      &lt;div className="h-4 bg-gray-200 rounded w-1/2">&lt;/div>
+                    &lt;/div>
+                  &lt;/div>
+                &lt;/div>
+              &lt;/div>
+            &lt;/div>
+          &lt;/div>
+        &lt;/>
+      );
+    }
+
+    return (
+      &lt;>
+        &lt;NavBar />
+        &lt;div className="max-w-6xl mx-auto p-4">
+          &lt;div className="flex gap-6">
+            &lt;div className="w-full lg:w-3/4">
+              {/* Use the ProfileHeader component */}
+              &lt;ProfileHeader profile={basicProfile} isRestricted={true} />
+            &lt;/div>
+
+            {/* Advertisement section */}
+            &lt;div className="hidden lg:block lg:w-1/4">
+              &lt;div className="shadow-sm rounded-lg overflow-hidden mt-8">
+                &lt;img
+                  src={adPhoto}
+                  alt="LinkedIn Advertisement"
+                  className="w-full h-full object-cover"
+                />
+              &lt;/div>
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+      &lt;/>
+    );
+  };
+
+  // Loading state
+  if (loading) {
+    return (
+      &lt;>
+        &lt;NavBar />
+        &lt;div className="max-w-6xl mx-auto p-4">
+          &lt;div className="flex gap-6">
+            &lt;div className="w-full lg:w-3/4">
+              &lt;div className="animate-pulse flex flex-col space-y-4">
+                &lt;div className="w-full h-48 bg-gray-200 rounded">&lt;/div>
+                &lt;div className="flex items-center space-x-4">
+                  &lt;div className="rounded-full bg-gray-200 h-24 w-24">&lt;/div>
+                  &lt;div className="flex-1 space-y-2">
+                    &lt;div className="h-6 bg-gray-200 rounded w-3/4">&lt;/div>
+                    &lt;div className="h-4 bg-gray-200 rounded w-1/2">&lt;/div>
+                  &lt;/div>
+                &lt;/div>
+                &lt;div className="space-y-2">
+                  &lt;div className="h-4 bg-gray-200 rounded">&lt;/div>
+                  &lt;div className="h-4 bg-gray-200 rounded w-5/6">&lt;/div>
+                &lt;/div>
+              &lt;/div>
+            &lt;/div>
+            &lt;div className="hidden lg:block lg:w-1/4">
+              &lt;div className="bg-gray-100 rounded-lg h-64 animate-pulse">&lt;/div>
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+      &lt;/>
+    );
+  }
+
+  if (notFound) {
+    return (
+      &lt;>
+        &lt;NavBar />
+        &lt;div className="max-w-6xl mx-auto p-4 mt-8">
+          &lt;div className="bg-white shadow-sm rounded-lg p-10 text-center">
+            &lt;svg
+              className="w-16 h-16 text-gray-400 mx-auto mb-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              &lt;path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              >&lt;/path>
+            &lt;/svg>
+            &lt;h2 className="text-xl font-semibold text-gray-700 mb-2">
+              User Not Found
+            &lt;/h2>
+            &lt;p className="text-gray-500">
+              The user profile you are looking for doesn't exist or has been
+              removed.
+            &lt;/p>
+          &lt;/div>
+        &lt;/div>
+      &lt;/>
+    );
+  }
+
+  if (!canViewProfile) {
+    return renderRestrictedProfile();
+  }
+
+  return (
+    &lt;>
+      &lt;NavBar />
+      &lt;div className="max-w-6xl mx-auto p-4 mt-8">
+        {message &amp;&amp; (
+          &lt;div
+            className={`fixed top-4 right-4 z-50 px-4 py-2 rounded shadow-lg ${
+              message.type === "success" ? "bg-green-500" : "bg-red-500"
+            } text-white`}
+          >
+            {message.content}
+          &lt;/div>
+        )}
+
+        &lt;div className="flex flex-col lg:flex-row gap-6">
+          &lt;div className="w-full lg:w-3/4 space-y-4">
+            &lt;div className="bg-white shadow-sm rounded-lg overflow-hidden">
+              &lt;div className="relative">
+                &lt;div
+                  className="w-full h-48 bg-cover bg-center"
+                  style={{
+                    backgroundImage: `url(${
+                      userProfile.coverPicture || "/placeholder-cover.jpg"
+                    })`,
+                  }}
+                >&lt;/div>
+                &lt;div className="absolute bottom-0 transform translate-y-1/2 left-8">
+                  &lt;div className="w-24 h-24 rounded-full border-4 border-white overflow-hidden">
+                    {userProfile.profilePicture ? (
+                      &lt;img
+                        src={userProfile.profilePicture}
+                        alt={`${userProfile.firstName}'s profile`}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      &lt;div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                        &lt;svg
+                          className="w-12 h-12 text-gray-400"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          &lt;path
+                            fillRule="evenodd"
+                            d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                            clipRule="evenodd"
+                          >&lt;/path>
+                        &lt;/svg>
+                      &lt;/div>
+                    )}
+                  &lt;/div>
+                &lt;/div>
+              &lt;/div>
+
+              &lt;div className="pt-16 px-8 flex flex-col md:flex-row md:items-center md:justify-between pb-10">
+                &lt;div>
+                  &lt;h1 className="text-2xl font-bold">{`${userProfile.firstName} ${userProfile.lastName}`}&lt;/h1>
+                  {userProfile.lastJobTitle &amp;&amp; (
+                    &lt;p className="text-gray-600">{userProfile.lastJobTitle}&lt;/p>
+                  )}
+                  {userProfile.location &amp;&amp; (
+                    &lt;p className="text-gray-500 text-sm flex items-center mt-1">
+                      &lt;svg
+                        className="w-4 h-4 mr-1"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        &lt;path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                        >&lt;/path>
+                        &lt;path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                        >&lt;/path>
+                      &lt;/svg>
+                      {userProfile.location}
+                    &lt;/p>
+                  )}
+                &lt;/div>
+
+                &lt;div className="mt-4 md:mt-0 flex space-x-3">
+                  &lt;ConnectButton />
+                  &lt;FollowButton />
+
+                  &lt;button
+                    className="bg-white cursor-pointer text-[#0073b1] border-[#0073b1] border-2 px-4 py-1 rounded-full hover:bg-[#EAF4FD] hover:[border-width:2px] box-border font-medium text-sm transition-all duration-150"
+                    onClick={() =>
+                      handleMessageApplicant(
+                        userProfile?._id,
+                        `${userProfile?.firstName} ${userProfile?.lastName}`,
+                        userProfile?.profilePicture
+                      )
+                    }
+                  >
+                    Message
+                  &lt;/button>
+
+                  &lt;div className="relative">
+                    &lt;button
+                      className="px-3 py-1 rounded-full hover:bg-gray-100"
+                      onClick={() => setShowMenu(!showMenu)}
+                    >
+                      ⋯
+                    &lt;/button>
+                    {showMenu &amp;&amp; (
+                      &lt;div className="absolute right-0 mt-2 w-32 bg-white border rounded shadow-lg z-50">
+                        &lt;BlockButton
+                          userId={userProfile?._id}
+                          className="w-full justify-center"
+                        />
+                      &lt;/div>
+                    )}
+                  &lt;/div>
+                &lt;/div>
+              &lt;/div>
+            &lt;/div>
+
+            &lt;div className="bg-white shadow-sm rounded-lg overflow-hidden">
+              &lt;div className="p-6">
+                &lt;h2 className="text-xl font-semibold mb-4">About&lt;/h2>
+
+                &lt;p className="text-gray-700 mb-4">
+                  {userProfile?.about?.description || "No bio available"}
+                &lt;/p>
+
+                &lt;div className="mt-4 text-sm text-gray-600 space-y-2">
+                  {userProfile?.phone &amp;&amp; (
+                    &lt;p className="flex items-center">
+                      &lt;span className="mr-2">📞&lt;/span>
+                      &lt;span>{userProfile.phone}&lt;/span>
+                    &lt;/p>
+                  )}
+                  {userProfile?.website &amp;&amp; (
+                    &lt;p className="flex items-center">
+                      &lt;span className="mr-2">🌐&lt;/span>
+                      &lt;a
+                        href={userProfile.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline"
+                      >
+                        {userProfile.website}
+                      &lt;/a>
+                    &lt;/p>
+                  )}
+                &lt;/div>
+              &lt;/div>
+            &lt;/div>
+
+            &lt;div className="bg-white shadow-sm rounded-lg overflow-hidden">
+              &lt;div className="p-6">
+                &lt;div className="flex justify-between items-center mb-4">
+                  &lt;h2 className="text-xl font-semibold">Experience&lt;/h2>
+                  {currentUserId === userId &amp;&amp; (
+                    &lt;button className="text-gray-400 hover:text-gray-600">
+                      &lt;svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        &lt;path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                        />
+                      &lt;/svg>
+                    &lt;/button>
+                  )}
+                &lt;/div>
+                {userProfile.workExperience &amp;&amp;
+                userProfile.workExperience.length > 0 ? (
+                  &lt;div className="space-y-6">
+                    {userProfile.workExperience.map((item, index) => (
+                      &lt;div key={index} className="flex">
+                        &lt;div className="mr-4">
+                          &lt;div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-500">
+                            &lt;svg
+                              className="w-5 h-5"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              &lt;path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                              >&lt;/path>
+                            &lt;/svg>
+                          &lt;/div>
+                        &lt;/div>
+                        &lt;div>
+                          &lt;h3 className="font-medium">{item.jobTitle}&lt;/h3>
+                          &lt;p className="text-gray-600">{item.companyName}&lt;/p>
+                          &lt;p className="text-gray-500 text-sm">
+                            {item.location}
+                          &lt;/p>
+                          &lt;p className="text-gray-500 text-sm">
+                            {formatDate(item.fromDate)} -{" "}
+                            {item.toDate ? formatDate(item.toDate) : "Present"}
+                          &lt;/p>
+                          {item.description &amp;&amp; (
+                            &lt;p className="text-gray-700 mt-2">
+                              {item.description}
+                            &lt;/p>
+                          )}
+                          {item.skills &amp;&amp; item.skills.length > 0 &amp;&amp; (
+                            &lt;div className="mt-2 flex flex-wrap gap-2">
+                              {item.skills.map((skill, i) => (
+                                &lt;span
+                                  key={i}
+                                  className="bg-gray-100 px-2 py-1 rounded-md text-sm text-gray-700"
+                                >
+                                  {skill}
+                                &lt;/span>
+                              ))}
+                            &lt;/div>
+                          )}
+                        &lt;/div>
+                      &lt;/div>
+                    ))}
+                  &lt;/div>
+                ) : (
+                  &lt;p className="text-gray-500">No work experience listed&lt;/p>
+                )}
+              &lt;/div>
+            &lt;/div>
+
+            &lt;div className="bg-white shadow-sm rounded-lg overflow-hidden">
+              &lt;div className="p-6">
+                &lt;div className="flex justify-between items-center mb-4">
+                  &lt;h2 className="text-xl font-semibold">Education&lt;/h2>
+                  {currentUserId === userId &amp;&amp; (
+                    &lt;button className="text-gray-400 hover:text-gray-600">
+                      &lt;svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        &lt;path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                        />
+                      &lt;/svg>
+                    &lt;/button>
+                  )}
+                &lt;/div>
+                {userProfile.education &amp;&amp; userProfile.education.length > 0 ? (
+                  &lt;div className="space-y-6">
+                    {userProfile.education.map((item, index) => (
+                      &lt;div key={index} className="flex">
+                        &lt;div className="mr-4">
+                          &lt;div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-500">
+                            &lt;svg
+                              className="w-5 h-5"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              &lt;path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                              >&lt;/path>
+                            &lt;/svg>
+                          &lt;/div>
+                        &lt;/div>
+                        &lt;div>
+                          &lt;h3 className="font-medium">{item.school}&lt;/h3>
+                          &lt;p className="text-gray-600">
+                            {item.degree}
+                            {item.fieldOfStudy &amp;&amp; `, ${item.fieldOfStudy}`}
+                          &lt;/p>
+                          &lt;p className="text-gray-500 text-sm">
+                            {formatDate(item.startDate)} -{" "}
+                            {item.endDate
+                              ? formatDate(item.endDate)
+                              : "Present"}
+                          &lt;/p>
+                          {item.grade &amp;&amp; (
+                            &lt;p className="text-gray-500 text-sm">
+                              Grade: {item.grade}
+                            &lt;/p>
+                          )}
+                          {item.description &amp;&amp; (
+                            &lt;p className="text-gray-700 mt-2">
+                              {item.description}
+                            &lt;/p>
+                          )}
+                        &lt;/div>
+                      &lt;/div>
+                    ))}
+                  &lt;/div>
+                ) : (
+                  &lt;p className="text-gray-500">No education listed&lt;/p>
+                )}
+              &lt;/div>
+            &lt;/div>
+
+            &lt;SkillEndorsementSection />
+
+            &lt;div className="bg-white shadow-sm rounded-lg overflow-hidden">
+              &lt;div className="p-6">
+                &lt;div className="flex justify-between items-center mb-4">
+                  &lt;h2 className="text-xl font-semibold">Activity&lt;/h2>
+                &lt;/div>
+
+                &lt;div className="mb-4">
+                  {activityLoading ? (
+                    &lt;div className="space-y-4">
+                      {[1, 2, 3].map((index) => (
+                        &lt;div key={index} className="animate-pulse">
+                          &lt;div className="flex items-start space-x-3">
+                            &lt;div className="flex-shrink-0 w-12 h-12 rounded-full bg-gray-200">&lt;/div>
+                            &lt;div className="flex-1 space-y-2">
+                              &lt;div className="h-4 bg-gray-200 rounded w-3/4">&lt;/div>
+                              &lt;div className="h-3 bg-gray-200 rounded w-1/2">&lt;/div>
+                              &lt;div className="h-40 bg-gray-200 rounded">&lt;/div>
+                              &lt;div className="h-3 bg-gray-200 rounded w-1/4">&lt;/div>
+                            &lt;/div>
+                          &lt;/div>
+                        &lt;/div>
+                      ))}
+                    &lt;/div>
+                  ) : userActivity.length > 0 ? (
+                    &lt;div className="space-y-4">
+                      {uniqueUserActivity.map((activity) => (
+                        &lt;ActivityCard
+                          key={activity.postId}
+                          activity={activity}
+                        />
+                      ))}
+                    &lt;/div>
+                  ) : (
+                    &lt;div className="text-center py-10">
+                      &lt;svg
+                        className="w-16 h-16 text-gray-300 mx-auto mb-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        &lt;path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        >&lt;/path>
+                      &lt;/svg>
+                      &lt;p className="text-gray-500">No activities found.&lt;/p>
+                      {currentUserId === userId &amp;&amp; (
+                        &lt;button className="mt-4 text-blue-600 hover:text-blue-800 font-medium">
+                          Create a post
+                        &lt;/button>
+                      )}
+                    &lt;/div>
+                  )}
+                &lt;/div>
+              &lt;/div>
+            &lt;/div>
+          &lt;/div>
+
+          {activeSkill &amp;&amp; (
+            &lt;Form
+              title={`Endorsements for "${activeSkill.skillName}"`}
+              onClose={closeEndorsementModal}
+            >
+              &lt;div className="p-4">
+                {activeSkill.endorsements &amp;&amp;
+                activeSkill.endorsements.length > 0 ? (
+                  &lt;ul className="space-y-4">
+                    {activeSkill.endorsements.map((endorser, i) => (
+                      &lt;EndorserCard key={i} endorser={endorser} />
+                    ))}
+                  &lt;/ul>
+                ) : (
+                  &lt;p className="text-gray-500">No endorsements found.&lt;/p>
+                )}
+              &lt;/div>
+            &lt;/Form>
+          )}
+
+          {confirmRemoveId &amp;&amp; (
+            &lt;div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+              &lt;div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
+                &lt;button
+                  className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-2xl"
+                  onClick={() => setConfirmRemoveId(null)}
+                  aria-label="Close"
+                >
+                  &amp;times;
+                &lt;/button>
+                &lt;h2 className="text-xl font-semibold mb-2">
+                  Remove Connection
+                &lt;/h2>
+                &lt;p className="mb-6">
+                  Are you sure you want to remove{" "}
+                  &lt;span className="font-semibold">{confirmRemoveName}&lt;/span> as
+                  a connection? Don't worry, {confirmRemoveName.split(" ")[0]}{" "}
+                  won't be notified.
+                &lt;/p>
+                &lt;div className="flex justify-end space-x-2">
+                  &lt;button
+                    className="px-4 py-2 rounded border border-gray-300 text-gray-700 hover:bg-gray-100"
+                    onClick={() => setConfirmRemoveId(null)}
+                  >
+                    Cancel
+                  &lt;/button>
+                  &lt;button
+                    className="px-4 py-2 rounded bg-red-600 text-white font-semibold hover:bg-red-700"
+                    onClick={() => handleRemoveConnection(confirmRemoveId)}
+                  >
+                    Remove
+                  &lt;/button>
+                &lt;/div>
+              &lt;/div>
+            &lt;/div>
+          )}
+
+          &lt;div className="hidden lg:block lg:w-1/4">
+            &lt;div className="shadow-sm rounded-lg overflow-hidden mt-8 ">
+              &lt;div className="w-full h-full">
+                &lt;img
+                  src={adPhoto}
+                  alt="LinkedIn Advertisement - See who's hiring on LinkedIn"
+                  className="w-full h-full object-cover"
+                />
+              &lt;/div>
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+      &lt;/div>
+    &lt;/>
+  );
+};
+
+export default UserProfileView;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+            </div>
+            
+            <footer class="footer">
+                <div class="content has-text-centered">
+                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.4</a></p>
+                    <p class="sidebar-created-by">
+                        <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by
+                        <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>
+                    </p>
+                </div>
+            </footer>
+            
+        </div>
+        <div id="side-nav" class="side-nav">
+        </div>
+    </div>
+<script src="scripts/app.min.js"></script>
+<script>PR.prettyPrint();</script>
+<script src="scripts/linenumber.js"> </script>
+
+
+</body>
+</html>
