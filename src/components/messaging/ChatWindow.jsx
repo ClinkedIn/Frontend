@@ -326,25 +326,19 @@ const ChatWindow = ({ conversationId,currentUser,otherUser, onBack }) => {
       if (currentlyBlocked) {
         // --- UNBLOCK ---
         // Use updateDoc, assuming doc exists if unblocking
-        const response = await axios.patch(`${BASE_URL}/messages/unblock-user/${otherUserId}`,{
+        const unblockResponse = await axios.patch(`${BASE_URL}/messages/unblock-user/${otherUserId}`,{
           withCredentials:true
         })
-        console.log(response.data)
-        await updateDoc(userDocRef, {
-          blockedUsers: arrayRemove(otherUserId)
-        });
+        console.log(unblockResponse.data)
         setIsBlockedByYou(false); // Optimistic UI update
         console.log(`User ${otherUserId} unblocked successfully.`);
       } else {
         // --- BLOCK ---
         // Use setDoc with merge: true to create or update
-        await setDoc(userDocRef,
-          {
-            // Data to set/merge: only the blockedUsers field modification
-            blockedUsers: arrayUnion(otherUserId)
-          },
-          { merge: true } // Option to merge data
-        );
+        const blockResponse = await axios.patch(`${BASE_URL}/messages/block-user/${otherUserId}`,{
+          withCredentials:true
+        })
+        console.log(blockResponse.data)
         setIsBlockedByYou(true); // Optimistic UI update
         console.log(`User ${otherUserId} blocked successfully (doc created if needed).`);
       }
